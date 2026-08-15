@@ -242,4 +242,4 @@ button:active,.btn:active{transform:scale(.985)}
 img{background:#faf9f7}
 .nav{transition:max-height .25s ease,opacity .25s ease}
 @media(max-width:790px){.nav{max-height:0;overflow:hidden;opacity:0}.nav.open{max-height:600px;opacity:1}}
-.footer-age-notice{margin-top:14px;padding-top:12px;border-top:1px solid var(--line);text-align:center;font-size:.56rem;letter-spacing:.08em;color:var(--muted);line-height:1.7}
+.footer-age-notice{margin-top:14px;padding-top:12px;border-top:1px solid var(--line);text-align:center;font-size:.58rem;color:var(--muted);line-height:1.7;opacity:.8}

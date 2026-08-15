@@ -35,28 +35,27 @@
     gate.setAttribute('aria-labelledby', 'ageGateTitle');
 
     const card = el('div', 'age-gate-card');
-    card.append(el('p', 'age-gate-brand', 'INTEGRALL | Boutique Gourmet'));
+    card.append(el('p', 'age-gate-brand', 'INTEGRALL'));
     const title = el('h2', 'age-gate-title', 'Você tem 18 anos ou mais?');
     title.id = 'ageGateTitle';
     card.append(title);
-    card.append(el('p', 'age-gate-copy', 'Nossa loja comercializa bebidas alcoólicas. A venda para menores de 18 anos é proibida (Lei nº 13.106/2015). Ao continuar, você confirma ser maior de idade.'));
 
     const actions = el('div', 'age-gate-actions');
-    const yes = el('button', 'btn primary', 'Sim, tenho 18 anos ou mais');
+    const yes = el('button', 'btn primary', 'Sim');
     yes.type = 'button';
     yes.id = 'ageGateYes';
-    const no = el('button', 'btn ghost', 'Não tenho 18 anos');
+    const no = el('button', 'btn ghost', 'Não');
     no.type = 'button';
     no.id = 'ageGateNo';
     actions.append(yes, no);
     card.append(actions);
 
-    const denied = el('p', 'age-gate-denied', 'O acesso à loja não é permitido para menores de 18 anos. Beba com moderação.');
+    const denied = el('p', 'age-gate-denied', 'Acesso permitido apenas para maiores de 18 anos.');
     denied.id = 'ageGateDenied';
     denied.hidden = true;
     card.append(denied);
 
-    card.append(el('p', 'age-gate-footnote', 'PROIBIDA A VENDA DE BEBIDAS ALCOÓLICAS PARA MENORES DE 18 ANOS. APRECIE COM MODERAÇÃO.'));
+    card.append(el('p', 'age-gate-footnote', 'Venda de bebidas alcoólicas proibida para menores de 18 anos.'));
     gate.append(card);
 
     yes.addEventListener('click', () => {

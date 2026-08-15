@@ -34,17 +34,16 @@
 .order-timeline{margin:14px 0}.order-timeline h3{font:400 1rem var(--serif);color:var(--wine);margin:0 0 8px}.timeline-row{display:grid;grid-template-columns:12px 1fr;gap:8px;padding:7px 0}.timeline-dot{width:8px;height:8px;border-radius:50%;background:var(--gold);margin-top:5px}.timeline-row b{display:block;font-size:.73rem}.timeline-row small{display:block;color:var(--muted);font-size:.62rem;line-height:1.45;margin-top:2px}
 @media(max-width:620px){.delivery-address>.two,.checkout-options>.two,.detail-order-grid{grid-template-columns:1fr}}
 
-/* ===== Verificação de idade (18+) ===== */
+/* ===== Verificação de idade (18+) — minimalista ===== */
 html.age-locked{overflow:hidden}
-.age-gate{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(23,8,12,.94);backdrop-filter:blur(6px)}
-.age-gate-card{max-width:460px;width:100%;background:#fff;border:1px solid var(--line);padding:34px 30px;text-align:center;display:grid;gap:14px}
-.age-gate-brand{margin:0;font-size:.66rem;letter-spacing:.22em;text-transform:uppercase;color:var(--gold)}
-.age-gate-title{margin:0;font:400 1.5rem var(--serif);color:var(--wine)}
-.age-gate-copy{margin:0;color:var(--muted);font-size:.78rem;line-height:1.65}
-.age-gate-actions{display:grid;gap:9px;margin-top:4px}
-.age-gate-denied{margin:0;padding:11px 12px;border:1px solid rgba(160,44,53,.4);color:var(--danger);font-size:.72rem;line-height:1.55}
+.age-gate{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(23,8,12,.88);backdrop-filter:blur(8px)}
+.age-gate-card{max-width:340px;width:100%;background:#fff;padding:42px 34px;text-align:center;display:grid;gap:20px}
+.age-gate-brand{margin:0;font-size:.62rem;letter-spacing:.3em;text-transform:uppercase;color:var(--gold)}
+.age-gate-title{margin:0;font:400 1.35rem var(--serif);color:var(--wine)}
+.age-gate-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:2px}
+.age-gate-denied{margin:0;color:var(--danger);font-size:.7rem;line-height:1.5}
 .age-gate-denied[hidden]{display:none}
-.age-gate-footnote{margin:4px 0 0;font-size:.56rem;letter-spacing:.08em;color:var(--muted);line-height:1.6}
+.age-gate-footnote{margin:0;font-size:.54rem;letter-spacing:.06em;color:var(--muted);line-height:1.6}
 .age-gate-leaving{opacity:0;transition:opacity .25s ease}
 @media(prefers-reduced-motion:reduce){.age-gate-leaving{transition:none}}
 
