@@ -1,0 +1,153 @@
+<!doctype html>
+<!DOCTYPE html>
+
+<html lang="pt-BR"><head><meta charset="utf-8"/><meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/><meta content="INTEGRALL — Explore todos os produtos disponíveis e monte seu pedido." name="description"/><meta content="#ffffff" name="theme-color"/><meta content="light" name="color-scheme"/><meta content="no-referrer" name="referrer"/><meta content="index,follow,max-image-preview:large" name="robots"/><meta content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'; worker-src 'none'" http-equiv="Content-Security-Policy"/><meta content="public-v9.1-2026-08-14" name="integrall-build"/><meta content="pt_BR" property="og:locale"/><meta content="website" property="og:type"/><meta content="INTEGRALL" property="og:site_name"/><meta content="INTEGRALL" property="og:title"/><meta content="INTEGRALL — Explore todos os produtos disponíveis e monte seu pedido." property="og:description"/><meta content="summary_large_image" name="twitter:card"/><meta content="INTEGRALL" name="twitter:title"/><meta content="INTEGRALL — Explore todos os produtos disponíveis e monte seu pedido." name="twitter:description"/><title>INTEGRALL | Boutique Gourmet</title><link href="/assets/icons/favicon.svg" id="siteFavicon" rel="icon"/><script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"LocalBusiness","name":"INTEGRALL","email":"integrallwine@gmail.com"},{"@type":"ItemList","name":"INTEGRALL — catálogo","itemListElement":[{"@type":"ListItem","position":1,"item":{"@type":"Product","name":"Suco Integral de Uva bordô","brand":{"@type":"Brand","name":"Marqués de Mendonça"},"offers":{"@type":"Offer","priceCurrency":"BRL","price":"11.50","availability":"https://schema.org/InStock"}}},{"@type":"ListItem","position":2,"item":{"@type":"Product","name":"Vinho Tinto Seco","description":"Vinho varietal uva bordô","brand":{"@type":"Brand","name":"Marqués de Mendonça"},"offers":{"@type":"Offer","priceCurrency":"BRL","price":"21.50","availability":"https://schema.org/InStock"}}},{"@type":"ListItem","position":3,"item":{"@type":"Product","name":"Mentirinha","offers":{"@type":"Offer","priceCurrency":"BRL","price":"54.90","availability":"https://schema.org/InStock"}}},{"@type":"ListItem","position":4,"item":{"@type":"Product","name":"Vó Damazia","brand":{"@type":"Brand","name":"Gerações"},"offers":{"@type":"Offer","priceCurrency":"BRL","price":"39.90","availability":"https://schema.org/InStock"}}},{"@type":"ListItem","position":5,"item":{"@type":"Product","name":"Vinho verde Pescada","brand":{"@type":"Brand","name":"Pescada"},"offers":{"@type":"Offer","priceCurrency":"BRL","price":"65.00","availability":"https://schema.org/InStock"}}}]}]}</script><link href="/css/store.css" rel="stylesheet"/><link href="/css/checkout.css" rel="stylesheet"/></head><body><noscript><div style="padding:16px;background:#fff3cd;color:#4a0a1a;text-align:center;font-family:Arial,sans-serif"><strong>INTEGRALL</strong><br/>O catálogo interativo precisa de JavaScript. Use os canais de atendimento informados no rodapé.</div></noscript><div class="catalog-surface" id="catalogSurface">
+<header class="header" data-visual-region="header">
+<div class="wrap header-row">
+<button aria-label="Ir para a vitrine" class="brand" data-header-slot="brand" data-page="vitrine" type="button">
+<img alt="" class="brand-logo brand-logo-header" decoding="async" hidden="" id="headerLogo"/>
+<span class="brand-copy" data-brand-copy=""><b data-brand="">INTEGRALL</b><span data-subtitle="">Wine</span></span>
+</button>
+<nav aria-label="Navegação principal" class="nav" data-header-slot="nav" id="nav">
+<button aria-current="page" class="active" data-page="vitrine" type="button">Vitrine</button>
+<button class="" data-page="vinhos" type="button">Vinhos</button>
+<button class="" data-page="cafes" type="button">Cafés</button>
+<button class="" data-page="sucos" type="button">Sucos</button>
+<button class="" data-page="petit-four" type="button">Petit Four</button>
+</nav>
+<div class="header-actions" data-header-slot="actions">
+<button aria-expanded="false" aria-label="Abrir menu" class="menu-btn" id="menuBtn" type="button">☰</button>
+<button aria-label="Abrir sacola" class="cart-btn" id="openCart" type="button">Sacola <span aria-live="polite" class="cart-count" id="cartCount">0</span></button>
+</div>
+</div>
+</header>
+<main id="siteMain" tabindex="-1">
+<section aria-labelledby="catalogTitle" class="site-page is-active" data-page-panel="catalogo" id="catalogPage">
+<div class="wrap">
+<div class="section-head" data-layout-block="intro" data-visual-region="hero">
+<p class="eyebrow" id="catalogEyebrow">Vitrine Integrall</p>
+<h1 id="catalogTitle">Nossa seleção</h1>
+<p id="catalogIntro">Explore todos os produtos disponíveis e monte seu pedido.</p>
+</div>
+<div class="catalog-controls" data-layout-block="filters" data-visual-region="filters">
+<div class="catalog-subnav" hidden="" id="wineSubnav">
+<button class="" data-page="vinhos" type="button">Todos os vinhos</button>
+<button data-page="vinhos-importados" type="button">Vinhos importados</button>
+</div>
+<div class="toolbar">
+<input aria-label="Buscar produtos" autocomplete="off" class="field" enterkeyhint="search" id="search" maxlength="100" placeholder="Buscar por nome, marca, categoria ou descrição" type="search"/>
+<select aria-label="Filtrar por categoria" class="select" id="category"><option value="all">Todas as categorias</option></select>
+<select aria-label="Ordenar produtos" class="select" id="sort">
+<option value="featured">Destaques</option><option value="manual">Ordem da vitrine</option><option value="name">Nome: A–Z</option><option value="price-up">Menor preço</option><option value="price-down">Maior preço</option>
+</select>
+</div>
+<div class="result-row"><span aria-live="polite" id="resultCount">Carregando…</span><button class="btn ghost small" hidden="" id="clearFilters" type="button">Limpar filtros</button></div>
+</div>
+<div class="catalog-products" data-layout-block="products" data-visual-region="products">
+<div aria-live="polite" class="product-grid" id="productGrid" role="list"></div>
+<div class="empty" hidden="" id="emptyProducts"><h2>Nenhum produto encontrado</h2><p>Tente remover os filtros ou buscar por outro termo.</p></div>
+</div>
+</div>
+</section>
+</main>
+<footer class="footer" data-visual-region="footer">
+<div class="wrap">
+<div class="footer-brand">
+<div class="footer-secret-brand" data-footer-block="logo">
+<img alt="" class="brand-logo brand-logo-footer" decoding="async" hidden="" id="footerLogo"/>
+<span class="footer-brand-copy" data-brand-copy=""><b data-brand="">INTEGRALL</b><small data-subtitle="">Wine</small></span>
+</div>
+<p data-footer-block="description">Vinhos, cafés, sucos, Petit Four e produtos gourmet selecionados com cuidado.</p>
+<div aria-label="Contato" class="footer-contact" data-footer-block="contact">
+<a data-disabled="0" href="mailto:integrallwine@gmail.com" id="emailLink"><span id="emailText">integrallwine@gmail.com</span></a>
+<a data-disabled="0" href="https://instagram.com/integrallwine" id="instagramLink" rel="noopener" target="_blank"><span id="instagramText">@integrallwine</span></a>
+<span data-address="" id="addressText">Retirada e entrega combinadas no atendimento.</span>
+</div>
+<div class="legal-links"><button data-legal="privacy" type="button">Privacidade</button><button data-legal="terms" type="button">Termos</button><button data-legal="returns" type="button">Trocas e devoluções</button></div></div>
+<div class="footer-bottom" data-footer-block="legal">
+<span>© <span id="year">2026</span> <span data-brand="">INTEGRALL</span>. Todos os direitos reservados.</span>
+<span data-mode="" id="modeLabel">Catálogo público</span>
+</div>
+</div>
+</footer>
+<div class="overlay" id="overlay"></div>
+<aside aria-hidden="true" aria-labelledby="cartTitle" aria-modal="true" class="drawer" id="cartDrawer" role="dialog">
+<div class="panel-head"><h2 id="cartTitle">Minha sacola</h2><button aria-label="Fechar sacola" class="close-btn close-ui" type="button">✕</button></div>
+<div class="drawer-body">
+<div class="cart-list" id="cartList"></div>
+<div class="empty" id="emptyCart"><h3>Sua sacola está vazia</h3><p>Abra um produto para escolher opções e adicionar ao pedido.</p></div>
+<div class="form-grid" hidden="" id="customerFields" style="margin-top:18px">
+<div class="group"><label for="customerName">Seu nome *</label><input autocomplete="name" class="field" id="customerName" maxlength="80" placeholder="Como devemos chamar você?"/></div>
+<div class="group"><label for="customerNote">Observações gerais</label><textarea class="textarea" id="customerNote" maxlength="500" placeholder="Horário, embalagem ou outra observação"></textarea></div>
+</div>
+</div>
+<div class="drawer-foot" hidden="" id="cartFoot">
+<div class="cart-receipt" id="cartReceipt">Escolha entrega ou retirada nos detalhes de qualquer produto.</div>
+<div class="summary">
+<div class="sum-line"><span>Subtotal</span><b id="cartSubtotal">R$ 0,00</b></div>
+<div class="sum-line"><span>Recebimento</span><b id="cartShipping">Não escolhido</b></div>
+<div class="sum-line total"><span>Total estimado</span><b id="cartTotal">R$ 0,00</b></div>
+</div>
+<div class="checkout-options" id="checkoutOptions">
+<strong>Dados para concluir</strong>
+<div class="two">
+  <div class="group"><label for="customerEmail">E-mail</label><input autocomplete="email" class="field" id="customerEmail" maxlength="254" type="email" value=""/></div>
+  <div class="group"><label for="customerPhone">Telefone</label><input autocomplete="tel" class="field" id="customerPhone" inputmode="tel" maxlength="30" value=""/></div>
+</div>
+<div class="delivery-address" id="deliveryAddressFields" hidden>
+  <strong>Endereço de entrega</strong>
+  <div class="two"><div class="group"><label for="deliveryStreet">Rua / avenida *</label><input autocomplete="address-line1" class="field" data-delivery-required id="deliveryStreet" maxlength="180"/></div><div class="group"><label for="deliveryNumber">Número *</label><input autocomplete="address-line2" class="field" data-delivery-required id="deliveryNumber" maxlength="40"/></div></div>
+  <div class="two"><div class="group"><label for="deliveryNeighborhood">Bairro *</label><input class="field" data-delivery-required id="deliveryNeighborhood" maxlength="120"/></div><div class="group"><label for="deliveryComplement">Complemento</label><input class="field" id="deliveryComplement" maxlength="120"/></div></div>
+  <div class="two"><div class="group"><label for="deliveryCity">Cidade *</label><input autocomplete="address-level2" class="field" data-delivery-required id="deliveryCity" maxlength="120"/></div><div class="group"><label for="deliveryState">UF *</label><input autocomplete="address-level1" class="field" data-delivery-required id="deliveryState" maxlength="2" placeholder="SP"/></div></div>
+</div>
+<strong>Como deseja concluir?</strong>
+<div class="payment-methods" id="paymentMethods"><label><input checked="" name="paymentMethod" type="radio" value="order"/><span><b>Registrar pedido</b><br/><small>Criar o pedido diretamente no sistema</small></span></label></div>
+<div class="checkout-note" id="paymentAvailabilityNote">O Mercado Pago aparecerá automaticamente quando as credenciais forem configuradas.</div>
+</div>
+<div class="drawer-actions"><button class="btn primary" id="checkout" type="button">Registrar pedido</button><button class="btn outline small" id="trackLastOrder" type="button">Acompanhar último pedido</button><button class="btn ghost small" id="clearCart" type="button">Limpar sacola</button></div>
+</div>
+</aside>
+<section aria-hidden="true" aria-labelledby="modalName" aria-modal="true" class="modal" id="productModal" role="dialog">
+<div class="panel-head"><h2>Detalhes do produto</h2><button aria-label="Fechar detalhes" class="close-btn close-ui" type="button">✕</button></div>
+<div class="modal-body">
+<div class="product-modal-grid">
+<div>
+<div class="gallery-main"><img alt="" decoding="async" id="modalImage"/></div>
+<div class="gallery-thumbs" hidden="" id="modalThumbs"></div>
+</div>
+<div class="product-info">
+<p class="category" id="modalCategory"></p><h2 id="modalName"></h2><p class="big-price" id="modalPrice"></p>
+<p class="product-description" id="modalDescription"></p>
+<div class="meta-grid"><div class="meta"><span>Disponibilidade</span><b id="modalAvailability"></b></div><div class="meta"><span>Apresentação</span><b id="modalUnit"></b></div></div>
+<div class="spec-list" id="modalSpecs"></div>
+<div class="form-row">
+<div class="group" hidden="" id="variantGroup"><label for="modalVariant">Opção</label><select class="select" id="modalVariant"></select></div>
+<div class="group"><label for="modalQty">Quantidade</label><input class="field" id="modalQty" inputmode="numeric" max="999" min="1" step="1" type="number" value="1"/></div>
+</div>
+<div class="gift-box">
+<label><input id="modalGift" type="checkbox"/> É para presente</label>
+<div class="gift-message" hidden="" id="giftMessageWrap"><label class="sr-only" for="modalGiftMessage">Mensagem do presente</label><textarea class="textarea" id="modalGiftMessage" maxlength="240" placeholder="Mensagem para acompanhar o presente"></textarea></div>
+</div>
+<div class="product-delivery">
+<h3 class="product-delivery-title">Entrega ou retirada</h3>
+<form class="product-delivery-form" id="modalDeliveryForm">
+<input aria-label="CEP para entrega" autocomplete="postal-code" class="field" id="modalCep" inputmode="numeric" maxlength="9" placeholder="Digite seu CEP" required=""/>
+<button class="btn outline" type="submit">Calcular frete</button>
+</form>
+<p class="product-delivery-result" id="modalDeliveryResult"></p>
+<fieldset class="shipping-choices" id="modalShippingChoices">
+<legend class="sr-only">Forma de recebimento</legend>
+<label class="shipping-choice" data-shipping-label="delivery"><input name="shippingChoice" type="radio" value="delivery"/><span><b>Entrega</b><span id="modalDeliveryOption">Informe um CEP com 8 dígitos.</span></span></label>
+<label class="shipping-choice" data-shipping-label="pickup"><input name="shippingChoice" type="radio" value="pickup"/><span><b>Retirada</b><span id="modalPickupOption">Retirada disponível mediante confirmação no atendimento.</span></span></label>
+</fieldset>
+</div>
+<p class="error" id="modalError"></p>
+<div class="product-actions"><button class="btn primary" id="modalAdd" type="button">Adicionar à sacola</button><button class="btn ghost" id="modalShare" type="button">Compartilhar</button></div>
+</div>
+</div>
+<div class="related" hidden="" id="relatedSection"><h3>Você também pode gostar</h3><div class="related-grid" id="relatedGrid"></div></div>
+</div>
+</section>
+</div><div aria-live="polite" class="toast-stack" id="toasts"></div><script id="buildData" type="application/json">{"publicBuild":true,"version":9,"generatedAt":"2026-08-12T23:13:00-03:00","settings":{"catalogId":"catalog-1786110588222-8uuux6","brand":"INTEGRALL","subtitle":"Wine","catalogTitle":"Nossa seleção","catalogText":"Explore todos os produtos disponíveis e monte seu pedido.","whatsapp":"","email":"integrallwine@gmail.com","instagram":"@integrallwine","address":"Retirada e entrega combinadas no atendimento.","shipMode":"quote","fixed":0,"free":0,"zoneFallback":"quote","pickup":"Retirada disponível mediante confirmação no atendimento.","zones":[],"visual":{"version":1,"preset":"classic","assets":{"headerLogo":"","footerLogo":"","favicon":"","heroBackground":"","headerBackground":"","footerBackground":"","pageBackground":""},"colors":{"page":"#ffffff","surface":"#ffffff","surfaceAlt":"#faf9f7","surfaceMuted":"#f4f1ec","primary":"#4a0a1a","primaryHover":"#681126","accent":"#aa8952","text":"#211e1c","muted":"#77716c","line":"#e9e4dd","danger":"#a02c35","success":"#276447","buttonText":"#ffffff","headerBackground":"#ffffff","footerBackground":"#ffffff","cardBackground":"#ffffff","inputBackground":"#ffffff","heroText":"#4a0a1a","heroOverlay":"rgba(0,0,0,.28)","headerText":"#4a0a1a","headerMuted":"#3d3835","footerText":"#77716c","footerMuted":"#746f6b","footerHeading":"#4a0a1a","footerAccent":"#aa8952","price":"#302c29","badgeBackground":"rgba(255,255,255,.94)","badgeText":"#4a0a1a","outOfStockBackground":"rgba(74,10,26,.9)","outOfStockText":"#ffffff","overlay":"rgba(31,25,23,.38)"},"typography":{"bodyFont":"modern","headingFont":"editorial","customBody":"","customHeading":"","baseSize":16,"bodyWeight":400,"headingWeight":400,"lineHeight":1.55,"headingScale":1,"navSize":11,"navSpacing":0.15,"brandSpacing":0.25,"navTransform":"uppercase"},"layout":{"maxWidth":1240,"gutterDesktop":56,"gutterMobile":28,"headerLayout":"centered","headerSticky":false,"headerPadding":48,"navGap":40,"headerOrder":["brand","nav","actions"],"catalogAlign":"center","catalogTop":48,"catalogBottom":78,"introMaxWidth":710,"blocks":["intro","filters","products"],"toolbarLayout":"columns","gridColumnsDesktop":3,"gridColumnsTablet":2,"gridColumnsMobile":1,"gridGapX":34,"gridGapY":48,"cardStyle":"minimal","cardAlign":"center","cardPadding":0,"imageRatio":"portrait","imageFit":"cover","radius":0,"buttonRadius":0,"inputRadius":0,"shadow":"none","footerAlign":"center","footerOrder":["description","contact","logo"],"headerLogoMode":"text","footerLogoMode":"image","headerLogoWidth":220,"footerLogoWidth":170,"heroMode":"plain","heroPadding":0,"heroRadius":0,"animations":true},"visibility":{"category":true,"unit":true,"stock":true,"quickAdd":true,"search":true,"filters":true,"resultCount":true,"footerDescription":false,"footerContact":true},"customCss":""}},"products":[{"id":"product-1786125158091-2hwfps","name":"Suco Integral de Uva bordô","department":"sucos","subcategory":"Uva Bordô","brand":"Marqués de Mendonça","sku":"","imported":false,"country":"","region":"","price":2390,"unit":"Garrafa de 1L e 300ml","description":"","images":["/assets/products/01-suco-integral-de-uva-bord.webp"],"variants":[{"id":"variant-1786125213057-vsk38j","name":"300ml","price":1150,"stock":1000,"unit":"","position":1},{"id":"variant-1786125277805-0nrmsu","name":"1L","price":2390,"stock":1000,"unit":"","position":2}],"attributes":{"flavor":"Uva Bordô","volume":"1L e 300ml","kind":"100% Integral","sugar":"Sem adição de açucar e adoçantes","storage":"Pasteurizado"},"stock":null,"stockMin":3,"maxPerOrder":null,"restockDate":"","preparation":"","available":true,"featured":false,"madeToOrder":false,"seasonal":false,"giftEnabled":true,"position":1,"created":1786125158091,"updated":1786125308896,"deletedAt":null},{"id":"product-1786125523055-ivln6v","name":"Vinho Tinto Seco","department":"vinhos","subcategory":"Vinho Tinto Seco","brand":"Marqués de Mendonça","sku":"","imported":false,"country":"Brasil","region":"Serra Gaúcha","price":2699,"unit":"750ml","description":"Vinho varietal uva bordô","images":["/assets/products/02-vinho-tinto-seco.webp"],"variants":[{"id":"variant-1786125472992-y1279u","name":"750ml","price":2699,"stock":1000,"unit":"","position":1},{"id":"variant-1786125496593-h1h204","name":"375ml","price":2150,"stock":1000,"unit":"","position":2}],"attributes":{"wineType":"Tinto","grape":"Bordô","alcohol":"10,9","volume":"750ml","serving":"12° a 14°"},"stock":null,"stockMin":3,"maxPerOrder":null,"restockDate":"","preparation":"","available":true,"featured":false,"madeToOrder":false,"seasonal":false,"giftEnabled":true,"position":2,"created":1786125523055,"updated":1786125523055,"deletedAt":null},{"id":"product-1786125594468-rlk598","name":"Mentirinha","department":"petit-four","subcategory":"Biscoito Folheado","brand":"","sku":"","imported":false,"country":"","region":"","price":5490,"unit":"Caixa com 2kg","description":"","images":["/assets/products/03-mentirinha.webp"],"variants":[],"attributes":{"weight":"2kg","shelfLife":"6 meses","minOrder":"2 caixas"},"stock":null,"stockMin":3,"maxPerOrder":null,"restockDate":"","preparation":"","available":true,"featured":false,"madeToOrder":false,"seasonal":false,"giftEnabled":true,"position":3,"created":1786125594468,"updated":1786125594468,"deletedAt":null},{"id":"product-1786125689329-bqbvu9","name":"Vó Damazia","department":"cafes","subcategory":"Café Gerações","brand":"Gerações","sku":"","imported":false,"country":"","region":"","price":3990,"unit":"250g","description":"","images":["/assets/products/04-v-damazia.webp"],"variants":[],"attributes":{"origin":"Serra Gaúcha","bean":"Arabica","roast":"Média","weight":"250g"},"stock":null,"stockMin":3,"maxPerOrder":null,"restockDate":"","preparation":"","available":true,"featured":false,"madeToOrder":false,"seasonal":false,"giftEnabled":true,"position":4,"created":1786125689329,"updated":1786125689329,"deletedAt":null},{"id":"product-1786125745701-ydcfi8","name":"Vinho verde Pescada","department":"vinhos","subcategory":"Vinho Verde","brand":"Pescada","sku":"","imported":true,"country":"Portugal","region":"","price":6500,"unit":"750ml","description":"","images":["/assets/products/05-vinho-verde-pescada.webp"],"variants":[],"attributes":{"wineType":"Branco","volume":"750ml"},"stock":null,"stockMin":3,"maxPerOrder":null,"restockDate":"","preparation":"","available":true,"featured":false,"madeToOrder":false,"seasonal":false,"giftEnabled":true,"position":5,"created":1786125745701,"updated":1786125745701,"deletedAt":null}],"commerce":{"businessName":"","siteUrl":"","taxId":"","businessAddress":"","supportEmail":"","supportPhone":"","privacyText":"","termsText":"","returnsText":"","retentionDays":90,"pixKey":"","paymentLink":"","paymentMethods":{"whatsapp":false,"pix":false,"card":false},"apiBaseUrl":"","apiMode":"required","lastUpdated":"2026-08-12T00:00:00.000Z"}}</script>
+
+<script defer="True" src="/js/store/catalog.js?v=9.2.0"></script><script defer="True" src="/js/store/cart.js?v=9.2.0"></script><script defer="True" src="/js/store/shipping.js?v=9.2.0"></script><script defer="True" src="/js/store/api.js?v=9.2.0"></script><script defer="True" src="/js/store/checkout.js?v=9.2.0"></script><script defer="True" src="/js/store/app.js?v=9.2.0"></script></body></html>

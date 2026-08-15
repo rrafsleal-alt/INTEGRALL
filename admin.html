@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="referrer" content="no-referrer">
+  <meta name="theme-color" content="#4a0a1a">
+  <title>INTEGRALL | Administração</title>
+  <link rel="icon" href="/assets/icons/favicon.svg">
+  <link rel="stylesheet" href="/css/admin.css?v=9.2.0">
+  <script src="/js/admin.js?v=9.2.0" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Ir para o conteúdo</a>
+  <header class="admin-header">
+    <div>
+      <p class="brand">INTEGRALL</p>
+      <p class="subtitle">Administração</p>
+    </div>
+    <div class="header-actions">
+      <span class="health" id="healthStatus">Verificando API…</span>
+      <a class="button secondary" href="/">Ver loja</a>
+      <button class="button secondary" id="logoutButton" type="button" hidden>Sair</button>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="login-panel" id="loginPanel" aria-labelledby="loginTitle">
+      <div class="login-card">
+        <p class="eyebrow">Área restrita</p>
+        <h1 id="loginTitle">Acessar administração</h1>
+        <p>O token é mantido somente nesta aba/sessão do navegador e não é salvo no armazenamento permanente.</p>
+        <form id="loginForm">
+          <label for="adminToken">Token administrativo</label>
+          <input id="adminToken" name="token" type="password" autocomplete="current-password" required minlength="8">
+          <button class="button primary" type="submit">Entrar</button>
+        </form>
+        <p class="feedback" id="loginFeedback" role="status" aria-live="polite"></p>
+      </div>
+    </section>
+
+    <section id="dashboard" hidden>
+      <div class="page-title">
+        <div><p class="eyebrow">Gestão</p><h1>Pedidos e catálogo</h1></div>
+        <button class="button secondary" id="refreshButton" type="button">Atualizar dados</button>
+      </div>
+
+      <div class="metrics" aria-label="Resumo de pedidos">
+        <article><span>Total</span><strong id="metricTotal">0</strong></article>
+        <article><span>Aguardando</span><strong id="metricPending">0</strong></article>
+        <article><span>Pagos</span><strong id="metricPaid">0</strong></article>
+        <article><span>Concluídos</span><strong id="metricDone">0</strong></article>
+        <article><span>Clientes</span><strong id="metricCustomers">0</strong></article>
+      </div>
+
+      <section class="panel" aria-labelledby="ordersTitle">
+        <div class="panel-head">
+          <div><h2 id="ordersTitle">Pedidos</h2><p>Os valores exibidos aqui já foram recalculados e registrados pelo servidor.</p></div>
+          <button class="button secondary" id="exportOrdersButton" type="button">Exportar CSV</button>
+        </div>
+        <div class="filters">
+          <label>Buscar<input id="orderSearch" type="search" placeholder="Pedido, cliente, e-mail ou telefone"></label>
+          <label>Status<select id="orderStatus">
+            <option value="">Todos</option>
+            <option value="received">Recebido</option>
+            <option value="awaiting_payment">Aguardando pagamento</option>
+            <option value="paid">Pago</option>
+            <option value="payment_failed">Falha no pagamento</option>
+            <option value="payment_expired">Pagamento expirado</option>
+            <option value="payment_review">Revisar pagamento</option>
+            <option value="preparing">Preparando</option>
+            <option value="ready">Pronto</option>
+            <option value="completed">Concluído</option>
+            <option value="cancelled">Cancelado</option>
+          </select></label>
+        </div>
+        <p class="feedback" id="ordersFeedback" role="status" aria-live="polite"></p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Pedido</th><th>Cliente</th><th>Status</th><th>Total</th><th>Pagamento</th><th>Data</th><th></th></tr></thead>
+            <tbody id="ordersBody"></tbody>
+          </table>
+        </div>
+        <p class="empty" id="ordersEmpty" hidden>Nenhum pedido encontrado.</p>
+      </section>
+
+
+      <section class="panel" aria-labelledby="customersTitle">
+        <div class="panel-head">
+          <div><h2 id="customersTitle">Clientes</h2><p>Contatos consolidados automaticamente a partir dos pedidos registrados.</p></div>
+        </div>
+        <div class="filters customers-filter"><label>Buscar cliente<input id="customerSearch" type="search" placeholder="Nome, e-mail ou telefone"></label></div>
+        <p class="feedback" id="customersFeedback" role="status" aria-live="polite"></p>
+        <div class="table-wrap"><table><thead><tr><th>Cliente</th><th>E-mail</th><th>Telefone</th><th>Último pedido</th><th>Última atividade</th></tr></thead><tbody id="customersBody"></tbody></table></div>
+        <p class="empty" id="customersEmpty" hidden>Nenhum cliente encontrado.</p>
+      </section>
+
+      <section class="panel" aria-labelledby="catalogTitleAdmin">
+        <div class="panel-head">
+          <div><h2 id="catalogTitleAdmin">Catálogo</h2><p>Importação e exportação usam JSON. Imagens novas devem ser URLs HTTPS ou arquivos já publicados em <code>/assets/</code>.</p></div>
+          <span class="catalog-count"><strong id="catalogCount">0</strong> produtos</span>
+        </div>
+        <div class="catalog-actions">
+          <button class="button secondary" id="downloadCatalogButton" type="button">Baixar catálogo atual</button>
+          <label class="button secondary file-button" for="catalogFile">Importar catálogo JSON</label>
+          <input id="catalogFile" type="file" accept="application/json,.json" hidden>
+        </div>
+        <p class="feedback" id="catalogFeedback" role="status" aria-live="polite"></p>
+      </section>
+    </section>
+  </main>
+
+  <dialog id="orderDialog">
+    <div class="dialog-head"><h2 id="dialogTitle">Pedido</h2><button class="icon-button" id="closeDialog" type="button" aria-label="Fechar">✕</button></div>
+    <div id="orderDetails"></div>
+    <div class="dialog-shipping" id="shippingQuotePanel" hidden>
+      <label for="shippingQuoteValue">Definir frete (R$)</label>
+      <input id="shippingQuoteValue" inputmode="decimal" placeholder="Ex.: 15,00">
+      <label for="shippingQuoteLabel">Descrição do frete</label>
+      <input id="shippingQuoteLabel" maxlength="160" value="Frete confirmado pela loja">
+      <button class="button secondary" id="saveShippingButton" type="button">Salvar frete</button>
+    </div>
+    <div class="dialog-status">
+      <label for="dialogStatus">Alterar status</label>
+      <select id="dialogStatus"></select>
+      <button class="button primary" id="saveStatusButton" type="button">Salvar status</button>
+    </div>
+    <p class="feedback" id="dialogFeedback" role="status" aria-live="polite"></p>
+  </dialog>
+</body>
+</html>

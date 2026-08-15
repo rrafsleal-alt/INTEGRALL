@@ -1,0 +1,51 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {Repository} from '../src/repository.js';
+
+test('repositório em memória lista pedidos sem falhar no structuredClone', async () => {
+  const repo = new Repository({databaseUrl: '', initialCatalog: {version: 9, settings: {}, commerce: {}, products: []}, production: false});
+  await repo.init();
+  const order = {
+    id: 'INT-TEST-1',
+    clientOrderId: 'CLIENT-TEST-1',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    status: 'received',
+    customer: {name: 'Cliente Teste', email: 'teste@example.com', phone: '11999999999'},
+    items: [],
+    subtotalCents: 1000,
+    shippingCents: 0,
+    totalCents: 1000,
+    payment: {}
+  };
+  const created = await repo.createOrder(order);
+  assert.equal(created.created, true);
+  const orders = await repo.listOrders();
+  assert.equal(orders.length, 1);
+  assert.equal(orders[0].id, order.id);
+  assert.notEqual(orders[0], order);
+});
+
+test('repositório consolida cliente e baixa estoque exatamente uma vez ao confirmar pagamento', async () => {
+  const initialCatalog = {
+    version: 9,
+    settings: {}, commerce: {},
+    products: [{id:'P1',name:'Produto',stock:5,variants:[]}]
+  };
+  const repo = new Repository({databaseUrl:'',initialCatalog,production:false});
+  await repo.init();
+  const now = new Date().toISOString();
+  const order = {
+    id:'INT-STOCK-1',clientOrderId:'CLIENT-STOCK-1',createdAt:now,updatedAt:now,status:'received',
+    customer:{name:'Ana',email:'ana@example.com',phone:'11999999999'},
+    items:[{productId:'P1',variantId:'',qty:2,name:'Produto',lineTotalCents:2000}],
+    subtotalCents:2000,shippingCents:0,totalCents:2000,payment:{},history:[]
+  };
+  await repo.createOrder(order);
+  assert.equal((await repo.listCustomers())[0].email,'ana@example.com');
+  const paid = await repo.updateOrder(order.id,{status:'paid'},{source:'test'});
+  assert.ok(paid.inventoryCommittedAt);
+  assert.equal((await repo.getCatalog()).products[0].stock,3);
+  await repo.updateOrder(order.id,{status:'preparing'},{source:'test'});
+  assert.equal((await repo.getCatalog()).products[0].stock,3);
+});
