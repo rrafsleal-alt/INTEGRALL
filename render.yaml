@@ -1,0 +1,46 @@
+services:
+  - type: web
+    name: integrall-online
+    runtime: node
+    plan: starter
+    region: oregon
+    buildCommand: npm install --omit=dev
+    startCommand: npm start
+    healthCheckPath: /api/health
+    autoDeployTrigger: commit
+    maxShutdownDelaySeconds: 30
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: TRUST_PROXY
+        value: "true"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: integrall-db
+          property: connectionString
+      - key: PUBLIC_URL
+        sync: false
+      - key: ADMIN_API_TOKEN
+        sync: false
+      - key: MERCADO_PAGO_ACCESS_TOKEN
+        sync: false
+      - key: MERCADO_PAGO_WEBHOOK_SECRET
+        sync: false
+      - key: WHATSAPP_NUMBER
+        sync: false
+      - key: MERCADO_PAGO_USE_SANDBOX
+        value: "false"
+      - key: MERCADO_PAGO_PAYMENT_EXPIRATION_DAYS
+        value: "3"
+      - key: SHIPPING_MODE
+        value: quote
+      - key: ALLOW_PAYMENT_WITH_QUOTED_SHIPPING
+        value: "false"
+
+databases:
+  - name: integrall-db
+    plan: basic-256mb
+    region: oregon
+    databaseName: integrall
+    user: integrall
+    ipAllowList: []

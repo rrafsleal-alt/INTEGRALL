@@ -1,0 +1,29 @@
+INTEGRALL v9.2 — ÚLTIMO PASSO: MERCADO PAGO
+
+O código já está preparado. Não coloque credenciais no HTML nem nos arquivos públicos.
+
+No ambiente de produção, configure:
+
+PUBLIC_URL=https://SEU-DOMINIO.com.br
+MERCADO_PAGO_ACCESS_TOKEN=APP_USR-...
+MERCADO_PAGO_WEBHOOK_SECRET=...
+MERCADO_PAGO_USE_SANDBOX=false
+MERCADO_PAGO_PAYMENT_EXPIRATION_DAYS=3
+
+Webhook da loja:
+https://SEU-DOMINIO.com.br/api/webhooks/mercadopago
+
+Depois de configurar:
+1. Reinicie/deploy a aplicação.
+2. Abra /api/health e confirme: "mercadoPago": true.
+3. Na loja aparecerá "Pagar online — Mercado Pago".
+4. Faça compra de teste.
+5. Confirme que o pedido entra como awaiting_payment.
+6. Após confirmação do webhook, o pedido deve mudar para paid.
+7. Confira a baixa de estoque no catálogo/Admin.
+8. Teste falha/expiração e uma nova tentativa de pagamento.
+
+IMPORTANTE
+- O servidor valida o webhook antes de aceitar a mudança financeira.
+- O servidor consulta o pagamento e confere valor, moeda e preferência.
+- O retorno do navegador sozinho não marca o pedido como pago.

@@ -1,0 +1,46 @@
+INTEGRALL v9.2 — LOJA COMPLETA, PRONTA PARA MERCADO PAGO
+
+O QUE JÁ ESTÁ PRONTO
+- Pedido online gravado no backend antes de qualquer pagamento.
+- PostgreSQL pronto para produção (Render provisiona pelo render.yaml).
+- Painel administrativo com pedidos, clientes, catálogo, frete e histórico.
+- Cliente informa nome, contato e endereço completo quando escolher entrega.
+- Acompanhamento do pedido na própria loja.
+- Frete sob cotação pode ser definido no Admin e o total é recalculado.
+- Estoque é baixado automaticamente uma única vez quando o pedido entra em Pago/Preparando/Pronto/Concluído.
+- Mercado Pago Checkout Pro já está programado: PIX/cartão, retorno, nova tentativa, webhook, validação de valor/moeda/preferência e atualização automática de status.
+- Status financeiros: aguardando, pago, falha, expirado, revisão, reembolso e chargeback.
+- WhatsApp não abre automaticamente. Se um número de atendimento for configurado, ele aparece apenas como opção manual de suporte.
+
+PARA TESTAR AGORA SEM MERCADO PAGO
+1. Dê dois cliques em INICIAR-INTEGRALL.bat.
+2. Abra http://localhost:3000
+3. Monte um pedido e finalize em "Registrar pedido".
+4. O número do pedido aparecerá na loja.
+5. Use "Acompanhar último pedido" para ver o status.
+6. Abra o Admin com ABRIR-ADMIN.bat.
+7. Se o frete estiver "Sob cotação", abra o pedido e informe o valor do frete.
+8. Altere o status para "Pago" para testar a baixa automática do estoque.
+
+IMPORTANTE SOBRE O BANCO
+- Se DATABASE_URL estiver vazio, o modo local usa memória e perde pedidos quando o servidor reinicia.
+- Em produção, NODE_ENV=production exige PostgreSQL e não permite iniciar sem DATABASE_URL.
+- O arquivo render.yaml já cria o PostgreSQL e conecta automaticamente.
+- Há também docker-compose.yml para quem quiser PostgreSQL local com Docker Desktop.
+
+O ÚNICO BLOCO EXTERNO QUE FALTA PARA PAGAMENTO REAL
+Preencher no ambiente de produção:
+MERCADO_PAGO_ACCESS_TOKEN=
+MERCADO_PAGO_WEBHOOK_SECRET=
+PUBLIC_URL=https://seu-dominio.com.br
+
+Depois disso, a opção "Pagar online — Mercado Pago" aparece automaticamente na loja.
+O cliente cria o pedido e é levado ao Mercado Pago para escolher PIX ou cartão.
+A confirmação final vem por webhook; a loja não confia apenas no retorno do navegador.
+
+ADMIN LOCAL
+O token está no arquivo .env na linha ADMIN_API_TOKEN.
+Em produção, troque por um token aleatório com pelo menos 32 caracteres e configure-o no provedor.
+
+VALIDAÇÃO
+Execute VERIFICAR-PROJETO.bat ou npm run verify.

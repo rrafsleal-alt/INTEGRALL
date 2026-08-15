@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: integrall-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: integrall
+      POSTGRES_USER: integrall
+      POSTGRES_PASSWORD: integrall_local_2026
+    ports:
+      - "5433:5432"
+    volumes:
+      - integrall_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U integrall -d integrall"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  integrall_pgdata:

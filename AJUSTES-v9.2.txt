@@ -1,0 +1,53 @@
+INTEGRALL v9.2.0 — AJUSTES IMPLEMENTADOS
+
+1. Fluxo de pedido
+- Registro server-side obrigatório antes do pagamento.
+- Idempotência por clientOrderId.
+- Número público do pedido + checkoutToken privado.
+- Acompanhamento do pedido na mesma sessão do cliente.
+
+2. Cliente e entrega
+- E-mail ou telefone obrigatório.
+- Endereço completo obrigatório para entrega: rua, número, bairro, cidade e UF.
+- Clientes consolidados no repositório e exibidos no Admin.
+
+3. Frete
+- Retirada, frete fixo, zonas ou cotação.
+- Admin consegue transformar "frete sob cotação" em valor definitivo.
+- Total é recalculado no servidor.
+- Pagamento online continua bloqueado enquanto o frete estiver indefinido.
+
+4. Estoque
+- Baixa automática ao primeiro avanço para Pago/Preparando/Pronto/Concluído.
+- Proteção contra baixa duplicada em webhooks repetidos ou mudança posterior de status.
+- Aviso no pedido se houver divergência de estoque no momento da confirmação.
+
+5. Mercado Pago (código pronto; credenciais não incluídas)
+- Checkout Pro.
+- PIX/cartão no ambiente do Mercado Pago.
+- Preferência com expiração configurável (mínimo 3 dias).
+- Tentativas de pagamento independentes.
+- Webhook com validação de assinatura.
+- Consulta do pagamento diretamente na API antes de confirmar.
+- Validação de valor, moeda e preferenceId.
+- Estados: awaiting_payment, paid, payment_failed, payment_expired, payment_review, refunded, chargeback.
+- Retorno do Mercado Pago abre o acompanhamento do pedido e consulta o status real.
+
+6. Admin
+- Pedidos, clientes e catálogo.
+- Pesquisa/filtro.
+- Detalhes de pagamento e endereço.
+- Cotação de frete.
+- Histórico de status.
+- Indicador de baixa de estoque.
+- Exportação CSV.
+
+7. WhatsApp
+- Removido do fluxo automático de checkout.
+- Pode ser usado somente como suporte manual quando houver número configurado.
+
+8. Testes
+- Sintaxe verificada.
+- 20 testes automatizados aprovados.
+- Auditoria pública aprovada.
+- Fluxos de criação de pedido, acompanhamento, admin, clientes, cotação de frete e baixa de estoque testados localmente.
