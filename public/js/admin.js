@@ -10,6 +10,7 @@
   let customers = [];
   let catalog = null;
   let activeOrder = null;
+  let coupons = [];
 
   const money = cents => new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format((Number(cents)||0)/100);
   const dateTime = value => { try { return value ? new Date(value).toLocaleString('pt-BR') : '—'; } catch { return '—'; } };
@@ -114,8 +115,12 @@
     grid.append(
       detailRow('Cliente',order.customer?.name),detailRow('Data',dateTime(order.createdAt)),detailRow('E-mail',order.customer?.email),detailRow('Telefone',order.customer?.phone),
       detailRow('Recebimento',order.shipping?.choice==='pickup'?'Retirada':'Entrega'),detailRow('CEP',order.shipping?.cep),detailRow('Endereço',fullAddress(order.shipping)),
-      detailRow('Subtotal',money(order.subtotalCents)),detailRow('Frete',order.shippingCents==null?'Sob cotação':money(order.shippingCents)),detailRow('Total',order.shippingCents==null?`${money(order.totalCents)} + frete`:money(order.totalCents)),
-      detailRow('Pagamento',order.payment?.status||'Não iniciado'),detailRow('Provedor',order.payment?.provider||'—'),detailRow('ID pagamento',order.payment?.paymentId||'—'),detailRow('Estoque baixado',order.inventoryCommittedAt?dateTime(order.inventoryCommittedAt):'Ainda não')
+      detailRow('Subtotal',money(order.subtotalCents)),detailRow('Frete',order.shippingCents==null?'Sob cotação':money(order.shippingCents)),
+      detailRow('Desconto',Number(order.discountCents)>0?`− ${money(order.discountCents)}${order.coupon?.code?` (${order.coupon.code})`:''}`:'—'),
+      detailRow('Total',order.shippingCents==null?`${money(order.totalCents)} + frete`:money(order.totalCents)),
+      detailRow('Pagamento',order.payment?.status||'Não iniciado'),detailRow('Provedor',order.payment?.provider||'—'),detailRow('ID pagamento',order.payment?.paymentId||'—'),detailRow('Estoque baixado',order.inventoryCommittedAt?dateTime(order.inventoryCommittedAt):'Ainda não'),
+      detailRow('Rastreio',order.trackingCode?`${order.trackingCode}${order.trackingCarrier?` (${order.trackingCarrier})`:''}`:'—'),
+      detailRow('Maior de 18 confirmado',order.containsAlcohol?(order.ageConfirmed?'Sim':'NÃO'):'Não se aplica')
     ); summary.append(grid); details.append(summary);
 
     const items=section('Itens');
@@ -133,6 +138,11 @@
     quotePanel.hidden=!canEditShipping;
     $('#shippingQuoteValue').value=order.shippingCents==null?'':(Number(order.shippingCents)/100).toFixed(2).replace('.',',');
     $('#shippingQuoteLabel').value=order.shipping?.label || 'Frete confirmado pela loja';
+    const trackingPanel=$('#trackingPanel');
+    trackingPanel.hidden=order.shipping?.choice!=='delivery';
+    $('#trackingCodeInput').value=order.trackingCode||'';
+    $('#trackingCarrierInput').value=order.trackingCarrier||'';
+    $('#trackingUrlInput').value=order.trackingUrl||'';
     setFeedback($('#dialogFeedback'),''); $('#orderDialog').showModal();
   }
 
@@ -160,9 +170,74 @@
     } catch(error){setFeedback($('#dialogFeedback'),error.message,'bad')} finally{button.disabled=false}
   }
 
+  async function saveTracking() {
+    if(!activeOrder?.id)return; const button=$('#saveTrackingButton');button.disabled=true;
+    try {
+      const trackingCode=$('#trackingCodeInput').value.trim().toUpperCase();
+      const trackingCarrier=$('#trackingCarrierInput').value.trim();
+      const trackingUrl=$('#trackingUrlInput').value.trim();
+      if(trackingUrl && !/^https:\/\//i.test(trackingUrl))throw new Error('O link de rastreio precisa começar com https://');
+      const data=await request(`/api/admin/orders/${encodeURIComponent(activeOrder.id)}/tracking`,{method:'PATCH',body:JSON.stringify({trackingCode,trackingCarrier,trackingUrl})});
+      setFeedback($('#dialogFeedback'),trackingCode?'Código de rastreio salvo. O cliente já pode acompanhar a entrega.':'Rastreio removido.','ok');
+      renderOrderDialog(data.order); await loadOrders();
+    } catch(error){setFeedback($('#dialogFeedback'),error.message,'bad')} finally{button.disabled=false}
+  }
+
+  function couponTypeLabel(type){return type==='percent'?'Porcentagem':type==='fixed'?'Valor fixo':'Frete grátis'}
+  function couponValueLabel(coupon){
+    if(coupon.type==='percent')return `${coupon.value}%`;
+    if(coupon.type==='fixed')return money(coupon.value);
+    return '—';
+  }
+
+  function renderCoupons() {
+    const body=$('#couponsBody'); if(!body)return; body.replaceChildren(); $('#couponsEmpty').hidden=coupons.length>0;
+    for (const coupon of coupons) {
+      const tr=document.createElement('tr');
+      const codeCell=makeCell(); const strong=document.createElement('strong'); strong.textContent=coupon.code; codeCell.append(strong); tr.append(codeCell);
+      tr.append(makeCell(couponTypeLabel(coupon.type)),makeCell(couponValueLabel(coupon)),makeCell(coupon.minSubtotalCents>0?money(coupon.minSubtotalCents):'—'),makeCell(coupon.expiresAt?dateTime(coupon.expiresAt):'Sem validade'));
+      const statusCell=makeCell(); const badge=document.createElement('span'); const expired=coupon.expiresAt&&Date.parse(coupon.expiresAt)<Date.now();
+      badge.className=coupon.active&&!expired?'coupon-active':'coupon-inactive'; badge.textContent=expired?'Expirado':coupon.active?'Ativo':'Inativo'; statusCell.append(badge); tr.append(statusCell);
+      const actions=makeCell();
+      const toggle=document.createElement('button'); toggle.type='button'; toggle.className='row-button'; toggle.textContent=coupon.active?'Desativar':'Ativar'; toggle.dataset.couponToggle=coupon.code;
+      const remove=document.createElement('button'); remove.type='button'; remove.className='row-button'; remove.textContent='Excluir'; remove.dataset.couponRemove=coupon.code;
+      actions.append(toggle,document.createTextNode(' '),remove); tr.append(actions);
+      body.append(tr);
+    }
+  }
+
+  async function loadCoupons() {
+    try { const data=await request('/api/admin/coupons'); coupons=Array.isArray(data.coupons)?data.coupons:[]; renderCoupons(); }
+    catch(error){setFeedback($('#couponsFeedback'),error.message,'bad')}
+  }
+
+  async function saveCoupons(next,message) {
+    try {
+      const data=await request('/api/admin/coupons',{method:'PUT',body:JSON.stringify({coupons:next})});
+      coupons=Array.isArray(data.coupons)?data.coupons:[]; renderCoupons(); setFeedback($('#couponsFeedback'),message,'ok');
+    } catch(error){setFeedback($('#couponsFeedback'),error.message,'bad')}
+  }
+
+  async function addCoupon(event) {
+    event.preventDefault();
+    const code=$('#couponCode').value.trim().toUpperCase().replace(/[^A-Z0-9_-]/g,'');
+    const type=$('#couponType').value;
+    if(code.length<3)return setFeedback($('#couponsFeedback'),'O código precisa de pelo menos 3 caracteres.','bad');
+    if(coupons.some(c=>c.code===code))return setFeedback($('#couponsFeedback'),`O cupom ${code} já existe.`,'bad');
+    let value=0;
+    if(type==='percent'){value=Number($('#couponValue').value.replace(',','.'));if(!Number.isFinite(value)||value<1||value>100)return setFeedback($('#couponsFeedback'),'Informe uma porcentagem entre 1 e 100.','bad');value=Math.round(value)}
+    else if(type==='fixed'){value=parseReais($('#couponValue').value);if(value==null||value<1)return setFeedback($('#couponsFeedback'),'Informe o valor do desconto em reais, por exemplo 10,00.','bad')}
+    const minSubtotalCents=parseReais($('#couponMin').value)||0;
+    const expiresRaw=$('#couponExpires').value;
+    const expiresAt=expiresRaw?`${expiresRaw}T23:59:59-03:00`:'';
+    const next=[...coupons,{code,type,value,minSubtotalCents,expiresAt,active:true,note:$('#couponNote').value.trim()}];
+    await saveCoupons(next,`Cupom ${code} criado.`);
+    $('#couponForm').reset();
+  }
+
   function download(filename,text,type) { const url=URL.createObjectURL(new Blob([text],{type}));const a=document.createElement('a');a.href=url;a.download=filename;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000); }
   function exportOrders() {
-    const rows=[['id','data','cliente','email','telefone','status','subtotal_centavos','frete_centavos','total_centavos','pagamento','pagamento_id'],...orders.map(o=>[o.id,o.createdAt,o.customer?.name||'',o.customer?.email||'',o.customer?.phone||'',o.status,o.subtotalCents,o.shippingCents??'',o.totalCents,o.payment?.status||'',o.payment?.paymentId||''])];
+    const rows=[['id','data','cliente','email','telefone','status','subtotal_centavos','frete_centavos','desconto_centavos','cupom','total_centavos','pagamento','pagamento_id','rastreio'],...orders.map(o=>[o.id,o.createdAt,o.customer?.name||'',o.customer?.email||'',o.customer?.phone||'',o.status,o.subtotalCents,o.shippingCents??'',o.discountCents||0,o.coupon?.code||'',o.totalCents,o.payment?.status||'',o.payment?.paymentId||'',o.trackingCode||''])];
     const csv=rows.map(row=>row.map(value=>`"${String(value??'').replaceAll('"','""')}"`).join(',')).join('\n'); download(`integrall-pedidos-${new Date().toISOString().slice(0,10)}.csv`,csv,'text/csv;charset=utf-8');
   }
   function downloadCatalog() { if(!catalog)return;download(`integrall-catalogo-${new Date().toISOString().slice(0,10)}.json`,JSON.stringify(catalog,null,2),'application/json'); }
@@ -173,7 +248,7 @@
       if(file.size>2_000_000)throw new Error('O arquivo JSON excede 2 MB.');
       const parsed=JSON.parse(await file.text()); if(!Array.isArray(parsed.products))throw new Error('O JSON precisa conter o array products.');
       if(!confirm(`Substituir o catálogo do servidor por ${parsed.products.length} produto(s)?`))return;
-      const data=await request('/api/admin/catalog',{method:'PUT',body:JSON.stringify({settings:parsed.settings,commerce:parsed.commerce ?? parsed.v8,products:parsed.products})}); catalog=data.catalog;$('#catalogCount').textContent=data.products;setFeedback($('#catalogFeedback'),`Catálogo atualizado: ${data.products} produto(s).`,'ok');
+      const data=await request('/api/admin/catalog',{method:'PUT',body:JSON.stringify({settings:parsed.settings,commerce:parsed.commerce ?? parsed.v8,coupons:parsed.coupons,products:parsed.products})}); catalog=data.catalog;$('#catalogCount').textContent=data.products;setFeedback($('#catalogFeedback'),`Catálogo atualizado: ${data.products} produto(s).`,'ok');
     } catch(error){setFeedback($('#catalogFeedback'),error.message,'bad')}
   }
 
@@ -184,7 +259,7 @@
     catch(error){sessionStorage.removeItem(TOKEN_KEY);setFeedback($('#loginFeedback'),error.message,'bad')}
   }
 
-  async function loadAll() { await Promise.all([loadOrders(),loadCustomers(),loadCatalog(),checkHealth()]); }
+  async function loadAll() { await Promise.all([loadOrders(),loadCustomers(),loadCatalog(),loadCoupons(),checkHealth()]); }
 
   function bind() {
     $('#loginForm').addEventListener('submit',login);
@@ -193,7 +268,15 @@
     let searchTimer; $('#orderSearch').addEventListener('input',()=>{clearTimeout(searchTimer);searchTimer=setTimeout(loadOrders,300)}); $('#orderStatus').addEventListener('change',loadOrders);
     let customerTimer; $('#customerSearch')?.addEventListener('input',()=>{clearTimeout(customerTimer);customerTimer=setTimeout(loadCustomers,300)});
     $('#ordersBody').addEventListener('click',event=>{const button=event.target.closest('[data-order-id]');if(button)openOrder(button.dataset.orderId)});
-    $('#closeDialog').addEventListener('click',()=>$('#orderDialog').close()); $('#saveStatusButton').addEventListener('click',saveStatus); $('#saveShippingButton').addEventListener('click',saveShipping);
+    $('#closeDialog').addEventListener('click',()=>$('#orderDialog').close()); $('#saveStatusButton').addEventListener('click',saveStatus); $('#saveShippingButton').addEventListener('click',saveShipping); $('#saveTrackingButton').addEventListener('click',saveTracking);
+    $('#couponForm')?.addEventListener('submit',addCoupon);
+    $('#couponType')?.addEventListener('change',()=>{const type=$('#couponType').value;const label=$('#couponValueLabel');const input=$('#couponValue');if(type==='free_shipping'){label.style.opacity='.45';input.disabled=true;input.value=''}else{label.style.opacity='';input.disabled=false;input.placeholder=type==='percent'?'10':'10,00'}});
+    $('#couponsBody')?.addEventListener('click',event=>{
+      const toggle=event.target.closest('[data-coupon-toggle]');
+      if(toggle){const code=toggle.dataset.couponToggle;const next=coupons.map(c=>c.code===code?{...c,active:!c.active}:c);saveCoupons(next,`Cupom ${code} atualizado.`);return}
+      const remove=event.target.closest('[data-coupon-remove]');
+      if(remove){const code=remove.dataset.couponRemove;if(!confirm(`Excluir o cupom ${code}?`))return;saveCoupons(coupons.filter(c=>c.code!==code),`Cupom ${code} excluído.`)}
+    });
     $('#exportOrdersButton').addEventListener('click',exportOrders); $('#downloadCatalogButton').addEventListener('click',downloadCatalog);
     $('#catalogFile').addEventListener('change',event=>{const file=event.target.files?.[0];if(file)importCatalog(file);event.target.value=''});
   }

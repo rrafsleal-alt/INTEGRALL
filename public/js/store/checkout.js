@@ -9,6 +9,7 @@
   const LAST_ORDER_KEY = 'integrall_last_order_v9';
   let memoryAttempt = null;
   let activeTrackedOrder = null;
+  let appliedCoupon = null;
 
   const STATUS_LABELS = Object.freeze({
     received: 'Pedido recebido',
@@ -213,6 +214,108 @@
     }
   }
 
+  function cartHasAlcohol() {
+    const app = globalThis.__integrallApp;
+    const items = app?.cartDetails?.() || [];
+    return items.some(item => {
+      const product = item.product || {};
+      const department = String(product.department || '').toLowerCase();
+      return ['vinhos', 'vinho', 'espumantes', 'cervejas', 'cerveja', 'destilados', 'licores', 'bebidas-alcoolicas'].includes(department) || Boolean(product.attributes?.alcohol);
+    });
+  }
+
+  function syncAgeConfirm() {
+    const row = $('#ageConfirmRow');
+    if (!row) return;
+    row.hidden = !cartHasAlcohol();
+  }
+
+  function couponFeedback(message, type = '') {
+    const node = $('#couponFeedback');
+    if (!node) return;
+    node.textContent = message;
+    node.className = `coupon-feedback${type ? ` ${type}` : ''}`;
+  }
+
+  function clearCoupon(silent = false) {
+    appliedCoupon = null;
+    if (!silent) couponFeedback('');
+    syncDiscountRow();
+  }
+
+  function couponDiscountCents(subtotalCents) {
+    if (!appliedCoupon) return 0;
+    if (appliedCoupon.type === 'percent') return Math.floor(subtotalCents * appliedCoupon.value / 100);
+    if (appliedCoupon.type === 'fixed') return Math.min(appliedCoupon.value, Math.max(0, subtotalCents - 100));
+    return 0;
+  }
+
+  function syncDiscountRow() {
+    const row = $('#cartDiscountRow');
+    const valueNode = $('#cartDiscount');
+    const totalNode = $('#cartTotal');
+    if (!row || !valueNode) return;
+    const app = globalThis.__integrallApp;
+    const subtotal = Number(app?.cartSubtotal?.() || 0);
+    if (!appliedCoupon || subtotal <= 0) { row.hidden = true; return; }
+    if (appliedCoupon.type === 'free_shipping') {
+      row.hidden = false;
+      valueNode.textContent = 'Frete grátis com cupom';
+      return;
+    }
+    const discount = couponDiscountCents(subtotal);
+    if (discount <= 0) { row.hidden = true; return; }
+    row.hidden = false;
+    valueNode.textContent = `− ${formatMoney(discount)}`;
+    if (totalNode && app) {
+      const quote = app.calculateShipping?.(subtotal);
+      const shippingPrice = quote && quote.price != null ? quote.price : null;
+      const choice = app.getState?.()?.checkout?.choice;
+      const next = choice === 'delivery' && shippingPrice === null
+        ? `${formatMoney(Math.max(0, subtotal - discount))} + entrega`
+        : formatMoney(Math.max(0, subtotal - discount + (shippingPrice || 0)));
+      if (totalNode.textContent !== next) totalNode.textContent = next;
+    }
+  }
+
+  async function applyCoupon() {
+    const input = $('#couponInput');
+    const button = $('#couponApply');
+    const code = cleanText(input?.value, 40).toUpperCase();
+    if (!code) { clearCoupon(); couponFeedback('Informe o código do cupom.', 'bad'); return; }
+    const app = globalThis.__integrallApp;
+    const subtotal = Number(app?.cartSubtotal?.() || 0);
+    if (subtotal <= 0) { couponFeedback('Adicione produtos à sacola antes de aplicar o cupom.', 'bad'); return; }
+    if (button) button.disabled = true;
+    try {
+      const state = app?.getState?.();
+      const quote = app?.calculateShipping?.(subtotal);
+      const response = await globalThis.IntegrallApi.request('/api/coupons/validate', {
+        method: 'POST',
+        body: JSON.stringify({
+          code,
+          subtotalCents: subtotal,
+          shippingChoice: state?.checkout?.choice || '',
+          shippingQuoted: Boolean(quote && quote.price === null && state?.checkout?.choice === 'delivery')
+        })
+      });
+      appliedCoupon = response.coupon;
+      if (input) input.value = appliedCoupon.code;
+      const label = appliedCoupon.type === 'percent'
+        ? `${appliedCoupon.value}% de desconto`
+        : appliedCoupon.type === 'fixed'
+          ? `${formatMoney(appliedCoupon.value)} de desconto`
+          : 'frete grátis';
+      couponFeedback(`Cupom ${appliedCoupon.code} aplicado: ${label}. O valor final é confirmado pelo servidor.`, 'ok');
+      syncDiscountRow();
+    } catch (error) {
+      clearCoupon(true);
+      couponFeedback(error?.message || 'Cupom inválido.', 'bad');
+    } finally {
+      if (button) button.disabled = false;
+    }
+  }
+
   function syncAddressVisibility() {
     const app = globalThis.__integrallApp;
     const box = $('#deliveryAddressFields');
@@ -248,13 +351,16 @@
         qty: Math.max(1, Math.min(999, Number(item.qty) || 1)),
         gift: Boolean(item.gift),
         giftMessage: cleanText(item.giftMessage, 240)
-      }))
+      })),
+      couponCode: appliedCoupon ? cleanText(appliedCoupon.code, 40) : '',
+      ageConfirmed: Boolean($('#ageConfirmCheckbox')?.checked)
     };
   }
 
   function validateDraft(draft) {
     if (!draft.customer.name) return 'Informe seu nome.';
     if (!draft.customer.email && !draft.customer.phone) return 'Informe um e-mail ou telefone para contato.';
+    if (cartHasAlcohol() && !draft.ageConfirmed) return 'Confirme que você tem 18 anos ou mais para comprar bebidas alcoólicas.';
     if (draft.shipping.choice === 'delivery') {
       if (draft.shipping.cep.length !== 8) return 'Informe um CEP válido.';
       if (!draft.shipping.street || !draft.shipping.number || !draft.shipping.neighborhood || !draft.shipping.city || !/^[A-Z]{2}$/.test(draft.shipping.state)) {
@@ -318,6 +424,7 @@
       <div class="modal-body">
         <div class="order-status-hero"><span id="orderStatusBadge"></span><strong id="orderStatusId"></strong><p id="orderStatusMessage"></p></div>
         <div class="detail-order-grid" id="orderStatusSummary"></div>
+        <div class="order-tracking-box" hidden id="orderTrackingBox"></div>
         <div class="order-timeline" id="orderTimeline"></div>
         <div class="checkout-action-row">
           <button class="btn primary" type="button" id="orderPayButton" hidden>Pagar agora</button>
@@ -386,17 +493,42 @@
     summary.replaceChildren();
     const rows = [
       ['Subtotal', formatMoney(order.subtotalCents)],
-      ['Frete', order.shippingCents == null ? 'A confirmar' : formatMoney(order.shippingCents)],
+      ['Frete', order.shippingCents == null ? 'A confirmar' : formatMoney(order.shippingCents)]
+    ];
+    if (Number(order.discountCents) > 0) rows.push([`Desconto${order.coupon ? ` (${order.coupon})` : ''}`, `− ${formatMoney(order.discountCents)}`]);
+    rows.push(
       ['Total', order.shippingCents == null ? `${formatMoney(order.totalCents)} + frete` : formatMoney(order.totalCents)],
       ['Recebimento', order.shipping?.choice === 'pickup' ? 'Retirada' : 'Entrega'],
       ['Pagamento', order.payment?.status || (order.onlinePaymentAvailable ? 'Disponível' : 'Não iniciado')],
       ['Atualizado', formatDate(order.updatedAt)]
-    ];
+    );
     for (const [label, value] of rows) {
       const cell = document.createElement('div');
       const small = document.createElement('span'); small.textContent = label;
       const strong = document.createElement('b'); strong.textContent = value;
       cell.append(small, strong); summary.append(cell);
+    }
+    const trackingBox = $('#orderTrackingBox');
+    if (trackingBox) {
+      trackingBox.replaceChildren();
+      if (order.trackingCode) {
+        const label = document.createElement('span');
+        label.textContent = `Rastreamento do envio${order.trackingCarrier ? ` — ${order.trackingCarrier}` : ''}`;
+        const code = document.createElement('b');
+        code.textContent = order.trackingCode;
+        trackingBox.append(label, code);
+        if (order.trackingUrl && /^https:\/\//i.test(order.trackingUrl)) {
+          const link = document.createElement('a');
+          link.href = order.trackingUrl;
+          link.target = '_blank';
+          link.rel = 'noopener noreferrer';
+          link.textContent = 'Acompanhar entrega';
+          trackingBox.append(link);
+        }
+        trackingBox.hidden = false;
+      } else {
+        trackingBox.hidden = true;
+      }
     }
     const timeline = $('#orderTimeline'); timeline.replaceChildren();
     const events = Array.isArray(order.history) ? order.history : [];
@@ -450,6 +582,8 @@
       status: order.status || 'received',
       subtotalCents: order.subtotalCents,
       shippingCents: order.shippingCents,
+      discountCents: order.discountCents,
+      coupon: order.coupon,
       totalCents: order.totalCents,
       requiresShippingQuote: order.requiresShippingQuote,
       shipping: {choice: app.getState()?.checkout?.choice || ''},
@@ -510,6 +644,9 @@
       }
 
       clearAttempt();
+      clearCoupon();
+      const couponField = $('#couponInput');
+      if (couponField) couponField.value = '';
       globalThis.IntegrallCart?.clear?.();
       showOrderCreated(order, app);
       notify(`Pedido ${order.id} registrado com sucesso.`, 'ok');
@@ -559,12 +696,21 @@
     hydrateCustomerFields();
     renderPaymentMethods();
     syncAddressVisibility();
+    syncAgeConfirm();
     document.addEventListener('click', handleCheckout, true);
     $('#trackLastOrder')?.addEventListener('click', async () => {
       try { await fetchOrderStatus(); }
       catch (error) { notify(error?.message || 'Nenhum pedido desta sessão para acompanhar.', 'bad'); }
     });
-    document.addEventListener('change', event => { if (event.target?.name === 'shippingChoice') setTimeout(syncAddressVisibility, 0); });
+    document.addEventListener('change', event => { if (event.target?.name === 'shippingChoice') setTimeout(() => { syncAddressVisibility(); syncDiscountRow(); }, 0); });
+    $('#couponApply')?.addEventListener('click', applyCoupon);
+    $('#couponInput')?.addEventListener('keydown', event => { if (event.key === 'Enter') { event.preventDefault(); applyCoupon(); } });
+    $('#couponInput')?.addEventListener('input', () => { if (appliedCoupon) { clearCoupon(true); couponFeedback('Cupom alterado — clique em Aplicar para validar.', ''); } });
+    const cartObserver = new MutationObserver(() => { syncAgeConfirm(); syncDiscountRow(); });
+    const cartList = $('#cartList');
+    if (cartList) cartObserver.observe(cartList, {childList: true, subtree: true});
+    const totals = $('#cartTotal');
+    if (totals) new MutationObserver(() => syncDiscountRow()).observe(totals, {characterData: true, childList: true, subtree: true});
   }
 
   globalThis.__integrallCheckout = Object.freeze({refreshConfig, config, handlePaymentReturn, showLastOrder: () => fetchOrderStatus()});

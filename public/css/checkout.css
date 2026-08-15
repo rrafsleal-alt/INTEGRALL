@@ -33,3 +33,38 @@
 .detail-order-grid span{display:block;color:var(--muted);font-size:.62rem;margin-bottom:2px}.detail-order-grid b{font-size:.76rem;color:var(--wine)}
 .order-timeline{margin:14px 0}.order-timeline h3{font:400 1rem var(--serif);color:var(--wine);margin:0 0 8px}.timeline-row{display:grid;grid-template-columns:12px 1fr;gap:8px;padding:7px 0}.timeline-dot{width:8px;height:8px;border-radius:50%;background:var(--gold);margin-top:5px}.timeline-row b{display:block;font-size:.73rem}.timeline-row small{display:block;color:var(--muted);font-size:.62rem;line-height:1.45;margin-top:2px}
 @media(max-width:620px){.delivery-address>.two,.checkout-options>.two,.detail-order-grid{grid-template-columns:1fr}}
+
+/* ===== Verificação de idade (18+) ===== */
+html.age-locked{overflow:hidden}
+.age-gate{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(23,8,12,.94);backdrop-filter:blur(6px)}
+.age-gate-card{max-width:460px;width:100%;background:#fff;border:1px solid var(--line);padding:34px 30px;text-align:center;display:grid;gap:14px}
+.age-gate-brand{margin:0;font-size:.66rem;letter-spacing:.22em;text-transform:uppercase;color:var(--gold)}
+.age-gate-title{margin:0;font:400 1.5rem var(--serif);color:var(--wine)}
+.age-gate-copy{margin:0;color:var(--muted);font-size:.78rem;line-height:1.65}
+.age-gate-actions{display:grid;gap:9px;margin-top:4px}
+.age-gate-denied{margin:0;padding:11px 12px;border:1px solid rgba(160,44,53,.4);color:var(--danger);font-size:.72rem;line-height:1.55}
+.age-gate-denied[hidden]{display:none}
+.age-gate-footnote{margin:4px 0 0;font-size:.56rem;letter-spacing:.08em;color:var(--muted);line-height:1.6}
+.age-gate-leaving{opacity:0;transition:opacity .25s ease}
+@media(prefers-reduced-motion:reduce){.age-gate-leaving{transition:none}}
+
+/* ===== Confirmação 18+ no checkout ===== */
+.age-confirm{display:flex;gap:9px;align-items:flex-start;padding:10px 12px;border:1px solid var(--line);background:var(--sand);font-size:.7rem;line-height:1.5;cursor:pointer}
+.age-confirm input{margin-top:2px;accent-color:var(--wine)}
+.age-confirm[hidden]{display:none}
+
+/* ===== Cupom de desconto ===== */
+.coupon-row{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end}
+.coupon-row .group{margin:0}
+.coupon-feedback{font-size:.66rem;line-height:1.5;color:var(--muted)}
+.coupon-feedback.ok{color:var(--ok)}
+.coupon-feedback.bad{color:var(--danger)}
+.sum-line.discount b{color:var(--ok)}
+.sum-line.discount[hidden]{display:none}
+
+/* ===== Rastreio no acompanhamento ===== */
+.order-tracking-box{margin:12px 0;padding:12px;border:1px solid var(--line);background:var(--sand);display:grid;gap:6px}
+.order-tracking-box[hidden]{display:none}
+.order-tracking-box span{font-size:.62rem;color:var(--muted)}
+.order-tracking-box b{font-size:.8rem;color:var(--wine);word-break:break-all}
+.order-tracking-box a{font-size:.7rem;color:var(--wine);text-decoration:underline;text-underline-offset:3px}

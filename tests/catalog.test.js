@@ -158,3 +158,126 @@ test('entrega exige endereço completo e contato', () => {
   assert.equal(order.shipping.street,'Av. Paulista');
   assert.equal(order.shipping.state,'SP');
 });
+
+test('pedido com bebida alcoólica exige confirmação de maioridade', () => {
+  const wine = catalog.products.find(product => product.department === 'vinhos');
+  assert.ok(wine, 'catálogo precisa ter um vinho para este teste');
+  const base = {
+    clientOrderId: 'AGE-1',
+    customer: {name: 'Cliente', email: 'cliente@example.com'},
+    shipping: {choice: 'pickup'},
+    items: [{productId: wine.id, variantId: wine.variants?.[0]?.id || '', qty: 1}]
+  };
+  assert.throws(() => buildOrder(base, catalog, baseConfig), /18 anos/);
+  const confirmed = buildOrder({...base, ageConfirmed: true}, catalog, baseConfig);
+  assert.equal(confirmed.containsAlcohol, true);
+  assert.equal(confirmed.ageConfirmed, true);
+  const juice = catalog.products.find(product => product.department === 'sucos');
+  const soft = buildOrder({
+    clientOrderId: 'AGE-2',
+    customer: {name: 'Cliente', email: 'cliente@example.com'},
+    shipping: {choice: 'pickup'},
+    items: [{productId: juice.id, variantId: juice.variants?.[0]?.id || '', qty: 1}]
+  }, catalog, baseConfig);
+  assert.equal(soft.containsAlcohol, false);
+});
+
+test('cupons são normalizados, aplicados no servidor e não vazam no catálogo público', () => {
+  const withCoupons = normalizeCatalog({
+    ...raw,
+    coupons: [
+      {code: 'bemvindo10', type: 'percent', value: 10},
+      {code: 'FRETEGRATIS', type: 'free_shipping'},
+      {code: 'INVALIDO', type: 'hack', value: 99},
+      {code: 'AB', type: 'percent', value: 10},
+      {code: 'FIXO5', type: 'fixed', value: 500, minSubtotalCents: 3000}
+    ]
+  });
+  assert.equal(withCoupons.coupons.length, 3);
+  assert.equal(withCoupons.coupons[0].code, 'BEMVINDO10');
+  const published = publicCatalog(withCoupons, baseConfig);
+  assert.equal(published.coupons, undefined);
+
+  const juice = withCoupons.products.find(product => product.department === 'sucos');
+  const expectedUnit = juice.variants?.[0]?.price ?? juice.price;
+  const order = buildOrder({
+    clientOrderId: 'COUPON-1',
+    customer: {name: 'Cliente', email: 'cliente@example.com'},
+    shipping: {choice: 'pickup'},
+    items: [{productId: juice.id, variantId: juice.variants?.[0]?.id || '', qty: 2}],
+    couponCode: 'bemvindo10'
+  }, withCoupons, baseConfig);
+  const subtotal = expectedUnit * 2;
+  const expectedDiscount = Math.floor(subtotal * 10 / 100);
+  assert.equal(order.discountCents, expectedDiscount);
+  assert.equal(order.totalCents, subtotal - expectedDiscount);
+  assert.equal(order.coupon.code, 'BEMVINDO10');
+
+  assert.throws(() => buildOrder({
+    clientOrderId: 'COUPON-2',
+    customer: {name: 'Cliente', email: 'cliente@example.com'},
+    shipping: {choice: 'pickup'},
+    items: [{productId: juice.id, variantId: juice.variants?.[0]?.id || '', qty: 1}],
+    couponCode: 'NAOEXISTE'
+  }, withCoupons, baseConfig), /[Cc]upom/);
+
+  assert.throws(() => buildOrder({
+    clientOrderId: 'COUPON-3',
+    customer: {name: 'Cliente', email: 'cliente@example.com'},
+    shipping: {choice: 'pickup'},
+    items: [{productId: juice.id, variantId: juice.variants?.[0]?.id || '', qty: 1}],
+    couponCode: 'FIXO5'
+  }, withCoupons, baseConfig), /mínimo/);
+});
+
+test('cupom nunca zera nem negativa o total e expira corretamente', () => {
+  const withCoupons = normalizeCatalog({
+    ...raw,
+    coupons: [
+      {code: 'MEGA', type: 'fixed', value: 100_000_000},
+      {code: 'VENCIDO', type: 'percent', value: 10, expiresAt: '2020-01-01T00:00:00-03:00'}
+    ]
+  });
+  const juice = withCoupons.products.find(product => product.department === 'sucos');
+  const expectedUnit = juice.variants?.[0]?.price ?? juice.price;
+  const order = buildOrder({
+    clientOrderId: 'COUPON-4',
+    customer: {name: 'Cliente', email: 'cliente@example.com'},
+    shipping: {choice: 'pickup'},
+    items: [{productId: juice.id, variantId: juice.variants?.[0]?.id || '', qty: 1}],
+    couponCode: 'MEGA'
+  }, withCoupons, baseConfig);
+  assert.ok(order.totalCents >= 100, 'total nunca fica abaixo de R$ 1,00');
+  assert.equal(order.totalCents, expectedUnit - order.discountCents);
+
+  assert.throws(() => buildOrder({
+    clientOrderId: 'COUPON-5',
+    customer: {name: 'Cliente', email: 'cliente@example.com'},
+    shipping: {choice: 'pickup'},
+    items: [{productId: juice.id, variantId: juice.variants?.[0]?.id || '', qty: 1}],
+    couponCode: 'VENCIDO'
+  }, withCoupons, baseConfig), /expirou/);
+});
+
+test('cupom de frete grátis desconta exatamente o frete calculado', () => {
+  const withCoupons = normalizeCatalog({...raw, coupons: [{code: 'FRETEGRATIS', type: 'free_shipping'}]});
+  const juice = withCoupons.products.find(product => product.department === 'sucos');
+  const expectedUnit = juice.variants?.[0]?.price ?? juice.price;
+  const order = buildOrder({
+    clientOrderId: 'COUPON-6',
+    customer: {name: 'Cliente', email: 'cliente@example.com'},
+    shipping: {choice: 'delivery', cep: '01310930', street: 'Av. Paulista', number: '1000', neighborhood: 'Bela Vista', city: 'São Paulo', state: 'SP'},
+    items: [{productId: juice.id, variantId: juice.variants?.[0]?.id || '', qty: 1}],
+    couponCode: 'FRETEGRATIS'
+  }, withCoupons, {...baseConfig, shippingMode: 'fixed', shippingFixedCents: 1500});
+  assert.equal(order.discountCents, 1500);
+  assert.equal(order.totalCents, expectedUnit + 1500 - 1500);
+
+  assert.throws(() => buildOrder({
+    clientOrderId: 'COUPON-7',
+    customer: {name: 'Cliente', email: 'cliente@example.com'},
+    shipping: {choice: 'pickup'},
+    items: [{productId: juice.id, variantId: juice.variants?.[0]?.id || '', qty: 1}],
+    couponCode: 'FRETEGRATIS'
+  }, withCoupons, baseConfig), /entrega/);
+});

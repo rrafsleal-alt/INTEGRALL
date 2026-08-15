@@ -96,6 +96,35 @@
         <p class="empty" id="customersEmpty" hidden>Nenhum cliente encontrado.</p>
       </section>
 
+      <section class="panel" aria-labelledby="couponsTitle">
+        <div class="panel-head">
+          <div><h2 id="couponsTitle">Cupons de desconto</h2><p>Os cupons são validados e aplicados exclusivamente pelo servidor. Códigos aceitam letras, números, hífen e sublinhado.</p></div>
+        </div>
+        <form class="coupon-form" id="couponForm">
+          <div class="coupon-form-grid">
+            <label>Código<input id="couponCode" maxlength="40" required minlength="3" placeholder="BEMVINDO10" spellcheck="false" style="text-transform:uppercase"></label>
+            <label>Tipo<select id="couponType">
+              <option value="percent">Porcentagem (%)</option>
+              <option value="fixed">Valor fixo (R$)</option>
+              <option value="free_shipping">Frete grátis</option>
+            </select></label>
+            <label id="couponValueLabel">Valor<input id="couponValue" inputmode="decimal" placeholder="10"></label>
+            <label>Pedido mínimo (R$)<input id="couponMin" inputmode="decimal" placeholder="0,00"></label>
+            <label>Validade<input id="couponExpires" type="date"></label>
+            <label>Observação<input id="couponNote" maxlength="200" placeholder="Campanha, origem…"></label>
+          </div>
+          <button class="button primary" type="submit">Adicionar cupom</button>
+        </form>
+        <p class="feedback" id="couponsFeedback" role="status" aria-live="polite"></p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Código</th><th>Tipo</th><th>Valor</th><th>Mínimo</th><th>Validade</th><th>Status</th><th></th></tr></thead>
+            <tbody id="couponsBody"></tbody>
+          </table>
+        </div>
+        <p class="empty" id="couponsEmpty" hidden>Nenhum cupom cadastrado.</p>
+      </section>
+
       <section class="panel" aria-labelledby="catalogTitleAdmin">
         <div class="panel-head">
           <div><h2 id="catalogTitleAdmin">Catálogo</h2><p>Importação e exportação usam JSON. Imagens novas devem ser URLs HTTPS ou arquivos já publicados em <code>/assets/</code>.</p></div>
@@ -120,6 +149,15 @@
       <label for="shippingQuoteLabel">Descrição do frete</label>
       <input id="shippingQuoteLabel" maxlength="160" value="Frete confirmado pela loja">
       <button class="button secondary" id="saveShippingButton" type="button">Salvar frete</button>
+    </div>
+    <div class="dialog-shipping" id="trackingPanel" hidden>
+      <label for="trackingCodeInput">Código de rastreio</label>
+      <input id="trackingCodeInput" maxlength="80" placeholder="Ex.: AA123456789BR" spellcheck="false" style="text-transform:uppercase">
+      <label for="trackingCarrierInput">Transportadora</label>
+      <input id="trackingCarrierInput" maxlength="80" placeholder="Ex.: Correios">
+      <label for="trackingUrlInput">Link de rastreio (opcional — Correios é gerado automaticamente)</label>
+      <input id="trackingUrlInput" maxlength="500" placeholder="https://…" spellcheck="false">
+      <button class="button secondary" id="saveTrackingButton" type="button">Salvar rastreio</button>
     </div>
     <div class="dialog-status">
       <label for="dialogStatus">Alterar status</label>

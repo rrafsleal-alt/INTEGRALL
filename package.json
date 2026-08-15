@@ -10,7 +10,7 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node --env-file=.env --watch server.js",
-    "check": "node --check server.js && node --check src/config.js && node --check src/catalog.js && node --check src/repository.js && node --check src/security.js && node --check src/payments.js && node --check src/payment-state.js && node --check public/js/store/catalog.js && node --check public/js/store/cart.js && node --check public/js/store/shipping.js && node --check public/js/store/api.js && node --check public/js/store/checkout.js && node --check public/js/store/app.js && node --check public/js/admin.js",
+    "check": "node --check server.js && node --check src/config.js && node --check src/catalog.js && node --check src/repository.js && node --check src/security.js && node --check src/payments.js && node --check src/payment-state.js && node --check public/js/store/age-gate.js && node --check public/js/store/catalog.js && node --check public/js/store/cart.js && node --check public/js/store/shipping.js && node --check public/js/store/api.js && node --check public/js/store/checkout.js && node --check public/js/store/app.js && node --check public/js/admin.js",
     "test": "node --test tests/*.test.js",
     "audit": "node scripts/audit.mjs",
     "verify": "npm run check && npm test && npm run audit"

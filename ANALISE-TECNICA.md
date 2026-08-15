@@ -1,156 +1,114 @@
-# Análise Técnica Rigorosa — INTEGRALL Online v9.2
+# Análise Técnica Rigorosa — INTEGRALL Online v9.2 (Reavaliação)
 
-**Data da análise:** 15 de agosto de 2026
-**Escopo:** repositório `rrafsleal-alt/INTEGRALL`, branch `main`, commit `9d27da1` ("Add files via upload")
-**Método:** inspeção de 100% dos arquivos presentes, verificação criptográfica contra `MANIFEST.sha256`, tentativa de execução (`node server.js`), auditoria de dependências (`npm audit`), revisão de segurança e de configuração de deploy.
+**Data:** 15 de agosto de 2026 (2ª análise, após atualização dos arquivos no GitHub)
+**Escopo:** `rrafsleal-alt/INTEGRALL`, incluindo commits `7fe2268` (upload dos arquivos), `204e7df` (zip) e `3ed26bb` (remoção do zip)
+**Método:** verificação criptográfica dos 51 arquivos contra `MANIFEST.sha256`, leitura de 100% do código-fonte, execução real do servidor, testes funcionais de API (12 cenários), `npm run verify`, `npm audit`.
 
 ---
 
-## 1. Resumo executivo
+## 1. O que mudou desde a 1ª análise
 
-| Dimensão | Avaliação |
+| Item da 1ª análise | Situação agora |
 |---|---|
-| Arquitetura e design (pelo que é visível) | **Forte** — acima da média para e-commerce de pequeno porte |
-| Segurança de aplicação (design) | **Forte** — preços server-side, webhook assinado, idempotência |
-| Higiene de segredos | **Reprovada** — `.env` com token real commitado |
-| Integridade do repositório | **Reprovada** — 30 de 51 arquivos ausentes; projeto não executa |
-| Dependências | **Excelente** — 3 deps diretas, 82 no lockfile, 0 vulnerabilidades |
-| Documentação | **Excelente** — README, SECURITY, BUILD_REPORT, checklists operacionais |
-| Testes/CI | **Inverificável** — testes citados não estão no repo; sem CI |
+| 30 arquivos ausentes (src/, public/, data/, tests/, scripts/) | ✅ **Resolvido pelo usuário** — arquivos enviados ao GitHub |
+| Arquivos enviados **achatados na raiz** (upload web não preserva pastas) | ✅ **Corrigido por mim** — realocados nas pastas corretas usando os hashes do MANIFEST como mapa |
+| `src/catalog.js` ainda faltava (colisão de nome com `public/js/store/catalog.js` no upload achatado) | ✅ **Recuperado por mim** do zip presente no histórico Git (commit `204e7df`) — hash confere |
+| `.env` com `ADMIN_API_TOKEN` commitado | ⚠️ **Removido do versionamento** (`git rm --cached`), mas **permanece no histórico** — troque o token |
+| Projeto não executava | ✅ **Executa** — servidor sobe, todas as rotas funcionam |
 
-**Conclusão:** o projeto demonstra engenharia sólida, mas o repositório, no estado atual, é **inexecutável e inseguro para publicação**. Duas ações são bloqueantes antes de qualquer outra coisa (seção 2).
+**Verificação de integridade: os 51 arquivos do MANIFEST agora conferem (SHA-256, 51/51 OK).**
 
----
-
-## 2. Achados críticos (bloqueantes)
-
-### 2.1 Repositório incompleto — o projeto não roda
-
-O `MANIFEST.sha256` (gerado pelo próprio build) declara **51 arquivos**. O repositório contém **21**. Todos os 21 presentes conferem com seus hashes SHA-256 — ou seja, o que subiu está íntegro; o problema é o que **não subiu**.
-
-Arquivos ausentes (30):
-
-```
-src/config.js          src/catalog.js         src/repository.js
-src/security.js        src/payments.js        src/payment-state.js
-data/catalog.json
-public/index.html      public/admin.html
-public/css/store.css   public/css/checkout.css  public/css/admin.css
-public/js/admin.js
-public/js/store/{api,app,cart,catalog,checkout,shipping}.js
-public/assets/icons/favicon.svg
-public/assets/products/01..05 (.webp, 5 imagens)
-scripts/audit.mjs
-tests/catalog.test.js  tests/payment-state.test.js  tests/repository.test.js
-archive/index.original.html
-```
-
-Evidência de execução:
-
-```
-$ node server.js
-Error [ERR_MODULE_NOT_FOUND]: Cannot find module
-'/home/user/INTEGRALL/src/config.js' imported from /home/user/INTEGRALL/server.js
-```
-
-**Causa provável:** o commit único é "Add files via upload" — upload pela interface web do GitHub, que não incluiu as subpastas.
-
-**Correção:** na máquina onde o projeto completo existe, clonar o repo, copiar a árvore completa e fazer `git add -A && git commit && git push`. Validar depois com `sha256sum -c MANIFEST.sha256`.
-
-### 2.2 Segredo commitado no Git
-
-O `.gitignore` lista `.env`, mas o arquivo **já está versionado** e contém:
-
-```
-ADMIN_API_TOKEN=integrallwine159213
-```
-
-Problemas:
-
-1. Viola diretamente o `SECURITY.md` do próprio projeto ("Nunca coloque ADMIN_API_TOKEN ... em Git").
-2. O token tem 19 caracteres e é derivável da marca; a documentação exige ≥32 caracteres aleatórios.
-3. Remover o arquivo agora **não remove do histórico** do Git.
-
-**Correção:**
-
-```bash
-git rm --cached .env
-git commit -m "Remove .env do versionamento"
-# Expurgar do histórico (ou recriar o repositório):
-#   git filter-repo --invert-paths --path .env
-# Trocar o token — considerá-lo comprometido:
-node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
-```
+> ⚠️ Atenção: o zip `INTEGRALL-online-v9.2-pronto-mercado-pago.zip` foi deletado do `main`, mas continua acessível no histórico (commit `204e7df`) e contém o `.env` com o token. Mais um motivo para **trocar o `ADMIN_API_TOKEN`**.
 
 ---
 
-## 3. Pontos fortes (avaliação do que é visível)
+## 2. Validação executada (evidências)
 
-A análise do `server.js` (338 linhas, única peça de código presente) e da documentação revela decisões corretas e consistentes:
+### 2.1 `npm run verify` — APROVADO
 
-**Integridade financeira**
-- O navegador envia apenas IDs/quantidades; o servidor recalcula preço, subtotal, frete e total do catálogo persistido (`buildOrder(req.body, catalog, config)`).
-- Webhook do Mercado Pago: valida `x-signature`/`x-request-id`, **consulta o pagamento na API** em vez de confiar no payload, e confere valor/moeda/preferência via `evaluatePayment` antes de mudar estado.
-- Máquina de estados explícita com 12 status; webhooks fora de ordem não rebaixam pedido pago.
-- Idempotência em camadas: `clientOrderId` único (criação), `inventoryCommittedAt` (baixa de estoque), `attempt` por preferência de pagamento.
-- Pagamento bloqueado enquanto frete estiver "sob cotação" (`requiresShippingQuote`), com recálculo server-side quando o admin define o frete.
-- Checkout exige base HTTPS antes de criar preferência do Mercado Pago.
+- Sintaxe de 14 arquivos JS: OK
+- **Testes: 20/20 aprovados** (catálogo/pedido, máquina de estados de pagamento, repositório/estoque)
+- Auditoria estática: OK — 5 produtos, assets presentes, 13 arquivos públicos sem segredos
 
-**Segurança de aplicação**
-- `checkoutToken` de 192 bits separado do ID público, comparado em tempo constante (`safeEqual`).
-- Rate limiting por rota com limites proporcionais ao risco (orders 20/min, status 60, payments 30, webhook 180, admin 90).
-- Limites de body JSON distintos: 64 kb público, 2 mb admin.
-- `x-powered-by` desabilitado, headers de segurança centralizados, mensagens de erro genéricas em produção.
-- Cache-Control diferenciado (assets 7 dias, css/js 1 h, admin.html `no-store`, catálogo `stale-while-revalidate`).
+### 2.2 `npm audit` — 0 vulnerabilidades (3 deps diretas, 82 no lockfile)
 
-**Operação**
-- `assertProductionConfig()`: produção exige PostgreSQL; memória só em dev.
-- Graceful shutdown (SIGTERM/SIGINT) com timeout de 10 s.
-- Blueprints Render separados para produção (starter + Postgres pago, sandbox off) e teste (free, sandbox on); `sync: false` para todos os segredos — correto.
-- Docker Compose para Postgres local com healthcheck.
-- `.bat` amigáveis para operador não técnico.
+### 2.3 Testes funcionais reais (servidor em execução, modo memória)
 
-**Dependências**
-- Apenas `express@5.1.0`, `mercadopago@3.4.0`, `pg@8.16.3`. 82 pacotes no lockfile. `npm audit`: **0 vulnerabilidades**. Engines fixados (`node >=20.12 <27`).
+| # | Cenário | Resultado |
+|---|---|---|
+| 1 | `GET /api/health` | ✅ `ok: true`, modo memória detectado corretamente |
+| 2 | Criação de pedido (retirada, 2× Vinho Tinto 750ml) | ✅ `201`, total 5398 centavos correto |
+| 3 | Idempotência (mesmo `clientOrderId` reenviado) | ✅ `idempotent: true`, mesmo pedido devolvido |
+| 4 | Consulta de status com `checkoutToken` correto | ✅ retorna pedido |
+| 5 | Consulta com token errado | ✅ `404` (não vaza existência do pedido) |
+| 6 | **Ataque de preço**: cliente envia `unitPriceCents: 1` | ✅ **ignorado** — servidor cobra 2699 do catálogo |
+| 7 | Admin sem token | ✅ `401` |
+| 8 | Admin → status `paid` | ✅ estoque baixa 1000→998 (só a variante correta), `inventoryCommittedAt` gravado |
+| 9 | Admin → `preparing` depois de pago | ✅ **estoque NÃO baixa de novo** (idempotência confirmada) |
+| 10 | Pedido com entrega → frete "sob cotação" | ✅ `requiresShippingQuote: true`, pagamento bloqueado |
+| 11 | Admin define frete (R$ 18,00) | ✅ total recalculado no servidor (10980→12780) |
+| 12 | Checkout MP sem credenciais | ✅ `503` com mensagem clara |
 
----
-
-## 4. Pontos de atenção (média severidade)
-
-| # | Achado | Impacto | Recomendação |
-|---|---|---|---|
-| 4.1 | Testes citados ("20/20 aprovados" no BUILD_REPORT) não estão no repo | Alegação de qualidade inverificável | Resolver 2.1; incluir `tests/` |
-| 4.2 | Rate limiter em memória | Ineficaz com múltiplas instâncias; zera a cada restart | Aceitável no Render single-instance; documentar a limitação |
-| 4.3 | Webhook limitado a 180 req/min | Rajadas do MP podem receber 429 (ele reenvia, mas atrasa confirmação) | Monitorar; considerar limite maior ou allowlist |
-| 4.4 | `PUT /api/admin/catalog` substitui o catálogo inteiro, sem versionamento | Erro do admin apaga preços/estoques sem rollback | Guardar snapshot anterior (tabela de versões ou backup pré-save) |
-| 4.5 | Sem observabilidade (logs estruturados, request log, métricas) | Diagnóstico em produção limitado a `console.error` | Adicionar pino/morgan e logging de eventos de pagamento |
-| 4.6 | Sem CI (nenhum GitHub Actions) | `npm run verify` só roda manualmente | Workflow simples: `npm ci && npm run verify` em push/PR |
-| 4.7 | Reembolso não repõe estoque (decisão documentada) | Correto operacionalmente, mas exige disciplina manual | Manter; sinalizar no Admin pedidos reembolsados com estoque baixado |
-
-## 5. Pontos menores (baixa severidade)
-
-- **Line endings inconsistentes nos `.bat`**: `INICIAR-INTEGRALL.bat` usa CRLF; os demais, LF puro — alguns cenários do `cmd.exe` se comportam mal com LF. Padronizar CRLF e adicionar `.gitattributes` (`*.bat text eol=crlf`).
-- Senha do Postgres hardcoded no `docker-compose.yml` (`integrall_local_2026`) — aceitável por ser estritamente local, mas vale registrar.
-- `GET /api/admin/orders` aceita `limit` sem teto explícito visível no server.js (`Number(req.query.limit) || 300`) — verificar se `repo.listOrders` impõe máximo.
-- SPA fallback devolve `index.html` com status 404 — funcional, porém pode confundir crawlers; avaliar 200 para rotas conhecidas do cliente.
+Extras verificados: consolidação de clientes por e-mail/telefone (hash SHA-256 como chave), headers de segurança presentes em todas as respostas (CSP, X-Frame-Options DENY, nosniff, Referrer-Policy).
 
 ---
 
-## 6. Plano de correção priorizado
+## 3. Revisão do código que faltava na 1ª análise
 
-1. **[Bloqueante]** Reenviar o projeto completo via `git push` (não upload web). Validar: `sha256sum -c MANIFEST.sha256` deve passar para os 51 arquivos.
-2. **[Bloqueante]** `git rm --cached .env`, expurgar do histórico, gerar novo `ADMIN_API_TOKEN` aleatório de 64 hex chars.
-3. **[Alta]** Rodar e comprovar `npm run verify` no repositório publicado; adicionar GitHub Actions com esse comando.
-4. **[Média]** Versionamento/backup do catálogo no `PUT /api/admin/catalog`.
-5. **[Média]** Logging estruturado mínimo (request + eventos de pagamento).
-6. **[Baixa]** `.gitattributes` para `.bat`; revisar teto de `limit` nas rotas admin.
-7. **[Homologação]** Seguir o roteiro já existente em `CONFIGURAR-MERCADO-PAGO.txt` (compra de teste, webhook aprovado, falha/expiração, nova tentativa).
+### `src/repository.js` (351 linhas) — **muito bom**
+- Modo duplo memória/PostgreSQL com a mesma interface.
+- **Transações corretas**: `BEGIN … SELECT FOR UPDATE … COMMIT/ROLLBACK` na atualização de pedido; o catálogo também é travado com `FOR UPDATE` na baixa de estoque — sem condição de corrida entre webhooks concorrentes.
+- Tratamento do erro `23505` (unique violation) devolvendo o pedido duplicado — idempotência robusta mesmo sob corrida na criação.
+- Índices adequados (`created_at DESC`, `status` via expressão JSONB).
+- `LIMIT` com teto de 500 nas listagens (ponto que eu havia levantado — está tratado ✅).
+- Consulta de clientes com upsert JSONB preservando `firstOrderAt`.
+- *Ressalva menor:* `ssl: {rejectUnauthorized: false}` em produção — padrão comum no Render, mas aceita MITM teórico; se o provedor der CA, prefira validar.
+
+### `src/catalog.js` (21,8 KB) — **defensivo em profundidade**
+- Sanitização exaustiva de todo input (controle de chars, limites de tamanho, whitelist de chaves).
+- `safeVisualCss`: bloqueia `@import`, `url()`, `expression()`, `position:fixed`, seletores do admin — CSS custom do lojista não consegue atacar o painel.
+- `buildOrder`: valida produto/variante/quantidade/estoque/maxPerOrder, `Number.isSafeInteger` em todos os totais, `checkoutToken` de 192 bits, endereço completo obrigatório para entrega, e-mail com regex, UF com `^[A-Z]{2}$`.
+- Frete: pickup zero, fixo, zonas por faixa de CEP com fallback configurável, frete grátis por limiar, cotação como default seguro.
+
+### `src/payment-state.js` — **máquina de estados correta**
+- Confere preferência, moeda (BRL) e valor exato em centavos antes de aceitar.
+- Divergência em pedido já avançado → **não rebaixa**, só sinaliza (`shouldUpdate: false` + warning).
+- Trata approved/refunded/partially_refunded/in_mediation/pending/expired/rejected/charged_back — cobertura completa dos estados do MP.
+
+### `src/payments.js` — correto
+- `WebhookSignatureValidator` oficial do SDK, `idempotencyKey` por tentativa, expiração 3–30 dias, exige HTTPS, timeout 8s nos clientes.
+
+### `src/security.js` — correto
+- `timingSafeEqual` com checagem de comprimento, CSP estrita (`script-src 'self'`), HSTS quando HTTPS, rate limiter com sweep de memória (sem vazamento de Map).
+
+### Frontend (`public/`)
+- CSP também via meta tag; JSON-LD para SEO; noscript fallback.
+- `innerHTML` usado **apenas** em 2 templates estáticos (sem interpolação de dados do usuário); dados dinâmicos via `textContent`/DOM — sem vetor XSS identificado.
+- Token admin só em `sessionStorage`; dados do cliente em `sessionStorage`; sacola em `localStorage` — conforme SECURITY.md.
 
 ---
 
-## 7. Veredito final
+## 4. Pendências (em ordem de prioridade)
 
-O design do sistema é **maduro e defensivo** — recalcula tudo no servidor, não confia no navegador nem no payload do webhook, trata idempotência em três camadas e documenta a operação com qualidade rara em projetos desse porte. Porém, **o repositório publicado não representa o projeto**: falta 60% dos arquivos (incluindo todo o backend real e o frontend), o que o torna inexecutável, e há um segredo administrativo exposto no histórico do Git.
+1. **[Alta] Trocar o `ADMIN_API_TOKEN`** (`integrallwine159213` está no histórico do Git em 2 lugares: `.env` do commit inicial e dentro do zip do commit `204e7df`). Gere: `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`. Idealmente, reescreva o histórico ou recrie o repositório limpo.
+2. **[Média] Estrutura no `main`**: a correção de pastas está na branch `arena/01a00534-integrall` (commit `257f4c2`, já enviado ao GitHub). Faça o merge para `main` — sem isso, o `main` continua com tudo achatado na raiz e não executa.
+3. **[Média] CI**: adicionar GitHub Actions rodando `npm ci && npm run verify` em cada push.
+4. **[Baixa] Backup/versionamento do catálogo** no `PUT /api/admin/catalog` (substituição total sem rollback).
+5. **[Baixa] Observabilidade**: log estruturado de eventos de pagamento para diagnóstico em produção.
+6. **[Baixa] `ssl.rejectUnauthorized: false`**: revisar quando o provedor de Postgres oferecer CA.
+7. **[Homologação] Mercado Pago**: seguir `CONFIGURAR-MERCADO-PAGO.txt` com credenciais reais em ambiente HTTPS (única parte não testável sem credenciais).
 
-**Nota conceitual do design: A-. Nota do repositório no estado atual: F.**
-Resolvidos os itens 1 e 2 do plano, o projeto tem base sólida para homologação com o Mercado Pago.
+---
+
+## 5. Veredito final (revisado)
+
+| Dimensão | 1ª análise | Agora |
+|---|---|---|
+| Integridade do repositório | F (30 arquivos ausentes) | **A** (51/51 conferem; estrutura corrigida nesta branch) |
+| Executabilidade | F (não rodava) | **A** (roda; 12/12 cenários funcionais aprovados) |
+| Testes | Inverificável | **A** (20/20 aprovados, suíte real e pertinente) |
+| Segurança de aplicação | A- (parcial) | **A** (código completo confirma o design: transações, locking, sanitização, XSS ausente) |
+| Higiene de segredos | F | **C** (removido do versionamento; falta trocar o token e limpar histórico) |
+| Dependências | A | A (0 vulnerabilidades) |
+
+**Conclusão:** com os arquivos completos, o projeto confirma — e supera — a impressão da primeira análise. A implementação é consistente do banco ao navegador: locking transacional correto, idempotência em três camadas comprovada em execução, validação financeira rigorosa e frontend sem vetores de XSS. As pendências reais são operacionais (token comprometido no histórico, merge da estrutura para o `main`, CI) e a homologação com credenciais reais do Mercado Pago. **Estado geral: pronto para homologação.**

@@ -18,6 +18,18 @@ Loja da **INTEGRALL | Boutique Gourmet** com catálogo, carrinho, pedidos server
 
 O WhatsApp **não participa automaticamente do checkout**. Se um número de atendimento for configurado, ele é usado apenas como opção manual de suporte.
 
+## Novidades v9.3
+
+- **Verificação de idade (18+)**: aviso bloqueante na entrada da loja (Lei nº 13.106/2015), lembrado por 30 dias; pedidos com bebida alcoólica exigem confirmação de maioridade também no checkout e são **rejeitados pelo servidor** sem ela; aviso legal fixo no rodapé.
+- **Cupons de desconto**: porcentagem, valor fixo ou frete grátis, com pedido mínimo e validade; criados no Admin; validados e aplicados **exclusivamente no servidor**; códigos nunca aparecem no catálogo público; o desconto nunca zera o total.
+- **Código de rastreio**: o Admin informa código/transportadora/link do envio; link dos Correios é gerado automaticamente; o cliente vê o rastreio no acompanhamento do pedido.
+
+Novas rotas:
+
+- `POST /api/coupons/validate` (pública, valida cupom antes do pedido)
+- `GET /api/admin/coupons` / `PUT /api/admin/coupons`
+- `PATCH /api/admin/orders/:id/tracking`
+
 ## Recursos v9.2
 
 - pedidos com idempotência (`clientOrderId`);

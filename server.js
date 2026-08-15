@@ -4,7 +4,7 @@ import {readFile} from 'node:fs/promises';
 import {fileURLToPath} from 'node:url';
 import path from 'node:path';
 import {config, assertProductionConfig} from './src/config.js';
-import {normalizeCatalog, publicCatalog, buildOrder, ORDER_STATUSES, cleanText} from './src/catalog.js';
+import {normalizeCatalog, publicCatalog, buildOrder, ORDER_STATUSES, cleanText, findCoupon, validateCoupon, couponDiscount} from './src/catalog.js';
 import {Repository} from './src/repository.js';
 import {securityHeaders, adminAuth, rateLimit, safeEqual} from './src/security.js';
 import {MercadoPagoService, InvalidWebhookSignatureError} from './src/payments.js';
@@ -61,6 +61,11 @@ function publicOrder(order) {
     updatedAt: order.updatedAt,
     subtotalCents: order.subtotalCents,
     shippingCents: order.shippingCents,
+    discountCents: Number(order.discountCents) || 0,
+    coupon: order.coupon?.code || '',
+    trackingCode: order.trackingCode || '',
+    trackingCarrier: order.trackingCarrier || '',
+    trackingUrl: order.trackingUrl || '',
     totalCents: order.totalCents,
     requiresShippingQuote: Boolean(order.requiresShippingQuote),
     shipping: {
@@ -139,12 +144,31 @@ app.post('/api/orders', orderLimiter, publicJson, asyncRoute(async (req, res) =>
       status: result.order.status,
       subtotalCents: result.order.subtotalCents,
       shippingCents: result.order.shippingCents,
+      discountCents: Number(result.order.discountCents) || 0,
+      coupon: result.order.coupon?.code || '',
       totalCents: result.order.totalCents,
       requiresShippingQuote: result.order.requiresShippingQuote,
       checkoutToken: result.order.checkoutToken,
       onlinePaymentAvailable: mercadoPago.configured && !result.order.requiresShippingQuote
     },
     idempotent: !result.created
+  });
+}));
+
+app.post('/api/coupons/validate', statusLimiter, publicJson, asyncRoute(async (req, res) => {
+  const code = cleanText(req.body?.code, 40).toUpperCase();
+  if (!code) return res.status(400).json({error: 'Informe o código do cupom.'});
+  const subtotalCents = Number(req.body?.subtotalCents);
+  const safeSubtotal = Number.isSafeInteger(subtotalCents) && subtotalCents > 0 ? subtotalCents : 0;
+  const shippingChoice = cleanText(req.body?.shippingChoice, 20);
+  const catalog = await repo.getCatalog();
+  const coupon = findCoupon(catalog, code);
+  const check = validateCoupon(coupon, {subtotalCents: safeSubtotal, shippingChoice, shippingQuoted: Boolean(req.body?.shippingQuoted)});
+  res.setHeader('Cache-Control', 'no-store');
+  if (!check.ok) return res.status(404).json({error: check.error || 'Cupom inválido.'});
+  res.json({
+    coupon: {code: coupon.code, type: coupon.type, value: coupon.value, note: coupon.note || ''},
+    discountCents: safeSubtotal ? couponDiscount(coupon, safeSubtotal, 0) : 0
   });
 }));
 
@@ -259,7 +283,8 @@ app.patch('/api/admin/orders/:id/shipping', adminLimiter, admin, publicJson, asy
   const shippingCents = centsFromBody(req.body?.shippingCents);
   if (shippingCents == null) return res.status(400).json({error: 'Informe o frete em centavos (zero ou valor positivo).'});
   const label = cleanText(req.body?.label, 160) || 'Frete confirmado pela loja';
-  const totalCents = Number(order.subtotalCents || 0) + shippingCents;
+  const totalCents = Number(order.subtotalCents || 0) + shippingCents - (Number(order.discountCents) || 0);
+  if (totalCents <= 0) return res.status(400).json({error: 'O frete informado deixaria o total do pedido inválido.'});
   const updated = await repo.updateOrder(orderId, {
     shipping: {priceCents: shippingCents, quoted: false, label},
     shippingCents,
@@ -269,10 +294,49 @@ app.patch('/api/admin/orders/:id/shipping', adminLimiter, admin, publicJson, asy
   res.json({order: updated});
 }));
 
+app.patch('/api/admin/orders/:id/tracking', adminLimiter, admin, publicJson, asyncRoute(async (req, res) => {
+  const orderId = cleanText(req.params.id, 100);
+  const order = await repo.getOrder(orderId);
+  if (!order) return res.status(404).json({error: 'Pedido não encontrado.'});
+  if (order.shipping?.choice !== 'delivery') return res.status(409).json({error: 'Este pedido é para retirada e não possui envio.'});
+  const trackingCode = cleanText(req.body?.trackingCode, 80).toUpperCase();
+  const trackingCarrier = cleanText(req.body?.trackingCarrier, 80);
+  let trackingUrl = cleanText(req.body?.trackingUrl, 500);
+  if (trackingUrl && !/^https:\/\/[^\s]+$/i.test(trackingUrl)) return res.status(400).json({error: 'O link de rastreio precisa ser uma URL HTTPS.'});
+  if (!trackingUrl && trackingCode) trackingUrl = `https://rastreamento.correios.com.br/app/index.php?objetos=${encodeURIComponent(trackingCode)}`;
+  const note = trackingCode
+    ? `Código de rastreio informado: ${trackingCode}${trackingCarrier ? ` (${trackingCarrier})` : ''}.`
+    : 'Código de rastreio removido.';
+  const updated = await repo.updateOrder(orderId, {
+    trackingCode,
+    trackingCarrier,
+    trackingUrl: trackingCode ? trackingUrl : ''
+  }, {source: 'admin', note});
+  res.json({order: updated});
+}));
+
 app.get('/api/admin/customers', adminLimiter, admin, asyncRoute(async (req, res) => {
   const search = cleanText(req.query.search, 120);
   const customers = await repo.listCustomers({search, limit: Number(req.query.limit) || 300});
   res.json({customers});
+}));
+
+app.get('/api/admin/coupons', adminLimiter, admin, asyncRoute(async (_req, res) => {
+  const catalog = await repo.getCatalog();
+  res.json({coupons: catalog.coupons || []});
+}));
+
+app.put('/api/admin/coupons', adminLimiter, admin, publicJson, asyncRoute(async (req, res) => {
+  if (!Array.isArray(req.body?.coupons)) return res.status(400).json({error: 'Envie um array coupons.'});
+  const current = await repo.getCatalog();
+  let next;
+  try {
+    next = normalizeCatalog({...current, coupons: req.body.coupons});
+  } catch (error) {
+    return res.status(400).json({error: error?.message || 'Cupons inválidos.'});
+  }
+  await repo.saveCatalog(next);
+  res.json({ok: true, coupons: next.coupons});
 }));
 
 app.put('/api/admin/catalog', adminLimiter, admin, adminCatalogJson, asyncRoute(async (req, res) => {
@@ -283,6 +347,7 @@ app.put('/api/admin/catalog', adminLimiter, admin, adminCatalogJson, asyncRoute(
       version: 9,
       settings: req.body?.settings ?? current.settings,
       commerce: req.body?.commerce ?? req.body?.v8 ?? current.commerce,
+      coupons: req.body?.coupons ?? current.coupons,
       products: req.body?.products ?? current.products
     });
   } catch (error) {

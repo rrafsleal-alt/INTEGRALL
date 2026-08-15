@@ -30,15 +30,30 @@ export class MercadoPagoService {
     if (!this.preference) throw new Error('Mercado Pago não configurado.');
     if (!publicUrl || !/^https:\/\//i.test(publicUrl)) throw new Error('PUBLIC_URL HTTPS é obrigatória para criar o Checkout Pro.');
 
-    const items = order.items.map(line => ({
-      id: line.productId,
-      title: line.variant ? `${line.name} — ${line.variant}` : line.name,
-      quantity: line.qty,
-      currency_id: 'BRL',
-      unit_price: line.unitPriceCents / 100
-    }));
-    if ((order.shippingCents || 0) > 0) {
-      items.push({id: 'shipping', title: 'Frete', quantity: 1, currency_id: 'BRL', unit_price: order.shippingCents / 100});
+    const discountCents = Math.max(0, Number(order.discountCents) || 0);
+    let items;
+    if (discountCents > 0) {
+      // O Mercado Pago não aceita itens com valor negativo; com desconto aplicado,
+      // envia um item consolidado para que o valor cobrado bata com o total validado no webhook.
+      const summary = order.items.map(line => `${line.qty}× ${line.name}`).join(', ').slice(0, 240);
+      items = [{
+        id: order.id,
+        title: `Pedido INTEGRALL${order.coupon?.code ? ` (cupom ${order.coupon.code})` : ''} — ${summary}`.slice(0, 256),
+        quantity: 1,
+        currency_id: 'BRL',
+        unit_price: order.totalCents / 100
+      }];
+    } else {
+      items = order.items.map(line => ({
+        id: line.productId,
+        title: line.variant ? `${line.name} — ${line.variant}` : line.name,
+        quantity: line.qty,
+        currency_id: 'BRL',
+        unit_price: line.unitPriceCents / 100
+      }));
+      if ((order.shippingCents || 0) > 0) {
+        items.push({id: 'shipping', title: 'Frete', quantity: 1, currency_id: 'BRL', unit_price: order.shippingCents / 100});
+      }
     }
 
     const encodedOrder = encodeURIComponent(order.id);

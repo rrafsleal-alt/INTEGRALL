@@ -170,6 +170,81 @@ function sanitizeCommerce(value) {
   };
 }
 
+const COUPON_TYPES = new Set(['percent', 'fixed', 'free_shipping']);
+const ALCOHOL_DEPARTMENTS = new Set(['vinhos', 'vinho', 'espumantes', 'cervejas', 'cerveja', 'destilados', 'licores', 'bebidas-alcoolicas']);
+
+function reais(cents) {
+  return `R$ ${(Math.max(0, Number(cents) || 0) / 100).toFixed(2).replace('.', ',')}`;
+}
+
+export function isAlcoholicProduct(product) {
+  if (!product || typeof product !== 'object') return false;
+  if (ALCOHOL_DEPARTMENTS.has(String(product.department || '').toLowerCase())) return true;
+  return Boolean(product.attributes?.alcohol);
+}
+
+function sanitizeCoupons(value) {
+  const source = Array.isArray(value) ? value.slice(0, 200) : [];
+  const codes = new Set();
+  const output = [];
+  for (const item of source) {
+    if (!item || typeof item !== 'object' || Array.isArray(item)) continue;
+    const code = cleanText(item.code, 40).toUpperCase().replace(/[^A-Z0-9_-]/g, '');
+    if (code.length < 3 || codes.has(code)) continue;
+    const type = COUPON_TYPES.has(item.type) ? item.type : '';
+    if (!type) continue;
+    let couponValue = 0;
+    if (type === 'percent') {
+      couponValue = integer(item.value, 0, 1, 100);
+      if (couponValue < 1) continue;
+    } else if (type === 'fixed') {
+      couponValue = integer(item.value, 0, 1, 100_000_000);
+      if (couponValue < 1) continue;
+    }
+    const expiresAt = cleanText(item.expiresAt, 40);
+    if (expiresAt && Number.isNaN(Date.parse(expiresAt))) continue;
+    codes.add(code);
+    output.push({
+      code,
+      type,
+      value: couponValue,
+      minSubtotalCents: integer(item.minSubtotalCents, 0, 0, 100_000_000),
+      expiresAt,
+      active: item.active !== false,
+      note: cleanText(item.note, 200)
+    });
+  }
+  return output;
+}
+
+export function findCoupon(catalog, code) {
+  const target = cleanText(code, 40).toUpperCase();
+  if (!target) return null;
+  return (catalog?.coupons || []).find(item => item.code === target) || null;
+}
+
+export function validateCoupon(coupon, {subtotalCents = 0, shippingChoice = '', shippingQuoted = false} = {}) {
+  if (!coupon || coupon.active === false) return {ok: false, error: 'Cupom inválido ou inativo.'};
+  if (coupon.expiresAt && Date.parse(coupon.expiresAt) < Date.now()) return {ok: false, error: 'Este cupom expirou.'};
+  if (coupon.minSubtotalCents > 0 && subtotalCents < coupon.minSubtotalCents) {
+    return {ok: false, error: `Este cupom exige pedido mínimo de ${reais(coupon.minSubtotalCents)}.`};
+  }
+  if (coupon.type === 'free_shipping') {
+    if (shippingChoice !== 'delivery') return {ok: false, error: 'Este cupom vale apenas para pedidos com entrega.'};
+    if (shippingQuoted) return {ok: false, error: 'Este cupom não se aplica a frete sob cotação.'};
+  }
+  return {ok: true, error: ''};
+}
+
+export function couponDiscount(coupon, subtotalCents, shippingPriceCents = 0) {
+  if (!coupon) return 0;
+  if (coupon.type === 'free_shipping') return Math.max(0, Math.min(Number(shippingPriceCents) || 0, 100_000_000));
+  let discount = 0;
+  if (coupon.type === 'percent') discount = Math.floor(subtotalCents * coupon.value / 100);
+  else if (coupon.type === 'fixed') discount = coupon.value;
+  return Math.max(0, Math.min(discount, Math.max(0, subtotalCents - 100)));
+}
+
 function sanitizeAttributes(value) {
   const source = value && typeof value === 'object' && !Array.isArray(value) ? value : {};
   const output = {};
@@ -249,12 +324,15 @@ export function normalizeCatalog(input) {
     version: integer(raw.version, 9, 1, 999),
     settings: sanitizeSettings(raw.settings),
     commerce: sanitizeCommerce(raw.commerce ?? raw.v8),
+    coupons: sanitizeCoupons(raw.coupons),
     products: normalizedProducts
   };
 }
 
 export function publicCatalog(catalog, serverConfig) {
   const result = normalizeCatalog(catalog);
+  delete result.coupons;
+  result.hasAlcohol = result.products.some(product => product.available !== false && isAlcoholicProduct(product));
   result.commerce.apiBaseUrl = '';
   result.commerce.apiMode = 'required';
   result.commerce.paymentMethods = {
@@ -388,8 +466,25 @@ export function buildOrder(payload, catalog, serverConfig) {
   }
 
   if (!Number.isSafeInteger(subtotalCents) || subtotalCents <= 0) throw new Error('Total do pedido inválido.');
+
+  const containsAlcohol = lines.some(line => isAlcoholicProduct(productsById.get(line.productId)));
+  if (containsAlcohol && payload.ageConfirmed !== true) {
+    throw new Error('Este pedido contém bebida alcoólica. É necessário confirmar que o comprador tem 18 anos ou mais.');
+  }
+
   const shipping = calculateShipping(payload.shipping || {}, subtotalCents, catalog.settings || {}, serverConfig);
-  const totalCents = subtotalCents + (shipping.priceCents ?? 0);
+
+  let coupon = null;
+  let discountCents = 0;
+  const couponCode = cleanText(payload.couponCode, 40).toUpperCase();
+  if (couponCode) {
+    coupon = findCoupon(catalog, couponCode);
+    const check = validateCoupon(coupon, {subtotalCents, shippingChoice: shipping.choice, shippingQuoted: shipping.quoted});
+    if (!check.ok) throw new Error(check.error || 'Cupom inválido.');
+    discountCents = couponDiscount(coupon, subtotalCents, shipping.priceCents ?? 0);
+  }
+
+  const totalCents = subtotalCents + (shipping.priceCents ?? 0) - discountCents;
   if (!Number.isSafeInteger(totalCents) || totalCents <= 0) throw new Error('Total do pedido inválido.');
   const email = cleanText(payload.customer?.email, 254);
   if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new Error('E-mail inválido.');
@@ -433,6 +528,10 @@ export function buildOrder(payload, catalog, serverConfig) {
     items: lines,
     subtotalCents,
     shippingCents: shipping.priceCents,
+    discountCents,
+    coupon: coupon ? {code: coupon.code, type: coupon.type, value: coupon.value} : null,
+    containsAlcohol,
+    ageConfirmed: containsAlcohol ? true : Boolean(payload.ageConfirmed),
     totalCents,
     requiresShippingQuote: shipping.quoted,
     payment: {provider: '', preferenceId: '', paymentId: '', status: '', statusDetail: '', attempt: 0},
