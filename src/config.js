@@ -33,7 +33,29 @@ export const config = Object.freeze({
   shippingMode: text('SHIPPING_MODE'),
   shippingFixedCents: int('SHIPPING_FIXED_CENTS', null),
   freeShippingCents: int('FREE_SHIPPING_CENTS', null),
-  trustProxy: bool('TRUST_PROXY', false)
+  trustProxy: bool('TRUST_PROXY', false),
+
+  // Correios (API de contrato / CWS)
+  correiosUser: text('CORREIOS_USER'),
+  correiosAccessCode: text('CORREIOS_ACCESS_CODE'),
+  correiosPostageCard: text('CORREIOS_POSTAGE_CARD'),
+  correiosContract: text('CORREIOS_CONTRACT'),
+  correiosOriginCep: text('CORREIOS_ORIGIN_CEP').replace(/\D/g, ''),
+  correiosServices: text('CORREIOS_SERVICES'),
+  correiosHomolog: bool('CORREIOS_HOMOLOG', false),
+  correiosBaseUrl: text('CORREIOS_BASE_URL'),
+
+  // E-mail transacional (SMTP)
+  smtpHost: text('SMTP_HOST'),
+  smtpPort: int('SMTP_PORT', 587) ?? 587,
+  smtpUser: text('SMTP_USER'),
+  smtpPassword: text('SMTP_PASSWORD'),
+  smtpFrom: text('SMTP_FROM'),
+  smtpFromName: text('SMTP_FROM_NAME', 'INTEGRALL'),
+  smtpSecure: bool('SMTP_SECURE', false),
+
+  // Expiração automática de pedidos não pagos (0 desativa)
+  orderExpireDays: Math.max(0, Math.min(90, int('ORDER_EXPIRE_DAYS', 7) ?? 7))
 });
 
 export function assertProductionConfig() {

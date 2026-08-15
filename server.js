@@ -9,6 +9,8 @@ import {Repository} from './src/repository.js';
 import {securityHeaders, adminAuth, rateLimit, safeEqual} from './src/security.js';
 import {MercadoPagoService, InvalidWebhookSignatureError} from './src/payments.js';
 import {evaluatePayment} from './src/payment-state.js';
+import {CorreiosService} from './src/correios.js';
+import {Mailer, orderEmail} from './src/mailer.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const publicDir = path.join(__dirname, 'public');
@@ -23,6 +25,36 @@ const mercadoPago = new MercadoPagoService({
   sandbox: config.mercadoPagoUseSandbox,
   expirationDays: config.mercadoPagoExpirationDays
 });
+const correios = new CorreiosService({
+  user: config.correiosUser,
+  accessCode: config.correiosAccessCode,
+  postageCard: config.correiosPostageCard,
+  contract: config.correiosContract,
+  originCep: config.correiosOriginCep,
+  services: config.correiosServices,
+  homolog: config.correiosHomolog,
+  baseUrl: config.correiosBaseUrl
+});
+const mailer = new Mailer({
+  host: config.smtpHost,
+  port: config.smtpPort,
+  user: config.smtpUser,
+  password: config.smtpPassword,
+  from: config.smtpFrom,
+  fromName: config.smtpFromName,
+  secure: config.smtpSecure
+});
+
+const EMAIL_STATUS_EVENTS = new Set(['paid', 'payment_failed', 'payment_expired', 'preparing', 'ready', 'completed', 'refunded', 'cancelled']);
+
+function sendOrderEmail(order, kind) {
+  if (!mailer.configured || !order?.customer?.email) return;
+  const businessName = 'INTEGRALL';
+  const message = orderEmail(order, {kind, publicUrl: config.publicUrl, businessName});
+  mailer.send({to: order.customer.email, ...message}).then(result => {
+    if (!result.ok) console.error(`E-mail não enviado (pedido ${order.id}): ${result.error}`);
+  }).catch(error => console.error(`E-mail não enviado (pedido ${order.id}):`, error));
+}
 
 const app = express();
 if (config.trustProxy) app.set('trust proxy', 1);
@@ -117,7 +149,10 @@ app.get('/api/health', asyncRoute(async (_req, res) => {
       orderTracking: true,
       inventoryOnPaid: true,
       shippingQuoteAdmin: true,
-      customers: true
+      customers: true,
+      correiosShipping: config.shippingMode === 'correios' && correios.configured,
+      transactionalEmail: mailer.configured,
+      orderAutoExpire: config.orderExpireDays > 0
     },
     time: new Date().toISOString()
   });
@@ -129,15 +164,71 @@ app.get('/api/catalog', asyncRoute(async (_req, res) => {
   res.json(publicCatalog(catalog, config));
 }));
 
+async function resolveCorreiosShipping(body, catalog) {
+  if (config.shippingMode !== 'correios' || !correios.configured) return null;
+  if (body?.shipping?.choice !== 'delivery') return null;
+  try {
+    const productsById = new Map(catalog.products.map(product => [product.id, product]));
+    const pack = correios.packOrder(Array.isArray(body.items) ? body.items : [], productsById);
+    const requestedService = cleanText(body?.shipping?.service, 20);
+    const result = await correios.quote(body.shipping.cep, pack);
+    const chosen = (requestedService && result.options.find(option => option.code === requestedService)) || result.cheapest;
+    return {
+      priceCents: chosen.priceCents,
+      label: `Correios ${chosen.label}`,
+      days: chosen.days != null ? `${chosen.days} dia(s) útil(eis)` : '',
+      service: chosen.code
+    };
+  } catch (error) {
+    console.error('Cotação Correios indisponível; pedido seguirá para cotação manual.', error?.message || error);
+    return null;
+  }
+}
+
+app.post('/api/shipping/quote', statusLimiter, publicJson, asyncRoute(async (req, res) => {
+  res.setHeader('Cache-Control', 'no-store');
+  if (config.shippingMode !== 'correios' || !correios.configured) {
+    return res.status(404).json({error: 'Cotação automática de frete não está habilitada.'});
+  }
+  const cep = cleanText(req.body?.cep, 10).replace(/\D/g, '');
+  if (cep.length !== 8) return res.status(400).json({error: 'Informe um CEP válido com 8 dígitos.'});
+  const items = Array.isArray(req.body?.items) ? req.body.items.slice(0, 100) : [];
+  if (!items.length) return res.status(400).json({error: 'Informe os itens do pedido.'});
+  const catalog = await repo.getCatalog();
+  const productsById = new Map(catalog.products.map(product => [product.id, product]));
+  const pack = correios.packOrder(items, productsById);
+  try {
+    const result = await correios.quote(cep, pack);
+    res.json({
+      options: result.options.map(option => ({
+        service: option.code,
+        label: option.label,
+        priceCents: option.priceCents,
+        days: option.days
+      }))
+    });
+  } catch (error) {
+    res.status(502).json({error: error?.message || 'Não foi possível cotar o frete agora.'});
+  }
+}));
+
 app.post('/api/orders', orderLimiter, publicJson, asyncRoute(async (req, res) => {
   const catalog = await repo.getCatalog();
   let order;
   try {
-    order = buildOrder(req.body, catalog, config);
+    // Segurança: 'resolved' é sempre descartado do corpo recebido e só é
+    // preenchido pela cotação server-side dos Correios.
+    const cleanShipping = {...(req.body?.shipping || {})};
+    delete cleanShipping.resolved;
+    const cleanBody = {...req.body, shipping: cleanShipping};
+    const resolved = await resolveCorreiosShipping(cleanBody, catalog);
+    const payload = resolved ? {...cleanBody, shipping: {...cleanShipping, resolved}} : cleanBody;
+    order = buildOrder(payload, catalog, config);
   } catch (error) {
     return res.status(400).json({error: error?.message || 'Pedido inválido.'});
   }
   const result = await repo.createOrder(order);
+  if (result.created) sendOrderEmail(result.order, 'created');
   res.status(result.created ? 201 : 200).json({
     order: {
       id: result.order.id,
@@ -233,7 +324,7 @@ app.post('/api/webhooks/mercadopago', webhookLimiter, publicJson, asyncRoute(asy
     return res.status(200).json({ok: true, ignored: true, ...(evaluation.warning ? {warning: evaluation.warning} : {})});
   }
 
-  await repo.updateOrder(order.id, {
+  const updated = await repo.updateOrder(order.id, {
     status: evaluation.nextStatus,
     payment: {
       provider: 'mercadopago',
@@ -248,6 +339,7 @@ app.post('/api/webhooks/mercadopago', webhookLimiter, publicJson, asyncRoute(asy
     source: 'mercadopago-webhook',
     note: `Pagamento atualizado para ${evaluation.paymentStatus || payment.status || 'desconhecido'}.`
   });
+  if (updated && order.status !== updated.status && EMAIL_STATUS_EVENTS.has(updated.status)) sendOrderEmail(updated, 'status');
   res.status(200).json({ok: true});
 }));
 
@@ -267,8 +359,10 @@ app.get('/api/admin/orders/:id', adminLimiter, admin, asyncRoute(async (req, res
 app.patch('/api/admin/orders/:id', adminLimiter, admin, publicJson, asyncRoute(async (req, res) => {
   const status = cleanText(req.body?.status, 30);
   if (!ORDER_STATUSES.includes(status)) return res.status(400).json({error: 'Status inválido.'});
+  const previous = await repo.getOrder(cleanText(req.params.id, 100));
   const order = await repo.updateOrder(cleanText(req.params.id, 100), {status}, {source: 'admin', note: cleanText(req.body?.note, 300) || 'Status alterado pelo painel administrativo.'});
   if (!order) return res.status(404).json({error: 'Pedido não encontrado.'});
+  if (previous?.status !== order.status && EMAIL_STATUS_EVENTS.has(order.status)) sendOrderEmail(order, 'status');
   res.json({order});
 }));
 
@@ -312,6 +406,7 @@ app.patch('/api/admin/orders/:id/tracking', adminLimiter, admin, publicJson, asy
     trackingCarrier,
     trackingUrl: trackingCode ? trackingUrl : ''
   }, {source: 'admin', note});
+  if (trackingCode && updated) sendOrderEmail(updated, 'status');
   res.json({order: updated});
 }));
 
@@ -319,6 +414,49 @@ app.get('/api/admin/customers', adminLimiter, admin, asyncRoute(async (req, res)
   const search = cleanText(req.query.search, 120);
   const customers = await repo.listCustomers({search, limit: Number(req.query.limit) || 300});
   res.json({customers});
+}));
+
+app.get('/api/admin/products', adminLimiter, admin, asyncRoute(async (_req, res) => {
+  const catalog = await repo.getCatalog();
+  res.json({products: catalog.products || []});
+}));
+
+app.patch('/api/admin/products/:id', adminLimiter, admin, publicJson, asyncRoute(async (req, res) => {
+  const productId = cleanText(req.params.id, 120);
+  const current = await repo.getCatalog();
+  const index = (current.products || []).findIndex(product => product.id === productId);
+  if (index < 0) return res.status(404).json({error: 'Produto não encontrado.'});
+
+  const patch = req.body && typeof req.body === 'object' && !Array.isArray(req.body) ? req.body : {};
+  const allowed = ['name', 'price', 'description', 'unit', 'stock', 'stockMin', 'maxPerOrder', 'minPerOrder',
+    'weightGrams', 'lengthCm', 'widthCm', 'heightCm', 'available', 'featured', 'department', 'subcategory', 'brand'];
+  const product = {...current.products[index]};
+  for (const key of allowed) {
+    if (key in patch) product[key] = patch[key];
+  }
+  if (Array.isArray(patch.variants)) {
+    const byId = new Map(patch.variants.filter(v => v && v.id).map(v => [v.id, v]));
+    product.variants = (product.variants || []).map(variant => {
+      const update = byId.get(variant.id);
+      if (!update) return variant;
+      const next = {...variant};
+      for (const key of ['name', 'price', 'stock', 'unit', 'weightGrams']) {
+        if (key in update) next[key] = update[key];
+      }
+      return next;
+    });
+  }
+
+  const nextProducts = [...current.products];
+  nextProducts[index] = product;
+  let next;
+  try {
+    next = normalizeCatalog({...current, products: nextProducts});
+  } catch (error) {
+    return res.status(400).json({error: error?.message || 'Produto inválido.'});
+  }
+  await repo.saveCatalog(next);
+  res.json({ok: true, product: next.products.find(item => item.id === productId)});
 }));
 
 app.get('/api/admin/coupons', adminLimiter, admin, asyncRoute(async (_req, res) => {
@@ -387,12 +525,25 @@ app.use((error, _req, res, _next) => {
   res.status(500).json({error: message});
 });
 
+let expireTimer = null;
+if (config.orderExpireDays > 0) {
+  const sweep = () => {
+    repo.expireStaleOrders(config.orderExpireDays)
+      .then(ids => { if (ids.length) console.log(`Pedidos expirados automaticamente: ${ids.join(', ')}`); })
+      .catch(error => console.error('Falha na expiração automática de pedidos:', error?.message || error));
+  };
+  expireTimer = setInterval(sweep, 6 * 60 * 60 * 1000);
+  expireTimer.unref();
+  setTimeout(sweep, 30_000).unref();
+}
+
 const server = app.listen(config.port, () => {
-  console.log(`INTEGRALL v9.2 em http://localhost:${config.port} (${repo.persistent ? 'PostgreSQL' : 'memória de desenvolvimento'})`);
+  console.log(`INTEGRALL v9.4 em http://localhost:${config.port} (${repo.persistent ? 'PostgreSQL' : 'memória de desenvolvimento'})`);
 });
 
 async function shutdown(signal) {
   console.log(`Encerrando (${signal})…`);
+  if (expireTimer) clearInterval(expireTimer);
   server.close(async () => {
     await repo.close();
     process.exit(0);

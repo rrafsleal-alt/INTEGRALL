@@ -67,3 +67,12 @@ html.age-locked{overflow:hidden}
 .order-tracking-box span{font-size:.62rem;color:var(--muted)}
 .order-tracking-box b{font-size:.8rem;color:var(--wine);word-break:break-all}
 .order-tracking-box a{font-size:.7rem;color:var(--wine);text-decoration:underline;text-underline-offset:3px}
+
+/* ===== Opções de frete Correios ===== */
+.correios-options{display:grid;gap:8px;padding:12px;border:1px solid var(--line);background:var(--sand)}
+.correios-options[hidden]{display:none}
+.correios-options>strong{font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--wine)}
+.correios-option{display:flex;gap:9px;align-items:center;padding:8px 10px;border:1px solid var(--line);background:#fff;font-size:.72rem;cursor:pointer}
+.correios-option input{accent-color:var(--wine)}
+.correios-option small{color:var(--muted)}
+.correios-note{margin:0;font-size:.68rem;color:var(--muted);line-height:1.5}

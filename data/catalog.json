@@ -166,7 +166,8 @@
           "price": 1150,
           "stock": 1000,
           "unit": "",
-          "position": 1
+          "position": 1,
+          "weightGrams": 550
         },
         {
           "id": "variant-1786125277805-0nrmsu",
@@ -174,7 +175,8 @@
           "price": 2390,
           "stock": 1000,
           "unit": "",
-          "position": 2
+          "position": 2,
+          "weightGrams": 1600
         }
       ],
       "attributes": {
@@ -197,7 +199,10 @@
       "position": 1,
       "created": 1786125158091,
       "updated": 1786125308896,
-      "deletedAt": null
+      "deletedAt": null,
+      "lengthCm": 9,
+      "widthCm": 9,
+      "heightCm": 32
     },
     {
       "id": "product-1786125523055-ivln6v",
@@ -222,7 +227,8 @@
           "price": 2699,
           "stock": 1000,
           "unit": "",
-          "position": 1
+          "position": 1,
+          "weightGrams": 1300
         },
         {
           "id": "variant-1786125496593-h1h204",
@@ -230,7 +236,8 @@
           "price": 2150,
           "stock": 1000,
           "unit": "",
-          "position": 2
+          "position": 2,
+          "weightGrams": 750
         }
       ],
       "attributes": {
@@ -253,7 +260,10 @@
       "position": 2,
       "created": 1786125523055,
       "updated": 1786125523055,
-      "deletedAt": null
+      "deletedAt": null,
+      "lengthCm": 9,
+      "widthCm": 9,
+      "heightCm": 31
     },
     {
       "id": "product-1786125594468-rlk598",
@@ -290,7 +300,12 @@
       "position": 3,
       "created": 1786125594468,
       "updated": 1786125594468,
-      "deletedAt": null
+      "deletedAt": null,
+      "weightGrams": 2200,
+      "lengthCm": 35,
+      "widthCm": 25,
+      "heightCm": 12,
+      "minPerOrder": 2
     },
     {
       "id": "product-1786125689329-bqbvu9",
@@ -328,7 +343,11 @@
       "position": 4,
       "created": 1786125689329,
       "updated": 1786125689329,
-      "deletedAt": null
+      "deletedAt": null,
+      "weightGrams": 300,
+      "lengthCm": 18,
+      "widthCm": 8,
+      "heightCm": 26
     },
     {
       "id": "product-1786125745701-ydcfi8",
@@ -364,19 +383,23 @@
       "position": 5,
       "created": 1786125745701,
       "updated": 1786125745701,
-      "deletedAt": null
+      "deletedAt": null,
+      "weightGrams": 1300,
+      "lengthCm": 9,
+      "widthCm": 9,
+      "heightCm": 31
     }
   ],
   "commerce": {
-    "businessName": "",
+    "businessName": "INTEGRALL | Boutique Gourmet",
     "siteUrl": "",
     "taxId": "",
     "businessAddress": "",
     "supportEmail": "",
     "supportPhone": "",
-    "privacyText": "",
-    "termsText": "",
-    "returnsText": "",
+    "privacyText": "POLÍTICA DE PRIVACIDADE\n\nA INTEGRALL coleta apenas os dados necessários para processar o seu pedido: nome, contato (e-mail ou telefone) e, quando houver entrega, o endereço. Esses dados são usados exclusivamente para: registrar e entregar o pedido, emitir comunicações sobre o próprio pedido e cumprir obrigações fiscais.\n\nNão vendemos nem compartilhamos seus dados com terceiros para fins de marketing. Os dados de pagamento são processados diretamente pelo provedor de pagamento (Mercado Pago) em ambiente próprio — a INTEGRALL não armazena números de cartão.\n\nConforme a Lei Geral de Proteção de Dados (Lei nº 13.709/2018), você pode solicitar a qualquer momento acesso, correção ou exclusão dos seus dados pelo nosso canal de atendimento. Os registros de pedidos são retidos pelo prazo necessário ao cumprimento de obrigações legais e fiscais.",
+    "termsText": "TERMOS DE USO\n\n1. Os preços, promoções, disponibilidade de estoque e prazos exibidos na loja podem ser atualizados sem aviso prévio; o valor válido é o confirmado no fechamento do pedido.\n\n2. A venda de bebidas alcoólicas é proibida para menores de 18 anos (Lei nº 13.106/2015). Ao comprar produtos alcoólicos, o cliente declara ser maior de idade, e a idade poderá ser conferida na entrega ou retirada mediante documento.\n\n3. O pedido é confirmado após o registro no sistema; o pagamento online, quando disponível, é processado pelo Mercado Pago em ambiente seguro.\n\n4. Para entregas via Correios, o prazo informado é uma estimativa da transportadora e começa a contar após a confirmação do pagamento e a postagem do pedido.\n\n5. Casos omissos serão tratados pelo canal de atendimento da loja.",
+    "returnsText": "TROCAS, DEVOLUÇÕES E CANCELAMENTOS\n\nDireito de arrependimento (art. 49 do Código de Defesa do Consumidor): em compras realizadas fora do estabelecimento comercial, você pode desistir da compra em até 7 (sete) dias corridos a partir do recebimento do produto, com devolução integral do valor pago, desde que o produto esteja lacrado e em condições de revenda.\n\nProdutos com avaria, violação ou erro de envio: comunique o ocorrido em até 7 dias pelo canal de atendimento, com fotos, informando o número do pedido. Faremos a substituição ou o reembolso integral, incluindo o frete.\n\nPor se tratar de produtos alimentícios e bebidas, não aceitamos devolução de itens abertos ou parcialmente consumidos, salvo em caso de vício de qualidade.\n\nCancelamentos antes do envio podem ser solicitados a qualquer momento pelo canal de atendimento com estorno integral.",
     "retentionDays": 90,
     "pixKey": "",
     "paymentLink": "",

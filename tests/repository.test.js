@@ -49,3 +49,20 @@ test('repositório consolida cliente e baixa estoque exatamente uma vez ao confi
   await repo.updateOrder(order.id,{status:'preparing'},{source:'test'});
   assert.equal((await repo.getCatalog()).products[0].stock,3);
 });
+
+test('pedidos antigos sem pagamento expiram; pedidos pagos nunca expiram', async () => {
+  const repo = new Repository({databaseUrl: '', initialCatalog: {version: 9, settings: {}, commerce: {}, products: []}, production: false});
+  await repo.init();
+  const old = new Date(Date.now() - 10 * 86_400_000).toISOString();
+  const base = {clientOrderId: '', createdAt: old, updatedAt: old, customer: {name: 'X', email: 'x@x.com'}, items: [], subtotalCents: 1000, shippingCents: 0, totalCents: 1000, payment: {}};
+  await repo.createOrder({...base, id: 'OLD-RECEIVED', clientOrderId: 'c1', status: 'received'});
+  await repo.createOrder({...base, id: 'OLD-PAID', clientOrderId: 'c2', status: 'paid'});
+  await repo.createOrder({...base, id: 'NEW-RECEIVED', clientOrderId: 'c3', status: 'received', createdAt: new Date().toISOString()});
+  const expired = await repo.expireStaleOrders(7);
+  assert.deepEqual(expired.sort(), ['OLD-RECEIVED']);
+  assert.equal((await repo.getOrder('OLD-RECEIVED')).status, 'cancelled');
+  assert.equal((await repo.getOrder('OLD-PAID')).status, 'paid');
+  assert.equal((await repo.getOrder('NEW-RECEIVED')).status, 'received');
+  const zero = await repo.expireStaleOrders(0);
+  assert.deepEqual(zero, []);
+});

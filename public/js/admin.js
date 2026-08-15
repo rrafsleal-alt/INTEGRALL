@@ -11,6 +11,8 @@
   let catalog = null;
   let activeOrder = null;
   let coupons = [];
+  let products = [];
+  let activeProduct = null;
 
   const money = cents => new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format((Number(cents)||0)/100);
   const dateTime = value => { try { return value ? new Date(value).toLocaleString('pt-BR') : '—'; } catch { return '—'; } };
@@ -183,6 +185,105 @@
     } catch(error){setFeedback($('#dialogFeedback'),error.message,'bad')} finally{button.disabled=false}
   }
 
+  function renderProducts() {
+    const body=$('#productsBody'); if(!body)return; body.replaceChildren();
+    for (const product of products) {
+      const tr=document.createElement('tr');
+      const nameCell=makeCell(); const strong=document.createElement('strong'); strong.textContent=product.name; nameCell.append(strong);
+      if(!product.weightGrams && !(product.variants||[]).some(v=>v.weightGrams)){const warn=document.createElement('div');warn.className='pf-missing';warn.textContent='sem peso p/ frete';nameCell.append(warn)}
+      tr.append(nameCell);
+      const priceLabel=(product.variants||[]).length
+        ? (()=>{const prices=product.variants.map(v=>Number(v.price)||0);const min=Math.min(...prices);const max=Math.max(...prices);return min===max?money(min):`${money(min)} – ${money(max)}`})()
+        : money(product.price);
+      tr.append(makeCell(priceLabel));
+      const stockLabel=(product.variants||[]).length
+        ? product.variants.map(v=>`${v.name}: ${v.stock==null?'—':v.stock}`).join(' • ')
+        : (product.stock==null?'Sem controle':String(product.stock));
+      tr.append(makeCell(stockLabel));
+      const weightLabel=(product.variants||[]).some(v=>v.weightGrams)
+        ? product.variants.map(v=>`${v.name}: ${v.weightGrams?`${v.weightGrams}g`:'—'}`).join(' • ')
+        : (product.weightGrams?`${product.weightGrams}g`:'—');
+      tr.append(makeCell(weightLabel));
+      tr.append(makeCell(product.available===false?'Não':'Sim'));
+      const action=makeCell(); const button=document.createElement('button'); button.type='button'; button.className='row-button'; button.textContent='Editar'; button.dataset.productId=product.id; action.append(button); tr.append(action);
+      body.append(tr);
+    }
+  }
+
+  async function loadProducts() {
+    try { const data=await request('/api/admin/products'); products=Array.isArray(data.products)?data.products:[]; renderProducts(); }
+    catch(error){setFeedback($('#productsFeedback'),error.message,'bad')}
+  }
+
+  function intOrNull(value){const t=String(value||'').trim();if(!t)return null;const n=Number(t);return Number.isFinite(n)&&n>=0?Math.round(n):null}
+
+  function openProductDialog(product) {
+    activeProduct=product;
+    $('#productDialogTitle').textContent=product.name;
+    $('#pfName').value=product.name||'';
+    $('#pfPrice').value=(Number(product.price)/100).toFixed(2).replace('.',',');
+    $('#pfUnit').value=product.unit||'';
+    $('#pfStock').value=product.stock==null?'':product.stock;
+    $('#pfMinPerOrder').value=product.minPerOrder==null?'':product.minPerOrder;
+    $('#pfMaxPerOrder').value=product.maxPerOrder==null?'':product.maxPerOrder;
+    $('#pfWeight').value=product.weightGrams==null?'':product.weightGrams;
+    $('#pfLength').value=product.lengthCm==null?'':product.lengthCm;
+    $('#pfWidth').value=product.widthCm==null?'':product.widthCm;
+    $('#pfHeight').value=product.heightCm==null?'':product.heightCm;
+    $('#pfAvailable').checked=product.available!==false;
+    $('#pfFeatured').checked=product.featured===true;
+    $('#pfDescription').value=product.description||'';
+    const variantsRoot=$('#pfVariants'); variantsRoot.replaceChildren();
+    for (const variant of product.variants||[]) {
+      const box=document.createElement('div'); box.className='pf-variant'; box.dataset.variantId=variant.id;
+      const title=document.createElement('div'); title.className='pf-variant-title'; title.textContent=`Variante: ${variant.name}`; box.append(title);
+      const fields=[['Nome','name',variant.name||''],['Preço (R$)','price',(Number(variant.price)/100).toFixed(2).replace('.',',')],['Estoque','stock',variant.stock==null?'':variant.stock],['Peso (g)','weightGrams',variant.weightGrams==null?'':variant.weightGrams]];
+      for (const [labelText,key,value] of fields) {
+        const label=document.createElement('label'); label.textContent=labelText;
+        const input=document.createElement('input'); input.dataset.variantField=key; input.value=value;
+        label.append(input); box.append(label);
+      }
+      variantsRoot.append(box);
+    }
+    setFeedback($('#productDialogFeedback'),'');
+    $('#productDialog').showModal();
+  }
+
+  async function saveProduct(event) {
+    event.preventDefault();
+    if(!activeProduct?.id)return;
+    const button=$('#productForm button[type="submit"]'); button.disabled=true;
+    try {
+      const price=parseReais($('#pfPrice').value);
+      if(price==null)throw new Error('Informe um preço válido, por exemplo 21,50.');
+      const patch={
+        name:$('#pfName').value.trim(),
+        price,
+        unit:$('#pfUnit').value.trim(),
+        description:$('#pfDescription').value.trim(),
+        stock:intOrNull($('#pfStock').value),
+        minPerOrder:intOrNull($('#pfMinPerOrder').value),
+        maxPerOrder:intOrNull($('#pfMaxPerOrder').value),
+        weightGrams:intOrNull($('#pfWeight').value),
+        lengthCm:intOrNull($('#pfLength').value),
+        widthCm:intOrNull($('#pfWidth').value),
+        heightCm:intOrNull($('#pfHeight').value),
+        available:$('#pfAvailable').checked,
+        featured:$('#pfFeatured').checked
+      };
+      const variants=[...document.querySelectorAll('#pfVariants .pf-variant')].map(box=>{
+        const get=key=>box.querySelector(`[data-variant-field="${key}"]`)?.value ?? '';
+        const variantPrice=parseReais(get('price'));
+        if(variantPrice==null)throw new Error(`Preço inválido na variante ${get('name')||box.dataset.variantId}.`);
+        return {id:box.dataset.variantId,name:get('name').trim(),price:variantPrice,stock:intOrNull(get('stock')),weightGrams:intOrNull(get('weightGrams'))};
+      });
+      if(variants.length)patch.variants=variants;
+      await request(`/api/admin/products/${encodeURIComponent(activeProduct.id)}`,{method:'PATCH',body:JSON.stringify(patch)});
+      setFeedback($('#productDialogFeedback'),'Produto salvo.','ok');
+      await Promise.all([loadProducts(),loadCatalog()]);
+    } catch(error){setFeedback($('#productDialogFeedback'),error.message,'bad')} finally{button.disabled=false}
+  }
+
   function couponTypeLabel(type){return type==='percent'?'Porcentagem':type==='fixed'?'Valor fixo':'Frete grátis'}
   function couponValueLabel(coupon){
     if(coupon.type==='percent')return `${coupon.value}%`;
@@ -259,7 +360,7 @@
     catch(error){sessionStorage.removeItem(TOKEN_KEY);setFeedback($('#loginFeedback'),error.message,'bad')}
   }
 
-  async function loadAll() { await Promise.all([loadOrders(),loadCustomers(),loadCatalog(),loadCoupons(),checkHealth()]); }
+  async function loadAll() { await Promise.all([loadOrders(),loadCustomers(),loadCatalog(),loadCoupons(),loadProducts(),checkHealth()]); }
 
   function bind() {
     $('#loginForm').addEventListener('submit',login);
@@ -269,6 +370,9 @@
     let customerTimer; $('#customerSearch')?.addEventListener('input',()=>{clearTimeout(customerTimer);customerTimer=setTimeout(loadCustomers,300)});
     $('#ordersBody').addEventListener('click',event=>{const button=event.target.closest('[data-order-id]');if(button)openOrder(button.dataset.orderId)});
     $('#closeDialog').addEventListener('click',()=>$('#orderDialog').close()); $('#saveStatusButton').addEventListener('click',saveStatus); $('#saveShippingButton').addEventListener('click',saveShipping); $('#saveTrackingButton').addEventListener('click',saveTracking);
+    $('#productsBody')?.addEventListener('click',event=>{const button=event.target.closest('[data-product-id]');if(!button)return;const product=products.find(p=>p.id===button.dataset.productId);if(product)openProductDialog(product)});
+    $('#productForm')?.addEventListener('submit',saveProduct);
+    $('#closeProductDialog')?.addEventListener('click',()=>$('#productDialog').close());
     $('#couponForm')?.addEventListener('submit',addCoupon);
     $('#couponType')?.addEventListener('change',()=>{const type=$('#couponType').value;const label=$('#couponValueLabel');const input=$('#couponValue');if(type==='free_shipping'){label.style.opacity='.45';input.disabled=true;input.value=''}else{label.style.opacity='';input.disabled=false;input.placeholder=type==='percent'?'10':'10,00'}});
     $('#couponsBody')?.addEventListener('click',event=>{

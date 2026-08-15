@@ -10,6 +10,10 @@
   let memoryAttempt = null;
   let activeTrackedOrder = null;
   let appliedCoupon = null;
+  let correiosOptions = [];
+  let correiosSelected = '';
+  let correiosQuoteTimer = null;
+  let correiosLastKey = '';
 
   const STATUS_LABELS = Object.freeze({
     received: 'Pedido recebido',
@@ -316,6 +320,108 @@
     }
   }
 
+  function correiosEnabled() {
+    return Boolean(globalThis.__integrallPublicHealth?.features?.correiosShipping);
+  }
+
+  function correiosBox() {
+    let box = $('#correiosOptions');
+    if (box) return box;
+    const anchor = $('#deliveryAddressFields');
+    if (!anchor) return null;
+    box = document.createElement('div');
+    box.id = 'correiosOptions';
+    box.className = 'correios-options';
+    box.hidden = true;
+    anchor.after(box);
+    box.addEventListener('change', event => {
+      if (event.target?.name === 'correiosService') {
+        correiosSelected = event.target.value;
+        syncDiscountRow();
+      }
+    });
+    return box;
+  }
+
+  function renderCorreiosOptions(message) {
+    const box = correiosBox();
+    if (!box) return;
+    box.replaceChildren();
+    const app = globalThis.__integrallApp;
+    const delivery = app?.getState?.()?.checkout?.choice === 'delivery';
+    if (!correiosEnabled() || !delivery) { box.hidden = true; return; }
+    box.hidden = false;
+    const title = document.createElement('strong');
+    title.textContent = 'Frete Correios';
+    box.append(title);
+    if (message) {
+      const note = document.createElement('p');
+      note.className = 'correios-note';
+      note.textContent = message;
+      box.append(note);
+      return;
+    }
+    for (const option of correiosOptions) {
+      const label = document.createElement('label');
+      label.className = 'correios-option';
+      const input = document.createElement('input');
+      input.type = 'radio';
+      input.name = 'correiosService';
+      input.value = option.service;
+      input.checked = option.service === correiosSelected;
+      const copy = document.createElement('span');
+      const name = document.createElement('b');
+      name.textContent = `${option.label} — ${formatMoney(option.priceCents)}`;
+      copy.append(name);
+      if (option.days != null) {
+        const small = document.createElement('small');
+        small.textContent = ` até ${option.days} dia(s) útil(eis)`;
+        copy.append(small);
+      }
+      label.append(input, copy);
+      box.append(label);
+    }
+  }
+
+  async function refreshCorreiosQuote() {
+    if (!correiosEnabled()) return;
+    const app = globalThis.__integrallApp;
+    const state = app?.getState?.();
+    if (state?.checkout?.choice !== 'delivery') { renderCorreiosOptions(); return; }
+    const cep = digits(state?.checkout?.cep).slice(0, 8);
+    const items = (app?.cartDetails?.() || []).map(item => ({
+      productId: item.product.id,
+      variantId: item.variantId || '',
+      qty: Math.max(1, Number(item.qty) || 1)
+    }));
+    if (cep.length !== 8 || !items.length) { renderCorreiosOptions('Informe o CEP para calcular o frete.'); return; }
+    const key = `${cep}|${JSON.stringify(items)}`;
+    if (key === correiosLastKey && correiosOptions.length) { renderCorreiosOptions(); return; }
+    renderCorreiosOptions('Calculando frete…');
+    try {
+      const response = await globalThis.IntegrallApi.request('/api/shipping/quote', {
+        method: 'POST',
+        body: JSON.stringify({cep, items})
+      });
+      correiosOptions = Array.isArray(response.options) ? response.options : [];
+      correiosLastKey = key;
+      if (!correiosOptions.some(option => option.service === correiosSelected)) {
+        correiosSelected = correiosOptions[0]?.service || '';
+      }
+      renderCorreiosOptions(correiosOptions.length ? '' : 'Nenhuma opção de frete disponível para este CEP.');
+    } catch (error) {
+      correiosOptions = [];
+      correiosLastKey = '';
+      renderCorreiosOptions(error?.message || 'Não foi possível calcular o frete agora. O pedido pode ser registrado com frete a confirmar.');
+    }
+  }
+
+  function scheduleCorreiosQuote() {
+    if (!correiosEnabled()) return;
+    clearTimeout(correiosQuoteTimer);
+    correiosQuoteTimer = setTimeout(refreshCorreiosQuote, 400);
+  }
+
   function syncAddressVisibility() {
     const app = globalThis.__integrallApp;
     const box = $('#deliveryAddressFields');
@@ -338,6 +444,7 @@
       shipping: {
         choice: state.checkout?.choice || '',
         cep: digits(state.checkout?.cep).slice(0, 8),
+        service: correiosEnabled() ? cleanText(correiosSelected, 20) : '',
         street: cleanText($('#deliveryStreet')?.value, 180),
         number: cleanText($('#deliveryNumber')?.value, 40),
         complement: cleanText($('#deliveryComplement')?.value, 120),
@@ -690,6 +797,14 @@
 
   function refreshConfig() { renderPaymentMethods(); }
 
+  async function loadPublicHealth() {
+    try {
+      const health = await globalThis.IntegrallApi.request('/api/health');
+      globalThis.__integrallPublicHealth = health;
+      if (health?.features?.correiosShipping) scheduleCorreiosQuote();
+    } catch {}
+  }
+
   function init() {
     injectAccessibility();
     bindLegalLinks();
@@ -697,16 +812,18 @@
     renderPaymentMethods();
     syncAddressVisibility();
     syncAgeConfirm();
+    loadPublicHealth();
     document.addEventListener('click', handleCheckout, true);
     $('#trackLastOrder')?.addEventListener('click', async () => {
       try { await fetchOrderStatus(); }
       catch (error) { notify(error?.message || 'Nenhum pedido desta sessão para acompanhar.', 'bad'); }
     });
-    document.addEventListener('change', event => { if (event.target?.name === 'shippingChoice') setTimeout(() => { syncAddressVisibility(); syncDiscountRow(); }, 0); });
+    document.addEventListener('change', event => { if (event.target?.name === 'shippingChoice') setTimeout(() => { syncAddressVisibility(); syncDiscountRow(); scheduleCorreiosQuote(); }, 0); });
+    document.addEventListener('input', event => { if (event.target?.id === 'modalCep') scheduleCorreiosQuote(); });
     $('#couponApply')?.addEventListener('click', applyCoupon);
     $('#couponInput')?.addEventListener('keydown', event => { if (event.key === 'Enter') { event.preventDefault(); applyCoupon(); } });
     $('#couponInput')?.addEventListener('input', () => { if (appliedCoupon) { clearCoupon(true); couponFeedback('Cupom alterado — clique em Aplicar para validar.', ''); } });
-    const cartObserver = new MutationObserver(() => { syncAgeConfirm(); syncDiscountRow(); });
+    const cartObserver = new MutationObserver(() => { syncAgeConfirm(); syncDiscountRow(); scheduleCorreiosQuote(); });
     const cartList = $('#cartList');
     if (cartList) cartObserver.observe(cartList, {childList: true, subtree: true});
     const totals = $('#cartTotal');

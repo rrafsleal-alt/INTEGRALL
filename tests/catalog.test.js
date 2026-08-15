@@ -281,3 +281,62 @@ test('cupom de frete grátis desconta exatamente o frete calculado', () => {
     couponCode: 'FRETEGRATIS'
   }, withCoupons, baseConfig), /entrega/);
 });
+
+test('quantidade mínima por produto é validada no servidor', () => {
+  const withMin = structuredClone(catalog);
+  const target = withMin.products.find(product => product.name === 'Mentirinha') || withMin.products[2];
+  target.minPerOrder = 2;
+  assert.throws(() => buildOrder({
+    clientOrderId: 'MIN-1',
+    customer: {name: 'Cliente', email: 'cliente@example.com'},
+    shipping: {choice: 'pickup'},
+    items: [{productId: target.id, qty: 1}]
+  }, withMin, baseConfig), /mínima/i);
+  const ok = buildOrder({
+    clientOrderId: 'MIN-2',
+    customer: {name: 'Cliente', email: 'cliente@example.com'},
+    shipping: {choice: 'pickup'},
+    items: [{productId: target.id, qty: 2}]
+  }, withMin, baseConfig);
+  assert.equal(ok.items[0].qty, 2);
+});
+
+test('peso e dimensões são normalizados no catálogo', () => {
+  const normalized = normalizeCatalog({
+    ...raw,
+    products: raw.products.map((product, index) => index ? product : {
+      ...product,
+      weightGrams: 1234.7,
+      lengthCm: 200,           // acima do limite -> 100
+      widthCm: 0,              // abaixo do mínimo -> vira 1..100 clamp
+      heightCm: 'quinze',      // inválido -> null? (fallback 0 -> clamp 1)
+      variants: (product.variants || []).map(variant => ({...variant, weightGrams: 550}))
+    })
+  });
+  const product = normalized.products[0];
+  assert.equal(product.weightGrams, 1235);
+  assert.equal(product.lengthCm, 100);
+  assert.ok(product.variants.every(variant => variant.weightGrams === 550));
+});
+
+test('modo correios usa cotação resolvida pelo servidor e cai para cotação manual sem ela', () => {
+  const correiosConfig = {...baseConfig, shippingMode: 'correios'};
+  const resolved = calculateShipping({
+    choice: 'delivery', cep: '01310930',
+    resolved: {priceCents: 2850, label: 'Correios PAC', days: 6, service: '03298'}
+  }, 10000, catalog.settings, correiosConfig);
+  assert.equal(resolved.priceCents, 2850);
+  assert.equal(resolved.quoted, false);
+  assert.match(resolved.label, /PAC/);
+
+  const fallback = calculateShipping({choice: 'delivery', cep: '01310930'}, 10000, catalog.settings, correiosConfig);
+  assert.equal(fallback.priceCents, null);
+  assert.equal(fallback.quoted, true);
+});
+
+test('frete grátis por limiar vence o modo correios', () => {
+  const correiosConfig = {...baseConfig, shippingMode: 'correios', freeShippingCents: 9000};
+  const free = calculateShipping({choice: 'delivery', cep: '01310930', resolved: {priceCents: 2850, label: 'PAC'}}, 10000, catalog.settings, correiosConfig);
+  assert.equal(free.priceCents, 0);
+  assert.equal(free.label, 'Frete grátis');
+});

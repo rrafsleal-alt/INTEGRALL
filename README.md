@@ -18,6 +18,26 @@ Loja da **INTEGRALL | Boutique Gourmet** com catálogo, carrinho, pedidos server
 
 O WhatsApp **não participa automaticamente do checkout**. Se um número de atendimento for configurado, ele é usado apenas como opção manual de suporte.
 
+## Novidades v9.4
+
+- **Frete Correios (API de contrato/CWS)**: cálculo automático de PAC/SEDEX no checkout com peso/dimensões reais dos produtos, prazo estimado, escolha de serviço pelo cliente e fallback para cotação manual se a API estiver indisponível. Ative com `SHIPPING_MODE=correios` + credenciais `CORREIOS_*` (ver `.env.example`).
+- **E-mail transacional (SMTP)**: confirmação de pedido, mudanças de status importantes (pago, preparando, pronto, enviado com rastreio, cancelado) — SMTP puro sem dependências novas; compatível com Gmail/Brevo/SES. Configure `SMTP_*`.
+- **Editor de produtos no Admin**: preço, estoque, descrição, mínimo/máximo por pedido, peso e dimensões (usados no frete) — sem editar JSON.
+- **Quantidade mínima por produto** validada no servidor (ex.: Mentirinha, mínimo 2 caixas).
+- **Expiração automática** de pedidos sem pagamento após `ORDER_EXPIRE_DAYS` dias (padrão 7; nunca toca pedidos pagos).
+- **Textos legais reais** (LGPD, CDC art. 49, Lei 13.106/2015) preenchidos no catálogo.
+- **SEO corrigido**: preços saíram do HTML estático (fonte única: catálogo do servidor).
+
+Novas rotas: `POST /api/shipping/quote` (pública), `GET /api/admin/products`, `PATCH /api/admin/products/:id`.
+
+### Ativando os Correios (contrato)
+
+1. No CWS (`https://cws.correios.com.br`), gere o **código de acesso a APIs** (menu Gestão de acesso a APIs).
+2. Preencha `CORREIOS_USER` (usuário Meu Correios), `CORREIOS_ACCESS_CODE`, `CORREIOS_POSTAGE_CARD` (cartão de postagem), `CORREIOS_ORIGIN_CEP` e `SHIPPING_MODE=correios`.
+3. Os códigos de serviço padrão são `03298` (PAC contrato) e `03220` (SEDEX contrato); ajuste `CORREIOS_SERVICES` conforme seu contrato.
+4. Cadastre **peso e dimensões** dos produtos no Admin (painel Produtos) — sem peso, o pedido cai para cotação manual.
+5. Para testar sem cobrar, use `CORREIOS_HOMOLOG=true` (ambiente `apihom`).
+
 ## Novidades v9.3
 
 - **Verificação de idade (18+)**: aviso bloqueante na entrada da loja (Lei nº 13.106/2015), lembrado por 30 dias; pedidos com bebida alcoólica exigem confirmação de maioridade também no checkout e são **rejeitados pelo servidor** sem ela; aviso legal fixo no rodapé.

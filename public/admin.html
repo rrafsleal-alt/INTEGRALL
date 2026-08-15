@@ -96,6 +96,19 @@
         <p class="empty" id="customersEmpty" hidden>Nenhum cliente encontrado.</p>
       </section>
 
+      <section class="panel" aria-labelledby="productsTitle">
+        <div class="panel-head">
+          <div><h2 id="productsTitle">Produtos</h2><p>Edite preço, estoque, peso e dimensões sem mexer em JSON. Peso e dimensões são usados pelo cálculo de frete dos Correios.</p></div>
+        </div>
+        <p class="feedback" id="productsFeedback" role="status" aria-live="polite"></p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Produto</th><th>Preço</th><th>Estoque</th><th>Peso</th><th>Disponível</th><th></th></tr></thead>
+            <tbody id="productsBody"></tbody>
+          </table>
+        </div>
+      </section>
+
       <section class="panel" aria-labelledby="couponsTitle">
         <div class="panel-head">
           <div><h2 id="couponsTitle">Cupons de desconto</h2><p>Os cupons são validados e aplicados exclusivamente pelo servidor. Códigos aceitam letras, números, hífen e sublinhado.</p></div>
@@ -139,6 +152,32 @@
       </section>
     </section>
   </main>
+
+  <dialog id="productDialog">
+    <div class="dialog-head"><h2 id="productDialogTitle">Produto</h2><button class="icon-button" id="closeProductDialog" type="button" aria-label="Fechar">✕</button></div>
+    <form class="product-form" id="productForm">
+      <div class="product-form-grid">
+        <label>Nome<input id="pfName" maxlength="160" required></label>
+        <label>Preço base (R$)<input id="pfPrice" inputmode="decimal" required></label>
+        <label>Unidade / descrição curta<input id="pfUnit" maxlength="120"></label>
+        <label>Estoque (vazio = sem controle)<input id="pfStock" inputmode="numeric"></label>
+        <label>Mín. por pedido<input id="pfMinPerOrder" inputmode="numeric" placeholder="1"></label>
+        <label>Máx. por pedido<input id="pfMaxPerOrder" inputmode="numeric" placeholder="999"></label>
+        <label>Peso (g) — p/ frete<input id="pfWeight" inputmode="numeric" placeholder="Ex.: 1300"></label>
+        <label>Comprimento (cm)<input id="pfLength" inputmode="numeric" placeholder="Ex.: 30"></label>
+        <label>Largura (cm)<input id="pfWidth" inputmode="numeric" placeholder="Ex.: 12"></label>
+        <label>Altura (cm)<input id="pfHeight" inputmode="numeric" placeholder="Ex.: 12"></label>
+        <label class="pf-check"><input id="pfAvailable" type="checkbox"> Disponível na loja</label>
+        <label class="pf-check"><input id="pfFeatured" type="checkbox"> Produto em destaque</label>
+      </div>
+      <label>Descrição<textarea id="pfDescription" maxlength="3000" rows="4" placeholder="História do produto, produtor, harmonização…"></textarea></label>
+      <div id="pfVariants"></div>
+      <div class="dialog-actions">
+        <button class="button primary" type="submit">Salvar produto</button>
+        <p class="feedback" id="productDialogFeedback" role="status" aria-live="polite"></p>
+      </div>
+    </form>
+  </dialog>
 
   <dialog id="orderDialog">
     <div class="dialog-head"><h2 id="dialogTitle">Pedido</h2><button class="icon-button" id="closeDialog" type="button" aria-label="Fechar">✕</button></div>

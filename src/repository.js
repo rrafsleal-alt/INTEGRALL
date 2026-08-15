@@ -339,6 +339,41 @@ export class Repository {
     return rows.map(row => row.data);
   }
 
+  /**
+   * Cancela pedidos sem pagamento criados há mais de `days` dias.
+   * Considera apenas estados pré-financeiros; nunca toca pedidos pagos.
+   */
+  async expireStaleOrders(days) {
+    const cutoffMs = Number(days) * 86_400_000;
+    if (!Number.isFinite(cutoffMs) || cutoffMs <= 0) return [];
+    const cutoff = new Date(Date.now() - cutoffMs).toISOString();
+    const staleStatuses = ['received', 'awaiting_payment', 'payment_failed', 'payment_expired'];
+    const expired = [];
+
+    if (!this.pool) {
+      for (const [id, order] of this.memoryOrders) {
+        if (staleStatuses.includes(order.status) && String(order.createdAt) < cutoff) {
+          const next = await this.updateOrder(id, {status: 'cancelled'}, {source: 'system', note: `Pedido cancelado automaticamente após ${days} dia(s) sem pagamento.`});
+          if (next) expired.push(next.id);
+        }
+      }
+      return expired;
+    }
+
+    const {rows} = await this.pool.query(
+      `SELECT id FROM integrall_orders
+        WHERE data->>'status' = ANY($1)
+          AND created_at < $2
+        LIMIT 200`,
+      [staleStatuses, cutoff]
+    );
+    for (const row of rows) {
+      const next = await this.updateOrder(row.id, {status: 'cancelled'}, {source: 'system', note: `Pedido cancelado automaticamente após ${days} dia(s) sem pagamento.`});
+      if (next) expired.push(next.id);
+    }
+    return expired;
+  }
+
   async health() {
     if (!this.pool) return {ok: true, mode: 'memory-development-only'};
     await this.pool.query('SELECT 1');

@@ -283,6 +283,7 @@ export function normalizeCatalog(input) {
         price: (() => { const value = priceCents(variant?.price, price); if (value < 0) throw new Error(`Preço inválido na variante ${variantId} de ${name}.`); return value; })(),
         stock: variant?.stock == null ? null : cents(variant.stock, 0),
         unit: cleanText(variant?.unit, 120),
+        weightGrams: variant?.weightGrams == null ? null : integer(variant.weightGrams, 0, 1, 100_000),
         position: integer(variant?.position, variantIndex + 1, 0, 100_000)
       };
     }) : [];
@@ -306,6 +307,11 @@ export function normalizeCatalog(input) {
       stock: product.stock == null ? null : cents(product.stock, 0),
       stockMin: product.stockMin == null ? null : cents(product.stockMin, 0),
       maxPerOrder: product.maxPerOrder == null ? null : integer(product.maxPerOrder, 1, 1, 999),
+      minPerOrder: product.minPerOrder == null ? null : integer(product.minPerOrder, 1, 1, 999),
+      weightGrams: product.weightGrams == null ? null : integer(product.weightGrams, 0, 1, 100_000),
+      lengthCm: product.lengthCm == null ? null : integer(product.lengthCm, 0, 1, 100),
+      widthCm: product.widthCm == null ? null : integer(product.widthCm, 0, 1, 100),
+      heightCm: product.heightCm == null ? null : integer(product.heightCm, 0, 1, 100),
       restockDate: cleanText(product.restockDate, 40),
       preparation: cleanText(product.preparation, 500),
       available: product.available !== false,
@@ -375,7 +381,7 @@ function findZone(zones, cep) {
   return null;
 }
 
-export function calculateShipping({choice, cep}, subtotalCents, settings, serverConfig) {
+export function calculateShipping({choice, cep, resolved}, subtotalCents, settings, serverConfig) {
   const normalizedChoice = choice === 'pickup' ? 'pickup' : choice === 'delivery' ? 'delivery' : '';
   if (!normalizedChoice) throw new Error('Escolha entrega ou retirada.');
   if (normalizedChoice === 'pickup') {
@@ -388,6 +394,24 @@ export function calculateShipping({choice, cep}, subtotalCents, settings, server
   const freeThreshold = cents(serverConfig.freeShippingCents ?? settings.free, 0);
   if (freeThreshold > 0 && subtotalCents >= freeThreshold) {
     return {choice: 'delivery', cep: normalizedCep, priceCents: 0, quoted: false, label: 'Frete grátis'};
+  }
+
+  // Frete já cotado pelo servidor via API (Correios): valor confiável injetado
+  // pela própria rota, nunca pelo navegador.
+  if (mode === 'correios' && resolved && Number.isSafeInteger(resolved.priceCents) && resolved.priceCents >= 0) {
+    return {
+      choice: 'delivery',
+      cep: normalizedCep,
+      priceCents: resolved.priceCents,
+      quoted: false,
+      label: cleanText(resolved.label, 160) || 'Correios',
+      days: resolved.days != null ? String(resolved.days) : '',
+      service: cleanText(resolved.service, 20)
+    };
+  }
+  if (mode === 'correios') {
+    // API indisponível ou dados de peso ausentes: cai para cotação manual.
+    return {choice: 'delivery', cep: normalizedCep, priceCents: null, quoted: true, label: 'Frete sob cotação'};
   }
 
   if (mode === 'fixed') {
@@ -425,6 +449,7 @@ export function buildOrder(payload, catalog, serverConfig) {
   const lines = [];
   const productQuantities = new Map();
   const stockQuantities = new Map();
+  const minimums = new Map();
   let subtotalCents = 0;
 
   for (const item of requestedItems) {
@@ -439,6 +464,7 @@ export function buildOrder(payload, catalog, serverConfig) {
     const productQuantity = (productQuantities.get(product.id) || 0) + qty;
     if (productQuantity > maxPerOrder) throw new Error(`Quantidade máxima de ${product.name}: ${maxPerOrder}.`);
     productQuantities.set(product.id, productQuantity);
+    minimums.set(product.id, {name: product.name, min: product.minPerOrder == null ? 1 : product.minPerOrder});
 
     const stock = availableStock(product, variant);
     if (stock != null) {
@@ -466,6 +492,12 @@ export function buildOrder(payload, catalog, serverConfig) {
   }
 
   if (!Number.isSafeInteger(subtotalCents) || subtotalCents <= 0) throw new Error('Total do pedido inválido.');
+
+  for (const [productId, rule] of minimums) {
+    if (rule.min > 1 && (productQuantities.get(productId) || 0) < rule.min) {
+      throw new Error(`Quantidade mínima de ${rule.name}: ${rule.min} unidade(s).`);
+    }
+  }
 
   const containsAlcohol = lines.some(line => isAlcoholicProduct(productsById.get(line.productId)));
   if (containsAlcohol && payload.ageConfirmed !== true) {
