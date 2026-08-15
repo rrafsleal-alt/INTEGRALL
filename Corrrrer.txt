@@ -1,0 +1,535 @@
+1. Apresentação
+1.1 Objetivo do Manual
+Este material foi desenvolvido para contribuir no planejamento e integração com a API Busca CEP dos Correios do Brasil em qualquer plataforma desejada pelo cliente.
+
+1.2 Escopo da API
+A API Busca CEP tem o escopo exclusivo de consulta aos dados de endereçamento pelos clientes detentores de contratos comerciais.
+
+1.3 Público-Alvo
+Esta API é indicada a todos os clientes dos Correios, posto que o CEP é informação obrigatória e imprescindível para entrega de objetos postais a seus destinatários. Além disso, essa API permite:
+
+Localizar unidades dos Correios que prestam o serviço Clique e Retire;
+Localizar Lockers (armários inteligentes dos Correios);
+Verificar se existe unidade próxima que presta o serviço Clique e Retire;
+Listar unidades por tipo de unidade em um bairro, Cidade ou Estado, entre outros.
+2. Visão Geral da API
+2.1 Finalidade da API
+A API Busca CEP permite retornar dados de endereço, utilizando diversos parâmetros de pesquisa como CEP, logradouro, bairro, município, entre outros.
+
+2.2 Funcionalidades Principais
+Consultar endereços por CEP;
+Listar endereços com diversos filtros;
+Consultar parâmetros adicionais para filtrar a listagem de endereços, como localidades, faixa de CEP e bairros.
+2.3 Arquitetura e Tecnologias Utilizadas
+As APIs dos Correios foram desenvolvidas com a tecnologia REST. Este padrão de mercado permite a escolha de diversas linguagens de programação para integração, tais como: ASP, .Net, Java, PHP, Ruby, Python, entre outras.
+
+Entre outras características, os atributos que mais se destacam na API são:
+
+Ausência de aplicativos proprietários: Para utilizar a API não há necessidade de instalação de um ambiente específico.
+Simplicidade: O protocolo utilizado é puramente o HTTPS.
+Credenciais: O tratamento das credenciais do cliente trafega em ambiente seguro.
+Tanto o corpo da requisição feita à API quanto a resposta recebida são em formato JSON, quando aplicável – visto que algumas requisições e respostas podem não possuir corpo.
+
+2.4 Fluxo Geral de Integração
+Sumário do Manual de uso da API Busca CEP-DIAGRAMA.png
+
+3. Autenticação e Autorização
+3.1 Métodos de Autenticação Suportados
+Esta API utiliza exclusivamente o método de autenticação Bearer Token. O token deve ser obtido através da integração com a API Token. É fundamental observar a validade do token para que um novo seja gerado pelo mesmo processo quando o atual expirar.
+
+Alternativamente, para facilitar o acesso de terceiros às APIs e sistemas dos Correios em nome de um cliente com contrato ativo, existe a opção de subdelegar acesso. A chave de acesso gerada será usada como token, conforme referência neste manual.
+
+3.2 Obtenção de Credenciais
+Para que seja possível acessar a API Busca CEP com o nível adequado de credenciais é necessário:
+
+Conta de Pessoa Jurídica no Meu Correios;
+Contrato comercial firmado junto aos Correios, exceto Clube Correios;
+No contrato comercial deve conter o serviço API BUSCA CEP, código 86738. Para confirmar se o serviço em questão está no contrato, é possível verificar na ficha técnica do contrato ou solicitar apoio comercial ao representante dos Correios que atende seu contrato;
+Deve ser criado código de acesso às APIs no CWS – Correios Web Services para geração do token.
+O token utilizado deve ser gerado com o endpoint /v1/autentica/contrato – a documentação de uso desse recurso está no manual de uso da API Token.
+3.3 Escopos e Permissões
+O escopo da API Busca CEP é apenas de consulta e suas permissões refletem o escopo em questão, sendo uma API simples, com poucos endpoints.
+
+3.4 Exemplo de Requisição Autenticada
+A requisição de exemplo para o endpoint /v1/ufs/AC e sua respectiva resposta em JSON estão detalhadas abaixo:
+
+Requisição
+curl -X 'GET' \
+  'https://api.correios.com.br/cep/v1/ufs/AC' \
+  -H 'accept: application/json' \
+  -H 'Authorization: Bearer [TOKEN_DE_EXEMPLO]'
+Resposta
+{
+  "uf": "AC",
+  "nome": "Acre",
+  "faixas": [
+    {
+      "cepInicial": "69900000",
+      "cepFinal": "69999999"
+    }
+  ]
+}
+4. Padrões Técnicos utilizados
+4.1 Formato das Requisições e Respostas
+Tanto o corpo da requisição feita à API quanto a resposta recebida são em formato JSON, quando aplicável – visto que algumas requisições e respostas podem não possuir corpo.
+
+4.2 Endpoints (REST, etc.)
+A API Busca CEP possui arquitetura REST e utiliza o protocolo HTTPS. É fornecida uma URL base e os verbos HTTP (como GET, POST, PUT, DELETE) indicam a ação requisitada pelo cliente.
+
+4.3 Códigos de Status HTTP e Tratamento de Erros
+Toda requisição enviada ao servidor retorna um código de status, dividido em cinco famílias:
+
+1xx – Informacionais
+2xx – Códigos de sucesso
+3xx – Códigos de redirecionamento
+4xx – Erros causados pelo cliente
+5xx – Erros originados no servidor
+Alguns dos códigos mais importantes e utilizados são:
+
+2xx (Sucesso)
+200 – OK
+Indica que a operação teve sucesso.
+201 – Created
+Indica que o recurso desejado foi criado com sucesso. Deve retornar um cabeçalho Location, contendo a URL do recurso recém-criado.
+202 – Accepted
+Indica que a solicitação foi recebida e será processada em outro momento (requisições assíncronas). Pode retornar um cabeçalho Location para consulta do status do recurso.
+204 – No Content
+Usualmente enviado em resposta a uma requisição PUT, POST ou DELETE, onde o servidor pode recusar-se a enviar conteúdo.
+3xx (Redirecionamento)
+301 – Moved Permanently
+O recurso solicitado foi realocado permanentemente. A resposta deve conter um cabeçalho Location com a URL completa do novo local.
+303 – See Other
+Utilizado quando a requisição foi processada, mas o servidor não deseja enviar o resultado. O servidor envia a resposta com este código e o cabeçalho Location, informando onde a resposta do processamento está.
+304 – Not Modified
+Utilizado principalmente em requisições GET condicionais, quando o cliente deseja a resposta apenas se ela tiver sido alterada em relação a uma requisição anterior.
+307 – Temporary Redirect
+Similar ao 301, mas indica que o redirecionamento é temporário.
+4xx (Erro do Cliente)
+400 – Bad Request
+Resposta genérica para qualquer tipo de erro de processamento cuja responsabilidade é do cliente do serviço.
+401 – Unauthorized
+Utilizado quando o cliente está tentando realizar uma operação sem ter fornecido dados de autenticação ou com autenticação inválida.
+403 – Forbidden
+Utilizado quando o cliente está tentando realizar uma operação sem ter a devida autorização.
+404 – Not Found
+Utilizado quando o recurso solicitado não existe.
+405 – Method Not Allowed
+Utilizado quando o método HTTP não é suportado pela URL. Deve incluir um cabeçalho Allow na resposta, listando os métodos suportados.
+409 – Conflict
+Utilizado quando há conflitos entre dois recursos (ex: criação de um usuário com login já existente). Se causado pela existência de outro recurso, a resposta deve conter um cabeçalho Location explicitando a localização do recurso que é a fonte do conflito.
+410 – Gone
+Semelhante ao 404, mas indica que um recurso já existiu neste local.
+415 – Unsupported Media Type
+Utilizado em resposta a clientes que solicitam um tipo de dados que não é suportado (ex: solicitar JSON quando o único formato suportado é XML).
+5xx (Erro do Servidor)
+500 – Internal Server Error
+Resposta de erro genérica, utilizada quando nenhuma outra se aplica.
+503 – Service Unavailable
+Indica que o servidor está atendendo requisições, mas o serviço em questão não está funcionando corretamente. Pode incluir um cabeçalho Retry-After, dizendo ao cliente quando ele deveria tentar submeter a requisição novamente.
+5. Documentação dos Endpoints
+5.1 Estrutura de Documentação (método, URL, parâmetros, exemplo)
+Para acesso à documentação completa da API, após todas as permissões devidamente recebidas, deve ser acessado o CWS - Correios Web Services. As instruções de acesso estão no Manual Correios Web Services.
+
+Após preenchimento das credenciais e geração do token adequado, conforme item 7.2 do manual referenciado – lembrando que a API Busca CEP utiliza autorização por contrato, será possível encontrar no campo de pesquisa a API CEP v3 (41):
+
+Sumário do Manual de uso da API Busca CEP-img1.png
+
+A estrutura das requisições consiste na URL base e o endpoint, além do verbo (GET, POST, PUT, PATCH ou DELETE). Esses dados são conseguidos no próprio Swagger:
+
+Sumário do Manual de uso da API Busca CEP-img2.png
+
+Nesse exemplo, para invocar o endpoint, utilizamos o endereço https://api.correios.com.br/cp/v2/enderecos utilizando o verbo GET.
+
+Recomendamos estudo intensivo dos dados disponibilizados nas páginas demonstradas acima, pois as atualizações são disponibilizadas primeiro no Swagger da API no CWS, que será sempre a documentação mais completa e atualizada.
+
+Adicionalmente, o primeiro link, logo abaixo do nome da API, se trata da documentação em JSON, que pode ser baixada e importada em aplicativos de teste de APIs REST, como Postman, SoapUI, Katalon Studio, Swagger UI, Apidog, IntelliJ IDEA, P`yCharm, API Fortress, entre outros. Recomendamos se referir aos manuais desses aplicativos para aproveitar essa funcionalidade.
+
+5.2 Endpoints por Domínio Funcional ou por categoria
+Endereços
+Finalidade: Identificar endereços, logradouros e CEPs.
+
+Endpoints
+GET /v2/enderecos – Lista endereços de forma paginada
+Parâmetros obrigatórios: Nenhum. Cada parâmetro utilizado irá filtrar melhor os resultados.
+
+Parâmetros opcionais:
+
+cep: CEP a ser pesquisado. Aceita uma lista de CEPs;
+uf: sigla do Estado, ex: SP;
+localidade: cidade, ex: BRASILIA. Importante: utilize o mesmo padrão obtido no endpoint GET /v1/localidades ou /v1/localidades/{uf};
+bairro: ex: CENTRO. Importante: utilize o mesmo padrão obtido no endpoint GET /v1/bairros/{uf}/localidades/{localidade};
+siglaUnidade: sigla para identificar tipos específicos de unidades dos Correios. As siglas possíveis podem ser pesquisadas na API Busca Agências;
+tipoCEP: Filtro para tipos específicos de CEP. Valores possíveis:
+Valor	Descrição
+1	Localidade (município)
+2	Logradouro (rua, avenida...)
+3	CEP Promocional
+4	Caixa Postal Comunitária
+5	Grande Usuário (CEP dedicado)
+6	Unidade Operacional
+logradouro: nome da rua, avenida, travessa, etc;
+tipoLogradouro: ao contrário do anterior, informa-se Rua, Avenida, Travessa, Viela, Passarela, etc. Importante: primeira letra é maiúscula, as outras, minúsculas;
+clique: se preenchido com “S”, só retornará dados de endereço das agências dos Correios que possuem o serviço Clique e Retire;
+caixaPostal: se preenchido com “S”, só retornará dados de endereço das agências dos Correios que possuem o serviço Caixa Postal;
+locker: se preenchido com “S”, só retornará dados de endereço dos Lockers (armários inteligentes dos Correios);
+agenciaModular: se preenchido com “S”, só retornará dados de endereço das Agências Modulares dos Correios;
+cepInicial e cepFinal: faixa de CEP (CEP inicial, CEP final) onde será limitada a consulta. O formato utilizado são 8 dígitos, sem hífen, ex: 01001010 e 11099999;
+numeroBairro: número identificador de um bairro. Os números podem ser obtidos no endpoint GET /v1/bairros/{uf}/localidades/{localidade};
+numeroCaixaPostal: número da caixa Postal. Ao informar esse valor, haverá filtro para endereços dos Correios que possuem caixas postais;
+page, size e sort: parâmetros que definem a paginação de resultados, tornando a consulta mais rápida;
+GET /v2/endereços/{cep} – Consulta um CEP específico
+Parâmetros obrigatórios:
+
+cep: CEP a ser pesquisado.
+Parâmetros opcionais: Nenhum.
+
+Localidades
+Finalidade: Recupera as localidades com bairros e suas faixas de CEP.
+
+Endpoints
+GET /v1/localidades – Lista todas as localidades.
+Parâmetros obrigatórios: Nenhum.
+
+Parâmetros opcionais:
+
+numero: número da localidade no cadastro interno dos Correios. Os números podem ser obtidos neste mesmo endpoint, utilizando outros filtros;
+uf: sigla do Estado a ser pesquisado, ex: SP;
+tipo: tipo de localidade. Valores possíveis:
+Valor	Descrição
+M	Município
+D	Distrito
+P	Povoado
+codificada: indica o status da localidade em relação à codificação por CEP. Valores possíveis:
+Valor	Descrição
+T	Todas
+S	Codificada por logradouro (cada rua tem seu CEP)
+N	Não codificada (CEP único para a cidade)
+E	Em fase de codificação
+I	Inserida na codificação da localidade superior* (* Essa condição é válida para distritos e povoados)
+localidade: cidade, ex: BRASILIA. Importante: utilize o mesmo padrão obtido neste endpoint ou GET /v1/localidades/{uf};
+cepNaFaixa: ao ser informado, trará apenas a localidade que abrange o CEP informado, ex 69990000;
+page, size e sort: parâmetros que definem a paginação de resultados, tornando a consulta mais rápida.
+GET /v1/localidades/{uf} – Consulta localidades numa UF específica
+Parâmetros obrigatórios:
+
+uf: sigla do Estado a ser pesquisado, ex: SP.
+Parâmetros opcionais:
+
+numero: número da localidade no cadastro interno dos Correios. Os números podem ser obtidos neste mesmo endpoint, utilizando outros filtros;
+tipo: tipo de localidade. Valores possíveis:
+Valor	Descrição
+M	Município
+D	Distrito
+P	Povoado
+codificada: indica o status da localidade em relação à codificação por CEP. Valores possíveis:
+Valor	Descrição
+T	Todas
+S	Codificada por logradouro (cada rua tem seu CEP)
+N	Não codificada (CEP único para a cidade)
+E	Em fase de codificação
+I	Inserida na codificação da localidade superior* (* Essa condição é válida para distritos e povoados)
+localidade: cidade, ex: BRASILIA. Importante: utilize o mesmo padrão obtido neste endpoint ou GET /v1/localidades/{uf};
+cepNaFaixa: ao ser informado, trará apenas a localidade que abrange o CEP informado, ex 69990000;
+page, size e sort: parâmetros que definem a paginação de resultados, tornando a consulta mais rápida.
+Bairros
+Finalidade: Lista os bairros de uma localidade.
+
+Endpoints
+GET /v1/bairros/{uf}/localidades/{localidade} – Lista os bairros de uma localidade.
+Parâmetros obrigatórios:
+
+uf: sigla do Estado a ser pesquisado, ex: SP;
+localidade: cidade, ex: BRASILIA. Importante: utilize o mesmo padrão obtido nos endpoints GET /v1/localidades ou GET /v1/localidades/{uf};
+Parâmetros opcionais:
+
+bairro: ex: CENTRO. Importante: utilize o mesmo padrão obtido neste mesmo endpoint;
+UF
+Finalidade: Lista Estados (UFs) e suas faixas de CEP.
+
+Endpoints
+GET /v1/ufs – Lista todas as UFs e suas respectivas faixas de CEP.
+Parâmetros obrigatórios: Nenhum.
+
+Parâmetros opcionais: Nenhum.
+
+GET /v1/ufs/{uf} – Consulta uma UFs e suas respectivas faixas de CEP.
+Parâmetros obrigatórios:
+
+uf: sigla do Estado a ser pesquisado, ex: SP;
+Parâmetros opcionais: Nenhum.
+
+Clique e Retire
+Finalidade: Recupera as localidades onde existem agências que prestam o serviço Clique e Retire.
+
+Endpoints
+GET /v1/localidades/cliques – Lista todas as localidades onde existem agências que prestam o serviço Clique e Retire.
+Parâmetros obrigatórios: Nenhum.
+
+Parâmetros opcionais:
+
+numero: número da localidade no cadastro interno dos Correios. Os números podem ser obtidos neste mesmo endpoint, utilizando outros filtros;
+uf: sigla do Estado a ser pesquisado, ex: SP;
+tipo: tipo de localidade. Valores possíveis:
+Valor	Descrição
+M	Município
+D	Distrito
+P	Povoado
+codificada: indica o status da localidade em relação à codificação por CEP. Valores possíveis:
+Valor	Descrição
+T	Todas
+S	Codificada por logradouro (cada rua tem seu CEP)
+N	Não codificada (CEP único para a cidade)
+E	Em fase de codificação
+I	Inserida na codificação da localidade superior* (* Essa condição é válida para distritos e povoados)
+localidade: cidade, ex: BRASILIA. Importante: utilize o mesmo padrão obtido neste endpoint ou GET /v1/localidades/{uf};
+cepNaFaixa: ao ser informado, trará apenas a localidade que abrange o CEP informado, ex 69990000;
+page, size e sort: parâmetros que definem a paginação de resultados, tornando a consulta mais rápida.
+Caixas Postais
+Finalidade: Recupera as localidades onde existem agências que possuem caixas postais.
+
+Endpoints
+GET /v1/localidades/caixas-postais – Lista todas as localidades onde existem agências que possuem caixas postais.
+Parâmetros obrigatórios: Nenhum.
+
+Parâmetros opcionais:
+
+numero: número da localidade no cadastro interno dos Correios. Os números podem ser obtidos neste mesmo endpoint, utilizando outros filtros;
+uf: sigla do Estado a ser pesquisado, ex: SP;
+tipo: tipo de localidade. Valores possíveis:
+Valor	Descrição
+M	Município
+D	Distrito
+P	Povoado
+codificada: indica o status da localidade em relação à codificação por CEP. Valores possíveis:
+Valor	Descrição
+T	Todas
+S	Codificada por logradouro (cada rua tem seu CEP)
+N	Não codificada (CEP único para a cidade)
+E	Em fase de codificação
+I	Inserida na codificação da localidade superior* (* Essa condição é válida para distritos e povoados)
+localidade: cidade, ex: BRASILIA. Importante: utilize o mesmo padrão obtido neste endpoint ou GET /v1/localidades/{uf};
+cepNaFaixa: ao ser informado, trará apenas a localidade que abrange o CEP informado, ex 69990000;
+page, size e sort: parâmetros que definem a paginação de resultados, tornando a consulta mais rápida.
+Agência Modular
+Finalidade: Recupera as localidades onde existem agências modulares.
+
+Endpoints
+GET /v1/localidades/agencias-modulares – Lista todas as localidades onde existem agências modulares.
+Parâmetros obrigatórios: Nenhum.
+
+Parâmetros opcionais:
+
+numero: número da localidade no cadastro interno dos Correios. Os números podem ser obtidos neste mesmo endpoint, utilizando outros filtros;
+uf: sigla do Estado a ser pesquisado, ex: SP;
+tipo: tipo de localidade. Valores possíveis:
+Valor	Descrição
+M	Município
+D	Distrito
+P	Povoado
+codificada: indica o status da localidade em relação à codificação por CEP. Valores possíveis:
+Valor	Descrição
+T	Todas
+S	Codificada por logradouro (cada rua tem seu CEP)
+N	Não codificada (CEP único para a cidade)
+E	Em fase de codificação
+I	Inserida na codificação da localidade superior* (* Essa condição é válida para distritos e povoados)
+localidade: cidade, ex: BRASILIA. Importante: utilize o mesmo padrão obtido neste endpoint ou GET /v1/localidades/{uf};
+cepNaFaixa: ao ser informado, trará apenas a localidade que abrange o CEP informado, ex 69990000;
+page, size e sort: parâmetros que definem a paginação de resultados, tornando a consulta mais rápida.
+Publicação do DNEC
+Finalidade: informa data e hora última atualização do DNE Corporativo dos Correios.
+
+Endpoints
+GET /v1/atualizacao – Retorna data e hora da última atualização do DNEC.
+Parâmetros obrigatórios: Nenhum.
+
+Parâmetros opcionais: Nenhum.
+
+6. Exemplos de Integração
+6.1 Exemplos requisições (ex: em Linguagens Populares)
+Pesquisar o CEP 01001-001:
+Requisição
+curl -X 'GET' \
+  'https://api.correios.com.br/cep/v2/endereços/01001001' \
+  -H 'accept: application/json' \
+  -H 'Authorization: Bearer [TOKEN_DE_EXEMPLO]'
+Resposta
+{
+  "cep": "01001001",
+  "uf": "SP",
+  "numeroLocalidade": 96681,
+  "localidade": "São Paulo",
+  "logradouro": "Praça da Sé",
+  "complemento": "- lado par",
+  "abreviatura": "Pç da Sé",
+  "bairro": "Sé",
+  "tipoCEP": 2,
+  "cepUnidadeOperacional": "01032970",
+  "lado": "P",
+  "numeroInicial": 0,
+  "numeroFinal": 998
+}
+Verificar os Lockers existentes no bairro da Alcântara, em São Gonçalo/RJ:
+Requisição
+curl -X 'GET' \
+ 'https://api.correios.com.br/cep/v2/enderecos?uf=RJ&localidade=S%C3%A3o%20Gon%C3%A7alo&bairro=Alc%C3%A2ntara&locker=S' \
+  -H 'accept: application/json' \
+  -H 'Authorization: Bearer [TOKEN_DE_EXEMPLO]'
+Resposta
+{
+  "itens": [
+    {
+      "cep": "24710989",
+      "uf": "RJ",
+      "numeroLocalidade": 70671,
+      "localidade": "São Gonçalo",
+      "logradouro": "Praça Carlos Gianelli, s/n",
+      "tipoLogradouro": "Praça",
+      "nomeLogradouro": "Carlos Gianelli",
+      "numeroLogradouro": "s/n",
+      "bairro": "Alcântara",
+      "nome": "LCK Locker Pátio Alcântara",
+      "siglaUnidade": "LCK",
+      "tipoCEP": 6,
+      "lado": " ",
+      "locker": "S"
+    }
+  ],
+  "links": [
+    {
+      "rel": "self",
+      "href": "https://api.correios.com.br/cep/v2/enderecos?uf=RJ&localidade=S%C3%A3o%20Gon%C3%A7alo&bairro=Alc%C3%A2ntara&locker=S&page=0&size=50&sort=cep,asc"
+    }
+  ],
+  "page": {
+    "size": 50,
+    "totalElements": 1,
+    "totalPages": 1,
+    "number": 0
+  }
+}
+Consultar o CEP da Avenida Paulista em Juiz de Fora/MG:
+Requisição
+curl -X 'GET' \
+  'https://api.correios.com.br/cep/v2/enderecos?uf=MG&localidade=Juiz%20de%20Fora&logradouro=Avenida%20Paulista' \
+  -H 'accept: application/json' \
+  -H 'Authorization: Bearer [TOKEN_DE_EXEMPLO]'
+Resposta
+{
+  "itens": [
+    {
+      "cep": "36072050",
+      "uf": "MG",
+      "numeroLocalidade": 33151,
+      "localidade": "Juiz de Fora",
+      "logradouro": "Avenida Paulista",
+      "tipoLogradouro": "Avenida",
+      "nomeLogradouro": "Paulista",
+      "abreviatura": "Av Paul",
+      "bairro": "Floresta",
+      "tipoCEP": 2
+    }
+  ],
+  "links": [
+    {
+      "rel": "self",
+      "href": "https://api.correios.com.br/cep/v2/enderecos?uf=MG&localidade=Juiz%20de%20Fora&logradouro=Avenida%20Paulista&page=0&size=50&sort=cep,asc"
+    }
+  ],
+  "page": {
+    "size": 50,
+    "totalElements": 1,
+    "totalPages": 1,
+    "number": 0
+  }
+}
+6.2 Casos de Uso Comuns
+Validar CEP informado pelo usuário.
+Pesquisar CEP para os usuários.
+Listar lockers dos Correios.
+Listar Unidades que prestam o serviço Clique e Retire.
+Garantir que postagens não sejam recusadas por CEP inválido.
+7. Ambientes Disponíveis
+7.1 Ambiente de Homologação
+Para acesso ao ambiente de homologação do Correios Web Services (CWS), é necessário primeiro obter o acesso em produção, com o serviço devidamente habilitado no contrato, conforme item 3.2 deste manual.
+
+Após o acesso ser completado em produção, o cliente deve entrar em contato com o representante comercial de seu contrato para pedir a replicação dos dados do contrato em homologação.
+
+Por fim, o cliente deve criar uma conta no Meu Correios de homologação, vinculada aos mesmos dados do CNPJ já existente em produção. Isso é feito no endereço do Meu Correios de homologação, a saber: https://meucorreioshom.correios.com.br/
+
+A documentação Swagger da API está disponível no endereço de homologação do CWS, ou seja: http://cwshom.correios.com.br/
+
+7.2 Ambiente de Produção
+Após os passos definidos neste manual, no item 3.2, o acesso do cliente em produção já está disponível.
+
+A documentação Swagger da API está disponível no endereço de produção do CWS, ou seja: https://cws.correios.com.br/
+
+8. Boas Práticas
+8.1 Segurança na Integração
+Os Correios recomendam os procedimentos de segurança padrão do mercado: não expor os códigos de acesso, mantê-los seguros em suas aplicações e não repassá-los indiscriminadamente, utilizar sempre protocolo HTTPS e manter atualizada a aplicação.
+
+Caso use uma empresa contratada para desenvolver sua aplicação, recomendamos fazer uso da subdelegação por chave de acesso, já citada neste manual. Tal chave precisa ser revogada ao término do desenvolvimento/contrato.
+
+8.2 Validação de Dados
+É importante validar todos os dados ao enviar à API. Os formatos de validação constam no CWS, conforme já citado neste manual.
+
+9. Suporte e Contato
+9.1 Canais de Suporte Técnico
+Contato direto com gestor comercial do contrato.
+Fale Conosco → Suporte ao cliente com contrato: https://faleconosco.correios.com.br/faleconosco/app/cadastro/suporte/index.php
+Central de Atendimento: https://www.correios.com.br/falecomoscorreios/central-de-atendimento
+9.2 Processo de Abertura de Chamados
+O processo geral de abertura de chamados consiste em:
+
+Acessar a página dos Correios;
+Ir até o final da página e localizar Suporte ao cliente com contrato:
+Sumário do Manual de uso da API Busca CEP-img3.png
+
+Na tela seguinte, clicar em Sistemas Comerciais:
+Sumário do Manual de uso da API Busca CEP-img4.png
+
+Na próxima tela, selecionar Correios Web Services / APIs e depois Problemas com a integração:
+Sumário do Manual de uso da API Busca CEP-img5.png
+
+Preencher os dados do formulário e clicar em Enviar. É extremamente importante se valer do campo Arquivo até 10MB para anexar as evidências dos problemas encontrados, como imagens, arquivos JSON de requisição e resposta, entre outros. Se necessário, compacte os arquivos num único arquivo ZIP.
+Sumário do Manual de uso da API Busca CEP-img6.png
+
+O chamado foi aberto. Será recebido um e-mail de confirmação e a resposta será recebida também por e-mail.
+Além da abertura de chamado, também é possível utilizar o contato telefônico com a Central de Atendimento dos Correios, informando o problema enfrentado.
+
+Para os clientes com contato comercial junto aos Correios, não é necessário abertura de chamado. Basta contatar o gestor comercial do contrato e enviar as evidências dos problemas encontrados, nos mesmos moldes do processo de abertura de chamados.
+
+Para clientes que contrataram outras empresas, como TMS, ERP, plataformas de e-commerce, entre outros, e são essas empresas que desenvolveram a integração, o chamado deve ser aberto na empresa contratada. Caso a empresa afirme que o problema é nos Correios, será necessário que a empresa forneça os dados necessários para abertura do chamado, conforme descrito no processo de abertura de chamados, ou essa empresa deve tratar diretamente com os Correios.
+
+É fundamental que sempre sejam enviadas anexar as evidências dos problemas encontrados, como imagens, arquivos JSON de requisição e resposta, entre outros. Essa informação é essencial para a análise do problema por parte dos Correios.
+
+10. Anexos
+10.1 Glossário de Termos Técnicos
+Termo	Descrição
+API	Application Programming Interfaces (Interface de Programação de Aplicações): conjunto de regras e protocolos que permite a comunicação entre diferentes softwares, funcionando como uma ponte que facilita a troca de informações e funcionalidades entre eles.
+API Manager	Sistema gerador de tokens para acesso de APIs. Gera uma string codificada com a finalidade de garantir a segurança de quem está usando a API e evitar fraudes.
+Autenticação	Processo de verificação de uma identidade digital do usuário, ou seja, para assegurar que o usuário é realmente aquele quem diz ser.
+Autorização	Processo para verificar quais são os privilégios concedidos, para utilizar uma aplicação.
+Cartão de postagem	Cartão que identifica um usuário como cliente de contrato dos Correios.
+CEP	Código de Endereçamento Postal - código numérico de oito dígitos usado pelos Correios no Brasil para agilizar e organizar a entrega de correspondências e encomendas. Cada um dos oito dígitos do CEP tem um significado específico, começando pela divisão das regiões do país, que se subdividem até identificar um logradouro, um edifício, um grande usuário ou uma unidade dos Correios.
+Código de acesso a APIs	Código de acesso criado pelo usuário no site Correios Web Services que permite esse usuário utilizar os componentes disponibilizados pelos Correios.
+Contrato comercial	Instrumento que o cliente firma com os Correios para a prestação de serviços de encomendas, mensagens, marketing direto e outros.
+CWS	Correios Web Services – site principal para conhecimento e testes das integrações dos Correios: https://cws.correios.com.br
+DNE	Diretório Nacional de Endereços – base completa de CEPs de todo o Brasil.
+DNEC	Versão corporativa do DNE, de uso interno. Traz os mesmos dados do DNE mas é acessível apenas pelos próprios Correios.
+HTTPS	Hypertext Transfer Protocol Secure: é a versão segura do protocolo HTTP, que utiliza a criptografia SSL/TLS para proteger os dados trocados entre o navegador de um usuário e um site. Ao contrário do HTTP, o HTTPS garante a confidencialidade, a integridade e a autenticidade da comunicação, impedindo que terceiros interceptem ou alterem informações sensíveis.
+Localidade	Engloba Município/Cidade, Distrito e/ou Povoado.
+Locker	Armário inteligente dos Correios. É um terminal de autoatendimento que oferece ao cliente dos Correios mais uma opção para devolver e retirar encomendas: https://www.correios.com.br/locker
+Meu Correios	Mecanismo de autenticação e autorização para acesso aos serviços que os Correios disponibilizam via internet.
+REST	Representational State Transfer - estilo de arquitetura de software que define princípios para a comunicação entre sistemas na web, tornando-os mais confiáveis, escaláveis e fáceis de modificar.
+Token (ou bearer token)	Credencial de segurança que concede acesso a recursos protegidos, funcionando com base na premissa "quem o possui, tem acesso", sem necessidade de identificação adicional. Ele é tipicamente usado na autenticação de APIs através do protocolo OAuth 2.0, onde é incluído no cabeçalho da requisição HTTP para verificar a identidade do cliente e autorizá-lo a acessar determinados recursos.
+UF	Unidade da Federação, também conhecida como Estado.
+Unidade	Denominação comum aos endereços dos Correios, se referindo tanto a agências de Correios (próprias ou franqueadas), pontos de coleta, centros de distribuição, postos de venda de produtos, entre outros.
+10.2 Referências e links úteis
+Correios Web Services – CWS: https://cws.correios.com.br/
+Manual – Correios Web Service: https://www.correios.com.br/atendimento/developers/manuais/correioswebservice
+Correios – desenvolvedores: https://www.correios.com.br/atendimento/developers
+Contrate os Correios: https://www.correios.com.br/enviar/precisa-de-ajuda/contrate-os-correios/
+Suporte ao cliente com contrato: https://faleconosco.correios.com.br/faleconosco/app/cadastro/suporte/index.php
+Central de Atendimento: https://www.correios.com.br/falecomoscorreios/central-de-atendimento
+10.3 Histórico de Alterações da API e da respectiva documentação
