@@ -25,6 +25,19 @@ const TOKEN_SAFETY_WINDOW_MS = 5 * 60 * 1000;
 const QUOTE_CACHE_TTL_MS = 10 * 60 * 1000;
 const QUOTE_CACHE_MAX = 500;
 
+// Converte preço da API em centavos, tolerando ambos os formatos:
+// brasileiro "1.234,56" (ponto = milhar) e internacional "1234.56" (ponto = decimal).
+// Sem isso, um "28.50" seria lido como R$ 2.850,00 — erro de 100x em código financeiro.
+function parsePriceCents(raw) {
+  const text = String(raw ?? '').trim();
+  if (!text) return null;
+  let normalized;
+  if (text.includes(',')) normalized = text.replace(/\./g, '').replace(',', '.');
+  else normalized = text;
+  const value = Number(normalized);
+  return Number.isFinite(value) && value > 0 ? Math.round(value * 100) : null;
+}
+
 function digits(value) {
   return String(value || '').replace(/\D/g, '');
 }
@@ -224,13 +237,6 @@ export class CorreiosService {
   }
 
   /**
-   * Cota preço e prazo para todos os serviços configurados.
-   * Retorna a opção mais barata como principal e a lista completa.
-   * `declaredCents` (opcional) ativa o serviço adicional Valor Declarado
-   * (019 = VD Nacional Premium/Padrão), incluindo o seguro no preço final —
-   * essencial para envio de garrafas de vidro.
-   */
-  /**
    * Consulta os eventos de rastreamento de um objeto (API Rastro / SRO).
    * GET /srorastro/v1/objetos/{codigo}?resultado=T — manual V2.4, seção 14.
    * Retorna eventos normalizados: [{at, description, detail, location}] (mais recente primeiro).
@@ -268,6 +274,13 @@ export class CorreiosService {
     return {carrier: 'Correios', code, expectedDelivery: object.dtPrevista || '', events};
   }
 
+  /**
+   * Cota preço e prazo para todos os serviços configurados.
+   * Retorna a opção mais barata como principal e a lista completa.
+   * `declaredCents` (opcional) ativa o serviço adicional Valor Declarado
+   * (019 = VD Nacional Premium/Padrão), incluindo o seguro no preço final —
+   * essencial para envio de garrafas de vidro.
+   */
   async quote(cepDestino, pack, declaredCents = 0) {
     const destination = digits(cepDestino).slice(0, 8);
     if (destination.length !== 8) throw new Error('CEP de destino inválido.');
@@ -333,10 +346,9 @@ export class CorreiosService {
       const code = String(item.coProduto || '');
       const entry = totals.get(code) || {sumCents: 0, count: 0, failed: false};
       if (item.txErro) { entry.failed = true; totals.set(code, entry); continue; }
-      const raw = String(item.pcFinal ?? item.pcProduto ?? '').replace(/\./g, '').replace(',', '.');
-      const price = Number(raw);
-      if (!Number.isFinite(price) || price <= 0) { entry.failed = true; totals.set(code, entry); continue; }
-      entry.sumCents += Math.round(price * 100);
+      const priceCents = parsePriceCents(item.pcFinal ?? item.pcProduto);
+      if (priceCents == null) { entry.failed = true; totals.set(code, entry); continue; }
+      entry.sumCents += priceCents;
       entry.count += 1;
       totals.set(code, entry);
     }

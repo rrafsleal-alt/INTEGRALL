@@ -681,6 +681,30 @@ app.get('/admin', (_req, res) => {
   res.sendFile(path.join(publicDir, 'admin.html'));
 });
 
+// Serve o index.html com og:image/twitter:image ABSOLUTOS quando PUBLIC_URL
+// está configurada: o crawler do WhatsApp/Facebook NÃO executa JavaScript,
+// então a URL absoluta precisa estar no HTML bruto.
+let indexHtmlCache = null;
+async function serveIndexHtml(res, statusCode = 200) {
+  const base = config.publicUrl || (config.renderExternalHostname ? `https://${config.renderExternalHostname}` : '');
+  if (!base) return res.status(statusCode).sendFile(path.join(publicDir, 'index.html'));
+  if (!indexHtmlCache) {
+    const raw = await readFile(path.join(publicDir, 'index.html'), 'utf8');
+    indexHtmlCache = raw.replace(
+      /<meta content="(\/assets\/[^"]+)" (property="og:image"|name="twitter:image")\/>/g,
+      (_match, url, attr) => `<meta content="${base}${url}" ${attr}/>`
+    );
+    if (!indexHtmlCache.includes('property="og:url"')) {
+      indexHtmlCache = indexHtmlCache.replace('property="og:type"/>', `property="og:type"/><meta content="${base}/" property="og:url"/>`);
+    }
+  }
+  res.status(statusCode).setHeader('Cache-Control', 'no-cache');
+  res.type('html').send(indexHtmlCache);
+}
+
+app.get('/', asyncRoute(async (_req, res) => serveIndexHtml(res)));
+app.get('/index.html', asyncRoute(async (_req, res) => serveIndexHtml(res)));
+
 app.use(express.static(publicDir, {
   index: 'index.html',
   etag: true,

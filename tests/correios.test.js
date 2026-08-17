@@ -220,3 +220,33 @@ test('rastreio Correios normaliza eventos da API Rastro', async () => {
   assert.equal(result.expectedDelivery, '2026-08-20T20:00:00');
   await assert.rejects(() => service.trackShipment('INVALIDO'), /inválido/i);
 });
+
+test('parse de preço tolera formato brasileiro e internacional (proteção contra erro de 100x)', async () => {
+  const prices = [];
+  const fetchImpl = async (url, options) => {
+    if (url.includes('/token/')) return {ok: true, status: 200, json: async () => ({token: 't', expiraEm: new Date(Date.now() + 3600_000).toISOString()})};
+    if (url.includes('/preco/')) {
+      return {ok: true, status: 200, json: async () => ([
+        {coProduto: '03298', pcFinal: prices[0]},
+        {coProduto: '03220', pcFinal: prices[1]}
+      ])};
+    }
+    if (url.includes('/prazo/')) return {ok: true, status: 200, json: async () => ([])};
+    throw new Error('URL inesperada');
+  };
+  const service = new CorreiosService({...CONFIG, fetchImpl});
+  const pack = {packages: [{weightGrams: 1000, lengthCm: 16, widthCm: 11, heightCm: 10}], missingData: false, overweight: false};
+
+  // Formato brasileiro: "1.234,56" = R$ 1.234,56 e "28,50" = R$ 28,50
+  prices[0] = '28,50'; prices[1] = '1.234,56';
+  let result = await service.quote('01001000', pack);
+  assert.equal(result.options.find(o => o.code === '03298').priceCents, 2850);
+  assert.equal(result.options.find(o => o.code === '03220').priceCents, 123456);
+
+  // Formato internacional: "28.50" deve ser R$ 28,50 — NUNCA R$ 2.850,00
+  service.quoteCache.clear();
+  prices[0] = '28.50'; prices[1] = '1234.56';
+  result = await service.quote('01001000', pack);
+  assert.equal(result.options.find(o => o.code === '03298').priceCents, 2850);
+  assert.equal(result.options.find(o => o.code === '03220').priceCents, 123456);
+});
