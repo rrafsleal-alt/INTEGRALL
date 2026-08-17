@@ -220,7 +220,8 @@ app.post('/api/shipping/quote', statusLimiter, publicJson, asyncRoute(async (req
         service: option.code,
         label: option.label,
         priceCents: option.priceCents,
-        days: option.days
+        days: option.days,
+        volumes: option.volumes || 1
       }))
     });
   } catch (error) {

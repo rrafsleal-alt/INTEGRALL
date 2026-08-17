@@ -312,6 +312,14 @@ export function normalizeCatalog(input) {
       lengthCm: product.lengthCm == null ? null : integer(product.lengthCm, 0, 1, 100),
       widthCm: product.widthCm == null ? null : integer(product.widthCm, 0, 1, 100),
       heightCm: product.heightCm == null ? null : integer(product.heightCm, 0, 1, 100),
+      boxes: (Array.isArray(product.boxes) ? product.boxes : []).slice(0, 10).map(box => ({
+        variantId: cleanText(box?.variantId, 120),
+        units: integer(box?.units, 0, 1, 1000),
+        lengthCm: integer(box?.lengthCm, 0, 1, 100),
+        widthCm: integer(box?.widthCm, 0, 1, 100),
+        heightCm: integer(box?.heightCm, 0, 1, 100),
+        weightGrams: integer(box?.weightGrams, 0, 1, 100_000)
+      })).filter(box => box.units > 0 && box.weightGrams > 0 && box.lengthCm > 0 && box.widthCm > 0 && box.heightCm > 0),
       restockDate: cleanText(product.restockDate, 40),
       preparation: cleanText(product.preparation, 500),
       available: product.available !== false,

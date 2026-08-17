@@ -167,7 +167,7 @@
           "stock": 1000,
           "unit": "",
           "position": 1,
-          "weightGrams": 550
+          "weightGrams": 520
         },
         {
           "id": "variant-1786125277805-0nrmsu",
@@ -176,7 +176,7 @@
           "stock": 1000,
           "unit": "",
           "position": 2,
-          "weightGrams": 1600
+          "weightGrams": 1500
         }
       ],
       "attributes": {
@@ -202,7 +202,25 @@
       "deletedAt": null,
       "lengthCm": 9,
       "widthCm": 9,
-      "heightCm": 32
+      "heightCm": 32,
+      "boxes": [
+        {
+          "variantId": "variant-1786125213057-vsk38j",
+          "units": 12,
+          "lengthCm": 23,
+          "widthCm": 18,
+          "heightCm": 19,
+          "weightGrams": 6200
+        },
+        {
+          "variantId": "variant-1786125277805-0nrmsu",
+          "units": 12,
+          "lengthCm": 37,
+          "widthCm": 27,
+          "heightCm": 29,
+          "weightGrams": 18000
+        }
+      ]
     },
     {
       "id": "product-1786125523055-ivln6v",
@@ -263,7 +281,25 @@
       "deletedAt": null,
       "lengthCm": 9,
       "widthCm": 9,
-      "heightCm": 31
+      "heightCm": 31,
+      "boxes": [
+        {
+          "variantId": "variant-1786125472992-y1279u",
+          "units": 12,
+          "lengthCm": 30,
+          "widthCm": 30,
+          "heightCm": 24,
+          "weightGrams": 14000
+        },
+        {
+          "variantId": "variant-1786125472992-y1279u",
+          "units": 6,
+          "lengthCm": 30,
+          "widthCm": 25,
+          "heightCm": 17,
+          "weightGrams": 7250
+        }
+      ]
     },
     {
       "id": "product-1786125594468-rlk598",
@@ -387,7 +423,25 @@
       "weightGrams": 1300,
       "lengthCm": 9,
       "widthCm": 9,
-      "heightCm": 31
+      "heightCm": 31,
+      "boxes": [
+        {
+          "variantId": "",
+          "units": 12,
+          "lengthCm": 30,
+          "widthCm": 30,
+          "heightCm": 24,
+          "weightGrams": 14000
+        },
+        {
+          "variantId": "",
+          "units": 6,
+          "lengthCm": 30,
+          "widthCm": 25,
+          "heightCm": 17,
+          "weightGrams": 7250
+        }
+      ]
     }
   ],
   "commerce": {

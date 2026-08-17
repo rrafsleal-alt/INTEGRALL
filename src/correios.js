@@ -119,71 +119,108 @@ export class CorreiosService {
   }
 
   /**
-   * Consolida os itens do pedido em um único pacote.
+   * Consolida os itens do pedido em pacotes (volumes) de envio.
    *
-   * Estratégia: os itens ficam EM PÉ, lado a lado, em uma grade quase quadrada
-   * (obrigatório para garrafas nos Correios e minimiza o peso cúbico, que é
-   * cobrado quando (C×L×A)/6000 excede o peso real). A altura da caixa é a do
-   * item mais alto; se a grade estourar 100cm em um lado, cresce em camadas.
-   * Mínimos dos Correios: 16x11x2 cm; máximos: 100cm/lado, soma <= 200cm, 30kg.
+   * 1. CAIXAS REAIS: se o produto tem caixas cadastradas (`boxes` no catálogo,
+   *    ex.: caixa fechada de 6 ou 12 vinhos com medidas e peso reais), as
+   *    quantidades são encaixadas nas maiores caixas possíveis — medidas e
+   *    pesos exatos, frete mais fiel.
+   * 2. AVULSOS: o restante é empacotado em grade quase quadrada com itens EM
+   *    PÉ (obrigatório para garrafas; minimiza o peso cúbico (C×L×A)/6000).
+   *
+   * Mínimos dos Correios: 16x11x2 cm; máximos: 100cm/lado, 30kg por volume.
+   * Retorna {packages:[{weightGrams,lengthCm,widthCm,heightCm}], missingData, overweight}.
    */
   packOrder(items, productsById) {
-    let totalWeight = 0;
-    let unitCount = 0;
-    let maxUnitLength = 0;
-    let maxUnitWidth = 0;
-    let maxUnitHeight = 0;
+    const packages = [];
+    const loose = [];
     let missingData = false;
 
     for (const line of items || []) {
       const product = productsById.get(line.productId);
       if (!product) { missingData = true; continue; }
-      const variant = line.variantId ? (product.variants || []).find(v => v.id === line.variantId) : null;
+      const variantId = String(line.variantId || '');
+      const variant = variantId ? (product.variants || []).find(v => v.id === variantId) : null;
       const unitWeight = Number(variant?.weightGrams ?? product.weightGrams);
-      const qty = Math.max(1, Number(line.qty) || 1);
+      let qty = Math.max(1, Number(line.qty) || 1);
       if (!Number.isFinite(unitWeight) || unitWeight <= 0) { missingData = true; continue; }
-      totalWeight += unitWeight * qty;
-      unitCount += qty;
-      maxUnitLength = Math.max(maxUnitLength, Math.min(100, Number(product.lengthCm) || 10));
-      maxUnitWidth = Math.max(maxUnitWidth, Math.min(100, Number(product.widthCm) || 10));
-      maxUnitHeight = Math.max(maxUnitHeight, Math.min(100, Number(product.heightCm) || 10));
+
+      // Caixas reais do produto aplicáveis a esta variante (ou genéricas).
+      const boxes = (product.boxes || [])
+        .filter(box => !box.variantId || box.variantId === variantId)
+        .sort((a, b) => b.units - a.units);
+      for (const box of boxes) {
+        while (qty >= box.units) {
+          packages.push({
+            weightGrams: Math.min(box.weightGrams, 30_000),
+            lengthCm: Math.min(100, box.lengthCm),
+            widthCm: Math.min(100, box.widthCm),
+            heightCm: Math.min(100, box.heightCm)
+          });
+          qty -= box.units;
+        }
+      }
+
+      if (qty > 0) {
+        loose.push({
+          qty,
+          weightGrams: unitWeight,
+          lengthCm: Math.min(100, Number(product.lengthCm) || 10),
+          widthCm: Math.min(100, Number(product.widthCm) || 10),
+          heightCm: Math.min(100, Number(product.heightCm) || 10)
+        });
+      }
     }
 
-    // Margem de embalagem: 10% do peso (caixa, proteção) com mínimo de 100g.
-    totalWeight = Math.ceil(totalWeight * 1.1 + 100);
+    // Empacota os avulsos em uma grade quase quadrada, itens em pé.
+    if (loose.length) {
+      let totalWeight = 0;
+      let unitCount = 0;
+      let maxUnitLength = 0;
+      let maxUnitWidth = 0;
+      let maxUnitHeight = 0;
+      for (const item of loose) {
+        totalWeight += item.weightGrams * item.qty;
+        unitCount += item.qty;
+        maxUnitLength = Math.max(maxUnitLength, item.lengthCm);
+        maxUnitWidth = Math.max(maxUnitWidth, item.widthCm);
+        maxUnitHeight = Math.max(maxUnitHeight, item.heightCm);
+      }
+      // Margem de embalagem: 10% do peso (caixa, proteção) com mínimo de 100g.
+      totalWeight = Math.ceil(totalWeight * 1.1 + 100);
 
-    // Grade quase quadrada com itens em pé; +2cm de proteção por lado.
-    let lengthCm = 16;
-    let widthCm = 11;
-    let heightCm = 10;
-    if (unitCount > 0) {
       let columns = Math.max(1, Math.ceil(Math.sqrt(unitCount)));
       let rows = Math.max(1, Math.ceil(unitCount / columns));
       let layers = 1;
-      // Se a grade de uma camada estourar 100cm, distribui em camadas.
       while ((columns * maxUnitLength + 4 > 100 || rows * maxUnitWidth + 4 > 100) && layers < 10) {
         layers += 1;
         const perLayer = Math.ceil(unitCount / layers);
         columns = Math.max(1, Math.ceil(Math.sqrt(perLayer)));
         rows = Math.max(1, Math.ceil(perLayer / columns));
       }
-      lengthCm = Math.min(100, columns * maxUnitLength + 4);
-      widthCm = Math.min(100, rows * maxUnitWidth + 4);
-      heightCm = Math.min(100, layers * maxUnitHeight + 4);
+      packages.push({
+        weightGrams: Math.min(totalWeight, 30_000),
+        lengthCm: Math.max(16, Math.round(Math.min(100, columns * maxUnitLength + 4))),
+        widthCm: Math.max(11, Math.round(Math.min(100, rows * maxUnitWidth + 4))),
+        heightCm: Math.max(2, Math.round(Math.min(100, layers * maxUnitHeight + 4))),
+        loose: true,
+        looseWeightRaw: totalWeight
+      });
     }
 
-    return {
-      weightGrams: Math.min(totalWeight, 30_000),
-      lengthCm: Math.max(16, Math.round(lengthCm)),
-      widthCm: Math.max(11, Math.round(widthCm)),
-      heightCm: Math.max(2, Math.round(heightCm)),
-      missingData,
-      overweight: totalWeight > 30_000
-    };
+    if (!packages.length) {
+      packages.push({weightGrams: 300, lengthCm: 16, widthCm: 11, heightCm: 10});
+    }
+
+    const overweight = packages.some(pkg => (pkg.looseWeightRaw || pkg.weightGrams) > 30_000);
+    return {packages, missingData, overweight};
   }
 
   cacheKey(cepDestino, pack, declaredCents) {
-    return `${cepDestino}|${pack.weightGrams}|${pack.lengthCm}x${pack.widthCm}x${pack.heightCm}|${declaredCents || 0}`;
+    const volumes = pack.packages
+      .map(pkg => `${pkg.weightGrams}:${pkg.lengthCm}x${pkg.widthCm}x${pkg.heightCm}`)
+      .join('+');
+    return `${cepDestino}|${volumes}|${declaredCents || 0}`;
   }
 
   /**
@@ -205,21 +242,32 @@ export class CorreiosService {
 
     const declared = Number.isSafeInteger(declaredCents) && declaredCents > 0
       ? Math.min(declaredCents, 10_000_000) : 0;
-    const priceParams = this.services.map((service, index) => ({
-      coProduto: service.code,
-      nuRequisicao: String(index + 1),
-      cepOrigem: this.originCep,
-      cepDestino: destination,
-      psObjeto: String(pack.weightGrams),
-      tpObjeto: '2',
-      comprimento: String(pack.lengthCm),
-      largura: String(pack.widthCm),
-      altura: String(pack.heightCm),
-      ...(declared > 0 ? {
-        servicosAdicionais: [{coServAdicional: '019'}],
-        vlDeclarado: (declared / 100).toFixed(2)
-      } : {})
-    }));
+    const volumes = pack.packages;
+    // Valor declarado distribuído proporcionalmente ao peso de cada volume.
+    const totalWeight = volumes.reduce((sum, pkg) => sum + pkg.weightGrams, 0) || 1;
+    // Uma requisição por (serviço × volume); a API aceita lote de parâmetros.
+    const priceParams = [];
+    for (const [serviceIndex, service] of this.services.entries()) {
+      for (const [volumeIndex, pkg] of volumes.entries()) {
+        const declaredShare = declared > 0
+          ? Math.max(1, Math.round(declared * pkg.weightGrams / totalWeight)) : 0;
+        priceParams.push({
+          coProduto: service.code,
+          nuRequisicao: String(serviceIndex * volumes.length + volumeIndex + 1),
+          cepOrigem: this.originCep,
+          cepDestino: destination,
+          psObjeto: String(pkg.weightGrams),
+          tpObjeto: '2',
+          comprimento: String(pkg.lengthCm),
+          largura: String(pkg.widthCm),
+          altura: String(pkg.heightCm),
+          ...(declaredShare > 0 ? {
+            servicosAdicionais: [{coServAdicional: '019'}],
+            vlDeclarado: (declaredShare / 100).toFixed(2)
+          } : {})
+        });
+      }
+    }
 
     const prazoParams = this.services.map((service, index) => ({
       coProduto: service.code,
@@ -239,19 +287,33 @@ export class CorreiosService {
       if (item?.coProduto && Number.isFinite(days)) prazoByService.set(String(item.coProduto), days);
     }
 
-    const options = [];
+    // Soma o preço de todos os volumes por serviço; o serviço só é oferecido
+    // se TODOS os volumes tiverem preço válido.
+    const totals = new Map();
     for (const item of Array.isArray(priceData) ? priceData : []) {
-      if (!item || item.txErro) continue;
+      if (!item) continue;
+      const code = String(item.coProduto || '');
+      const entry = totals.get(code) || {sumCents: 0, count: 0, failed: false};
+      if (item.txErro) { entry.failed = true; totals.set(code, entry); continue; }
       const raw = String(item.pcFinal ?? item.pcProduto ?? '').replace(/\./g, '').replace(',', '.');
       const price = Number(raw);
-      if (!Number.isFinite(price) || price <= 0) continue;
-      const service = this.services.find(entry => entry.code === String(item.coProduto));
-      const days = prazoByService.get(String(item.coProduto));
+      if (!Number.isFinite(price) || price <= 0) { entry.failed = true; totals.set(code, entry); continue; }
+      entry.sumCents += Math.round(price * 100);
+      entry.count += 1;
+      totals.set(code, entry);
+    }
+
+    const options = [];
+    for (const service of this.services) {
+      const entry = totals.get(service.code);
+      if (!entry || entry.failed || entry.count !== volumes.length) continue;
+      const days = prazoByService.get(service.code);
       options.push({
-        code: String(item.coProduto),
-        label: service?.label || String(item.coProduto),
-        priceCents: Math.round(price * 100),
-        days: Number.isFinite(days) ? days : null
+        code: service.code,
+        label: service.label,
+        priceCents: entry.sumCents,
+        days: Number.isFinite(days) ? days : null,
+        volumes: volumes.length
       });
     }
 
