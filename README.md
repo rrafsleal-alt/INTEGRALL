@@ -32,7 +32,7 @@ Novas rotas: `POST /api/shipping/quote` (pública), `GET /api/admin/products`, `
 
 ### Jadlog (opcional, soma-se aos Correios)
 
-A loja pode cotar **Correios e Jadlog ao mesmo tempo**: o cliente vê todas as opções (PAC, SEDEX, Jadlog .Package) ordenadas por preço e escolhe. Falha de uma transportadora não derruba a outra.
+**Regra de divisão (`CARRIER_SPLIT_UNITS`, padrão 12):** pedidos com até 12 unidades (1 caixa) são cotados pelos **Correios**; acima de 12 unidades, pela **Jadlog** (multi-volume nos Correios sai caro; a Jadlog ganha em carga maior). A regra é imposta pelo servidor — o navegador não consegue forçar a transportadora "errada". Se a preferida estiver fora do ar ou sem credenciais, a outra assume automaticamente. Use `CARRIER_SPLIT_UNITS=0` para desativar (as duas cotam sempre e o cliente escolhe).
 
 1. Peça o **token de integração** à franquia Jadlog que atende seu CNPJ (é ela quem solicita ao comercial).
 2. Preencha `JADLOG_TOKEN`, `JADLOG_CNPJ` e, se correntista, `JADLOG_CONTA`/`JADLOG_CONTRATO`.

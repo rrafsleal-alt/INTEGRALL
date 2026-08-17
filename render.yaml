@@ -58,6 +58,8 @@ services:
         sync: false
       - key: JADLOG_MODALIDADE
         value: "3"
+      - key: CARRIER_SPLIT_UNITS
+        value: "12"
       - key: SMTP_HOST
         sync: false
       - key: SMTP_PORT

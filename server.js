@@ -196,29 +196,65 @@ function estimateSubtotalCents(items, productsById) {
 
 const carrierShippingEnabled = () => config.shippingMode === 'correios' && (correios.configured || jadlog.configured);
 
-/**
- * Consulta todas as transportadoras configuradas em paralelo e retorna as
- * opções combinadas, ordenadas por preço. Falha de uma transportadora não
- * derruba a outra; se todas falharem, propaga o primeiro erro.
- */
-async function quoteAllCarriers(cep, pack, declaredCents) {
-  const carriers = [];
-  if (correios.configured) carriers.push({name: 'Correios', prefixLabel: label => `Correios ${label}`, service: correios});
-  if (jadlog.configured) carriers.push({name: 'Jadlog', prefixLabel: label => label, service: jadlog});
-  if (!carriers.length) throw new Error('Nenhuma transportadora configurada.');
-
-  const settled = await Promise.allSettled(carriers.map(carrier => carrier.service.quote(cep, pack, declaredCents)));
-  const options = [];
-  const errors = [];
-  for (const [index, result] of settled.entries()) {
-    if (result.status === 'fulfilled') {
-      for (const option of result.value.options) {
-        options.push({...option, label: carriers[index].prefixLabel(option.label)});
-      }
-    } else {
-      errors.push(`${carriers[index].name}: ${result.reason?.message || result.reason}`);
-    }
+/** Total de unidades físicas do pedido (garrafas, caixas de biscoito etc.). */
+function countOrderUnits(items) {
+  let units = 0;
+  for (const line of Array.isArray(items) ? items : []) {
+    units += Math.max(1, Math.min(999, Number(line?.qty) || 1));
   }
+  return units;
+}
+
+/**
+ * Consulta as transportadoras elegíveis em paralelo e retorna as opções
+ * combinadas, ordenadas por preço.
+ *
+ * REGRA DE DIVISÃO (CARRIER_SPLIT_UNITS, padrão 12): pedidos de até N
+ * unidades são enviados pelos Correios; acima de N unidades, pela Jadlog
+ * (multi-volume nos Correios sai caro; a Jadlog ganha em carga maior).
+ * Se a transportadora preferida não estiver configurada ou falhar, a outra
+ * entra como reserva — o cliente nunca fica sem frete por causa da regra.
+ */
+async function quoteAllCarriers(cep, pack, declaredCents, totalUnits = 0) {
+  const available = [];
+  if (correios.configured) available.push({name: 'Correios', prefixLabel: label => `Correios ${label}`, service: correios});
+  if (jadlog.configured) available.push({name: 'Jadlog', prefixLabel: label => label, service: jadlog});
+  if (!available.length) throw new Error('Nenhuma transportadora configurada.');
+
+  let carriers = available;
+  const split = config.carrierSplitUnits;
+  if (split > 0 && available.length > 1) {
+    const preferredName = totalUnits > split ? 'Jadlog' : 'Correios';
+    carriers = available.filter(carrier => carrier.name === preferredName);
+    if (!carriers.length) carriers = available;
+  }
+
+  const attempt = async group => {
+    const settled = await Promise.allSettled(group.map(carrier => carrier.service.quote(cep, pack, declaredCents)));
+    const options = [];
+    const errors = [];
+    for (const [index, result] of settled.entries()) {
+      if (result.status === 'fulfilled') {
+        for (const option of result.value.options) {
+          options.push({...option, label: group[index].prefixLabel(option.label)});
+        }
+      } else {
+        errors.push(`${group[index].name}: ${result.reason?.message || result.reason}`);
+      }
+    }
+    return {options, errors};
+  };
+
+  let {options, errors} = await attempt(carriers);
+
+  // Fallback: se a transportadora preferida pela regra falhou, tenta as demais.
+  if (!options.length && carriers.length < available.length) {
+    const backup = available.filter(carrier => !carriers.includes(carrier));
+    const retry = await attempt(backup);
+    options = retry.options;
+    errors = errors.concat(retry.errors);
+  }
+
   if (!options.length) throw new Error(errors.join(' | ') || 'Nenhuma transportadora retornou preço.');
   if (errors.length) console.error('Transportadora(s) indisponível(is) na cotação:', errors.join(' | '));
   options.sort((a, b) => a.priceCents - b.priceCents);
@@ -233,7 +269,7 @@ async function resolveCorreiosShipping(body, catalog) {
     const pack = correios.packOrder(Array.isArray(body.items) ? body.items : [], productsById);
     const requestedService = cleanText(body?.shipping?.service, 20);
     const declaredCents = estimateSubtotalCents(body.items, productsById);
-    const result = await quoteAllCarriers(body.shipping.cep, pack, declaredCents);
+    const result = await quoteAllCarriers(body.shipping.cep, pack, declaredCents, countOrderUnits(body.items));
     const chosen = (requestedService && result.options.find(option => option.code === requestedService)) || result.cheapest;
     return {
       priceCents: chosen.priceCents,
@@ -260,7 +296,7 @@ app.post('/api/shipping/quote', statusLimiter, publicJson, asyncRoute(async (req
   const productsById = new Map(catalog.products.map(product => [product.id, product]));
   const pack = correios.packOrder(items, productsById);
   try {
-    const result = await quoteAllCarriers(cep, pack, estimateSubtotalCents(items, productsById));
+    const result = await quoteAllCarriers(cep, pack, estimateSubtotalCents(items, productsById), countOrderUnits(items));
     res.json({
       options: result.options.map(option => ({
         service: option.code,

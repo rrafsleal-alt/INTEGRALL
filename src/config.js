@@ -54,6 +54,10 @@ export const config = Object.freeze({
   jadlogTpEntrega: text('JADLOG_TP_ENTREGA', 'D').toUpperCase() === 'R' ? 'R' : 'D',
   jadlogBaseUrl: text('JADLOG_BASE_URL'),
 
+  // Regra de divisão entre transportadoras: até N unidades → Correios;
+  // acima de N unidades → Jadlog. 0 desativa (todas cotam sempre).
+  carrierSplitUnits: Math.max(0, Math.min(999, int('CARRIER_SPLIT_UNITS', 12) ?? 12)),
+
   // E-mail transacional (SMTP)
   smtpHost: text('SMTP_HOST'),
   smtpPort: int('SMTP_PORT', 587) ?? 587,
