@@ -95,3 +95,14 @@ test('mutateCatalog aplica mutação sobre o estado mais recente e propaga erros
   const unchanged = await repo.getCatalog();
   assert.equal(unchanged.products[0].price, 2000);
 });
+
+test('busca com % e _ é tratada literalmente (sem curinga acidental)', async () => {
+  const repo = new Repository({databaseUrl: '', initialCatalog: {version: 9, settings: {}, commerce: {}, coupons: [], products: []}, production: false});
+  await repo.init();
+  const base = {createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), status: 'received', items: [], subtotalCents: 1000, shippingCents: 0, totalCents: 1000, payment: {}};
+  await repo.createOrder({...base, id: 'A1', clientOrderId: 'c1', customer: {name: 'Suco 100% Integral', email: 'a@a.com'}});
+  await repo.createOrder({...base, id: 'A2', clientOrderId: 'c2', customer: {name: 'Maria Comum', email: 'b@b.com'}});
+  const hits = await repo.listOrders({search: '100%'});
+  assert.equal(hits.length, 1);
+  assert.equal(hits[0].id, 'A1');
+});

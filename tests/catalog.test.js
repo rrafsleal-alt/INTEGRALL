@@ -340,3 +340,16 @@ test('frete grátis por limiar vence o modo correios', () => {
   assert.equal(free.priceCents, 0);
   assert.equal(free.label, 'Frete grátis');
 });
+
+test('catálogo público sincroniza modo/valores de frete do servidor', () => {
+  const synced = publicCatalog(catalog, {...baseConfig, shippingMode: 'fixed', shippingFixedCents: 1500, freeShippingCents: 30000});
+  assert.equal(synced.settings.shipMode, 'fixed');
+  assert.equal(synced.settings.fixed, 1500);
+  assert.equal(synced.settings.free, 30000);
+  // modo correios aparece para o front como 'quote' (o front usa /api/shipping/quote)
+  const correiosMode = publicCatalog(catalog, {...baseConfig, shippingMode: 'correios'});
+  assert.equal(correiosMode.settings.shipMode, 'quote');
+  // sem config de servidor, mantém o que está no catálogo
+  const untouched = publicCatalog(catalog, {...baseConfig, shippingMode: '', shippingFixedCents: null, freeShippingCents: null});
+  assert.equal(untouched.settings.shipMode, catalog.settings.shipMode);
+});

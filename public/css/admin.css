@@ -27,3 +27,4 @@
 .pf-missing{color:var(--bad);font-size:11px}
 @media(max-width:900px){.product-form-grid{grid-template-columns:1fr 1fr}.pf-variant{grid-template-columns:1fr 1fr}}
 @media(max-width:560px){.product-form-grid{grid-template-columns:1fr}.pf-variant{grid-template-columns:1fr}}
+.gift-message{padding:6px 10px;margin:2px 0 8px;background:#fff8e6;border-left:3px solid var(--gold);font-size:12px;color:#7a5311;font-style:italic}

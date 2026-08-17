@@ -202,7 +202,7 @@ export function orderEmail(order, {kind = 'created', publicUrl = '', businessNam
     : `${businessName} — Pedido ${order.id}: ${status}`;
 
   const itemsText = (order.items || [])
-    .map(item => `  ${item.qty}× ${item.name}${item.variant ? ` (${item.variant})` : ''} — ${money(item.lineTotalCents)}`)
+    .map(item => `  ${item.qty}× ${item.name}${item.variant ? ` (${item.variant})` : ''}${item.gift ? ' [PRESENTE]' : ''} — ${money(item.lineTotalCents)}${item.gift && item.giftMessage ? `\n    Mensagem: “${item.giftMessage}”` : ''}`)
     .join('\n');
 
   const shippingLine = order.shipping?.choice === 'pickup'
@@ -241,7 +241,7 @@ export function orderEmail(order, {kind = 'created', publicUrl = '', businessNam
   ].filter(line => line !== null).join('\n');
 
   const itemsHtml = (order.items || [])
-    .map(item => `<tr><td style="padding:6px 10px;border-bottom:1px solid #eee">${item.qty}× ${escapeHtml(item.name)}${item.variant ? ` <small>(${escapeHtml(item.variant)})</small>` : ''}</td><td style="padding:6px 10px;border-bottom:1px solid #eee;text-align:right">${money(item.lineTotalCents)}</td></tr>`)
+    .map(item => `<tr><td style="padding:6px 10px;border-bottom:1px solid #eee">${item.qty}× ${escapeHtml(item.name)}${item.variant ? ` <small>(${escapeHtml(item.variant)})</small>` : ''}${item.gift ? ' 🎁' : ''}${item.gift && item.giftMessage ? `<br><small style="color:#aa8952;font-style:italic">Mensagem: “${escapeHtml(item.giftMessage)}”</small>` : ''}</td><td style="padding:6px 10px;border-bottom:1px solid #eee;text-align:right;vertical-align:top">${money(item.lineTotalCents)}</td></tr>`)
     .join('');
 
   const html = `<!doctype html><html lang="pt-BR"><body style="margin:0;background:#faf9f7;font-family:Arial,Helvetica,sans-serif;color:#211e1c">

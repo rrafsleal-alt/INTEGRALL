@@ -64,3 +64,17 @@ test('frete sob cotação aparece como "a confirmar"', () => {
   assert.match(text, /frete a confirmar/i);
   assert.match(text, /\+ frete/);
 });
+
+test('itens de presente aparecem no e-mail com a mensagem', () => {
+  const {text, html} = orderEmail({
+    ...ORDER,
+    items: [{qty: 1, name: 'Vinho Tinto Seco', variant: '750ml', lineTotalCents: 2699, gift: true, giftMessage: 'Feliz aniversário, Ana!'}]
+  }, {kind: 'created'});
+  assert.match(text, /\[PRESENTE\]/);
+  assert.match(text, /Feliz aniversário, Ana!/);
+  assert.match(html, /🎁/);
+  assert.match(html, /Feliz aniversário, Ana!/);
+  // sanitizado
+  const evil = orderEmail({...ORDER, items: [{qty: 1, name: 'X', variant: '', lineTotalCents: 100, gift: true, giftMessage: '<img src=x onerror=alert(1)>'}]}, {kind: 'created'});
+  assert.ok(!evil.html.includes('<img src=x'));
+});

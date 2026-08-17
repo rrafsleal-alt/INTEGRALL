@@ -91,13 +91,19 @@
     } catch {}
   }
 
+  // A referência do último pedido (número + autorização de consulta) persiste
+  // em localStorage para que o cliente possa voltar depois — inclusive pelo
+  // link do e-mail de confirmação. A consulta pública não expõe dados
+  // pessoais (ver publicOrder no servidor), apenas status/valores/rastreio.
   function saveLastOrder(value) {
+    try { localStorage.setItem(LAST_ORDER_KEY, JSON.stringify(value)); } catch {}
     try { sessionStorage.setItem(LAST_ORDER_KEY, JSON.stringify(value)); } catch {}
   }
 
   function loadLastOrder() {
     try {
-      const value = JSON.parse(sessionStorage.getItem(LAST_ORDER_KEY) || 'null');
+      const raw = localStorage.getItem(LAST_ORDER_KEY) || sessionStorage.getItem(LAST_ORDER_KEY) || 'null';
+      const value = JSON.parse(raw);
       return value && typeof value === 'object' ? value : null;
     } catch { return null; }
   }
@@ -965,6 +971,26 @@
         delete shippingNode.dataset.syncing;
       }
     }).observe(shippingNode, {characterData: true, childList: true, subtree: true});
+    handleOrderDeepLink();
+  }
+
+  /**
+   * Link do e-mail de confirmação (?pedido=INT-...): abre o acompanhamento
+   * automaticamente. A autorização (checkoutToken) vem do armazenamento local
+   * do cliente; se ele abrir em outro dispositivo, orienta usar o mesmo
+   * navegador da compra ou falar com a loja.
+   */
+  async function handleOrderDeepLink() {
+    const query = new URLSearchParams(location.search);
+    const requested = cleanText(query.get('pedido'), 120);
+    if (!requested) return;
+    query.delete('pedido');
+    history.replaceState(null, '', location.pathname + (query.toString() ? `?${query}` : '') + location.hash);
+    const reference = loadLastOrder();
+    if (reference?.id === requested && reference?.checkoutToken) {
+      try { await fetchOrderStatus(reference); return; } catch {}
+    }
+    notify(`Para acompanhar o pedido ${requested}, abra este link no mesmo navegador em que a compra foi feita — ou fale com a INTEGRALL informando o número.`, 'bad');
   }
 
   globalThis.__integrallCheckout = Object.freeze({refreshConfig, config, handlePaymentReturn, showLastOrder: () => fetchOrderStatus()});

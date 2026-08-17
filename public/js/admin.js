@@ -126,7 +126,14 @@
     ); summary.append(grid); details.append(summary);
 
     const items=section('Itens');
-    for(const item of order.items||[]){const row=document.createElement('div');row.className='item-row';const left=document.createElement('span');left.textContent=`${item.qty}× ${item.name}${item.variant?` — ${item.variant}`:''}`;const right=document.createElement('b');right.textContent=money(item.lineTotalCents);row.append(left,right);items.append(row)} details.append(items);
+    for(const item of order.items||[]){
+      const row=document.createElement('div');row.className='item-row';
+      const left=document.createElement('span');
+      left.textContent=`${item.qty}× ${item.name}${item.variant?` — ${item.variant}`:''}${item.gift?' 🎁 PRESENTE':''}`;
+      const right=document.createElement('b');right.textContent=money(item.lineTotalCents);
+      row.append(left,right);items.append(row);
+      if(item.gift&&item.giftMessage){const msg=document.createElement('div');msg.className='gift-message';msg.textContent=`Mensagem do presente: “${item.giftMessage}”`;items.append(msg)}
+    } details.append(items);
     if(order.customer?.note){const notes=section('Observações');const p=document.createElement('p');p.textContent=order.customer.note;notes.append(p);details.append(notes)}
     if(Array.isArray(order.inventoryWarnings)&&order.inventoryWarnings.length){const warning=section('Aviso de estoque');const box=document.createElement('div');box.className='warning-box';box.textContent=order.inventoryWarnings.join(' • ');warning.append(box);details.append(warning)}
 

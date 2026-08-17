@@ -12,6 +12,11 @@ function digits(value) {
   return String(value || '').replace(/\D/g, '');
 }
 
+/** Escapa curingas do LIKE (% e _) para que a busca seja literal. */
+function likePattern(term) {
+  return `%${String(term).replace(/([\\%_])/g, '\\$1')}%`;
+}
+
 function customerKey(customer = {}) {
   const email = String(customer.email || '').trim().toLowerCase();
   const phone = digits(customer.phone);
@@ -333,7 +338,7 @@ export class Repository {
         .slice(0, safeLimit);
     }
 
-    const pattern = q ? `%${q}%` : '';
+    const pattern = q ? likePattern(q) : '';
     const {rows} = await this.pool.query(
       `SELECT data
          FROM integrall_orders
@@ -362,7 +367,7 @@ export class Repository {
         .sort((a, b) => String(b.lastOrderAt || '').localeCompare(String(a.lastOrderAt || '')))
         .slice(0, safeLimit);
     }
-    const pattern = q ? `%${q}%` : '';
+    const pattern = q ? likePattern(q) : '';
     const {rows} = await this.pool.query(
       `SELECT data FROM integrall_customers
        WHERE ($1 = '' OR LOWER(CONCAT_WS(' ', COALESCE(data->>'name',''), COALESCE(data->>'email',''), COALESCE(data->>'phone',''))) LIKE $1)

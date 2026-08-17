@@ -358,6 +358,17 @@ export function publicCatalog(catalog, serverConfig) {
     card: Boolean(serverConfig.mercadoPagoAccessToken && serverConfig.mercadoPagoWebhookSecret)
   };
   result.settings.whatsapp = cleanText(serverConfig.whatsappNumber || result.settings.whatsapp, 40);
+  // Sincroniza a configuração de frete efetiva do SERVIDOR no catálogo
+  // público: o cálculo local do front (modo fixed/zones/frete grátis) passa a
+  // usar os mesmos números que o backend cobrará — sem estimativa divergente.
+  const serverShipMode = cleanText(serverConfig.shippingMode, 20).toLowerCase();
+  if (serverShipMode) {
+    // O front não conhece o modo 'correios'; ele exibe as opções cotadas via
+    // /api/shipping/quote. Para o cálculo local, 'correios' equivale a 'quote'.
+    result.settings.shipMode = serverShipMode === 'correios' ? 'quote' : serverShipMode;
+  }
+  if (serverConfig.shippingFixedCents != null) result.settings.fixed = cents(serverConfig.shippingFixedCents, result.settings.fixed);
+  if (serverConfig.freeShippingCents != null) result.settings.free = cents(serverConfig.freeShippingCents, result.settings.free);
   return result;
 }
 
