@@ -110,3 +110,32 @@ test('mais de 3 volumes são fatiados em múltiplas chamadas', async () => {
   assert.equal(result.cheapest.priceCents, 5000);
   assert.equal(result.cheapest.volumes, 5);
 });
+
+test('rastreio Jadlog normaliza eventos (mais recente primeiro)', async () => {
+  const fetchImpl = async (url, options) => {
+    assert.match(url, /tracking\/consultar/);
+    const body = JSON.parse(options.body);
+    assert.deepEqual(body.consulta, [{shipmentId: '12345678901234'}]);
+    return {ok: true, status: 200, json: async () => ({consulta: [{
+      codigo: '000000001',
+      tracking: {
+        codigo: '12345678901234',
+        status: 'EM ROTA',
+        eventos: [
+          {data: '2026-08-16 09:00:00', status: 'EMISSAO', unidade: 'PA BAURU'},
+          {data: '2026-08-17 15:00:00', status: 'EM ROTA DE ENTREGA', unidade: 'PA SAO PAULO'}
+        ]
+      },
+      previsaoEntrega: '2026-08-19'
+    }]})};
+  };
+  const service = new JadlogService({...CONFIG, fetchImpl});
+  const result = await service.trackShipment('12345678901234');
+  assert.equal(result.carrier, 'Jadlog');
+  assert.equal(result.events[0].description, 'EM ROTA DE ENTREGA');
+  assert.equal(result.events[0].location, 'PA SAO PAULO');
+  assert.equal(result.expectedDelivery, '2026-08-19');
+
+  const notFound = new JadlogService({...CONFIG, fetchImpl: async () => ({ok: true, status: 200, json: async () => ({consulta: [{erro: {descricao: 'Não localizado'}}]})})});
+  await assert.rejects(() => notFound.trackShipment('99999999999999'), /Não localizado/);
+});

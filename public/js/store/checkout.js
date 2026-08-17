@@ -630,15 +630,21 @@
         const code = document.createElement('b');
         code.textContent = order.trackingCode;
         trackingBox.append(label, code);
+        const events = document.createElement('div');
+        events.className = 'tracking-events';
+        events.id = 'trackingEvents';
+        events.textContent = 'Consultando a transportadora…';
+        trackingBox.append(events);
         if (order.trackingUrl && /^https:\/\//i.test(order.trackingUrl)) {
           const link = document.createElement('a');
           link.href = order.trackingUrl;
           link.target = '_blank';
           link.rel = 'noopener noreferrer';
-          link.textContent = 'Acompanhar entrega';
+          link.textContent = 'Ver no site da transportadora';
           trackingBox.append(link);
         }
         trackingBox.hidden = false;
+        loadTrackingEvents(order);
       } else {
         trackingBox.hidden = true;
       }
@@ -662,6 +668,56 @@
     const app = globalThis.__integrallApp;
     $('#orderSupportButton').hidden = !(digits(app?.getState?.()?.settings?.whatsapp || cfg.supportPhone) || cfg.supportEmail);
     modal.classList.add('open'); modal.setAttribute('aria-hidden', 'false'); document.body.classList.add('lock');
+  }
+
+  async function loadTrackingEvents(order) {
+    const container = $('#trackingEvents');
+    if (!container) return;
+    const reference = loadLastOrder();
+    if (!reference?.id || !reference?.checkoutToken) { container.textContent = ''; return; }
+    try {
+      const data = await globalThis.IntegrallApi.request('/api/orders/tracking', {
+        method: 'POST',
+        body: JSON.stringify({orderId: reference.id, checkoutToken: reference.checkoutToken})
+      });
+      container.replaceChildren();
+      if (data.expectedDelivery) {
+        const eta = document.createElement('div');
+        eta.className = 'tracking-eta';
+        try {
+          eta.textContent = `Previsão de entrega: ${new Date(data.expectedDelivery).toLocaleDateString('pt-BR')}`;
+        } catch { eta.textContent = `Previsão de entrega: ${data.expectedDelivery}`; }
+        container.append(eta);
+      }
+      const events = Array.isArray(data.events) ? data.events.slice(0, 8) : [];
+      if (!events.length) {
+        container.append(Object.assign(document.createElement('div'), {className: 'tracking-note', textContent: 'A transportadora ainda não registrou movimentações. Volte mais tarde.'}));
+        return;
+      }
+      for (const [index, event] of events.entries()) {
+        const row = document.createElement('div');
+        row.className = `tracking-event${index === 0 ? ' latest' : ''}`;
+        const dot = document.createElement('span');
+        dot.className = 'tracking-dot';
+        const copy = document.createElement('div');
+        const title = document.createElement('b');
+        title.textContent = event.description || 'Atualização';
+        const meta = document.createElement('small');
+        const when = event.at ? formatDate(event.at) : '';
+        meta.textContent = [when, event.location].filter(Boolean).join(' • ');
+        copy.append(title, meta);
+        row.append(dot, copy);
+        container.append(row);
+      }
+    } catch (error) {
+      container.textContent = '';
+      const note = document.createElement('div');
+      note.className = 'tracking-note';
+      note.textContent = error?.message?.includes('não está configurado')
+        ? 'Acompanhe pelo link da transportadora abaixo.'
+        : (error?.message || 'Rastreamento indisponível no momento — tente novamente mais tarde.');
+      container.append(note);
+    }
   }
 
   async function fetchOrderStatus(reference = loadLastOrder()) {

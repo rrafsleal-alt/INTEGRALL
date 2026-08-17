@@ -75,6 +75,35 @@ export class JadlogService {
   }
 
   /**
+   * Consulta o rastreamento de uma remessa (Consulta do Tracking, manual v2.3).
+   * POST /embarcador/api/tracking/consultar com {consulta:[{shipmentId}]} ou codigo.
+   * Retorna eventos normalizados (mais recente primeiro).
+   */
+  async trackShipment(trackingCode) {
+    const code = String(trackingCode || '').trim();
+    if (!code) throw new Error('Código de rastreio inválido.');
+    const query = /^\d{8,14}$/.test(code) ? {shipmentId: code} : {codigo: code};
+    const response = await this.fetch(`${this.base}/embarcador/api/tracking/consultar`, {
+      method: 'POST',
+      headers: {Authorization: this.token, 'Content-Type': 'application/json', Accept: 'application/json'},
+      body: JSON.stringify({consulta: [query]}),
+      signal: AbortSignal.timeout(10_000)
+    });
+    if (!response.ok) throw new Error(`Rastro Jadlog indisponível (HTTP ${response.status}).`);
+    const data = await response.json();
+    const entry = Array.isArray(data?.consulta) ? data.consulta[0] : null;
+    const tracking = entry?.tracking;
+    if (!tracking) throw new Error(entry?.erro?.descricao || 'Remessa não encontrada na Jadlog.');
+    const events = (Array.isArray(tracking.eventos) ? tracking.eventos : []).map(event => ({
+      at: event.data || '',
+      description: String(event.status || '').slice(0, 200),
+      detail: '',
+      location: String(event.unidade || '').slice(0, 120)
+    })).reverse();
+    return {carrier: 'Jadlog', code, expectedDelivery: entry.previsaoEntrega || '', events};
+  }
+
+  /**
    * Cota o frete para os volumes do pedido. Retorna a mesma forma dos demais
    * transportadores: {options: [{code, label, priceCents, days, volumes}], cheapest}.
    */

@@ -230,6 +230,33 @@ export class CorreiosService {
    * (019 = VD Nacional Premium/Padrão), incluindo o seguro no preço final —
    * essencial para envio de garrafas de vidro.
    */
+  /**
+   * Consulta os eventos de rastreamento de um objeto (API Rastro / SRO).
+   * GET /srorastro/v1/objetos/{codigo}?resultado=T — manual V2.4, seção 14.
+   * Retorna eventos normalizados: [{at, description, detail, location}] (mais recente primeiro).
+   */
+  async trackShipment(trackingCode) {
+    const code = String(trackingCode || '').trim().toUpperCase();
+    if (!/^[A-Z]{2}\d{9}[A-Z]{2}$/.test(code)) throw new Error('Código de rastreio inválido.');
+    const token = await this.authenticate();
+    const response = await this.fetch(`${this.base}/srorastro/v1/objetos/${encodeURIComponent(code)}?resultado=T`, {
+      method: 'GET',
+      headers: {Authorization: `Bearer ${token}`, Accept: 'application/json'},
+      signal: AbortSignal.timeout(10_000)
+    });
+    if (!response.ok) throw new Error(`Rastro Correios indisponível (HTTP ${response.status}).`);
+    const data = await response.json();
+    const object = Array.isArray(data?.objetos) ? data.objetos[0] : null;
+    if (!object || object.mensagem) throw new Error(object?.mensagem || 'Objeto não encontrado nos Correios.');
+    const events = (Array.isArray(object.eventos) ? object.eventos : []).map(event => ({
+      at: event.dtHrCriado || '',
+      description: String(event.descricao || '').slice(0, 200),
+      detail: String(event.detalhe || '').slice(0, 300),
+      location: [event.unidade?.endereco?.cidade, event.unidade?.endereco?.uf].filter(Boolean).join(' - ')
+    }));
+    return {carrier: 'Correios', code, expectedDelivery: object.dtPrevista || '', events};
+  }
+
   async quote(cepDestino, pack, declaredCents = 0) {
     const destination = digits(cepDestino).slice(0, 8);
     if (destination.length !== 8) throw new Error('CEP de destino inválido.');

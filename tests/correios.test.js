@@ -193,3 +193,30 @@ test('erros da API viram mensagens claras', async () => {
   await assert.rejects(() => service.quote('01001000', packHeavy), /30kg/i);
   await assert.rejects(() => service.quote('123', {packages: [], missingData: false, overweight: false}), /CEP/i);
 });
+
+test('rastreio Correios normaliza eventos da API Rastro', async () => {
+  const fetchImpl = async (url, options) => {
+    if (url.includes('/token/')) return {ok: true, status: 200, json: async () => ({token: 't', expiraEm: new Date(Date.now() + 3600_000).toISOString()})};
+    if (url.includes('/srorastro/')) {
+      assert.match(url, /AA123456789BR/);
+      assert.equal(options.headers.Authorization, 'Bearer t');
+      return {ok: true, status: 200, json: async () => ({objetos: [{
+        codObjeto: 'AA123456789BR',
+        dtPrevista: '2026-08-20T20:00:00',
+        eventos: [
+          {codigo: 'BDE', dtHrCriado: '2026-08-18T14:00:00', descricao: 'Objeto entregue ao destinatário', unidade: {endereco: {cidade: 'SAO PAULO', uf: 'SP'}}},
+          {codigo: 'PO', dtHrCriado: '2026-08-16T10:00:00', descricao: 'Objeto postado', unidade: {endereco: {cidade: 'CAFELANDIA', uf: 'SP'}}}
+        ]
+      }]})};
+    }
+    throw new Error('URL inesperada: ' + url);
+  };
+  const service = new CorreiosService({...CONFIG, fetchImpl});
+  const result = await service.trackShipment('aa123456789br');
+  assert.equal(result.carrier, 'Correios');
+  assert.equal(result.events.length, 2);
+  assert.equal(result.events[0].description, 'Objeto entregue ao destinatário');
+  assert.equal(result.events[0].location, 'SAO PAULO - SP');
+  assert.equal(result.expectedDelivery, '2026-08-20T20:00:00');
+  await assert.rejects(() => service.trackShipment('INVALIDO'), /inválido/i);
+});

@@ -362,6 +362,57 @@ app.post('/api/coupons/validate', statusLimiter, publicJson, asyncRoute(async (r
   });
 }));
 
+// Cache de rastreio: os eventos mudam poucas vezes ao dia; 15 min evita
+// abusar das APIs das transportadoras em recarregamentos do cliente.
+const trackingCache = new Map();
+const TRACKING_CACHE_TTL_MS = 15 * 60 * 1000;
+
+app.post('/api/orders/tracking', statusLimiter, publicJson, asyncRoute(async (req, res) => {
+  res.setHeader('Cache-Control', 'no-store');
+  const orderId = cleanText(req.body?.orderId, 100);
+  const checkoutToken = cleanText(req.body?.checkoutToken, 128);
+  if (!orderId || !checkoutToken) return res.status(400).json({error: 'Número do pedido e autorização são obrigatórios.'});
+  const order = await repo.getOrder(orderId);
+  if (!order || !safeEqual(checkoutToken, order.checkoutToken)) return res.status(404).json({error: 'Pedido não encontrado.'});
+  if (!order.trackingCode) return res.status(404).json({error: 'Este pedido ainda não possui código de rastreio.'});
+
+  const cacheKey = order.trackingCode;
+  const cached = trackingCache.get(cacheKey);
+  if (cached && Date.now() - cached.at < TRACKING_CACHE_TTL_MS) return res.json(cached.value);
+
+  // Detecta a transportadora: etiqueta Correios = AA123456789BR; Jadlog = numérica.
+  const isCorreiosCode = /^[A-Z]{2}\d{9}[A-Z]{2}$/i.test(order.trackingCode);
+  const trackers = [];
+  if (isCorreiosCode && correios.configured) trackers.push(correios);
+  if (!isCorreiosCode && jadlog.configured) trackers.push(jadlog);
+  // fallback: tenta qualquer transportadora configurada
+  if (!trackers.length) {
+    if (correios.configured) trackers.push(correios);
+    if (jadlog.configured) trackers.push(jadlog);
+  }
+  if (!trackers.length) return res.status(503).json({error: 'Rastreamento automático não está configurado.', trackingUrl: order.trackingUrl || ''});
+
+  let lastError = null;
+  for (const tracker of trackers) {
+    try {
+      const result = await tracker.trackShipment(order.trackingCode);
+      const value = {
+        carrier: result.carrier,
+        code: result.code,
+        expectedDelivery: result.expectedDelivery || '',
+        trackingUrl: order.trackingUrl || '',
+        events: result.events.slice(0, 20)
+      };
+      if (trackingCache.size >= 500) trackingCache.delete(trackingCache.keys().next().value);
+      trackingCache.set(cacheKey, {at: Date.now(), value});
+      return res.json(value);
+    } catch (error) {
+      lastError = error;
+    }
+  }
+  res.status(502).json({error: lastError?.message || 'Rastreamento indisponível no momento.', trackingUrl: order.trackingUrl || ''});
+}));
+
 app.post('/api/orders/status', statusLimiter, publicJson, asyncRoute(async (req, res) => {
   const orderId = cleanText(req.body?.orderId, 100);
   const checkoutToken = cleanText(req.body?.checkoutToken, 128);

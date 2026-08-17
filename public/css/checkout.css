@@ -76,3 +76,15 @@ html.age-locked{overflow:hidden}
 .correios-option input{accent-color:var(--wine)}
 .correios-option small{color:var(--muted)}
 .correios-note{margin:0;font-size:.68rem;color:var(--muted);line-height:1.5}
+
+/* ===== Linha do tempo de rastreamento ===== */
+.tracking-events{display:grid;gap:7px;margin:6px 0}
+.tracking-eta{padding:8px 10px;background:#fff;border:1px solid var(--line);font-size:.7rem;color:var(--wine);font-weight:600}
+.tracking-event{display:grid;grid-template-columns:14px 1fr;gap:8px;align-items:start;padding:5px 0;opacity:.75}
+.tracking-event.latest{opacity:1}
+.tracking-event.latest b{color:var(--wine)}
+.tracking-dot{width:8px;height:8px;border-radius:50%;background:var(--line);margin-top:4px}
+.tracking-event.latest .tracking-dot{background:var(--ok)}
+.tracking-event b{display:block;font-size:.72rem}
+.tracking-event small{display:block;color:var(--muted);font-size:.6rem;margin-top:1px}
+.tracking-note{font-size:.66rem;color:var(--muted);line-height:1.5}
