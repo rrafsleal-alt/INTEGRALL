@@ -164,6 +164,21 @@ app.get('/api/catalog', asyncRoute(async (_req, res) => {
   res.json(publicCatalog(catalog, config));
 }));
 
+// Subtotal server-side dos itens (preços do catálogo) para o Valor Declarado
+// do seguro dos Correios — nunca confia em valores vindos do navegador.
+function estimateSubtotalCents(items, productsById) {
+  let total = 0;
+  for (const line of Array.isArray(items) ? items : []) {
+    const product = productsById.get(cleanText(line?.productId, 120));
+    if (!product) continue;
+    const variant = line?.variantId ? (product.variants || []).find(v => v.id === cleanText(line.variantId, 120)) : null;
+    const unit = Number(variant?.price ?? product.price) || 0;
+    const qty = Math.max(1, Math.min(999, Number(line?.qty) || 1));
+    total += unit * qty;
+  }
+  return Number.isSafeInteger(total) && total > 0 ? total : 0;
+}
+
 async function resolveCorreiosShipping(body, catalog) {
   if (config.shippingMode !== 'correios' || !correios.configured) return null;
   if (body?.shipping?.choice !== 'delivery') return null;
@@ -171,7 +186,8 @@ async function resolveCorreiosShipping(body, catalog) {
     const productsById = new Map(catalog.products.map(product => [product.id, product]));
     const pack = correios.packOrder(Array.isArray(body.items) ? body.items : [], productsById);
     const requestedService = cleanText(body?.shipping?.service, 20);
-    const result = await correios.quote(body.shipping.cep, pack);
+    const declaredCents = estimateSubtotalCents(body.items, productsById);
+    const result = await correios.quote(body.shipping.cep, pack, declaredCents);
     const chosen = (requestedService && result.options.find(option => option.code === requestedService)) || result.cheapest;
     return {
       priceCents: chosen.priceCents,
@@ -198,7 +214,7 @@ app.post('/api/shipping/quote', statusLimiter, publicJson, asyncRoute(async (req
   const productsById = new Map(catalog.products.map(product => [product.id, product]));
   const pack = correios.packOrder(items, productsById);
   try {
-    const result = await correios.quote(cep, pack);
+    const result = await correios.quote(cep, pack, estimateSubtotalCents(items, productsById));
     res.json({
       options: result.options.map(option => ({
         service: option.code,

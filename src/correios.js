@@ -120,14 +120,19 @@ export class CorreiosService {
 
   /**
    * Consolida os itens do pedido em um único pacote.
-   * Estratégia: soma pesos; a caixa cresce na altura (empilhamento simples),
-   * respeitando os mínimos dos Correios (16x11x2 cm, dims somadas <= 200cm; peso <= 30kg).
+   *
+   * Estratégia: os itens ficam EM PÉ, lado a lado, em uma grade quase quadrada
+   * (obrigatório para garrafas nos Correios e minimiza o peso cúbico, que é
+   * cobrado quando (C×L×A)/6000 excede o peso real). A altura da caixa é a do
+   * item mais alto; se a grade estourar 100cm em um lado, cresce em camadas.
+   * Mínimos dos Correios: 16x11x2 cm; máximos: 100cm/lado, soma <= 200cm, 30kg.
    */
   packOrder(items, productsById) {
     let totalWeight = 0;
-    let maxLength = 16;
-    let maxWidth = 11;
-    let stackedHeight = 0;
+    let unitCount = 0;
+    let maxUnitLength = 0;
+    let maxUnitWidth = 0;
+    let maxUnitHeight = 0;
     let missingData = false;
 
     for (const line of items || []) {
@@ -138,46 +143,68 @@ export class CorreiosService {
       const qty = Math.max(1, Number(line.qty) || 1);
       if (!Number.isFinite(unitWeight) || unitWeight <= 0) { missingData = true; continue; }
       totalWeight += unitWeight * qty;
-      const length = Number(product.lengthCm) || 0;
-      const width = Number(product.widthCm) || 0;
-      const height = Number(product.heightCm) || 0;
-      if (length > 0) maxLength = Math.max(maxLength, Math.min(100, length));
-      if (width > 0) maxWidth = Math.max(maxWidth, Math.min(100, width));
-      if (height > 0) stackedHeight += Math.min(100, height) * qty;
+      unitCount += qty;
+      maxUnitLength = Math.max(maxUnitLength, Math.min(100, Number(product.lengthCm) || 10));
+      maxUnitWidth = Math.max(maxUnitWidth, Math.min(100, Number(product.widthCm) || 10));
+      maxUnitHeight = Math.max(maxUnitHeight, Math.min(100, Number(product.heightCm) || 10));
     }
 
     // Margem de embalagem: 10% do peso (caixa, proteção) com mínimo de 100g.
     totalWeight = Math.ceil(totalWeight * 1.1 + 100);
-    const height = Math.max(2, Math.min(100, stackedHeight || 10));
+
+    // Grade quase quadrada com itens em pé; +2cm de proteção por lado.
+    let lengthCm = 16;
+    let widthCm = 11;
+    let heightCm = 10;
+    if (unitCount > 0) {
+      let columns = Math.max(1, Math.ceil(Math.sqrt(unitCount)));
+      let rows = Math.max(1, Math.ceil(unitCount / columns));
+      let layers = 1;
+      // Se a grade de uma camada estourar 100cm, distribui em camadas.
+      while ((columns * maxUnitLength + 4 > 100 || rows * maxUnitWidth + 4 > 100) && layers < 10) {
+        layers += 1;
+        const perLayer = Math.ceil(unitCount / layers);
+        columns = Math.max(1, Math.ceil(Math.sqrt(perLayer)));
+        rows = Math.max(1, Math.ceil(perLayer / columns));
+      }
+      lengthCm = Math.min(100, columns * maxUnitLength + 4);
+      widthCm = Math.min(100, rows * maxUnitWidth + 4);
+      heightCm = Math.min(100, layers * maxUnitHeight + 4);
+    }
 
     return {
       weightGrams: Math.min(totalWeight, 30_000),
-      lengthCm: Math.max(16, maxLength),
-      widthCm: Math.max(11, maxWidth),
-      heightCm: height,
+      lengthCm: Math.max(16, Math.round(lengthCm)),
+      widthCm: Math.max(11, Math.round(widthCm)),
+      heightCm: Math.max(2, Math.round(heightCm)),
       missingData,
       overweight: totalWeight > 30_000
     };
   }
 
-  cacheKey(cepDestino, pack) {
-    return `${cepDestino}|${pack.weightGrams}|${pack.lengthCm}x${pack.widthCm}x${pack.heightCm}`;
+  cacheKey(cepDestino, pack, declaredCents) {
+    return `${cepDestino}|${pack.weightGrams}|${pack.lengthCm}x${pack.widthCm}x${pack.heightCm}|${declaredCents || 0}`;
   }
 
   /**
    * Cota preço e prazo para todos os serviços configurados.
    * Retorna a opção mais barata como principal e a lista completa.
+   * `declaredCents` (opcional) ativa o serviço adicional Valor Declarado
+   * (019 = VD Nacional Premium/Padrão), incluindo o seguro no preço final —
+   * essencial para envio de garrafas de vidro.
    */
-  async quote(cepDestino, pack) {
+  async quote(cepDestino, pack, declaredCents = 0) {
     const destination = digits(cepDestino).slice(0, 8);
     if (destination.length !== 8) throw new Error('CEP de destino inválido.');
     if (pack.missingData) throw new Error('Produtos sem peso cadastrado — configure peso/dimensões no catálogo.');
     if (pack.overweight) throw new Error('O pedido excede o limite de 30kg dos Correios; divida em mais de um pedido.');
 
-    const key = this.cacheKey(destination, pack);
+    const key = this.cacheKey(destination, pack, declaredCents);
     const cached = this.quoteCache.get(key);
     if (cached && Date.now() - cached.at < QUOTE_CACHE_TTL_MS) return cached.value;
 
+    const declared = Number.isSafeInteger(declaredCents) && declaredCents > 0
+      ? Math.min(declaredCents, 10_000_000) : 0;
     const priceParams = this.services.map((service, index) => ({
       coProduto: service.code,
       nuRequisicao: String(index + 1),
@@ -187,7 +214,11 @@ export class CorreiosService {
       tpObjeto: '2',
       comprimento: String(pack.lengthCm),
       largura: String(pack.widthCm),
-      altura: String(pack.heightCm)
+      altura: String(pack.heightCm),
+      ...(declared > 0 ? {
+        servicosAdicionais: [{coServAdicional: '019'}],
+        vlDeclarado: (declared / 100).toFixed(2)
+      } : {})
     }));
 
     const prazoParams = this.services.map((service, index) => ({
