@@ -1,46 +1,45 @@
-INTEGRALL v9.2 — LOJA COMPLETA, PRONTA PARA MERCADO PAGO
+INTEGRALL v9.5 — LOJA COMPLETA COM FRETE AUTOMÁTICO (CORREIOS + JADLOG)
 
 O QUE JÁ ESTÁ PRONTO
+- Verificação de idade 18+ na entrada da loja (Lei 13.106/2015).
 - Pedido online gravado no backend antes de qualquer pagamento.
-- PostgreSQL pronto para produção (Render provisiona pelo render.yaml).
-- Painel administrativo com pedidos, clientes, catálogo, frete e histórico.
-- Cliente informa nome, contato e endereço completo quando escolher entrega.
-- Acompanhamento do pedido na própria loja.
-- Frete sob cotação pode ser definido no Admin e o total é recalculado.
-- Estoque é baixado automaticamente uma única vez quando o pedido entra em Pago/Preparando/Pronto/Concluído.
-- Mercado Pago Checkout Pro já está programado: PIX/cartão, retorno, nova tentativa, webhook, validação de valor/moeda/preferência e atualização automática de status.
-- Status financeiros: aguardando, pago, falha, expirado, revisão, reembolso e chargeback.
-- WhatsApp não abre automaticamente. Se um número de atendimento for configurado, ele aparece apenas como opção manual de suporte.
+- FRETE AUTOMÁTICO: o cliente digita o CEP e vê preço + prazo na hora.
+  * Até 12 unidades: Correios (PAC e SEDEX do seu contrato).
+  * Acima de 12 unidades: Jadlog (.Package).
+  * Caixas reais cadastradas (6 e 12 vinhos, 12 sucos 300ml e 1L).
+  * Seguro (valor declarado) embutido no preço.
+- Cupons de desconto (porcentagem, valor fixo, frete grátis) criados no Admin.
+- E-mail automático para o cliente: pedido recebido, pago, enviado (com rastreio).
+- Código de rastreio no Admin com link dos Correios gerado sozinho.
+- Editor de produtos no Admin: preço, estoque, peso, medidas — sem mexer em código.
+- Quantidade mínima por produto (ex.: Mentirinha, 2 caixas).
+- Pedidos sem pagamento expiram sozinhos após 7 dias.
+- Textos legais prontos: privacidade (LGPD), termos, trocas (CDC).
+- Mercado Pago Checkout Pro programado: PIX/cartão, webhook, tudo validado.
+- PostgreSQL pronto para produção (render.yaml provisiona).
 
-PARA TESTAR AGORA SEM MERCADO PAGO
-1. Dê dois cliques em INICIAR-INTEGRALL.bat.
-2. Abra http://localhost:3000
+PARA TESTAR AGORA (SEM NENHUMA CREDENCIAL)
+1. Dê dois cliques em INICIAR-INTEGRALL.bat (ou: npm install && npm run dev).
+2. Abra http://localhost:3000 — confirme os 18+.
 3. Monte um pedido e finalize em "Registrar pedido".
-4. O número do pedido aparecerá na loja.
-5. Use "Acompanhar último pedido" para ver o status.
-6. Abra o Admin com ABRIR-ADMIN.bat.
-7. Se o frete estiver "Sob cotação", abra o pedido e informe o valor do frete.
-8. Altere o status para "Pago" para testar a baixa automática do estoque.
+4. Use "Acompanhar último pedido" para ver o status.
+5. Abra o Admin com ABRIR-ADMIN.bat (token: linha ADMIN_API_TOKEN do .env).
+6. Painéis: Pedidos, Produtos (edite preços!), Cupons, Clientes, Catálogo.
+Obs.: sem DATABASE_URL o modo local usa memória (pedidos somem ao reiniciar).
 
-IMPORTANTE SOBRE O BANCO
-- Se DATABASE_URL estiver vazio, o modo local usa memória e perde pedidos quando o servidor reinicia.
-- Em produção, NODE_ENV=production exige PostgreSQL e não permite iniciar sem DATABASE_URL.
-- O arquivo render.yaml já cria o PostgreSQL e conecta automaticamente.
-- Há também docker-compose.yml para quem quiser PostgreSQL local com Docker Desktop.
-
-O ÚNICO BLOCO EXTERNO QUE FALTA PARA PAGAMENTO REAL
-Preencher no ambiente de produção:
-MERCADO_PAGO_ACCESS_TOKEN=
-MERCADO_PAGO_WEBHOOK_SECRET=
-PUBLIC_URL=https://seu-dominio.com.br
-
-Depois disso, a opção "Pagar online — Mercado Pago" aparece automaticamente na loja.
-O cliente cria o pedido e é levado ao Mercado Pago para escolher PIX ou cartão.
-A confirmação final vem por webhook; a loja não confia apenas no retorno do navegador.
-
-ADMIN LOCAL
-O token está no arquivo .env na linha ADMIN_API_TOKEN.
-Em produção, troque por um token aleatório com pelo menos 32 caracteres e configure-o no provedor.
+O QUE FALTA VOCÊ PREENCHER PARA VENDER DE VERDADE (.env de produção)
+1. CORREIOS: CORREIOS_USER / CORREIOS_ACCESS_CODE (gerar no cws.correios.com.br)
+   / CORREIOS_POSTAGE_CARD / CORREIOS_ORIGIN_CEP + SHIPPING_MODE=correios
+2. JADLOG (opcional): JADLOG_TOKEN (pedir à franquia) / JADLOG_CNPJ / JADLOG_CONTA
+3. E-MAIL: SMTP_HOST / SMTP_USER / SMTP_PASSWORD / SMTP_FROM
+   (recomendado: Brevo, grátis até 300 e-mails/dia)
+4. MERCADO PAGO: MERCADO_PAGO_ACCESS_TOKEN / MERCADO_PAGO_WEBHOOK_SECRET
+   + PUBLIC_URL=https://seu-dominio.com.br
+5. ADMIN_API_TOKEN novo com 32+ caracteres aleatórios. Gere com:
+   node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 
 VALIDAÇÃO
-Execute VERIFICAR-PROJETO.bat ou npm run verify.
+Execute VERIFICAR-PROJETO.bat ou npm run verify (51 testes automatizados).
+
+DOCUMENTAÇÃO
+README.md (completo) | SECURITY.md (segurança) | docs/ (manuais Correios e análise técnica)

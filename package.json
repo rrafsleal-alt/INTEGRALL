@@ -1,6 +1,6 @@
 {
   "name": "integrall-online",
-  "version": "9.2.0",
+  "version": "9.5.0",
   "private": true,
   "type": "module",
   "description": "Loja INTEGRALL com pedidos persistentes, clientes, rastreio, estoque, PostgreSQL, admin e Mercado Pago pronto para credenciais.",

@@ -1,263 +1,153 @@
-# INTEGRALL Online v9.2
+# INTEGRALL Online v9.5
 
-Loja da **INTEGRALL | Boutique Gourmet** com catálogo, carrinho, pedidos server-side, clientes, acompanhamento de pedido, painel administrativo, PostgreSQL e integração **Mercado Pago Checkout Pro pronta para receber credenciais**.
+Loja virtual da **INTEGRALL | Boutique Gourmet** — vinhos, sucos, cafés e petit four — com catálogo, carrinho, pedidos server-side, clientes, acompanhamento de pedido, painel administrativo, PostgreSQL, **frete automático (Correios + Jadlog)**, **e-mail transacional**, cupons de desconto, verificação de idade 18+ e integração **Mercado Pago Checkout Pro** pronta para credenciais.
 
-## Fluxo final
+## Fluxo da loja
 
-1. Cliente escolhe produtos, variações e quantidades.
-2. Define retirada ou entrega.
-3. Para entrega, informa CEP e endereço completo.
-4. Informa nome + e-mail ou telefone.
-5. O servidor recalcula preços, estoque e frete e cria o pedido.
-6. O pedido aparece imediatamente no Admin.
-7. Se Mercado Pago estiver configurado e o frete estiver definido, o cliente pode seguir para **PIX ou cartão** no Checkout Pro.
-8. O webhook do Mercado Pago confirma o pagamento no backend.
-9. O pedido muda automaticamente para `paid` e o estoque é baixado uma única vez.
-10. O Admin avança o fluxo: `paid → preparing → ready → completed`.
-11. O cliente pode acompanhar o último pedido na própria loja.
-
-O WhatsApp **não participa automaticamente do checkout**. Se um número de atendimento for configurado, ele é usado apenas como opção manual de suporte.
-
-## Novidades v9.4
-
-- **Frete Correios (API de contrato/CWS)**: cálculo automático de PAC/SEDEX no checkout com peso/dimensões reais dos produtos, prazo estimado, escolha de serviço pelo cliente e fallback para cotação manual se a API estiver indisponível. Ative com `SHIPPING_MODE=correios` + credenciais `CORREIOS_*` (ver `.env.example`).
-- **E-mail transacional (SMTP)**: confirmação de pedido, mudanças de status importantes (pago, preparando, pronto, enviado com rastreio, cancelado) — SMTP puro sem dependências novas; compatível com Gmail/Brevo/SES. Configure `SMTP_*`.
-- **Editor de produtos no Admin**: preço, estoque, descrição, mínimo/máximo por pedido, peso e dimensões (usados no frete) — sem editar JSON.
-- **Quantidade mínima por produto** validada no servidor (ex.: Mentirinha, mínimo 2 caixas).
-- **Expiração automática** de pedidos sem pagamento após `ORDER_EXPIRE_DAYS` dias (padrão 7; nunca toca pedidos pagos).
-- **Textos legais reais** (LGPD, CDC art. 49, Lei 13.106/2015) preenchidos no catálogo.
-- **SEO corrigido**: preços saíram do HTML estático (fonte única: catálogo do servidor).
-
-Novas rotas: `POST /api/shipping/quote` (pública), `GET /api/admin/products`, `PATCH /api/admin/products/:id`.
-
-### Jadlog (opcional, soma-se aos Correios)
-
-**Regra de divisão (`CARRIER_SPLIT_UNITS`, padrão 12):** pedidos com até 12 unidades (1 caixa) são cotados pelos **Correios**; acima de 12 unidades, pela **Jadlog** (multi-volume nos Correios sai caro; a Jadlog ganha em carga maior). A regra é imposta pelo servidor — o navegador não consegue forçar a transportadora "errada". Se a preferida estiver fora do ar ou sem credenciais, a outra assume automaticamente. Use `CARRIER_SPLIT_UNITS=0` para desativar (as duas cotam sempre e o cliente escolhe).
-
-1. Peça o **token de integração** à franquia Jadlog que atende seu CNPJ (é ela quem solicita ao comercial).
-2. Preencha `JADLOG_TOKEN`, `JADLOG_CNPJ` e, se correntista, `JADLOG_CONTA`/`JADLOG_CONTRATO`.
-3. `JADLOG_MODALIDADE=3` (.Package) é o padrão de e-commerce; o peso enviado é sempre o maior entre real e cubado (C×L×A÷6000), conforme o manual v2.3.
-4. O CEP de origem é o mesmo `CORREIOS_ORIGIN_CEP`.
-
-### Ativando os Correios (contrato)
-
-1. No CWS (`https://cws.correios.com.br`), gere o **código de acesso a APIs** (menu Gestão de acesso a APIs).
-2. Preencha `CORREIOS_USER` (usuário Meu Correios), `CORREIOS_ACCESS_CODE`, `CORREIOS_POSTAGE_CARD` (cartão de postagem), `CORREIOS_ORIGIN_CEP` e `SHIPPING_MODE=correios`.
-3. Os códigos de serviço padrão são `03298` (PAC contrato) e `03220` (SEDEX contrato); ajuste `CORREIOS_SERVICES` conforme seu contrato.
-4. Cadastre **peso e dimensões** dos produtos no Admin (painel Produtos) — sem peso, o pedido cai para cotação manual.
-5. Para testar sem cobrar, use `CORREIOS_HOMOLOG=true` (ambiente `apihom`).
-
-## Novidades v9.3
-
-- **Verificação de idade (18+)**: aviso bloqueante na entrada da loja (Lei nº 13.106/2015), lembrado por 30 dias; pedidos com bebida alcoólica exigem confirmação de maioridade também no checkout e são **rejeitados pelo servidor** sem ela; aviso legal fixo no rodapé.
-- **Cupons de desconto**: porcentagem, valor fixo ou frete grátis, com pedido mínimo e validade; criados no Admin; validados e aplicados **exclusivamente no servidor**; códigos nunca aparecem no catálogo público; o desconto nunca zera o total.
-- **Código de rastreio**: o Admin informa código/transportadora/link do envio; link dos Correios é gerado automaticamente; o cliente vê o rastreio no acompanhamento do pedido.
-
-Novas rotas:
-
-- `POST /api/coupons/validate` (pública, valida cupom antes do pedido)
-- `GET /api/admin/coupons` / `PUT /api/admin/coupons`
-- `PATCH /api/admin/orders/:id/tracking`
-
-## Recursos v9.2
-
-- pedidos com idempotência (`clientOrderId`);
-- `checkoutToken` privado separado do número público do pedido;
-- PostgreSQL obrigatório em produção;
-- tabela persistente de catálogo, pedidos e clientes;
-- endereço completo de entrega;
-- frete fixo, zonas, retirada ou cotação;
-- cotação de frete pelo Admin com recálculo do total no servidor;
-- acompanhamento público autenticado pelo token da sessão;
-- histórico de alterações do pedido;
-- baixa de estoque idempotente na confirmação financeira/operacional;
-- prevenção de baixa duplicada em webhooks repetidos;
-- Admin com pedidos, clientes, catálogo, frete, histórico e exportação CSV;
-- Checkout Pro preparado para PIX/cartão;
-- nova tentativa de pagamento para falha/expiração;
-- webhook assinado;
-- confirmação de valor, moeda e preferência antes de aceitar pagamento;
-- estados explícitos para falha, expiração, revisão, reembolso e chargeback.
+1. Cliente confirma ter 18+ (obrigatório — a loja vende bebida alcoólica).
+2. Escolhe produtos, variações e quantidades (com mínimo/máximo por produto).
+3. Define retirada ou entrega; para entrega, informa CEP e endereço completo.
+4. **O frete é cotado automaticamente**: até 12 unidades pelos Correios (PAC/SEDEX), acima de 12 pela Jadlog (.Package) — preço + prazo na hora, com seguro (valor declarado) embutido.
+5. Pode aplicar cupom de desconto (validado no servidor).
+6. O servidor recalcula preços, estoque, frete e desconto e cria o pedido.
+7. Cliente recebe **e-mail de confirmação** com resumo e link de acompanhamento.
+8. Se o Mercado Pago estiver configurado, segue para PIX ou cartão no Checkout Pro.
+9. O webhook confirma o pagamento; o pedido vira `paid` e o estoque baixa uma única vez.
+10. Admin avança o fluxo (`paid → preparing → ready → completed`) e informa o **código de rastreio** — o cliente é avisado por e-mail e acompanha a entrega.
+11. Pedidos sem pagamento expiram automaticamente após 7 dias.
 
 ## Rodar localmente
-
-No Windows, use:
-
-```text
-INICIAR-INTEGRALL.bat
-```
-
-Ou pelo terminal:
 
 ```bash
 npm install
 npm run dev
 ```
 
-Acesse:
-
 - Loja: `http://localhost:3000/`
-- Admin: `http://localhost:3000/admin`
+- Admin: `http://localhost:3000/admin` (token em `ADMIN_API_TOKEN` no `.env`)
 - Health: `http://localhost:3000/api/health`
 
-Se `DATABASE_URL` estiver vazio em desenvolvimento, o sistema usa memória. Os pedidos desaparecem ao reiniciar.
+No Windows: `INICIAR-INTEGRALL.bat`. Com `DATABASE_URL` vazio em desenvolvimento, usa memória (pedidos somem ao reiniciar). PostgreSQL local: `INICIAR-COM-POSTGRES-LOCAL.bat` (Docker).
 
-## PostgreSQL local opcional
+## Configuração (.env)
 
-Se tiver Docker Desktop:
+Veja `.env.example` com todos os comentários. Resumo dos blocos:
 
-```text
-INICIAR-COM-POSTGRES-LOCAL.bat
-```
+| Bloco | Variáveis-chave | Efeito quando preenchido |
+|---|---|---|
+| Servidor | `NODE_ENV`, `PORT`, `PUBLIC_URL`, `TRUST_PROXY` | produção exige PostgreSQL + HTTPS |
+| Banco | `DATABASE_URL` | pedidos/clientes/catálogo persistentes |
+| Admin | `ADMIN_API_TOKEN` (≥32 chars em produção) | acesso ao painel |
+| Mercado Pago | `MERCADO_PAGO_ACCESS_TOKEN`, `MERCADO_PAGO_WEBHOOK_SECRET` | PIX/cartão no Checkout Pro |
+| **Correios** | `CORREIOS_USER`, `CORREIOS_ACCESS_CODE`, `CORREIOS_POSTAGE_CARD`, `CORREIOS_ORIGIN_CEP` + `SHIPPING_MODE=correios` | frete PAC/SEDEX automático |
+| **Jadlog** | `JADLOG_TOKEN`, `JADLOG_CNPJ`, `JADLOG_CONTA` | frete .Package automático |
+| Divisão | `CARRIER_SPLIT_UNITS=12` | até 12 un → Correios; acima → Jadlog; `0` = todas cotam |
+| E-mail | `SMTP_HOST`, `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_FROM` | confirmação de pedido/status/rastreio |
+| Operação | `ORDER_EXPIRE_DAYS=7` | expira pedidos sem pagamento |
+| Frete manual | `SHIPPING_MODE=quote|fixed|zones`, `FREE_SHIPPING_CENTS` | modos sem API |
 
-Isso sobe PostgreSQL na porta `5433` e configura a `DATABASE_URL` local no `.env`.
+### Frete automático — Correios (contrato)
 
-Para parar o container:
+1. No CWS (`https://cws.correios.com.br`), gere o **código de acesso a APIs** (Gestão de acesso a APIs).
+2. Preencha `CORREIOS_USER` (usuário Meu Correios PJ), `CORREIOS_ACCESS_CODE`, `CORREIOS_POSTAGE_CARD` (cartão de postagem) e `CORREIOS_ORIGIN_CEP`.
+3. `SHIPPING_MODE=correios` ativa a cotação automática. Serviços padrão: `03298` (PAC contrato) e `03220` (SEDEX contrato) — ajuste `CORREIOS_SERVICES` conforme sua ficha técnica.
+4. `CORREIOS_HOMOLOG=true` usa o ambiente `apihom` para testes.
+5. O valor declarado (seguro, serviço 019) é enviado automaticamente com o subtotal do pedido — essencial para garrafas.
 
-```text
-PARAR-POSTGRES-LOCAL.bat
-```
+### Frete automático — Jadlog
 
-Em produção, use PostgreSQL real. O `render.yaml` já referencia um banco e injeta `DATABASE_URL` no serviço web.
+1. Peça o **token de integração** à franquia Jadlog que atende seu CNPJ.
+2. Preencha `JADLOG_TOKEN`, `JADLOG_CNPJ` e, se correntista, `JADLOG_CONTA`/`JADLOG_CONTRATO`.
+3. Modalidade padrão: `3` (.Package). O peso enviado é sempre o maior entre real e cubado (C×L×A÷6000), conforme manual v2.3.
 
-## Variáveis principais
+**Regra de divisão** (`CARRIER_SPLIT_UNITS`, padrão 12): pedidos com até 12 unidades vão pelos Correios; acima, pela Jadlog. Imposta pelo servidor (o navegador não força a transportadora). Se a preferida falhar ou não tiver credenciais, a outra assume automaticamente.
 
-```env
-NODE_ENV=production
-PORT=3000
-PUBLIC_URL=https://seu-dominio.com.br
-DATABASE_URL=postgresql://...
-ADMIN_API_TOKEN=token-aleatorio-com-32-ou-mais-caracteres
-TRUST_PROXY=true
-```
+### Empacotamento e caixas reais
 
-### Mercado Pago — falta somente preencher
+O servidor monta os volumes do pedido antes de cotar:
 
-```env
-MERCADO_PAGO_ACCESS_TOKEN=APP_USR-...
-MERCADO_PAGO_WEBHOOK_SECRET=...
-MERCADO_PAGO_USE_SANDBOX=false
-MERCADO_PAGO_PAYMENT_EXPIRATION_DAYS=3
-```
+- **Caixas reais cadastradas** (campo `boxes` do produto): caixa 6×750ml (30×25×17 cm, 7,25 kg), caixa 12×750ml (30×30×24 cm, 14 kg), caixa 12×300ml (23×18×19 cm, 6,2 kg), caixa 12×1L (37×27×29 cm, 18 kg). Quantidades que fecham caixa usam medidas e pesos exatos.
+- **Avulsos**: empacotados em grade quase quadrada com garrafas **em pé** (exigência das transportadoras), minimizando o peso cúbico.
+- Pedidos grandes geram múltiplos volumes; o frete é a soma de todos.
+- Peso/dimensões de cada produto são editáveis no **Admin → Produtos**.
 
-Quando `MERCADO_PAGO_ACCESS_TOKEN` + `MERCADO_PAGO_WEBHOOK_SECRET` estiverem configurados, a loja habilita automaticamente:
+## Painel administrativo
 
-```text
-Pagar online — Mercado Pago
-PIX ou cartão no ambiente seguro do Mercado Pago
-```
-
-O endpoint de webhook é:
-
-```text
-https://SEU-DOMINIO/api/webhooks/mercadopago
-```
-
-A aplicação valida `x-signature`/`x-request-id`, consulta o pagamento diretamente no Mercado Pago e somente então atualiza o pedido.
-
-Referências oficiais utilizadas na preparação:
-
-- https://www.mercadopago.com.br/developers/pt/docs/checkout-pro/payment-notifications
-- https://www.mercadopago.com.br/developers/pt/docs/checkout-pro/additional-settings/expiration-date
-- https://github.com/mercadopago/sdk-nodejs
-
-## Frete
-
-```env
-SHIPPING_MODE=quote
-SHIPPING_FIXED_CENTS=1500
-FREE_SHIPPING_CENTS=30000
-ALLOW_PAYMENT_WITH_QUOTED_SHIPPING=false
-```
-
-Modos:
-
-- `quote`: Admin define o frete depois que o pedido é criado;
-- `fixed`: usa valor fixo em centavos;
-- `zones`: usa zonas configuradas no catálogo;
-- retirada sempre tem frete zero.
-
-Enquanto um pedido de entrega estiver com frete sob cotação, o pagamento online permanece bloqueado. Depois que o Admin salva o frete, o total é atualizado e o cliente pode iniciar o pagamento pelo acompanhamento do pedido.
-
-## Estoque
-
-O pedido é validado contra o catálogo ao ser criado. A baixa efetiva ocorre uma única vez quando o pedido avança pela primeira vez para:
-
-- `paid`;
-- `preparing`;
-- `ready`;
-- `completed`.
-
-O campo `inventoryCommittedAt` impede baixa repetida. Reembolso não repõe estoque automaticamente, porque a devolução física precisa ser validada operacionalmente.
-
-## Status
-
-- `received` — pedido recebido;
-- `awaiting_payment` — aguardando Mercado Pago;
-- `paid` — pago;
-- `payment_failed` — pagamento recusado/cancelado;
-- `payment_expired` — tentativa expirada;
-- `payment_review` — mediação, divergência ou reembolso parcial;
-- `preparing` — preparando;
-- `ready` — pronto;
-- `completed` — concluído;
-- `refunded` — reembolsado;
-- `chargeback` — contestado;
-- `cancelled` — cancelado manualmente.
+- **Pedidos**: busca, filtro por status, detalhes completos, mudança de status, cotação manual de frete, **código de rastreio** (link Correios automático), histórico, exportação CSV.
+- **Produtos**: edição de preço, estoque, descrição, mín/máx por pedido, peso e dimensões — sem JSON.
+- **Cupons**: porcentagem, valor fixo ou frete grátis; pedido mínimo e validade; ativar/desativar/excluir.
+- **Clientes**: consolidados automaticamente por e-mail/telefone.
+- **Catálogo**: exportação/importação JSON completa (backup).
 
 ## API
 
 ### Pública
 
-- `GET /api/health`
-- `GET /api/catalog`
-- `POST /api/orders`
-- `POST /api/orders/status`
-- `POST /api/payments/checkout`
-- `POST /api/webhooks/mercadopago`
+- `GET /api/health` — status e recursos ativos
+- `GET /api/catalog` — catálogo sanitizado (sem cupons, sem segredos)
+- `POST /api/shipping/quote` — cotação de frete `{cep, items}` → opções com preço/prazo
+- `POST /api/coupons/validate` — pré-validação de cupom
+- `POST /api/orders` — criação de pedido (preços/frete/desconto recalculados no servidor)
+- `POST /api/orders/status` — acompanhamento (`orderId` + `checkoutToken`)
+- `POST /api/payments/checkout` — inicia Checkout Pro
+- `POST /api/webhooks/mercadopago` — webhook assinado
 
-### Admin
+### Admin (`Authorization: Bearer <ADMIN_API_TOKEN>`)
 
-Requer:
+- `GET/PATCH /api/admin/orders[/:id]` — listagem e status
+- `PATCH /api/admin/orders/:id/shipping` — cotação manual de frete
+- `PATCH /api/admin/orders/:id/tracking` — código de rastreio
+- `GET/PATCH /api/admin/products[/:id]` — editor de produtos
+- `GET/PUT /api/admin/coupons` — cupons
+- `GET /api/admin/customers` — clientes
+- `PUT /api/admin/catalog` — catálogo completo
 
-```http
-Authorization: Bearer <ADMIN_API_TOKEN>
-```
+## Status do pedido
 
-- `GET /api/admin/orders`
-- `GET /api/admin/orders/:id`
-- `PATCH /api/admin/orders/:id`
-- `PATCH /api/admin/orders/:id/shipping`
-- `GET /api/admin/customers`
-- `PUT /api/admin/catalog`
+`received` → `awaiting_payment` → `paid` → `preparing` → `ready` → `completed`, com estados de exceção: `payment_failed`, `payment_expired`, `payment_review`, `refunded`, `chargeback`, `cancelled` (manual ou expiração automática).
 
 ## Segurança
 
-O navegador não define preços finais. O backend usa IDs de produto/variante e recalcula os valores a partir do catálogo persistido. O `checkoutToken` é exigido para consultar o pedido na sessão e iniciar pagamento. O token do Admin fica somente em `sessionStorage` no navegador do administrador.
+- O navegador **nunca define preços, frete ou desconto** — o servidor recalcula tudo do catálogo persistido; campos injetados (ex.: `shipping.resolved`) são descartados.
+- `checkoutToken` de 192 bits por pedido, comparado em tempo constante; criação idempotente por `clientOrderId`; baixa de estoque idempotente (`inventoryCommittedAt`).
+- Webhook Mercado Pago: valida assinatura, consulta o pagamento na API e confere valor/moeda/preferência antes de qualquer mudança.
+- Pedido com bebida alcoólica exige confirmação de maioridade **no servidor** (Lei nº 13.106/2015).
+- CSP estrita, rate limiting por rota, headers de segurança, credenciais só em variáveis de ambiente.
+- Detalhes em `SECURITY.md`.
+
+## Conformidade
+
+- Verificação de idade 18+ na entrada + aviso legal no rodapé (Lei 13.106/2015).
+- Política de privacidade (LGPD), termos de uso e trocas/devoluções (CDC art. 49) publicados na loja.
+- Cadastre o CNPJ no campo `taxId` do catálogo (Decreto 7.962/2013).
 
 ## Verificação
 
 ```bash
-npm run verify
+npm run verify   # sintaxe + 51 testes + auditoria de arquivos públicos
 ```
 
-Executa:
+## Deploy (Render)
 
-1. sintaxe dos arquivos JavaScript;
-2. testes automatizados;
-3. auditoria de arquivos públicos, assets e padrões perigosos.
+`render.yaml` provisiona web service + PostgreSQL. Preencha no painel: `PUBLIC_URL`, `ADMIN_API_TOKEN`, credenciais do Mercado Pago, dos Correios, da Jadlog e do SMTP (todos `sync: false`). Blueprint de teste gratuito: `render-free-test.yaml`.
 
-## Antes de produção
+## Antes de vender de verdade (checklist)
 
-- [ ] PostgreSQL ativo;
-- [ ] `NODE_ENV=production`;
-- [ ] `PUBLIC_URL` HTTPS;
-- [ ] `ADMIN_API_TOKEN` forte;
-- [ ] catálogo, preços e estoques revisados;
-- [ ] frete definido (`fixed`, `zones` ou processo de cotação);
-- [ ] Access Token do Mercado Pago;
-- [ ] segredo Webhook do Mercado Pago;
-- [ ] URL do webhook configurada na aplicação Mercado Pago;
-- [ ] pagamento de teste aprovado;
-- [ ] webhook de pagamento aprovado testado;
-- [ ] `npm run verify` aprovado.
+- [ ] PostgreSQL ativo e `NODE_ENV=production`
+- [ ] `PUBLIC_URL` HTTPS e `ADMIN_API_TOKEN` forte (≥32 chars aleatórios)
+- [ ] Credenciais Correios preenchidas e cotação testada com CEPs reais
+- [ ] (Opcional) Token Jadlog para pedidos acima de 12 unidades
+- [ ] SMTP configurado e e-mail de confirmação testado
+- [ ] Access Token + Webhook Secret do Mercado Pago; webhook configurado; compra de teste aprovada
+- [ ] CNPJ no catálogo; preços, estoques e descrições revisados
+- [ ] Caixas com colmeia divisória para garrafas (exigência das transportadoras)
+- [ ] `npm run verify` aprovado
+
+## Documentação de referência
+
+- `docs/correios-manual-integracao-v2.4.pdf` — manual oficial Correios API (token, preço, prazo, rastro)
+- `docs/correios-api-busca-cep.txt` — manual da API Busca CEP
+- `docs/correios-api-locker.pdf` — API Locker (não utilizada; referência futura)
+- `docs/ANALISE-TECNICA.md` — análise técnica do projeto
+- Manual Jadlog: https://www.jadlog.com.br/jadlog/arquivos/api_integracao.pdf
+- Mercado Pago: https://www.mercadopago.com.br/developers/pt/docs/checkout-pro/payment-notifications

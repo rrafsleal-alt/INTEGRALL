@@ -151,7 +151,7 @@ app.get('/api/health', asyncRoute(async (_req, res) => {
   res.json({
     ok: true,
     name: 'INTEGRALL API',
-    version: '9.2.0',
+    version: '9.5.0',
     database: databaseHealth.mode,
     mercadoPago: mercadoPago.configured,
     adminConfigured: Boolean(config.adminToken),
@@ -637,7 +637,7 @@ if (config.orderExpireDays > 0) {
 }
 
 const server = app.listen(config.port, () => {
-  console.log(`INTEGRALL v9.4 em http://localhost:${config.port} (${repo.persistent ? 'PostgreSQL' : 'memória de desenvolvimento'})`);
+  console.log(`INTEGRALL v9.5 em http://localhost:${config.port} (${repo.persistent ? 'PostgreSQL' : 'memória de desenvolvimento'})`);
 });
 
 async function shutdown(signal) {
