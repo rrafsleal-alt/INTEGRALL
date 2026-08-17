@@ -30,14 +30,14 @@ c12875445bfec68115f013b2335d9f6588e06f23fd31b301745a860b57e5c35c  ./public/asset
 1f08968dc021f7dabfd8572586eaff13a7826063c84968f327eb5936d7d09352  ./public/css/admin.css
 528e91f7b5ac1ec6eeecead84cb36f9f3e9e46e187eeb165ceeeaff2f446bfce  ./public/css/checkout.css
 2811c71b3cc4b16465f064011363aaa540105bd055bac55fe4a1a9247781be94  ./public/css/store.css
-1f86120e7bb89963f89b0c80b347dbff3a8d3836921dda0c12b98157f5cea930  ./public/index.html
+89aa65f6ce353814ca72e5e1ff68672fc198707d604d5988a0cd350e750130b1  ./public/index.html
 4145f6cec3e5a73d00f9225e5649fb760d99f5dc22378ff189d351394d184ede  ./public/js/admin.js
 fa7e62af25bba3acb80fcc1d32a720f00a61813818b947faeebe760234b028cd  ./public/js/store/age-gate.js
 d210e68bd9a2da60496811e3565bd585014b67e12ac30f0ff7d760aa459b83d6  ./public/js/store/api.js
 fa2c93cd477f62dd1e600179ddaec184cc7f3864ad44fac272ddd664508c61b1  ./public/js/store/app.js
 5a7e573ffc64b1bd9f600f1e3090f99a1d25e216ca077ec1b0ec037b0cec007d  ./public/js/store/cart.js
 fbf2d5b1e6976d69c26b93f11e7bd3be42998e6f750a636d040d4c78ad282dcd  ./public/js/store/catalog.js
-14e163d54f28d8b644459234c0994e2a44aaf9539ffbf20eb20280ba5046bc41  ./public/js/store/checkout.js
+7ea5e0e62aaf0dee731d1b0da060a179b26366c907e7093780fd8a105c282e25  ./public/js/store/checkout.js
 995798b2a2ce5a2351b986ac4090e013857e1c0ac842199fa22ea47b61bcd24d  ./public/js/store/shipping.js
 fb4895533c20ed66a19b721b9f6322a17f6462116b58c17484f44c96971e6173  ./render-free-test.yaml
 46cce233184392fdca2bfc6212563cd2dda452d9b67407d967adef5ba3c35077  ./render.yaml

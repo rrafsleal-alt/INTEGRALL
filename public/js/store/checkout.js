@@ -187,22 +187,28 @@
     const root = $('#paymentMethods');
     if (!root) return;
     const cfg = config();
+    const onlineActive = cfg.paymentMethods?.card === true;
     const selected = root.querySelector('input:checked')?.value;
-    const methods = [['order', 'Registrar pedido', 'Criar o pedido agora e realizar o pagamento depois, quando necessário']];
-    if (cfg.paymentMethods?.card === true) methods.unshift(['card', 'Pagar online — Mercado Pago', 'PIX ou cartão no ambiente seguro do Mercado Pago']);
+    const methods = [];
+    if (onlineActive) {
+      methods.push(['card', 'PIX ou cartão', 'Pagamento imediato no ambiente seguro do Mercado Pago']);
+      methods.push(['order', 'Combinar com a loja', 'Finalize o pedido agora e acerte o pagamento diretamente com a INTEGRALL']);
+    } else {
+      methods.push(['order', 'Finalizar pedido', 'Seu pedido é enviado à INTEGRALL, que confirma o pagamento e a entrega com você']);
+    }
     const button = $('#checkout');
     root.replaceChildren(...methods.map((method, index) => createPaymentOption(method[0], method[1], method[2], selected ? selected === method[0] : index === 0)));
     if (button) button.disabled = false;
     const syncLabel = () => {
       if (!button) return;
-      button.textContent = root.querySelector('input:checked')?.value === 'card' ? 'Criar pedido e pagar' : 'Registrar pedido';
+      button.textContent = root.querySelector('input:checked')?.value === 'card' ? 'Ir para o pagamento' : 'Finalizar pedido';
     };
     root.onchange = syncLabel;
     syncLabel();
     const note = $('#paymentAvailabilityNote');
-    if (note) note.textContent = cfg.paymentMethods?.card === true
-      ? 'Pagamento online ativo: após criar o pedido, você será levado ao Mercado Pago para escolher PIX ou cartão.'
-      : 'Pagamento online ainda não está ativo. O pedido será registrado normalmente e o Mercado Pago aparecerá automaticamente quando as credenciais forem configuradas.';
+    if (note) note.textContent = onlineActive
+      ? 'Você será levado ao ambiente seguro do Mercado Pago para concluir o pagamento. O pedido é confirmado automaticamente.'
+      : 'Após finalizar, você recebe o número do pedido e a INTEGRALL combina o pagamento e a entrega com você.';
   }
 
   function hydrateCustomerFields() {
@@ -756,7 +762,7 @@
       if (couponField) couponField.value = '';
       globalThis.IntegrallCart?.clear?.();
       showOrderCreated(order, app);
-      notify(`Pedido ${order.id} registrado com sucesso.`, 'ok');
+      notify(`Pedido ${order.id} confirmado! Guarde o número para acompanhar.`, 'ok');
     } catch (error) {
       notify(error?.message || 'Não foi possível concluir o pedido.', 'bad');
     } finally {
