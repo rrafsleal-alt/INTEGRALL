@@ -58,8 +58,19 @@ const mailer = new Mailer({
 
 const EMAIL_STATUS_EVENTS = new Set(['paid', 'payment_failed', 'payment_expired', 'preparing', 'ready', 'completed', 'refunded', 'cancelled']);
 
+// Deduplicação de e-mails de status: webhooks reenviados (retry do Mercado
+// Pago) não devem disparar o mesmo aviso duas vezes. Chave: pedido+status.
+const notifiedStatuses = new Map();
+const NOTIFIED_MAX = 2000;
+
 function sendOrderEmail(order, kind) {
   if (!mailer.configured || !order?.customer?.email) return;
+  if (kind === 'status') {
+    const key = `${order.id}|${order.status}${order.trackingCode ? `|${order.trackingCode}` : ''}`;
+    if (notifiedStatuses.has(key)) return;
+    if (notifiedStatuses.size >= NOTIFIED_MAX) notifiedStatuses.delete(notifiedStatuses.keys().next().value);
+    notifiedStatuses.set(key, Date.now());
+  }
   const businessName = 'INTEGRALL';
   const message = orderEmail(order, {kind, publicUrl: config.publicUrl, businessName});
   mailer.send({to: order.customer.email, ...message}).then(result => {
@@ -79,6 +90,7 @@ const statusLimiter = rateLimit({windowMs: 60_000, max: 60});
 const paymentLimiter = rateLimit({windowMs: 60_000, max: 30});
 const webhookLimiter = rateLimit({windowMs: 60_000, max: 180});
 const adminLimiter = rateLimit({windowMs: 60_000, max: 90});
+const readLimiter = rateLimit({windowMs: 60_000, max: 120});
 const admin = adminAuth(config.adminToken);
 
 function asyncRoute(handler) {
@@ -145,7 +157,7 @@ function centsFromBody(value) {
   return number;
 }
 
-app.get('/api/health', asyncRoute(async (_req, res) => {
+app.get('/api/health', readLimiter, asyncRoute(async (_req, res) => {
   res.setHeader('Cache-Control', 'no-store');
   const databaseHealth = await repo.health();
   res.json({
@@ -173,7 +185,7 @@ app.get('/api/health', asyncRoute(async (_req, res) => {
   });
 }));
 
-app.get('/api/catalog', asyncRoute(async (_req, res) => {
+app.get('/api/catalog', readLimiter, asyncRoute(async (_req, res) => {
   const catalog = await repo.getCatalog();
   res.setHeader('Cache-Control', 'public, max-age=60, stale-while-revalidate=300');
   res.json(publicCatalog(catalog, config));
@@ -527,14 +539,24 @@ app.patch('/api/admin/orders/:id/shipping', adminLimiter, admin, publicJson, asy
   const shippingCents = centsFromBody(req.body?.shippingCents);
   if (shippingCents == null) return res.status(400).json({error: 'Informe o frete em centavos (zero ou valor positivo).'});
   const label = cleanText(req.body?.label, 160) || 'Frete confirmado pela loja';
-  const totalCents = Number(order.subtotalCents || 0) + shippingCents - (Number(order.discountCents) || 0);
+
+  // Recalcula o desconto quando o cupom depende do frete (free_shipping):
+  // se o admin muda o frete, o desconto acompanha; um desconto congelado do
+  // valor antigo geraria total errado.
+  let discountCents = Number(order.discountCents) || 0;
+  if (order.coupon?.type === 'free_shipping') {
+    discountCents = shippingCents;
+  }
+
+  const totalCents = Number(order.subtotalCents || 0) + shippingCents - discountCents;
   if (totalCents <= 0) return res.status(400).json({error: 'O frete informado deixaria o total do pedido inválido.'});
   const updated = await repo.updateOrder(orderId, {
     shipping: {priceCents: shippingCents, quoted: false, label},
     shippingCents,
+    discountCents,
     totalCents,
     requiresShippingQuote: false
-  }, {source: 'admin', note: `Frete definido em ${shippingCents} centavos.`});
+  }, {source: 'admin', note: `Frete definido em ${shippingCents} centavos${order.coupon?.type === 'free_shipping' ? ` (cupom ${order.coupon.code}: frete grátis, desconto ajustado)` : ''}.`});
   res.json({order: updated});
 }));
 
@@ -543,7 +565,7 @@ app.patch('/api/admin/orders/:id/tracking', adminLimiter, admin, publicJson, asy
   const order = await repo.getOrder(orderId);
   if (!order) return res.status(404).json({error: 'Pedido não encontrado.'});
   if (order.shipping?.choice !== 'delivery') return res.status(409).json({error: 'Este pedido é para retirada e não possui envio.'});
-  const trackingCode = cleanText(req.body?.trackingCode, 80).toUpperCase();
+  const trackingCode = cleanText(req.body?.trackingCode, 80).toUpperCase().replace(/\s+/g, '');
   const trackingCarrier = cleanText(req.body?.trackingCarrier, 80);
   let trackingUrl = cleanText(req.body?.trackingUrl, 500);
   if (trackingUrl && !/^https:\/\/[^\s]+$/i.test(trackingUrl)) return res.status(400).json({error: 'O link de rastreio precisa ser uma URL HTTPS.'});
@@ -571,41 +593,46 @@ app.get('/api/admin/products', adminLimiter, admin, asyncRoute(async (_req, res)
   res.json({products: catalog.products || []});
 }));
 
+class HttpError extends Error {
+  constructor(status, message) { super(message); this.status = status; }
+}
+
 app.patch('/api/admin/products/:id', adminLimiter, admin, publicJson, asyncRoute(async (req, res) => {
   const productId = cleanText(req.params.id, 120);
-  const current = await repo.getCatalog();
-  const index = (current.products || []).findIndex(product => product.id === productId);
-  if (index < 0) return res.status(404).json({error: 'Produto não encontrado.'});
-
   const patch = req.body && typeof req.body === 'object' && !Array.isArray(req.body) ? req.body : {};
   const allowed = ['name', 'price', 'description', 'unit', 'stock', 'stockMin', 'maxPerOrder', 'minPerOrder',
     'weightGrams', 'lengthCm', 'widthCm', 'heightCm', 'available', 'featured', 'department', 'subcategory', 'brand'];
-  const product = {...current.products[index]};
-  for (const key of allowed) {
-    if (key in patch) product[key] = patch[key];
-  }
-  if (Array.isArray(patch.variants)) {
-    const byId = new Map(patch.variants.filter(v => v && v.id).map(v => [v.id, v]));
-    product.variants = (product.variants || []).map(variant => {
-      const update = byId.get(variant.id);
-      if (!update) return variant;
-      const next = {...variant};
-      for (const key of ['name', 'price', 'stock', 'unit', 'weightGrams']) {
-        if (key in update) next[key] = update[key];
-      }
-      return next;
-    });
-  }
-
-  const nextProducts = [...current.products];
-  nextProducts[index] = product;
   let next;
   try {
-    next = normalizeCatalog({...current, products: nextProducts});
+    // Atômico: lê o catálogo com lock, aplica o patch sobre o estado mais
+    // recente (nunca sobre um snapshot velho) e salva na mesma transação.
+    next = await repo.mutateCatalog(current => {
+      const index = (current.products || []).findIndex(product => product.id === productId);
+      if (index < 0) throw new HttpError(404, 'Produto não encontrado.');
+      const product = {...current.products[index]};
+      for (const key of allowed) {
+        if (key in patch) product[key] = patch[key];
+      }
+      if (Array.isArray(patch.variants)) {
+        const byId = new Map(patch.variants.filter(v => v && v.id).map(v => [v.id, v]));
+        product.variants = (product.variants || []).map(variant => {
+          const update = byId.get(variant.id);
+          if (!update) return variant;
+          const nextVariant = {...variant};
+          for (const key of ['name', 'price', 'stock', 'unit', 'weightGrams']) {
+            if (key in update) nextVariant[key] = update[key];
+          }
+          return nextVariant;
+        });
+      }
+      const nextProducts = [...current.products];
+      nextProducts[index] = product;
+      return normalizeCatalog({...current, products: nextProducts});
+    });
   } catch (error) {
+    if (error instanceof HttpError) return res.status(error.status).json({error: error.message});
     return res.status(400).json({error: error?.message || 'Produto inválido.'});
   }
-  await repo.saveCatalog(next);
   res.json({ok: true, product: next.products.find(item => item.id === productId)});
 }));
 
@@ -616,32 +643,28 @@ app.get('/api/admin/coupons', adminLimiter, admin, asyncRoute(async (_req, res) 
 
 app.put('/api/admin/coupons', adminLimiter, admin, publicJson, asyncRoute(async (req, res) => {
   if (!Array.isArray(req.body?.coupons)) return res.status(400).json({error: 'Envie um array coupons.'});
-  const current = await repo.getCatalog();
   let next;
   try {
-    next = normalizeCatalog({...current, coupons: req.body.coupons});
+    next = await repo.mutateCatalog(current => normalizeCatalog({...current, coupons: req.body.coupons}));
   } catch (error) {
     return res.status(400).json({error: error?.message || 'Cupons inválidos.'});
   }
-  await repo.saveCatalog(next);
   res.json({ok: true, coupons: next.coupons});
 }));
 
 app.put('/api/admin/catalog', adminLimiter, admin, adminCatalogJson, asyncRoute(async (req, res) => {
-  const current = await repo.getCatalog();
   let next;
   try {
-    next = normalizeCatalog({
+    next = await repo.mutateCatalog(current => normalizeCatalog({
       version: 9,
       settings: req.body?.settings ?? current.settings,
       commerce: req.body?.commerce ?? req.body?.v8 ?? current.commerce,
       coupons: req.body?.coupons ?? current.coupons,
       products: req.body?.products ?? current.products
-    });
+    }));
   } catch (error) {
     return res.status(400).json({error: error?.message || 'Catálogo inválido.'});
   }
-  await repo.saveCatalog(next);
   res.json({ok: true, products: next.products.length, catalog: publicCatalog(next, config)});
 }));
 
@@ -663,12 +686,17 @@ app.use(express.static(publicDir, {
 }));
 
 app.use((req, res) => {
-  if (req.method === 'GET' && !req.path.startsWith('/api/')) return res.status(404).sendFile(path.join(publicDir, 'index.html'));
+  if ((req.method === 'GET' || req.method === 'HEAD') && !req.path.startsWith('/api/')) {
+    res.setHeader('X-Robots-Tag', 'noindex'); // rota inexistente não deve ser indexada
+    return res.status(404).sendFile(path.join(publicDir, 'index.html'));
+  }
   res.status(404).json({error: 'Rota não encontrada.'});
 });
 
-app.use((error, _req, res, _next) => {
-  console.error(error);
+app.use((error, req, res, _next) => {
+  // Log com contexto: método+rota tornam o diagnóstico possível em produção.
+  console.error(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl} ->`, error?.message || error);
+  if (config.env !== 'production' && error?.stack) console.error(error.stack);
   if (error?.type === 'entity.too.large') return res.status(413).json({error: 'Corpo da requisição muito grande.'});
   if (error instanceof SyntaxError && 'body' in error) return res.status(400).json({error: 'JSON inválido.'});
   const message = config.env === 'production' ? 'Erro interno do servidor.' : (error?.message || 'Erro interno do servidor.');

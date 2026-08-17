@@ -102,6 +102,25 @@
     } catch { return null; }
   }
 
+  /**
+   * Focus trap: mantém o Tab circulando dentro do modal aberto (WCAG 2.4.3).
+   * Aplica uma única vez por elemento; ativo apenas enquanto o modal está aberto.
+   */
+  function trapFocus(modal) {
+    if (!modal || modal.dataset.focusTrapped) return;
+    modal.dataset.focusTrapped = '1';
+    modal.addEventListener('keydown', event => {
+      if (event.key !== 'Tab' || !modal.classList.contains('open')) return;
+      const focusables = [...modal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])')]
+        .filter(el => !el.disabled && !el.hidden && el.offsetParent !== null);
+      if (!focusables.length) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+    });
+  }
+
   function injectAccessibility() {
     if (!$('.integrall-skip-link')) {
       const link = document.createElement('a');
@@ -134,6 +153,7 @@
     };
     modal.querySelector('.close-btn').addEventListener('click', close);
     document.addEventListener('keydown', event => { if (event.key === 'Escape' && modal.classList.contains('open')) close(); });
+    trapFocus(modal);
     return modal;
   }
 
@@ -229,6 +249,9 @@
     const items = app?.cartDetails?.() || [];
     return items.some(item => {
       const product = item.product || {};
+      // Flag calculada pelo servidor (publicCatalog) — fonte única de verdade.
+      if (typeof product.isAlcoholic === 'boolean') return product.isAlcoholic;
+      // Fallback para catálogo embutido antigo (sem a flag).
       const department = String(product.department || '').toLowerCase();
       return ['vinhos', 'vinho', 'espumantes', 'cervejas', 'cerveja', 'destilados', 'licores', 'bebidas-alcoolicas'].includes(department) || Boolean(product.attributes?.alcohol);
     });
@@ -260,30 +283,71 @@
     return 0;
   }
 
+  /** Frete atualmente selecionado nas opções de transportadora (centavos) ou null. */
+  function selectedCarrierShipping() {
+    if (!correiosEnabled() || !correiosOptions.length) return null;
+    const option = correiosOptions.find(item => item.service === correiosSelected) || correiosOptions[0];
+    return option ? {priceCents: option.priceCents, label: option.label} : null;
+  }
+
+  /**
+   * Resumo unificado do carrinho: subtotal + frete escolhido (Correios/Jadlog,
+   * fixo ou zonas) − desconto do cupom. Mantém o total do carrinho IGUAL ao
+   * que o servidor cobrará — nada de surpresa no fechamento.
+   */
   function syncDiscountRow() {
     const row = $('#cartDiscountRow');
     const valueNode = $('#cartDiscount');
     const totalNode = $('#cartTotal');
+    const shippingNode = $('#cartShipping');
     if (!row || !valueNode) return;
     const app = globalThis.__integrallApp;
     const subtotal = Number(app?.cartSubtotal?.() || 0);
-    if (!appliedCoupon || subtotal <= 0) { row.hidden = true; return; }
-    if (appliedCoupon.type === 'free_shipping') {
+    const choice = app?.getState?.()?.checkout?.choice;
+
+    // 1) Frete efetivo: transportadora escolhida > cálculo local (fixo/zonas) > pendente
+    let shippingCents = null;
+    let shippingLabel = '';
+    if (choice === 'pickup') {
+      shippingCents = 0;
+    } else if (choice === 'delivery') {
+      const carrier = selectedCarrierShipping();
+      if (carrier) {
+        shippingCents = carrier.priceCents;
+        shippingLabel = carrier.label;
+      } else {
+        const quote = app?.calculateShipping?.(subtotal);
+        if (quote && quote.price != null) shippingCents = quote.price;
+      }
+    }
+    if (shippingNode && shippingLabel && shippingCents != null) {
+      const text = `${shippingLabel} — ${formatMoney(shippingCents)}`;
+      if (shippingNode.textContent !== text) shippingNode.textContent = text;
+    }
+
+    // 2) Desconto do cupom (free_shipping desconta o frete cotado)
+    let discount = 0;
+    if (appliedCoupon && subtotal > 0) {
+      if (appliedCoupon.type === 'free_shipping') discount = Math.max(0, shippingCents || 0);
+      else discount = couponDiscountCents(subtotal);
+    }
+    if (discount > 0) {
+      row.hidden = false;
+      valueNode.textContent = appliedCoupon.type === 'free_shipping'
+        ? `Frete grátis (− ${formatMoney(discount)})`
+        : `− ${formatMoney(discount)}`;
+    } else if (appliedCoupon && appliedCoupon.type === 'free_shipping' && subtotal > 0) {
       row.hidden = false;
       valueNode.textContent = 'Frete grátis com cupom';
-      return;
+    } else {
+      row.hidden = true;
     }
-    const discount = couponDiscountCents(subtotal);
-    if (discount <= 0) { row.hidden = true; return; }
-    row.hidden = false;
-    valueNode.textContent = `− ${formatMoney(discount)}`;
-    if (totalNode && app) {
-      const quote = app.calculateShipping?.(subtotal);
-      const shippingPrice = quote && quote.price != null ? quote.price : null;
-      const choice = app.getState?.()?.checkout?.choice;
-      const next = choice === 'delivery' && shippingPrice === null
-        ? `${formatMoney(Math.max(0, subtotal - discount))} + entrega`
-        : formatMoney(Math.max(0, subtotal - discount + (shippingPrice || 0)));
+
+    // 3) Total real
+    if (totalNode && subtotal > 0) {
+      const next = choice === 'delivery' && shippingCents == null
+        ? `${formatMoney(Math.max(0, subtotal - (appliedCoupon && appliedCoupon.type !== 'free_shipping' ? discount : 0)))} + entrega`
+        : formatMoney(Math.max(0, subtotal + (shippingCents || 0) - discount));
       if (totalNode.textContent !== next) totalNode.textContent = next;
     }
   }
@@ -415,6 +479,7 @@
         correiosSelected = correiosOptions[0]?.service || '';
       }
       renderCorreiosOptions(correiosOptions.length ? '' : 'Nenhuma opção de frete disponível para este CEP.');
+      syncDiscountRow();
     } catch (error) {
       correiosOptions = [];
       correiosLastKey = '';
@@ -553,6 +618,7 @@
     $('#orderRefreshButton').addEventListener('click', () => refreshTrackedOrder());
     $('#orderPayButton').addEventListener('click', () => startPaymentForTrackedOrder());
     $('#orderSupportButton').addEventListener('click', () => openSupport());
+    trapFocus(modal);
     return modal;
   }
 
@@ -890,6 +956,15 @@
     if (cartList) cartObserver.observe(cartList, {childList: true, subtree: true});
     const totals = $('#cartTotal');
     if (totals) new MutationObserver(() => syncDiscountRow()).observe(totals, {characterData: true, childList: true, subtree: true});
+    // Reaplica o rótulo do frete da transportadora quando o app re-renderiza o carrinho
+    const shippingNode = $('#cartShipping');
+    if (shippingNode) new MutationObserver(() => {
+      if (correiosEnabled() && correiosOptions.length && !shippingNode.dataset.syncing) {
+        shippingNode.dataset.syncing = '1';
+        syncDiscountRow();
+        delete shippingNode.dataset.syncing;
+      }
+    }).observe(shippingNode, {characterData: true, childList: true, subtree: true});
   }
 
   globalThis.__integrallCheckout = Object.freeze({refreshConfig, config, handlePaymentReturn, showLastOrder: () => fetchOrderStatus()});

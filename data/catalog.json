@@ -155,7 +155,7 @@
       "region": "",
       "price": 2390,
       "unit": "Garrafa de 1L e 300ml",
-      "description": "",
+      "description": "Suco 100% integral de uva bordô, sem adição de açúcar, água ou conservantes. Pasteurizado para preservar o sabor intenso e os antioxidantes naturais da fruta. Produzido pela Marqués de Mendonça, é o suco de quem leva uva a sério: encorpado, de cor profunda e doçura natural da própria fruta. Disponível em garrafas de 300ml e 1 litro.",
       "images": [
         "/assets/products/01-suco-integral-de-uva-bord.webp"
       ],
@@ -164,7 +164,7 @@
           "id": "variant-1786125213057-vsk38j",
           "name": "300ml",
           "price": 1150,
-          "stock": 1000,
+          "stock": 60,
           "unit": "",
           "position": 1,
           "weightGrams": 520
@@ -173,7 +173,7 @@
           "id": "variant-1786125277805-0nrmsu",
           "name": "1L",
           "price": 2390,
-          "stock": 1000,
+          "stock": 60,
           "unit": "",
           "position": 2,
           "weightGrams": 1500
@@ -234,7 +234,7 @@
       "region": "Serra Gaúcha",
       "price": 2699,
       "unit": "750ml",
-      "description": "Vinho varietal uva bordô",
+      "description": "Vinho tinto seco varietal de uva bordô, produzido pela Marqués de Mendonça na Serra Gaúcha. Aromas de frutas vermelhas maduras, corpo leve e taninos macios — um tinto honesto e fácil de gostar, ideal para o dia a dia. Harmoniza com massas ao molho vermelho, queijos e churrasco. Sirva entre 12° e 14°C. Teor alcoólico: 10,9%. Garrafas de 750ml e 375ml.",
       "images": [
         "/assets/products/02-vinho-tinto-seco.webp"
       ],
@@ -243,7 +243,7 @@
           "id": "variant-1786125472992-y1279u",
           "name": "750ml",
           "price": 2699,
-          "stock": 1000,
+          "stock": 48,
           "unit": "",
           "position": 1,
           "weightGrams": 1300
@@ -252,7 +252,7 @@
           "id": "variant-1786125496593-h1h204",
           "name": "375ml",
           "price": 2150,
-          "stock": 1000,
+          "stock": 24,
           "unit": "",
           "position": 2,
           "weightGrams": 750
@@ -313,7 +313,7 @@
       "region": "",
       "price": 5490,
       "unit": "Caixa com 2kg",
-      "description": "",
+      "description": "Biscoito folheado tradicional, crocante e delicado, feito em fornadas artesanais. A caixa de 2kg rende bem e é perfeita para servir com café, chá ou vinho de sobremesa. Validade de 6 meses. Pedido mínimo de 2 caixas.",
       "images": [
         "/assets/products/03-mentirinha.webp"
       ],
@@ -323,7 +323,7 @@
         "shelfLife": "6 meses",
         "minOrder": "2 caixas"
       },
-      "stock": null,
+      "stock": 30,
       "stockMin": 3,
       "maxPerOrder": null,
       "restockDate": "",
@@ -355,7 +355,7 @@
       "region": "",
       "price": 3990,
       "unit": "250g",
-      "description": "",
+      "description": "Café Gerações Vó Damazia: grãos 100% arábica cultivados na Serra Gaúcha, torra média que revela notas de chocolate e caramelo com acidez equilibrada. Uma homenagem de família em cada xícara. Embalagem de 250g.",
       "images": [
         "/assets/products/04-v-damazia.webp"
       ],
@@ -366,7 +366,7 @@
         "roast": "Média",
         "weight": "250g"
       },
-      "stock": null,
+      "stock": 40,
       "stockMin": 3,
       "maxPerOrder": null,
       "restockDate": "",
@@ -397,7 +397,7 @@
       "region": "",
       "price": 6500,
       "unit": "750ml",
-      "description": "",
+      "description": "Vinho verde branco Pescada, importado de Portugal. Leve, fresco e levemente frisante, com notas cítricas e finalização limpa — o companheiro ideal de peixes, frutos do mar e tardes quentes. Sirva bem gelado. Garrafa de 750ml.",
       "images": [
         "/assets/products/05-vinho-verde-pescada.webp"
       ],
@@ -406,7 +406,7 @@
         "wineType": "Branco",
         "volume": "750ml"
       },
-      "stock": null,
+      "stock": 24,
       "stockMin": 3,
       "maxPerOrder": null,
       "restockDate": "",

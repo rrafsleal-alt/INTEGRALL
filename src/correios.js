@@ -236,14 +236,25 @@ export class CorreiosService {
    * Retorna eventos normalizados: [{at, description, detail, location}] (mais recente primeiro).
    */
   async trackShipment(trackingCode) {
-    const code = String(trackingCode || '').trim().toUpperCase();
+    const code = String(trackingCode || '').trim().toUpperCase().replace(/\s+/g, '');
     if (!/^[A-Z]{2}\d{9}[A-Z]{2}$/.test(code)) throw new Error('Código de rastreio inválido.');
-    const token = await this.authenticate();
-    const response = await this.fetch(`${this.base}/srorastro/v1/objetos/${encodeURIComponent(code)}?resultado=T`, {
+    let token = await this.authenticate();
+    let response = await this.fetch(`${this.base}/srorastro/v1/objetos/${encodeURIComponent(code)}?resultado=T`, {
       method: 'GET',
       headers: {Authorization: `Bearer ${token}`, Accept: 'application/json'},
       signal: AbortSignal.timeout(10_000)
     });
+    if (response.status === 401) {
+      // Token expirado no meio da sessão: renova e tenta uma vez mais
+      // (mesmo comportamento do authorizedPost usado na cotação).
+      this.token = null;
+      token = await this.authenticate();
+      response = await this.fetch(`${this.base}/srorastro/v1/objetos/${encodeURIComponent(code)}?resultado=T`, {
+        method: 'GET',
+        headers: {Authorization: `Bearer ${token}`, Accept: 'application/json'},
+        signal: AbortSignal.timeout(10_000)
+      });
+    }
     if (!response.ok) throw new Error(`Rastro Correios indisponível (HTTP ${response.status}).`);
     const data = await response.json();
     const object = Array.isArray(data?.objetos) ? data.objetos[0] : null;

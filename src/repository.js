@@ -162,6 +162,40 @@ export class Repository {
     return catalog;
   }
 
+  /**
+   * Atualização atômica do catálogo: lê com lock (FOR UPDATE), aplica o
+   * `mutator` sobre o estado MAIS RECENTE e salva na mesma transação.
+   * Elimina a corrida ler→modificar→salvar entre edições do Admin e a baixa
+   * de estoque dos webhooks/pedidos (que também trava a linha do catálogo).
+   * O mutator recebe o catálogo atual e retorna o próximo (ou lança para abortar).
+   */
+  async mutateCatalog(mutator) {
+    if (!this.pool) {
+      const next = await mutator(clone(this.memoryCatalog));
+      this.memoryCatalog = clone(next);
+      return this.getCatalog();
+    }
+    const client = await this.pool.connect();
+    try {
+      await client.query('BEGIN');
+      const {rows} = await client.query('SELECT data FROM integrall_catalog WHERE id = 1 FOR UPDATE');
+      const current = rows[0]?.data ?? clone(this.initialCatalog);
+      const next = await mutator(current);
+      await client.query(
+        `INSERT INTO integrall_catalog (id, data, updated_at) VALUES (1, $1::jsonb, NOW())
+         ON CONFLICT (id) DO UPDATE SET data = EXCLUDED.data, updated_at = NOW()`,
+        [JSON.stringify(next)]
+      );
+      await client.query('COMMIT');
+      return next;
+    } catch (error) {
+      try { await client.query('ROLLBACK'); } catch {}
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+
   async getOrder(id) {
     if (!this.pool) return this.memoryOrders.has(id) ? clone(this.memoryOrders.get(id)) : null;
     const {rows} = await this.pool.query('SELECT data FROM integrall_orders WHERE id = $1', [id]);

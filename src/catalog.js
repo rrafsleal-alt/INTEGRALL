@@ -346,7 +346,10 @@ export function normalizeCatalog(input) {
 export function publicCatalog(catalog, serverConfig) {
   const result = normalizeCatalog(catalog);
   delete result.coupons;
-  result.hasAlcohol = result.products.some(product => product.available !== false && isAlcoholicProduct(product));
+  // Fonte única de verdade: o front usa esta flag em vez de manter uma
+  // lista própria de departamentos alcoólicos (que poderia divergir).
+  for (const product of result.products) product.isAlcoholic = isAlcoholicProduct(product);
+  result.hasAlcohol = result.products.some(product => product.available !== false && product.isAlcoholic);
   result.commerce.apiBaseUrl = '';
   result.commerce.apiMode = 'required';
   result.commerce.paymentMethods = {

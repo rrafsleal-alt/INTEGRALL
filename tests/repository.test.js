@@ -66,3 +66,32 @@ test('pedidos antigos sem pagamento expiram; pedidos pagos nunca expiram', async
   const zero = await repo.expireStaleOrders(0);
   assert.deepEqual(zero, []);
 });
+
+test('mutateCatalog aplica mutação sobre o estado mais recente e propaga erros sem salvar', async () => {
+  const repo = new Repository({
+    databaseUrl: '',
+    initialCatalog: {version: 9, settings: {}, commerce: {}, coupons: [], products: [{id: 'p1', name: 'Produto', price: 1000, variants: [], attributes: {}, images: []}]},
+    production: false
+  });
+  await repo.init();
+
+  // Mutação 1: muda o preço
+  await repo.mutateCatalog(current => {
+    current.products[0].price = 2000;
+    return current;
+  });
+  // Mutação 2 (concorrente lógica): parte do estado JÁ atualizado, não de um snapshot velho
+  await repo.mutateCatalog(current => {
+    assert.equal(current.products[0].price, 2000);
+    current.products[0].stock = 5;
+    return current;
+  });
+  const catalog = await repo.getCatalog();
+  assert.equal(catalog.products[0].price, 2000);
+  assert.equal(catalog.products[0].stock, 5);
+
+  // Mutação que lança: nada é salvo
+  await assert.rejects(() => repo.mutateCatalog(() => { throw new Error('valida e aborta'); }), /valida e aborta/);
+  const unchanged = await repo.getCatalog();
+  assert.equal(unchanged.products[0].price, 2000);
+});
