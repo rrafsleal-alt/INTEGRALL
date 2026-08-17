@@ -39,7 +39,7 @@ function digits(value) {
 }
 
 export class JadlogService {
-  constructor({token, cnpj, conta, contrato, originCep, modalidade = 3, tpEntrega = 'D', baseUrl, fetchImpl} = {}) {
+  constructor({token, cnpj, conta, contrato, originCep, modalidade = 3, tpEntrega = 'D', tpSeguro = 'N', baseUrl, fetchImpl} = {}) {
     this.token = String(token || '').trim();
     this.cnpj = digits(cnpj);
     this.conta = String(conta || '').trim();
@@ -47,6 +47,7 @@ export class JadlogService {
     this.originCep = digits(originCep).slice(0, 8);
     this.modalidade = Number.isInteger(Number(modalidade)) ? Number(modalidade) : 3;
     this.tpEntrega = tpEntrega === 'R' ? 'R' : 'D';
+    this.tpSeguro = tpSeguro === 'A' ? 'A' : 'N'; // N=normal, A=apólice própria
     this.base = String(baseUrl || '').trim() || PRODUCTION_BASE;
     this.fetch = fetchImpl || globalThis.fetch.bind(globalThis);
     this.quoteCache = new Map();
@@ -133,7 +134,7 @@ export class JadlogService {
         contrato: this.contrato || null,
         modalidade: this.modalidade,
         tpentrega: this.tpEntrega,
-        tpseguro: 'N',
+        tpseguro: this.tpSeguro,
         vldeclarado: declaredShare > 0 ? Math.round(declaredShare) / 100 : 0,
         vlcoleta: 0
       };

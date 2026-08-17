@@ -70,13 +70,14 @@ class SmtpConnection {
 }
 
 export class Mailer {
-  constructor({host, port, user, password, from, fromName, secure, timeoutMs = 15_000} = {}) {
+  constructor({host, port, user, password, from, fromName, replyTo, secure, timeoutMs = 15_000} = {}) {
     this.host = String(host || '').trim();
     this.port = Number(port) || 587;
     this.user = String(user || '').trim();
     this.password = String(password || '');
     this.from = String(from || this.user).trim();
     this.fromName = String(fromName || 'INTEGRALL').trim();
+    this.replyTo = String(replyTo || '').trim();
     this.secure = secure == null ? this.port === 465 : Boolean(secure);
     this.timeoutMs = timeoutMs;
   }
@@ -139,6 +140,7 @@ export class Mailer {
       const boundary = `integrall-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
       const message = [
         `From: ${encodeHeaderWord(this.fromName)} <${this.from}>`,
+        ...(this.replyTo && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.replyTo) ? [`Reply-To: <${this.replyTo}>`] : []),
         `To: <${recipient}>`,
         `Subject: ${encodeHeaderWord(subject)}`,
         `Date: ${new Date().toUTCString()}`,

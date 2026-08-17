@@ -44,6 +44,7 @@ const jadlog = new JadlogService({
   originCep: config.correiosOriginCep, // CEP de origem da loja (compartilhado)
   modalidade: config.jadlogModalidade,
   tpEntrega: config.jadlogTpEntrega,
+  tpSeguro: config.jadlogTpSeguro,
   baseUrl: config.jadlogBaseUrl
 });
 const mailer = new Mailer({
@@ -53,6 +54,7 @@ const mailer = new Mailer({
   password: config.smtpPassword,
   from: config.smtpFrom,
   fromName: config.smtpFromName,
+  replyTo: config.smtpReplyTo,
   secure: config.smtpSecure
 });
 
@@ -105,7 +107,9 @@ function publicBaseUrl(req) {
 }
 
 function paymentCanStart(order) {
-  return !['paid', 'preparing', 'ready', 'completed', 'refunded', 'chargeback', 'cancelled'].includes(order?.status);
+  // payment_review (mediação/divergência) também bloqueia: um novo checkout
+  // durante mediação poderia gerar cobrança dupla ao cliente.
+  return !['paid', 'preparing', 'ready', 'completed', 'refunded', 'chargeback', 'cancelled', 'payment_review'].includes(order?.status);
 }
 
 function publicOrder(order) {
@@ -578,6 +582,10 @@ app.patch('/api/admin/orders/:id/tracking', adminLimiter, admin, publicJson, asy
     trackingCarrier,
     trackingUrl: trackingCode ? trackingUrl : ''
   }, {source: 'admin', note});
+  // Invalida o cache de rastreio dos códigos envolvidos (antigo e novo):
+  // o cliente vê os eventos certos imediatamente após a troca.
+  if (order.trackingCode) trackingCache.delete(order.trackingCode);
+  if (trackingCode) trackingCache.delete(trackingCode);
   if (trackingCode && updated) sendOrderEmail(updated, 'status');
   res.json({order: updated});
 }));

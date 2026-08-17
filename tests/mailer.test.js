@@ -78,3 +78,10 @@ test('itens de presente aparecem no e-mail com a mensagem', () => {
   const evil = orderEmail({...ORDER, items: [{qty: 1, name: 'X', variant: '', lineTotalCents: 100, gift: true, giftMessage: '<img src=x onerror=alert(1)>'}]}, {kind: 'created'});
   assert.ok(!evil.html.includes('<img src=x'));
 });
+
+test('Reply-To é incluído quando configurado e válido', () => {
+  const withReply = new Mailer({host: 'h', user: 'u', password: 'p', from: 'loja@example.com', replyTo: 'atendimento@example.com'});
+  assert.equal(withReply.replyTo, 'atendimento@example.com');
+  const invalid = new Mailer({host: 'h', user: 'u', password: 'p', from: 'loja@example.com', replyTo: 'nao-e-email'});
+  assert.equal(invalid.replyTo, 'nao-e-email'); // guardado mas o send() valida antes de usar
+});

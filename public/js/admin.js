@@ -161,8 +161,14 @@
   }
 
   async function saveStatus() {
-    if(!activeOrder?.id)return; const button=$('#saveStatusButton');button.disabled=true;
-    try { const data=await request(`/api/admin/orders/${encodeURIComponent(activeOrder.id)}`,{method:'PATCH',body:JSON.stringify({status:$('#dialogStatus').value})}); setFeedback($('#dialogFeedback'),'Status atualizado.','ok'); renderOrderDialog(data.order); await Promise.all([loadOrders(),loadCatalog()]); }
+    if(!activeOrder?.id)return;
+    const nextStatus=$('#dialogStatus').value;
+    // Aviso operacional: cancelar/reembolsar pedido com estoque já baixado NÃO repõe o estoque automaticamente.
+    if(['cancelled','refunded','chargeback'].includes(nextStatus)&&activeOrder.inventoryCommittedAt){
+      if(!confirm('Este pedido já teve baixa de estoque. Mudar para este status NÃO repõe o estoque automaticamente — ajuste manualmente no painel Produtos se a mercadoria voltou. Continuar?'))return;
+    }
+    const button=$('#saveStatusButton');button.disabled=true;
+    try { const data=await request(`/api/admin/orders/${encodeURIComponent(activeOrder.id)}`,{method:'PATCH',body:JSON.stringify({status:nextStatus})}); setFeedback($('#dialogFeedback'),'Status atualizado.','ok'); renderOrderDialog(data.order); await Promise.all([loadOrders(),loadCatalog()]); }
     catch(error){setFeedback($('#dialogFeedback'),error.message,'bad')} finally{button.disabled=false}
   }
 
@@ -346,7 +352,10 @@
   function download(filename,text,type) { const url=URL.createObjectURL(new Blob([text],{type}));const a=document.createElement('a');a.href=url;a.download=filename;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000); }
   function exportOrders() {
     const rows=[['id','data','cliente','email','telefone','status','subtotal_centavos','frete_centavos','desconto_centavos','cupom','total_centavos','pagamento','pagamento_id','rastreio'],...orders.map(o=>[o.id,o.createdAt,o.customer?.name||'',o.customer?.email||'',o.customer?.phone||'',o.status,o.subtotalCents,o.shippingCents??'',o.discountCents||0,o.coupon?.code||'',o.totalCents,o.payment?.status||'',o.payment?.paymentId||'',o.trackingCode||''])];
-    const csv=rows.map(row=>row.map(value=>`"${String(value??'').replaceAll('"','""')}"`).join(',')).join('\n'); download(`integrall-pedidos-${new Date().toISOString().slice(0,10)}.csv`,csv,'text/csv;charset=utf-8');
+    // Proteção contra injeção de fórmula no Excel/LibreOffice: valores que
+    // começam com = + - @ ganham apóstrofo. BOM UTF-8 para acentos no Excel PT-BR.
+    const safeCell=value=>{let text=String(value??'');if(/^[=+\-@]/.test(text))text=`'${text}`;return `"${text.replaceAll('"','""')}"`};
+    const csv='\uFEFF'+rows.map(row=>row.map(safeCell).join(',')).join('\n'); download(`integrall-pedidos-${new Date().toISOString().slice(0,10)}.csv`,csv,'text/csv;charset=utf-8');
   }
   function downloadCatalog() { if(!catalog)return;download(`integrall-catalogo-${new Date().toISOString().slice(0,10)}.json`,JSON.stringify(catalog,null,2),'application/json'); }
 

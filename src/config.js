@@ -52,6 +52,7 @@ export const config = Object.freeze({
   jadlogContrato: text('JADLOG_CONTRATO'),
   jadlogModalidade: int('JADLOG_MODALIDADE', 3) ?? 3,
   jadlogTpEntrega: text('JADLOG_TP_ENTREGA', 'D').toUpperCase() === 'R' ? 'R' : 'D',
+  jadlogTpSeguro: text('JADLOG_TP_SEGURO', 'N').toUpperCase() === 'A' ? 'A' : 'N',
   jadlogBaseUrl: text('JADLOG_BASE_URL'),
 
   // Regra de divisão entre transportadoras: até N unidades → Correios;
@@ -65,6 +66,7 @@ export const config = Object.freeze({
   smtpPassword: text('SMTP_PASSWORD'),
   smtpFrom: text('SMTP_FROM'),
   smtpFromName: text('SMTP_FROM_NAME', 'INTEGRALL'),
+  smtpReplyTo: text('SMTP_REPLY_TO'),
   smtpSecure: bool('SMTP_SECURE', false),
 
   // Expiração automática de pedidos não pagos (0 desativa)

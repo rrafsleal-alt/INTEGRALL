@@ -229,3 +229,26 @@ test('rotas de pagamento/frete indisponíveis degradam com clareza', async () =>
   assert.equal(missing.status, 404);
   assert.ok(missing.data.error);
 });
+
+test('payment_review bloqueia novo checkout (evita cobrança dupla em mediação)', async () => {
+  const catalog = (await api('/api/catalog')).data;
+  const juice = catalog.products.find(p => p.department === 'sucos');
+  const order = (await api('/api/orders', {method: 'POST', body: {
+    clientOrderId: 'HTTP-REVIEW',
+    items: [{productId: juice.id, variantId: juice.variants[0].id, qty: 1}],
+    shipping: {choice: 'pickup'}, customer: {name: 'R', email: 'r@example.com'}
+  }})).data.order;
+  await api(`/api/admin/orders/${order.id}`, {method: 'PATCH', headers: ADMIN, body: {status: 'payment_review'}});
+  // Mercado Pago desconfigurado responde 503 ANTES da checagem de status;
+  // então validamos pela flag pública onlinePaymentAvailable, que usa paymentCanStart.
+  const status = await api('/api/orders/status', {method: 'POST', body: {orderId: order.id, checkoutToken: order.checkoutToken}});
+  assert.equal(status.data.order.onlinePaymentAvailable, false);
+});
+
+test('robots.txt é servido e bloqueia /admin e /api', async () => {
+  const response = await fetch(`${BASE}/robots.txt`);
+  assert.equal(response.status, 200);
+  const text = await response.text();
+  assert.match(text, /Disallow: \/admin/);
+  assert.match(text, /Disallow: \/api\//);
+});

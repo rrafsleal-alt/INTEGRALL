@@ -608,7 +608,7 @@ ${publicMode ? scopeVisualCss(v.customCss) : ''}`;
     const related = relatedProducts(product); const section = $('#relatedSection'); const grid = $('#relatedGrid'); grid.replaceChildren(); section.hidden = !related.length;
     related.forEach(item => {
       const button = el('button', 'related-card'); button.type = 'button'; button.dataset.relatedId = item.id;
-      const image = document.createElement('img'); image.src = productImages(item)[0]; image.alt = '';
+      const image = document.createElement('img'); image.loading = 'lazy'; image.decoding = 'async'; image.src = productImages(item)[0]; image.alt = '';
       button.append(image, el('span', '', item.name)); grid.append(button);
     });
   }
@@ -783,7 +783,7 @@ ${publicMode ? scopeVisualCss(v.customCss) : ''}`;
     $('#emptyCart').hidden = items.length > 0; $('#cartFoot').hidden = !items.length; $('#customerFields').hidden = !items.length;
     $('#cartCount').textContent = String(items.reduce((sum, item) => sum + item.qty, 0));
     items.forEach(item => {
-      const row = el('article', 'cart-item'); const image = document.createElement('img'); image.src = productImages(item.product)[0]; image.alt = '';
+      const row = el('article', 'cart-item'); const image = document.createElement('img'); image.loading = 'lazy'; image.decoding = 'async'; image.src = productImages(item.product)[0]; image.alt = '';
       const copy = el('div'); copy.append(el('h3', '', item.product.name));
       const details = [item.variant?.name || item.product.unit, `${money(item.price)} cada`].filter(Boolean).join(' • '); copy.append(el('p', '', details));
       if (item.gift) copy.append(el('p', '', item.giftMessage ? `Presente: “${item.giftMessage}”` : 'Embalagem para presente'));
