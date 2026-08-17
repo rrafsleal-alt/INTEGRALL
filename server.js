@@ -10,6 +10,7 @@ import {securityHeaders, adminAuth, rateLimit, safeEqual} from './src/security.j
 import {MercadoPagoService, InvalidWebhookSignatureError} from './src/payments.js';
 import {evaluatePayment} from './src/payment-state.js';
 import {CorreiosService} from './src/correios.js';
+import {JadlogService} from './src/jadlog.js';
 import {Mailer, orderEmail} from './src/mailer.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -34,6 +35,16 @@ const correios = new CorreiosService({
   services: config.correiosServices,
   homolog: config.correiosHomolog,
   baseUrl: config.correiosBaseUrl
+});
+const jadlog = new JadlogService({
+  token: config.jadlogToken,
+  cnpj: config.jadlogCnpj,
+  conta: config.jadlogConta,
+  contrato: config.jadlogContrato,
+  originCep: config.correiosOriginCep, // CEP de origem da loja (compartilhado)
+  modalidade: config.jadlogModalidade,
+  tpEntrega: config.jadlogTpEntrega,
+  baseUrl: config.jadlogBaseUrl
 });
 const mailer = new Mailer({
   host: config.smtpHost,
@@ -150,7 +161,11 @@ app.get('/api/health', asyncRoute(async (_req, res) => {
       inventoryOnPaid: true,
       shippingQuoteAdmin: true,
       customers: true,
-      correiosShipping: config.shippingMode === 'correios' && correios.configured,
+      correiosShipping: carrierShippingEnabled(),
+      carriers: [
+        ...(config.shippingMode === 'correios' && correios.configured ? ['correios'] : []),
+        ...(config.shippingMode === 'correios' && jadlog.configured ? ['jadlog'] : [])
+      ],
       transactionalEmail: mailer.configured,
       orderAutoExpire: config.orderExpireDays > 0
     },
@@ -179,31 +194,62 @@ function estimateSubtotalCents(items, productsById) {
   return Number.isSafeInteger(total) && total > 0 ? total : 0;
 }
 
+const carrierShippingEnabled = () => config.shippingMode === 'correios' && (correios.configured || jadlog.configured);
+
+/**
+ * Consulta todas as transportadoras configuradas em paralelo e retorna as
+ * opções combinadas, ordenadas por preço. Falha de uma transportadora não
+ * derruba a outra; se todas falharem, propaga o primeiro erro.
+ */
+async function quoteAllCarriers(cep, pack, declaredCents) {
+  const carriers = [];
+  if (correios.configured) carriers.push({name: 'Correios', prefixLabel: label => `Correios ${label}`, service: correios});
+  if (jadlog.configured) carriers.push({name: 'Jadlog', prefixLabel: label => label, service: jadlog});
+  if (!carriers.length) throw new Error('Nenhuma transportadora configurada.');
+
+  const settled = await Promise.allSettled(carriers.map(carrier => carrier.service.quote(cep, pack, declaredCents)));
+  const options = [];
+  const errors = [];
+  for (const [index, result] of settled.entries()) {
+    if (result.status === 'fulfilled') {
+      for (const option of result.value.options) {
+        options.push({...option, label: carriers[index].prefixLabel(option.label)});
+      }
+    } else {
+      errors.push(`${carriers[index].name}: ${result.reason?.message || result.reason}`);
+    }
+  }
+  if (!options.length) throw new Error(errors.join(' | ') || 'Nenhuma transportadora retornou preço.');
+  if (errors.length) console.error('Transportadora(s) indisponível(is) na cotação:', errors.join(' | '));
+  options.sort((a, b) => a.priceCents - b.priceCents);
+  return {options, cheapest: options[0]};
+}
+
 async function resolveCorreiosShipping(body, catalog) {
-  if (config.shippingMode !== 'correios' || !correios.configured) return null;
+  if (!carrierShippingEnabled()) return null;
   if (body?.shipping?.choice !== 'delivery') return null;
   try {
     const productsById = new Map(catalog.products.map(product => [product.id, product]));
     const pack = correios.packOrder(Array.isArray(body.items) ? body.items : [], productsById);
     const requestedService = cleanText(body?.shipping?.service, 20);
     const declaredCents = estimateSubtotalCents(body.items, productsById);
-    const result = await correios.quote(body.shipping.cep, pack, declaredCents);
+    const result = await quoteAllCarriers(body.shipping.cep, pack, declaredCents);
     const chosen = (requestedService && result.options.find(option => option.code === requestedService)) || result.cheapest;
     return {
       priceCents: chosen.priceCents,
-      label: `Correios ${chosen.label}`,
+      label: chosen.label,
       days: chosen.days != null ? `${chosen.days} dia(s) útil(eis)` : '',
       service: chosen.code
     };
   } catch (error) {
-    console.error('Cotação Correios indisponível; pedido seguirá para cotação manual.', error?.message || error);
+    console.error('Cotação de frete indisponível; pedido seguirá para cotação manual.', error?.message || error);
     return null;
   }
 }
 
 app.post('/api/shipping/quote', statusLimiter, publicJson, asyncRoute(async (req, res) => {
   res.setHeader('Cache-Control', 'no-store');
-  if (config.shippingMode !== 'correios' || !correios.configured) {
+  if (!carrierShippingEnabled()) {
     return res.status(404).json({error: 'Cotação automática de frete não está habilitada.'});
   }
   const cep = cleanText(req.body?.cep, 10).replace(/\D/g, '');
@@ -214,7 +260,7 @@ app.post('/api/shipping/quote', statusLimiter, publicJson, asyncRoute(async (req
   const productsById = new Map(catalog.products.map(product => [product.id, product]));
   const pack = correios.packOrder(items, productsById);
   try {
-    const result = await correios.quote(cep, pack, estimateSubtotalCents(items, productsById));
+    const result = await quoteAllCarriers(cep, pack, estimateSubtotalCents(items, productsById));
     res.json({
       options: result.options.map(option => ({
         service: option.code,

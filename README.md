@@ -30,6 +30,15 @@ O WhatsApp **não participa automaticamente do checkout**. Se um número de aten
 
 Novas rotas: `POST /api/shipping/quote` (pública), `GET /api/admin/products`, `PATCH /api/admin/products/:id`.
 
+### Jadlog (opcional, soma-se aos Correios)
+
+A loja pode cotar **Correios e Jadlog ao mesmo tempo**: o cliente vê todas as opções (PAC, SEDEX, Jadlog .Package) ordenadas por preço e escolhe. Falha de uma transportadora não derruba a outra.
+
+1. Peça o **token de integração** à franquia Jadlog que atende seu CNPJ (é ela quem solicita ao comercial).
+2. Preencha `JADLOG_TOKEN`, `JADLOG_CNPJ` e, se correntista, `JADLOG_CONTA`/`JADLOG_CONTRATO`.
+3. `JADLOG_MODALIDADE=3` (.Package) é o padrão de e-commerce; o peso enviado é sempre o maior entre real e cubado (C×L×A÷6000), conforme o manual v2.3.
+4. O CEP de origem é o mesmo `CORREIOS_ORIGIN_CEP`.
+
 ### Ativando os Correios (contrato)
 
 1. No CWS (`https://cws.correios.com.br`), gere o **código de acesso a APIs** (menu Gestão de acesso a APIs).

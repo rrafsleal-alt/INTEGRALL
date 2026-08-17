@@ -45,6 +45,15 @@ export const config = Object.freeze({
   correiosHomolog: bool('CORREIOS_HOMOLOG', false),
   correiosBaseUrl: text('CORREIOS_BASE_URL'),
 
+  // Jadlog (API Embarcador)
+  jadlogToken: text('JADLOG_TOKEN'),
+  jadlogCnpj: text('JADLOG_CNPJ').replace(/\D/g, ''),
+  jadlogConta: text('JADLOG_CONTA'),
+  jadlogContrato: text('JADLOG_CONTRATO'),
+  jadlogModalidade: int('JADLOG_MODALIDADE', 3) ?? 3,
+  jadlogTpEntrega: text('JADLOG_TP_ENTREGA', 'D').toUpperCase() === 'R' ? 'R' : 'D',
+  jadlogBaseUrl: text('JADLOG_BASE_URL'),
+
   // E-mail transacional (SMTP)
   smtpHost: text('SMTP_HOST'),
   smtpPort: int('SMTP_PORT', 587) ?? 587,

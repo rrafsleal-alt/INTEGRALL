@@ -48,6 +48,16 @@ services:
         sync: false
       - key: CORREIOS_SERVICES
         value: "03298:PAC,03220:SEDEX"
+      - key: JADLOG_TOKEN
+        sync: false
+      - key: JADLOG_CNPJ
+        sync: false
+      - key: JADLOG_CONTA
+        sync: false
+      - key: JADLOG_CONTRATO
+        sync: false
+      - key: JADLOG_MODALIDADE
+        value: "3"
       - key: SMTP_HOST
         sync: false
       - key: SMTP_PORT

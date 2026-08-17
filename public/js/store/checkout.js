@@ -352,7 +352,7 @@
     if (!correiosEnabled() || !delivery) { box.hidden = true; return; }
     box.hidden = false;
     const title = document.createElement('strong');
-    title.textContent = 'Frete Correios';
+    title.textContent = 'Opções de frete';
     box.append(title);
     if (message) {
       const note = document.createElement('p');
