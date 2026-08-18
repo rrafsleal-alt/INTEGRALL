@@ -64,7 +64,7 @@ test('caixas reais são usadas para quantidades fechadas e o restante vai avulso
   // 12 vinhos = exatamente a caixa master real
   const twelve = service.packOrder([{productId: 'vinho', variantId: 'v750', qty: 12}], products);
   assert.equal(twelve.packages.length, 1);
-  assert.deepEqual(twelve.packages[0], {weightGrams: 14000, lengthCm: 30, widthCm: 30, heightCm: 24});
+  assert.deepEqual(twelve.packages[0], {weightGrams: 14000, lengthCm: 30, widthCm: 30, heightCm: 24, boxWeightRaw: 14000});
 
   // 6 vinhos = caixa de 6 real (7,25kg, não estimativa)
   const six = service.packOrder([{productId: 'vinho', variantId: 'v750', qty: 6}], products);

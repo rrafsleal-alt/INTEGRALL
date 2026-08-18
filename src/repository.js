@@ -409,12 +409,27 @@ export class Repository {
     const staleStatuses = ['received', 'awaiting_payment', 'payment_failed', 'payment_expired'];
     const expired = [];
 
+    // Patch FUNCIONAL: reconfirma o status DENTRO do lock. Sem isso, um
+    // webhook poderia marcar o pedido como pago entre o SELECT e o UPDATE,
+    // e o cancelamento automático sobrescreveria um pedido pago (TOCTOU).
+    // O flag `applied` (por pedido) distingue "cancelei agora" de "já estava
+    // em outro estado" — evita e-mail de expiração duplicado/indevido.
+    const auditNote = {source: 'system', note: `Pedido cancelado automaticamente após ${days} dia(s) sem pagamento.`};
+    const expireOne = async id => {
+      let applied = false;
+      const next = await this.updateOrder(id, current => {
+        if (staleStatuses.includes(current.status) && String(current.createdAt) < cutoff) {
+          applied = true;
+          return {status: 'cancelled'};
+        }
+        return null;
+      }, auditNote);
+      if (next && applied) expired.push(next);
+    };
+
     if (!this.pool) {
       for (const [id, order] of this.memoryOrders) {
-        if (staleStatuses.includes(order.status) && String(order.createdAt) < cutoff) {
-          const next = await this.updateOrder(id, {status: 'cancelled'}, {source: 'system', note: `Pedido cancelado automaticamente após ${days} dia(s) sem pagamento.`});
-          if (next) expired.push(next);
-        }
+        if (staleStatuses.includes(order.status) && String(order.createdAt) < cutoff) await expireOne(id);
       }
       return expired;
     }
@@ -426,10 +441,7 @@ export class Repository {
         LIMIT 200`,
       [staleStatuses, cutoff]
     );
-    for (const row of rows) {
-      const next = await this.updateOrder(row.id, {status: 'cancelled'}, {source: 'system', note: `Pedido cancelado automaticamente após ${days} dia(s) sem pagamento.`});
-      if (next) expired.push(next);
-    }
+    for (const row of rows) await expireOne(row.id);
     return expired;
   }
 

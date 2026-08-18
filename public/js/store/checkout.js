@@ -284,9 +284,14 @@
 
   function couponDiscountCents(subtotalCents) {
     if (!appliedCoupon) return 0;
-    if (appliedCoupon.type === 'percent') return Math.floor(subtotalCents * appliedCoupon.value / 100);
-    if (appliedCoupon.type === 'fixed') return Math.min(appliedCoupon.value, Math.max(0, subtotalCents - 100));
-    return 0;
+    // MESMA regra do servidor (couponDiscount): o desconto nunca deixa o
+    // subtotal abaixo de R$ 1,00 — sem isso um cupom de 100% mostraria total
+    // R$ 0,00 aqui e o servidor cobraria R$ 1,00 (divergência no fechamento).
+    let discount = 0;
+    if (appliedCoupon.type === 'percent') discount = Math.floor(subtotalCents * appliedCoupon.value / 100);
+    else if (appliedCoupon.type === 'fixed') discount = appliedCoupon.value;
+    else return 0;
+    return Math.max(0, Math.min(discount, Math.max(0, subtotalCents - 100)));
   }
 
   /** Frete atualmente selecionado nas opções de transportadora (centavos) ou null. */

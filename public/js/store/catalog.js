@@ -636,9 +636,21 @@ ${publicMode ? scopeVisualCss(v.customCss) : ''}`;
   }
 
   function findZone(cep) {
-    const number = Number(digits(cep));
+    const clean = digits(cep);
+    const number = Number(clean);
     if (!Number.isFinite(number)) return null;
-    return (state.settings.zones || []).find(zone => zone.active !== false && number >= Number(digits(zone.cepStart)) && number <= Number(digits(zone.cepEnd))) || null;
+    // Aceita AMBOS os formatos de zona: o legado do editor (cepStart/cepEnd)
+    // e o sanitizado pelo servidor (startCep/endCep/prefix) — o catálogo
+    // vindo de /api/catalog usa o segundo; sem isso a loja diria "CEP fora
+    // das zonas" enquanto o servidor cobraria o valor da zona.
+    return (state.settings.zones || []).find(zone => {
+      if (zone.active === false) return false;
+      const prefix = digits(zone.prefix ?? zone.cepPrefix ?? '');
+      if (prefix && clean.startsWith(prefix)) return true;
+      const start = digits(zone.startCep ?? zone.cepStart ?? '');
+      const end = digits(zone.endCep ?? zone.cepEnd ?? '');
+      return start.length === 8 && end.length === 8 && number >= Number(start) && number <= Number(end);
+    }) || null;
   }
 
   function calculateShipping(subtotal, choice = state.checkout.choice, cep = state.checkout.cep) {
@@ -649,7 +661,7 @@ ${publicMode ? scopeVisualCss(v.customCss) : ''}`;
     if (state.settings.shipMode === 'fixed') { price = Number(state.settings.fixed) || 0; label = 'Frete fixo configurado'; }
     else if (state.settings.shipMode === 'zones') {
       const zone = findZone(cep);
-      if (zone) { price = Number(zone.price) || 0; days = zone.days || ''; minimum = Number(zone.minOrder) || 0; label = zone.name || 'Zona de entrega'; }
+      if (zone) { price = Number(zone.price) || 0; days = zone.days || zone.deadline || ''; minimum = Number(zone.minOrder) || 0; label = zone.label || zone.name || 'Zona de entrega'; }
       else if (state.settings.zoneFallback === 'unavailable') return {status: 'unavailable', choice, price: null, label: 'Entrega indisponível para este CEP.'};
       else return {status: 'quote', choice, price: null, label: 'CEP fora das zonas. Valor e prazo serão confirmados no atendimento.'};
     } else return {status: 'quote', choice, price: null, label: 'Valor e prazo serão confirmados no atendimento.'};

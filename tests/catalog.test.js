@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
-import {normalizeCatalog, publicCatalog, buildOrder, calculateShipping, cleanText} from '../src/catalog.js';
+import {normalizeCatalog, publicCatalog, buildOrder, calculateShipping, cleanText, couponDiscount} from '../src/catalog.js';
 
 const raw = JSON.parse(await readFile(new URL('../data/catalog.json', import.meta.url), 'utf8'));
 const catalog = normalizeCatalog(raw);
@@ -359,4 +359,17 @@ test('cleanText remove caracteres invisíveis e overrides bidirecionais (anti-sp
   assert.equal(cleanText('a\u200Bb\uFEFFc'), 'abc');       // zero-width + BOM
   assert.equal(cleanText('x\u2066y\u2069z'), 'xyz');       // isolates bidi
   assert.equal(cleanText('José & Maria — ok'), 'José & Maria — ok'); // texto legítimo intacto
+});
+
+test('couponDiscount nunca deixa o subtotal abaixo de R$ 1,00 (paridade com o front)', () => {
+  // Cupom de 100%: desconto capado em subtotal-100 (servidor cobra no mínimo R$ 1,00)
+  assert.equal(couponDiscount({type: 'percent', value: 100}, 1000, 0), 900);
+  // Cupom fixo maior que o subtotal: mesmo cap
+  assert.equal(couponDiscount({type: 'fixed', value: 5000}, 1000, 0), 900);
+  // Cupom normal não é afetado pelo cap
+  assert.equal(couponDiscount({type: 'percent', value: 10}, 10000, 0), 1000);
+  // free_shipping desconta exatamente o frete
+  assert.equal(couponDiscount({type: 'free_shipping'}, 10000, 2350), 2350);
+  // Subtotal minúsculo: desconto nunca fica negativo
+  assert.equal(couponDiscount({type: 'percent', value: 50}, 80, 0), 0);
 });

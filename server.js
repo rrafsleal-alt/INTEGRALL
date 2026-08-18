@@ -168,7 +168,7 @@ app.get('/api/health', readLimiter, asyncRoute(async (_req, res) => {
   res.json({
     ok: true,
     name: 'INTEGRALL API',
-    version: '9.5.0',
+    version: '9.6.1',
     database: databaseHealth.mode,
     mercadoPago: mercadoPago.configured,
     adminConfigured: Boolean(config.adminToken),
@@ -370,7 +370,9 @@ app.post('/api/orders', orderLimiter, publicJson, asyncRoute(async (req, res) =>
       totalCents: result.order.totalCents,
       requiresShippingQuote: result.order.requiresShippingQuote,
       checkoutToken: result.order.checkoutToken,
-      onlinePaymentAvailable: mercadoPago.configured && !result.order.requiresShippingQuote
+      // paymentCanStart cobre o replay idempotente: se o clientOrderId repetido
+      // devolve um pedido já pago/cancelado, não podemos anunciar pagamento.
+      onlinePaymentAvailable: mercadoPago.configured && paymentCanStart(result.order) && !result.order.requiresShippingQuote
     },
     idempotent: !result.created
   });
@@ -654,6 +656,109 @@ class HttpError extends Error {
   constructor(status, message) { super(message); this.status = status; }
 }
 
+function newId(prefix) {
+  return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+// Cria um produto novo. O corpo aceita os mesmos campos editáveis do PATCH
+// e opcionalmente `variants` (subprodutos) sem id — os ids são gerados aqui.
+app.post('/api/admin/products', adminLimiter, admin, publicJson, asyncRoute(async (req, res) => {
+  const body = req.body && typeof req.body === 'object' && !Array.isArray(req.body) ? req.body : {};
+  const name = cleanText(body.name, 160);
+  if (!name) return res.status(400).json({error: 'Informe o nome do produto.'});
+  const productId = newId('product');
+  const now = Date.now();
+  if (Array.isArray(body.variants) && body.variants.some(variant => !cleanText(variant?.name, 120))) {
+    return res.status(400).json({error: 'Toda variação precisa de um nome (ex.: 750ml).'});
+  }
+  const variants = (Array.isArray(body.variants) ? body.variants : []).slice(0, 100).map((variant, index) => ({
+    id: cleanText(variant?.id, 120) || newId('variant'),
+    name: cleanText(variant?.name, 120),
+    price: variant?.price,
+    stock: variant?.stock ?? null,
+    unit: cleanText(variant?.unit, 120),
+    weightGrams: variant?.weightGrams ?? null,
+    position: index + 1
+  }));
+  const product = {
+    id: productId,
+    name,
+    department: cleanText(body.department, 80),
+    subcategory: cleanText(body.subcategory, 100),
+    brand: cleanText(body.brand, 120),
+    price: body.price ?? 0,
+    unit: cleanText(body.unit, 120),
+    description: cleanText(body.description, 3000),
+    images: Array.isArray(body.images) ? body.images : [],
+    variants,
+    attributes: body.attributes,
+    stock: body.stock ?? null,
+    minPerOrder: body.minPerOrder ?? null,
+    maxPerOrder: body.maxPerOrder ?? null,
+    weightGrams: body.weightGrams ?? null,
+    lengthCm: body.lengthCm ?? null,
+    widthCm: body.widthCm ?? null,
+    heightCm: body.heightCm ?? null,
+    available: body.available !== false,
+    featured: body.featured === true,
+    giftEnabled: body.giftEnabled !== false,
+    created: now,
+    updated: now
+  };
+  let next;
+  try {
+    next = await repo.mutateCatalog(current => {
+      const products = [...(current.products || []), {...product, position: (current.products || []).length + 1}];
+      return normalizeCatalog({...current, products});
+    });
+  } catch (error) {
+    return res.status(400).json({error: error?.message || 'Produto inválido.'});
+  }
+  res.status(201).json({ok: true, product: next.products.find(item => item.id === productId)});
+}));
+
+// Exclui um produto do catálogo (remoção real; pedidos já registrados
+// guardam os próprios dados e não são afetados).
+app.delete('/api/admin/products/:id', adminLimiter, admin, asyncRoute(async (req, res) => {
+  const productId = cleanText(req.params.id, 120);
+  try {
+    await repo.mutateCatalog(current => {
+      const products = (current.products || []).filter(product => product.id !== productId);
+      if (products.length === (current.products || []).length) throw new HttpError(404, 'Produto não encontrado.');
+      return normalizeCatalog({...current, products});
+    });
+  } catch (error) {
+    if (error instanceof HttpError) return res.status(error.status).json({error: error.message});
+    return res.status(400).json({error: error?.message || 'Não foi possível excluir.'});
+  }
+  res.json({ok: true});
+}));
+
+// Personalização da loja: lê e grava apenas o bloco `settings` do catálogo
+// (marca, textos, contatos, visual completo). A sanitização acontece no
+// normalizeCatalog — nada além do permitido entra.
+app.get('/api/admin/settings', adminLimiter, admin, asyncRoute(async (_req, res) => {
+  const catalog = await repo.getCatalog();
+  res.json({settings: catalog.settings || {}});
+}));
+
+app.put('/api/admin/settings', adminLimiter, admin, adminCatalogJson, asyncRoute(async (req, res) => {
+  const body = req.body && typeof req.body === 'object' && !Array.isArray(req.body) ? req.body : {};
+  if (!body.settings || typeof body.settings !== 'object' || Array.isArray(body.settings)) {
+    return res.status(400).json({error: 'Envie um objeto settings.'});
+  }
+  let next;
+  try {
+    next = await repo.mutateCatalog(current => normalizeCatalog({
+      ...current,
+      settings: {...current.settings, ...body.settings, visual: body.settings.visual ?? current.settings?.visual}
+    }));
+  } catch (error) {
+    return res.status(400).json({error: error?.message || 'Personalização inválida.'});
+  }
+  res.json({ok: true, settings: next.settings});
+}));
+
 app.patch('/api/admin/products/:id', adminLimiter, admin, publicJson, asyncRoute(async (req, res) => {
   const productId = cleanText(req.params.id, 120);
   const patch = req.body && typeof req.body === 'object' && !Array.isArray(req.body) ? req.body : {};
@@ -802,7 +907,7 @@ if (config.orderExpireDays > 0) {
 }
 
 const server = app.listen(config.port, () => {
-  console.log(`INTEGRALL v9.5 em http://localhost:${config.port} (${repo.persistent ? 'PostgreSQL' : 'memória de desenvolvimento'})`);
+  console.log(`INTEGRALL v9.6 em http://localhost:${config.port} (${repo.persistent ? 'PostgreSQL' : 'memória de desenvolvimento'})`);
   for (const warning of configWarnings()) console.warn(`[config] AVISO: ${warning}`);
 });
 

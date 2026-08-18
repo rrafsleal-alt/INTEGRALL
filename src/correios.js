@@ -187,7 +187,11 @@ export class CorreiosService {
             weightGrams: Math.min(box.weightGrams, 30_000),
             lengthCm: Math.min(100, box.lengthCm),
             widthCm: Math.min(100, box.widthCm),
-            heightCm: Math.min(100, box.heightCm)
+            heightCm: Math.min(100, box.heightCm),
+            // Peso REAL da caixa (sem teto): uma caixa cadastrada acima de
+            // 30kg precisa disparar a trava de overweight, não ser cotada
+            // silenciosamente como 30kg (preço errado e recusa no balcão).
+            boxWeightRaw: box.weightGrams
           });
           qty -= box.units;
         }
@@ -244,7 +248,7 @@ export class CorreiosService {
       packages.push({weightGrams: 300, lengthCm: 16, widthCm: 11, heightCm: 10});
     }
 
-    const overweight = packages.some(pkg => (pkg.looseWeightRaw || pkg.weightGrams) > 30_000);
+    const overweight = packages.some(pkg => (pkg.looseWeightRaw || pkg.boxWeightRaw || pkg.weightGrams) > 30_000);
     return {packages, missingData, overweight};
   }
 
