@@ -267,3 +267,66 @@ test('frete não pode mudar com pagamento em andamento (preferência MP ativa)',
   assert.equal(blocked.status, 409);
   assert.match(blocked.data.error, /pagamento em andamento/i);
 });
+
+test('admin cria produto com variações, aparece na loja e pode ser excluído', async () => {
+  // sem token → recusado
+  const denied = await api('/api/admin/products', {method: 'POST', body: {name: 'X'}});
+  assert.equal(denied.status, 401);
+  // cria com variações (subprodutos)
+  const created = await api('/api/admin/products', {method: 'POST', headers: ADMIN, body: {
+    name: 'Vinho Teste HTTP', department: 'vinhos', subcategory: 'Teste', brand: 'Casa Teste',
+    price: 4990, unit: '750ml', description: 'Produto de teste automatizado.',
+    stock: 10, weightGrams: 1300, lengthCm: 9, widthCm: 9, heightCm: 31,
+    variants: [{name: '750ml', price: 4990, stock: 10, weightGrams: 1300}, {name: '375ml', price: 2990, stock: 5, weightGrams: 750}]
+  }});
+  assert.equal(created.status, 201);
+  const product = created.data.product;
+  assert.ok(product.id.startsWith('product-'));
+  assert.equal(product.variants.length, 2);
+  assert.ok(product.variants.every(v => v.id.startsWith('variant-')));
+  // aparece no catálogo público
+  const publicCatalog = (await api('/api/catalog')).data;
+  const found = publicCatalog.products.find(p => p.id === product.id);
+  assert.ok(found, 'produto criado deve aparecer na loja');
+  assert.equal(found.isAlcoholic, true);
+  // nome vazio → 400
+  const invalid = await api('/api/admin/products', {method: 'POST', headers: ADMIN, body: {price: 100}});
+  assert.equal(invalid.status, 400);
+  // exclui
+  const removed = await api(`/api/admin/products/${product.id}`, {method: 'DELETE', headers: ADMIN});
+  assert.equal(removed.status, 200);
+  const after = (await api('/api/catalog')).data;
+  assert.ok(!after.products.some(p => p.id === product.id), 'produto excluído sai da loja');
+  // excluir de novo → 404
+  const again = await api(`/api/admin/products/${product.id}`, {method: 'DELETE', headers: ADMIN});
+  assert.equal(again.status, 404);
+});
+
+test('admin salva personalização (settings + visual) e a loja pública reflete', async () => {
+  const before = (await api('/api/admin/settings', {headers: ADMIN})).data.settings;
+  assert.ok(before && typeof before === 'object');
+  const saved = await api('/api/admin/settings', {method: 'PUT', headers: ADMIN, body: {settings: {
+    ...before,
+    brand: 'INTEGRALL TESTE',
+    catalogTitle: 'Título Personalizado',
+    visual: {...before.visual, colors: {...before.visual?.colors, primary: '#123456'},
+      typography: {...before.visual?.typography, headingFont: 'classic', baseSize: 18},
+      layout: {...before.visual?.layout, gridColumnsDesktop: 4, cardStyle: 'boxed'}}
+  }}});
+  assert.equal(saved.status, 200);
+  assert.equal(saved.data.settings.brand, 'INTEGRALL TESTE');
+  assert.equal(saved.data.settings.visual.colors.primary, '#123456');
+  assert.equal(saved.data.settings.visual.typography.headingFont, 'classic');
+  assert.equal(saved.data.settings.visual.layout.gridColumnsDesktop, 4);
+  // catálogo público reflete
+  const pub = (await api('/api/catalog')).data;
+  assert.equal(pub.settings.brand, 'INTEGRALL TESTE');
+  assert.equal(pub.settings.visual.colors.primary, '#123456');
+  // valores fora do limite são normalizados, não rejeitados
+  const clamped = await api('/api/admin/settings', {method: 'PUT', headers: ADMIN, body: {settings: {
+    ...saved.data.settings, visual: {...saved.data.settings.visual, layout: {...saved.data.settings.visual.layout, gridColumnsDesktop: 99}}
+  }}});
+  assert.equal(clamped.status, 200);
+  // restaura marca original para não interferir em outros testes
+  await api('/api/admin/settings', {method: 'PUT', headers: ADMIN, body: {settings: before}});
+});

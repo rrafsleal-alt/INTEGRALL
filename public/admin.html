@@ -8,8 +8,8 @@
   <meta name="theme-color" content="#4a0a1a">
   <title>INTEGRALL | Administração</title>
   <link rel="icon" href="/assets/icons/favicon.svg">
-  <link rel="stylesheet" href="/css/admin.css?v=9.5.0">
-  <script src="/js/admin.js?v=9.5.0" defer></script>
+  <link rel="stylesheet" href="/css/admin.css?v=9.6.2">
+  <script src="/js/admin.js?v=9.6.2" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#main">Ir para o conteúdo</a>
@@ -98,7 +98,8 @@
 
       <section class="panel" aria-labelledby="productsTitle">
         <div class="panel-head">
-          <div><h2 id="productsTitle">Produtos</h2><p>Edite preço, estoque, peso e dimensões sem mexer em JSON. Peso e dimensões são usados pelo cálculo de frete dos Correios.</p></div>
+          <div><h2 id="productsTitle">Produtos</h2><p>Crie, edite e exclua produtos e variações (subprodutos). Peso e dimensões são usados pelo cálculo de frete dos Correios.</p></div>
+          <button class="button primary" id="newProductButton" type="button">➕ Novo produto</button>
         </div>
         <p class="feedback" id="productsFeedback" role="status" aria-live="polite"></p>
         <div class="table-wrap">
@@ -138,6 +139,198 @@
         <p class="empty" id="couponsEmpty" hidden>Nenhum cupom cadastrado.</p>
       </section>
 
+      <section class="panel" aria-labelledby="themeTitle">
+        <div class="panel-head">
+          <div><h2 id="themeTitle">🎨 Personalização da loja</h2><p>Textos, cores, fontes, logos e posição dos elementos. As mudanças são aplicadas na loja assim que você salva — use "Ver loja" para conferir.</p></div>
+          <div class="theme-head-actions">
+            <button class="button secondary" id="themeReloadButton" type="button">Descartar mudanças</button>
+            <button class="button primary" id="themeSaveButton" type="button">Salvar personalização</button>
+          </div>
+        </div>
+        <p class="feedback" id="themeFeedback" role="status" aria-live="polite"></p>
+
+        <div class="theme-tabs" role="tablist" aria-label="Seções de personalização">
+          <button class="theme-tab active" data-theme-tab="texts" type="button">Textos</button>
+          <button class="theme-tab" data-theme-tab="colors" type="button">Cores</button>
+          <button class="theme-tab" data-theme-tab="typography" type="button">Fontes</button>
+          <button class="theme-tab" data-theme-tab="logos" type="button">Logos e imagens</button>
+          <button class="theme-tab" data-theme-tab="layout" type="button">Layout e posição</button>
+          <button class="theme-tab" data-theme-tab="visibility" type="button">Mostrar / ocultar</button>
+        </div>
+
+        <div class="theme-pane" data-theme-pane="texts">
+          <div class="theme-grid">
+            <label>Nome da marca<input id="thBrand" maxlength="120"></label>
+            <label>Subtítulo da marca<input id="thSubtitle" maxlength="120"></label>
+            <label>Título do catálogo<input id="thCatalogTitle" maxlength="180"></label>
+            <label class="theme-wide">Texto de apresentação<textarea id="thCatalogText" maxlength="1000" rows="3"></textarea></label>
+            <label>E-mail de contato<input id="thEmail" maxlength="254" type="email"></label>
+            <label>Instagram<input id="thInstagram" maxlength="120" placeholder="@sualoja"></label>
+            <label>WhatsApp (só números)<input id="thWhatsapp" maxlength="40" inputmode="numeric" placeholder="5514999999999"></label>
+            <label class="theme-wide">Endereço / texto do rodapé<textarea id="thAddress" maxlength="500" rows="2"></textarea></label>
+            <label class="theme-wide">Texto da opção de retirada<textarea id="thPickup" maxlength="300" rows="2"></textarea></label>
+          </div>
+        </div>
+
+        <div class="theme-pane" data-theme-pane="colors" hidden>
+          <div class="theme-grid theme-colors" id="themeColorsGrid"></div>
+        </div>
+
+        <div class="theme-pane" data-theme-pane="typography" hidden>
+          <div class="theme-grid">
+            <label>Fonte dos títulos<select id="thHeadingFont">
+              <option value="editorial">Editorial (serifada clássica)</option>
+              <option value="classic">Clássica (Garamond)</option>
+              <option value="slab">Slab (robusta)</option>
+              <option value="modern">Moderna (sem serifa)</option>
+              <option value="system">Sistema</option>
+              <option value="humanist">Humanista</option>
+              <option value="geometric">Geométrica</option>
+              <option value="mono">Monoespaçada</option>
+            </select></label>
+            <label>Fonte do texto<select id="thBodyFont">
+              <option value="modern">Moderna (sem serifa)</option>
+              <option value="system">Sistema</option>
+              <option value="humanist">Humanista</option>
+              <option value="geometric">Geométrica</option>
+              <option value="editorial">Editorial (serifada)</option>
+              <option value="classic">Clássica (Garamond)</option>
+              <option value="slab">Slab (robusta)</option>
+              <option value="mono">Monoespaçada</option>
+            </select></label>
+            <label>Fonte personalizada — títulos (opcional)<input id="thCustomHeading" maxlength="160" placeholder="Ex.: Playfair Display, serif"></label>
+            <label>Fonte personalizada — texto (opcional)<input id="thCustomBody" maxlength="160" placeholder="Ex.: Lato, sans-serif"></label>
+            <label>Tamanho base do texto (px)<input id="thBaseSize" type="number" min="12" max="22" step="1"></label>
+            <label>Peso do texto<input id="thBodyWeight" type="number" min="300" max="800" step="100"></label>
+            <label>Peso dos títulos<input id="thHeadingWeight" type="number" min="300" max="800" step="100"></label>
+            <label>Altura da linha<input id="thLineHeight" type="number" min="1.1" max="2.1" step="0.05"></label>
+            <label>Escala dos títulos<input id="thHeadingScale" type="number" min="0.75" max="1.5" step="0.05"></label>
+            <label>Menu — tamanho (px)<input id="thNavSize" type="number" min="9" max="18" step="1"></label>
+            <label>Menu — espaçamento entre letras<input id="thNavSpacing" type="number" min="0" max="0.45" step="0.01"></label>
+            <label>Menu — caixa<select id="thNavTransform">
+              <option value="uppercase">MAIÚSCULAS</option>
+              <option value="capitalize">Primeira Maiúscula</option>
+              <option value="none">como digitado</option>
+            </select></label>
+          </div>
+        </div>
+
+        <div class="theme-pane" data-theme-pane="logos" hidden>
+          <div class="theme-grid">
+            <label>Logo do cabeçalho (URL https:// ou /assets/…)<input id="thHeaderLogo" maxlength="2048" placeholder="https://…/logo.png"></label>
+            <label>Cabeçalho mostra<select id="thHeaderLogoMode">
+              <option value="text">Só o nome (texto)</option>
+              <option value="image">Só o logo (imagem)</option>
+              <option value="both">Logo + nome</option>
+            </select></label>
+            <label>Largura do logo no cabeçalho (px)<input id="thHeaderLogoWidth" type="number" min="60" max="480" step="10"></label>
+            <label>Logo do rodapé (URL)<input id="thFooterLogo" maxlength="2048" placeholder="https://…/logo.png"></label>
+            <label>Rodapé mostra<select id="thFooterLogoMode">
+              <option value="text">Só o nome (texto)</option>
+              <option value="image">Só o logo (imagem)</option>
+              <option value="both">Logo + nome</option>
+            </select></label>
+            <label>Largura do logo no rodapé (px)<input id="thFooterLogoWidth" type="number" min="60" max="360" step="10"></label>
+            <label>Favicon (ícone da aba do navegador)<input id="thFavicon" maxlength="2048" placeholder="https://…/favicon.png"></label>
+            <label>Imagem de fundo do topo (hero)<input id="thHeroBackground" maxlength="2048" placeholder="https://…/fundo.jpg"></label>
+            <label>Estilo do topo<select id="thHeroMode">
+              <option value="plain">Simples (sem destaque)</option>
+              <option value="panel">Painel colorido</option>
+              <option value="image">Com imagem de fundo</option>
+            </select></label>
+            <label>Imagem de fundo do cabeçalho<input id="thHeaderBackground" maxlength="2048" placeholder="https://…"></label>
+            <label>Imagem de fundo do rodapé<input id="thFooterBackgroundImg" maxlength="2048" placeholder="https://…"></label>
+            <label>Imagem de fundo da página<input id="thPageBackground" maxlength="2048" placeholder="https://…"></label>
+          </div>
+          <p class="theme-hint">Dica: hospede as imagens em um link https:// (por exemplo, no seu próprio site ou em um serviço de imagens) ou peça para incluirmos os arquivos na pasta /assets/ do projeto.</p>
+        </div>
+
+        <div class="theme-pane" data-theme-pane="layout" hidden>
+          <div class="theme-grid">
+            <label>Largura máxima do site (px)<input id="thMaxWidth" type="number" min="760" max="1800" step="20"></label>
+            <label>Disposição do cabeçalho<select id="thHeaderLayout">
+              <option value="centered">Centralizado</option>
+              <option value="split">Dividido (marca à esquerda)</option>
+              <option value="compact">Compacto</option>
+            </select></label>
+            <label class="pf-check theme-check"><input id="thHeaderSticky" type="checkbox"> Cabeçalho fixo ao rolar</label>
+            <label>Ordem das seções da página<select id="thBlocks">
+              <option value="intro,filters,products">Apresentação → Filtros → Produtos</option>
+              <option value="intro,products,filters">Apresentação → Produtos → Filtros</option>
+              <option value="filters,intro,products">Filtros → Apresentação → Produtos</option>
+              <option value="filters,products,intro">Filtros → Produtos → Apresentação</option>
+              <option value="products,intro,filters">Produtos → Apresentação → Filtros</option>
+              <option value="products,filters,intro">Produtos → Filtros → Apresentação</option>
+            </select></label>
+            <label>Alinhamento do título do catálogo<select id="thCatalogAlign">
+              <option value="left">Esquerda</option>
+              <option value="center">Centro</option>
+              <option value="right">Direita</option>
+            </select></label>
+            <label>Colunas de produtos (computador)<input id="thGridDesktop" type="number" min="1" max="6" step="1"></label>
+            <label>Colunas de produtos (tablet)<input id="thGridTablet" type="number" min="1" max="4" step="1"></label>
+            <label>Colunas de produtos (celular)<input id="thGridMobile" type="number" min="1" max="2" step="1"></label>
+            <label>Estilo dos cartões<select id="thCardStyle">
+              <option value="minimal">Minimalista</option>
+              <option value="boxed">Com caixa</option>
+              <option value="elevated">Elevado (sombra)</option>
+              <option value="outlined">Contornado</option>
+            </select></label>
+            <label>Alinhamento dos cartões<select id="thCardAlign">
+              <option value="left">Esquerda</option>
+              <option value="center">Centro</option>
+              <option value="right">Direita</option>
+            </select></label>
+            <label>Proporção das fotos<select id="thImageRatio">
+              <option value="portrait">Retrato</option>
+              <option value="square">Quadrada</option>
+              <option value="landscape">Paisagem</option>
+              <option value="auto">Automática</option>
+            </select></label>
+            <label>Ajuste das fotos<select id="thImageFit">
+              <option value="cover">Preencher (cortar)</option>
+              <option value="contain">Mostrar inteira</option>
+            </select></label>
+            <label>Cantos arredondados (px)<input id="thRadius" type="number" min="0" max="40" step="1"></label>
+            <label>Cantos dos botões (px)<input id="thButtonRadius" type="number" min="0" max="40" step="1"></label>
+            <label>Sombra dos cartões<select id="thShadow">
+              <option value="none">Nenhuma</option>
+              <option value="soft">Suave</option>
+              <option value="medium">Média</option>
+              <option value="strong">Forte</option>
+            </select></label>
+            <label>Alinhamento do rodapé<select id="thFooterAlign">
+              <option value="left">Esquerda</option>
+              <option value="center">Centro</option>
+              <option value="right">Direita</option>
+            </select></label>
+            <label>Ordem do rodapé<select id="thFooterOrder">
+              <option value="logo,description,contact">Logo → Descrição → Contato</option>
+              <option value="logo,contact,description">Logo → Contato → Descrição</option>
+              <option value="description,contact,logo">Descrição → Contato → Logo</option>
+              <option value="description,logo,contact">Descrição → Logo → Contato</option>
+              <option value="contact,logo,description">Contato → Logo → Descrição</option>
+              <option value="contact,description,logo">Contato → Descrição → Logo</option>
+            </select></label>
+            <label class="pf-check theme-check"><input id="thAnimations" type="checkbox"> Animações suaves</label>
+          </div>
+        </div>
+
+        <div class="theme-pane" data-theme-pane="visibility" hidden>
+          <div class="theme-grid theme-visibility">
+            <label class="pf-check"><input id="thShowSearch" type="checkbox"> Campo de busca</label>
+            <label class="pf-check"><input id="thShowFilters" type="checkbox"> Filtros de categoria</label>
+            <label class="pf-check"><input id="thShowResultCount" type="checkbox"> Contagem de resultados</label>
+            <label class="pf-check"><input id="thShowCategory" type="checkbox"> Categoria nos cartões</label>
+            <label class="pf-check"><input id="thShowUnit" type="checkbox"> Unidade nos cartões</label>
+            <label class="pf-check"><input id="thShowStock" type="checkbox"> Aviso de estoque baixo</label>
+            <label class="pf-check"><input id="thShowQuickAdd" type="checkbox"> Botão adicionar rápido</label>
+            <label class="pf-check"><input id="thShowFooterDescription" type="checkbox"> Descrição no rodapé</label>
+            <label class="pf-check"><input id="thShowFooterContact" type="checkbox"> Contatos no rodapé</label>
+          </div>
+        </div>
+      </section>
+
       <section class="panel" aria-labelledby="catalogTitleAdmin">
         <div class="panel-head">
           <div><h2 id="catalogTitleAdmin">Catálogo</h2><p>Importação e exportação usam JSON. Imagens novas devem ser URLs HTTPS ou arquivos já publicados em <code>/assets/</code>.</p></div>
@@ -158,6 +351,15 @@
     <form class="product-form" id="productForm">
       <div class="product-form-grid">
         <label>Nome<input id="pfName" maxlength="160" required></label>
+        <label>Departamento<select id="pfDepartment">
+          <option value="vinhos">Vinhos</option>
+          <option value="sucos">Sucos</option>
+          <option value="cafes">Cafés</option>
+          <option value="petit-four">Petit Four</option>
+          <option value="">Outros</option>
+        </select></label>
+        <label>Categoria (texto livre)<input id="pfSubcategory" maxlength="100" placeholder="Ex.: Vinho Tinto Seco"></label>
+        <label>Marca<input id="pfBrand" maxlength="120" placeholder="Ex.: Marqués de Mendonça"></label>
         <label>Preço base (R$)<input id="pfPrice" inputmode="decimal" required></label>
         <label>Unidade / descrição curta<input id="pfUnit" maxlength="120"></label>
         <label>Estoque (vazio = sem controle)<input id="pfStock" inputmode="numeric"></label>
@@ -170,10 +372,17 @@
         <label class="pf-check"><input id="pfAvailable" type="checkbox"> Disponível na loja</label>
         <label class="pf-check"><input id="pfFeatured" type="checkbox"> Produto em destaque</label>
       </div>
+      <label>Foto do produto (URL https:// ou /assets/…)<input id="pfImage" maxlength="2048" placeholder="https://…/foto.jpg" spellcheck="false"></label>
       <label>Descrição<textarea id="pfDescription" maxlength="3000" rows="4" placeholder="História do produto, produtor, harmonização…"></textarea></label>
+      <div class="pf-variants-head">
+        <h3>Variações / subprodutos</h3>
+        <button class="button secondary" id="addVariantButton" type="button">➕ Adicionar variação</button>
+      </div>
+      <p class="theme-hint">Use variações para tamanhos ou versões do mesmo produto (ex.: 750ml e 375ml), cada uma com preço e estoque próprios.</p>
       <div id="pfVariants"></div>
       <div class="dialog-actions">
         <button class="button primary" type="submit">Salvar produto</button>
+        <button class="button danger" id="deleteProductButton" type="button" hidden>Excluir produto</button>
         <p class="feedback" id="productDialogFeedback" role="status" aria-live="polite"></p>
       </div>
     </form>

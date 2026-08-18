@@ -1,0 +1,1339 @@
+diff --git a/.env.example b/.env.example
+index a815d62..f320ce2 100644
+--- a/.env.example
++++ b/.env.example
+@@ -9,6 +9,9 @@ DATABASE_URL=
+ 
+ # Admin: use um token longo/aleatório. Nunca coloque no HTML.
+ ADMIN_API_TOKEN=
++# Diagnóstico de login do Admin (temporário): true registra tentativas
++# recusadas no log (apenas tamanho/categorias — nunca o conteúdo do token).
++ADMIN_AUTH_DEBUG=false
+ 
+ # Atendimento
+ WHATSAPP_NUMBER=55DDDNUMERO
+diff --git a/MANIFEST.sha256 b/MANIFEST.sha256
+index d7d67f7..d42a030 100644
+--- a/MANIFEST.sha256
++++ b/MANIFEST.sha256
+@@ -1,4 +1,4 @@
+-b8b74e323723730276f7ff6d47292e97618b4eb8aa49b0cda00cdbafb1fe493e  ./.env.example
++015e4aba46d8b20ab83d34dabac4dc9c99c00f1103957aaa36c5ce7b816ab39b  ./.env.example
+ a0a477e4fc85b0ce44a19ed9d0a946024c8bb9c599244cec5c6610beb4476f22  ./.gitignore
+ 9b11d3ae21160e98242de22f7b324c9f1347d9d259e4db084a3c0f094051d7f0  ./ABRIR-ADMIN.bat
+ 4aabe8f23ce2294b13f67d423e4010159e39d976de36f6a2bcf0adeea265f71b  ./AJUSTES-v9.2.txt
+@@ -18,9 +18,9 @@ fce97e4453081db30edb0242c9275f42ecd0557746152c2955c9aeadeb37e965  ./docs/ANALISE
+ 6e785cc80e083d0ecdd26420d782753225498bd125e82ce0a510d91869c44c5f  ./docs/correios-api-busca-cep.txt
+ a468a2b0e0c6254a3418dc0a4c2869e5a227dad12d1c7e0aa55dd35b76e80347  ./docs/correios-api-locker.pdf
+ 37c25ca9ff633838d12613aa20b0bc0658fb9dbaafdd4095a80eaf57ae13f549  ./docs/correios-manual-integracao-v2.4.pdf
+-3af8861df866926956574d7e55fc41aeb71b4b84ccd00d9091d50d28e18bb1fc  ./package-lock.json
+-a6cd527cfbb07865e544d6d9b7fd2f259c4136efcfc3d6d48a6ab7882d7c8adb  ./package.json
+-36aeb0828885a8c3e7d9f7e87681378d1351c7bc10eddcd9258c9f69ba37ca4b  ./public/admin.html
++e7425508f44ff88e099874eccdcb0a4b7b8279d3d4569b5b729cf60ae9e0c8cc  ./package-lock.json
++31ecfedb9a654f9c98691011d0707381ba5da5758be9d96bf63e38d0c347b739  ./package.json
++bcb752159af2e86521743a5d145dc9fd5b2b221921c2ac7ecee430d71f7928d9  ./public/admin.html
+ c2cae4be7ac26b9dc0775351e4321514efd00ded31fd9510f2c3bee1423e142e  ./public/assets/icons/apple-touch-icon.png
+ 285dcbd1b04f3da80fb0463a50d50c52cc4ca2e92ef061208750bc792a555206  ./public/assets/icons/favicon.svg
+ d2397c972bd875b171992e6394b3a787f4f2753165eee7263dc256eb996d6a1a  ./public/assets/products/01-suco-integral-de-uva-bord.webp
+@@ -28,36 +28,36 @@ b43d2cd8e639b10f2252bfa15ac1fb4c4aac9366dd775e455559ec86e55186bb  ./public/asset
+ c12875445bfec68115f013b2335d9f6588e06f23fd31b301745a860b57e5c35c  ./public/assets/products/03-mentirinha.webp
+ 9d854fc172045056540c4d5befcc01aff9a6e90a1394d4e04c8c0383baaf8f29  ./public/assets/products/04-v-damazia.webp
+ 3d5fd73ae07b189d810472804140a51b2305832a51892c280f81531bd4adc14b  ./public/assets/products/05-vinho-verde-pescada.webp
+-724f668aefc0c6ee0c986fbad615c524c3ddfdf6a6ae0ca4fd417edb4126fff2  ./public/css/admin.css
++e126a45a925fd13b38bf2f8d3d03afee2f1e32eb786305e79e089365330f5605  ./public/css/admin.css
+ df4ba06d36e5f9520cadf7bbae3d67283ff857b06c30b40e5b0ed4c3a822a034  ./public/css/checkout.css
+ 2811c71b3cc4b16465f064011363aaa540105bd055bac55fe4a1a9247781be94  ./public/css/store.css
+-7b86e845054341c3b01b77e45f459403e9f3547ad3146c211fbe54f223fe423b  ./public/index.html
+-599e33072280d79533f8777990f6f0614da8b6ba5ba2fa76f94f1a28c894885a  ./public/js/admin.js
++9bd67ae72049ce0dcdba7a5483bf935ed8c58bdfc1433cc546b6cc34a46e1994  ./public/index.html
++22e7fd456cdbdfe6002bdad9c343b78a330d93d919bdd52330995134ba626ee4  ./public/js/admin.js
+ 7e7ad1352b0e2f303cbf9bbb52fa64425bd67b964a41a89f07f717b920f26817  ./public/js/store/age-gate.js
+ d210e68bd9a2da60496811e3565bd585014b67e12ac30f0ff7d760aa459b83d6  ./public/js/store/api.js
+ 35f3d1d59cde046b7a044de20ac7cd6f1ca7e41bb18ebe1726f406f0d6e8941e  ./public/js/store/app.js
+ 5a7e573ffc64b1bd9f600f1e3090f99a1d25e216ca077ec1b0ec037b0cec007d  ./public/js/store/cart.js
+-7b433cb8cc1e1a7574751ce539260de4caf8dbea0e7d2eee4501cbe67ff2de79  ./public/js/store/catalog.js
+-8d32609b42772df8c79813e2be8ef6ef9fbaf01720daf3c7b2feee1693711db7  ./public/js/store/checkout.js
++f7c8daab4524f01a0c76fc58fb499013320774745032dd67bb2539c8ce0247f6  ./public/js/store/catalog.js
++18d8ad2d020b6d97836716e376e45220f3780243e34f1829dedcf58939e8ad70  ./public/js/store/checkout.js
+ 995798b2a2ce5a2351b986ac4090e013857e1c0ac842199fa22ea47b61bcd24d  ./public/js/store/shipping.js
+ ed7dfbf893923182b55ca848b428fe3064d61e7b12d3f6d72bad6a68ee8e4de6  ./public/robots.txt
+ cd772de9fe7e0a2146b1c933ad7bf335040c4c9ff2a00bdc0c78ce84a53f78f9  ./render-free-test.yaml
+ 46cce233184392fdca2bfc6212563cd2dda452d9b67407d967adef5ba3c35077  ./render.yaml
+ ba3fa4964c0e468def2d7312e611f4cf1d9375164fc626939632d5f5ce4f3376  ./scripts/audit.mjs
+-2fe81fcd7afaea491dbff8134f556d37934e923030f4cca3b35f8d19c3f01a16  ./server.js
++eae8f28342c521fb7c913e6db4b17e2871cca7a381375be33d817226244fa7e5  ./server.js
+ 55de7425734255c803e8aa34a0f4a0a6bb0f1f7bb314093486b9ccdaf10058e0  ./src/catalog.js
+ 5c3000e9c0ea27674b58a0caaa3b5cc898868a7755815af3eca249b7cff3074e  ./src/config.js
+-8c66f6aa86d1b6baf5803e59922c194f714213cc8fb766828d6e3446198e413b  ./src/correios.js
++e22ee6b6adcff9a7c1cf6fdb42165cad772a64924491112e9ecf78613fb48b75  ./src/correios.js
+ 536548aea140de1ed04a92bf4cf6123776b1c158fae8bed22219c70efa3cf94e  ./src/jadlog.js
+ 07be12100bd90bca38cf9649c4efbd08723e9841491dc348b2aec645ef905380  ./src/mailer.js
+ 52d86ff9fed0af08d7fbd6a45cb17bd47b62063b968530f354c86c416e2d3399  ./src/payment-state.js
+ 1d4adc9384b329e6d34ff23ad1b0a88bb3dd4dfb02e5a5171310ce3317303443  ./src/payments.js
+-f92db0b82cc904392b85a80b139c4124ba1a181ee3467124e158c9ca4b7af5f6  ./src/repository.js
+-82ddc29860b3ad8b026a078d09776235c97122cc3e3610243f5f688a8ec34ec8  ./src/security.js
++f2c78ab72a0df300097cf7a8b51646f89ddd1539da75480ba881a78640c9ce97  ./src/repository.js
++90bbfe673833a99e17356dc44dea492011959b367c2814ee7f642e91c5e53034  ./src/security.js
+ a813c3a54a63ce4909be2eec038c08c715fb9cc0f7563393bfc14420535caff7  ./tests/carrier-split.test.js
+-15388a373a3ade9eda9c2bae90b4d2870e6efda75586551cfc98e63119fee233  ./tests/catalog.test.js
+-112a9f203a0996b80a65f34f46f09f965993d3382d819e3ba834bf419f3be374  ./tests/correios.test.js
+-46fbd61cc7b3e35ec6c0ba08797285f8b1fc1c73e1580608407ab88287b82e7d  ./tests/http.test.js
++16a6923e7a3d20e513853c1ce31ef58834ca642b5f1f87fb889428234b422991  ./tests/catalog.test.js
++c32144ba83c5afacb0137049c958f87fcacd61d5de9c99d595e00f0d2b810bfc  ./tests/correios.test.js
++0d2d989709ce7ceb2d7927c18a6cb0aae9214e009c0a831862533ceeeba54a8e  ./tests/http.test.js
+ 2d3cbea896e3a73cd6ceb00ddc54cb4c275a2942f88b741decc7df0e982fff84  ./tests/jadlog.test.js
+ f86ed37ca8d6f47350c5a37094bf72c5a2abc1503608287ce0f965eea60a8853  ./tests/mailer.test.js
+ 1bf4a30cf3b9944cf8029b446781a5edafeeb5cef9fb00be162f792fe0e4dc7a  ./tests/payment-state.test.js
+diff --git a/package-lock.json b/package-lock.json
+index d4bcb1b..87f783c 100644
+--- a/package-lock.json
++++ b/package-lock.json
+@@ -1,12 +1,12 @@
+ {
+   "name": "integrall-online",
+-  "version": "9.2.0",
++  "version": "9.6.1",
+   "lockfileVersion": 3,
+   "requires": true,
+   "packages": {
+     "": {
+       "name": "integrall-online",
+-      "version": "9.2.0",
++      "version": "9.6.1",
+       "dependencies": {
+         "express": "5.1.0",
+         "mercadopago": "3.4.0",
+diff --git a/package.json b/package.json
+index 9fe83a9..146fe92 100644
+--- a/package.json
++++ b/package.json
+@@ -1,6 +1,6 @@
+ {
+   "name": "integrall-online",
+-  "version": "9.5.0",
++  "version": "9.6.1",
+   "private": true,
+   "type": "module",
+   "description": "Loja INTEGRALL com pedidos persistentes, clientes, rastreio, estoque, PostgreSQL, admin e Mercado Pago pronto para credenciais.",
+diff --git a/public/admin.html b/public/admin.html
+index fa38e14..ae097e8 100644
+--- a/public/admin.html
++++ b/public/admin.html
+@@ -8,8 +8,8 @@
+   <meta name="theme-color" content="#4a0a1a">
+   <title>INTEGRALL | Administração</title>
+   <link rel="icon" href="/assets/icons/favicon.svg">
+-  <link rel="stylesheet" href="/css/admin.css?v=9.5.0">
+-  <script src="/js/admin.js?v=9.5.0" defer></script>
++  <link rel="stylesheet" href="/css/admin.css?v=9.6.2">
++  <script src="/js/admin.js?v=9.6.2" defer></script>
+ </head>
+ <body>
+   <a class="skip-link" href="#main">Ir para o conteúdo</a>
+@@ -98,7 +98,8 @@
+ 
+       <section class="panel" aria-labelledby="productsTitle">
+         <div class="panel-head">
+-          <div><h2 id="productsTitle">Produtos</h2><p>Edite preço, estoque, peso e dimensões sem mexer em JSON. Peso e dimensões são usados pelo cálculo de frete dos Correios.</p></div>
++          <div><h2 id="productsTitle">Produtos</h2><p>Crie, edite e exclua produtos e variações (subprodutos). Peso e dimensões são usados pelo cálculo de frete dos Correios.</p></div>
++          <button class="button primary" id="newProductButton" type="button">➕ Novo produto</button>
+         </div>
+         <p class="feedback" id="productsFeedback" role="status" aria-live="polite"></p>
+         <div class="table-wrap">
+@@ -138,6 +139,198 @@
+         <p class="empty" id="couponsEmpty" hidden>Nenhum cupom cadastrado.</p>
+       </section>
+ 
++      <section class="panel" aria-labelledby="themeTitle">
++        <div class="panel-head">
++          <div><h2 id="themeTitle">🎨 Personalização da loja</h2><p>Textos, cores, fontes, logos e posição dos elementos. As mudanças são aplicadas na loja assim que você salva — use "Ver loja" para conferir.</p></div>
++          <div class="theme-head-actions">
++            <button class="button secondary" id="themeReloadButton" type="button">Descartar mudanças</button>
++            <button class="button primary" id="themeSaveButton" type="button">Salvar personalização</button>
++          </div>
++        </div>
++        <p class="feedback" id="themeFeedback" role="status" aria-live="polite"></p>
++
++        <div class="theme-tabs" role="tablist" aria-label="Seções de personalização">
++          <button class="theme-tab active" data-theme-tab="texts" type="button">Textos</button>
++          <button class="theme-tab" data-theme-tab="colors" type="button">Cores</button>
++          <button class="theme-tab" data-theme-tab="typography" type="button">Fontes</button>
++          <button class="theme-tab" data-theme-tab="logos" type="button">Logos e imagens</button>
++          <button class="theme-tab" data-theme-tab="layout" type="button">Layout e posição</button>
++          <button class="theme-tab" data-theme-tab="visibility" type="button">Mostrar / ocultar</button>
++        </div>
++
++        <div class="theme-pane" data-theme-pane="texts">
++          <div class="theme-grid">
++            <label>Nome da marca<input id="thBrand" maxlength="120"></label>
++            <label>Subtítulo da marca<input id="thSubtitle" maxlength="120"></label>
++            <label>Título do catálogo<input id="thCatalogTitle" maxlength="180"></label>
++            <label class="theme-wide">Texto de apresentação<textarea id="thCatalogText" maxlength="1000" rows="3"></textarea></label>
++            <label>E-mail de contato<input id="thEmail" maxlength="254" type="email"></label>
++            <label>Instagram<input id="thInstagram" maxlength="120" placeholder="@sualoja"></label>
++            <label>WhatsApp (só números)<input id="thWhatsapp" maxlength="40" inputmode="numeric" placeholder="5514999999999"></label>
++            <label class="theme-wide">Endereço / texto do rodapé<textarea id="thAddress" maxlength="500" rows="2"></textarea></label>
++            <label class="theme-wide">Texto da opção de retirada<textarea id="thPickup" maxlength="300" rows="2"></textarea></label>
++          </div>
++        </div>
++
++        <div class="theme-pane" data-theme-pane="colors" hidden>
++          <div class="theme-grid theme-colors" id="themeColorsGrid"></div>
++        </div>
++
++        <div class="theme-pane" data-theme-pane="typography" hidden>
++          <div class="theme-grid">
++            <label>Fonte dos títulos<select id="thHeadingFont">
++              <option value="editorial">Editorial (serifada clássica)</option>
++              <option value="classic">Clássica (Garamond)</option>
++              <option value="slab">Slab (robusta)</option>
++              <option value="modern">Moderna (sem serifa)</option>
++              <option value="system">Sistema</option>
++              <option value="humanist">Humanista</option>
++              <option value="geometric">Geométrica</option>
++              <option value="mono">Monoespaçada</option>
++            </select></label>
++            <label>Fonte do texto<select id="thBodyFont">
++              <option value="modern">Moderna (sem serifa)</option>
++              <option value="system">Sistema</option>
++              <option value="humanist">Humanista</option>
++              <option value="geometric">Geométrica</option>
++              <option value="editorial">Editorial (serifada)</option>
++              <option value="classic">Clássica (Garamond)</option>
++              <option value="slab">Slab (robusta)</option>
++              <option value="mono">Monoespaçada</option>
++            </select></label>
++            <label>Fonte personalizada — títulos (opcional)<input id="thCustomHeading" maxlength="160" placeholder="Ex.: Playfair Display, serif"></label>
++            <label>Fonte personalizada — texto (opcional)<input id="thCustomBody" maxlength="160" placeholder="Ex.: Lato, sans-serif"></label>
++            <label>Tamanho base do texto (px)<input id="thBaseSize" type="number" min="12" max="22" step="1"></label>
++            <label>Peso do texto<input id="thBodyWeight" type="number" min="300" max="800" step="100"></label>
++            <label>Peso dos títulos<input id="thHeadingWeight" type="number" min="300" max="800" step="100"></label>
++            <label>Altura da linha<input id="thLineHeight" type="number" min="1.1" max="2.1" step="0.05"></label>
++            <label>Escala dos títulos<input id="thHeadingScale" type="number" min="0.75" max="1.5" step="0.05"></label>
++            <label>Menu — tamanho (px)<input id="thNavSize" type="number" min="9" max="18" step="1"></label>
++            <label>Menu — espaçamento entre letras<input id="thNavSpacing" type="number" min="0" max="0.45" step="0.01"></label>
++            <label>Menu — caixa<select id="thNavTransform">
++              <option value="uppercase">MAIÚSCULAS</option>
++              <option value="capitalize">Primeira Maiúscula</option>
++              <option value="none">como digitado</option>
++            </select></label>
++          </div>
++        </div>
++
++        <div class="theme-pane" data-theme-pane="logos" hidden>
++          <div class="theme-grid">
++            <label>Logo do cabeçalho (URL https:// ou /assets/…)<input id="thHeaderLogo" maxlength="2048" placeholder="https://…/logo.png"></label>
++            <label>Cabeçalho mostra<select id="thHeaderLogoMode">
++              <option value="text">Só o nome (texto)</option>
++              <option value="image">Só o logo (imagem)</option>
++              <option value="both">Logo + nome</option>
++            </select></label>
++            <label>Largura do logo no cabeçalho (px)<input id="thHeaderLogoWidth" type="number" min="60" max="480" step="10"></label>
++            <label>Logo do rodapé (URL)<input id="thFooterLogo" maxlength="2048" placeholder="https://…/logo.png"></label>
++            <label>Rodapé mostra<select id="thFooterLogoMode">
++              <option value="text">Só o nome (texto)</option>
++              <option value="image">Só o logo (imagem)</option>
++              <option value="both">Logo + nome</option>
++            </select></label>
++            <label>Largura do logo no rodapé (px)<input id="thFooterLogoWidth" type="number" min="60" max="360" step="10"></label>
++            <label>Favicon (ícone da aba do navegador)<input id="thFavicon" maxlength="2048" placeholder="https://…/favicon.png"></label>
++            <label>Imagem de fundo do topo (hero)<input id="thHeroBackground" maxlength="2048" placeholder="https://…/fundo.jpg"></label>
++            <label>Estilo do topo<select id="thHeroMode">
++              <option value="plain">Simples (sem destaque)</option>
++              <option value="panel">Painel colorido</option>
++              <option value="image">Com imagem de fundo</option>
++            </select></label>
++            <label>Imagem de fundo do cabeçalho<input id="thHeaderBackground" maxlength="2048" placeholder="https://…"></label>
++            <label>Imagem de fundo do rodapé<input id="thFooterBackgroundImg" maxlength="2048" placeholder="https://…"></label>
++            <label>Imagem de fundo da página<input id="thPageBackground" maxlength="2048" placeholder="https://…"></label>
++          </div>
++          <p class="theme-hint">Dica: hospede as imagens em um link https:// (por exemplo, no seu próprio site ou em um serviço de imagens) ou peça para incluirmos os arquivos na pasta /assets/ do projeto.</p>
++        </div>
++
++        <div class="theme-pane" data-theme-pane="layout" hidden>
++          <div class="theme-grid">
++            <label>Largura máxima do site (px)<input id="thMaxWidth" type="number" min="760" max="1800" step="20"></label>
++            <label>Disposição do cabeçalho<select id="thHeaderLayout">
++              <option value="centered">Centralizado</option>
++              <option value="split">Dividido (marca à esquerda)</option>
++              <option value="compact">Compacto</option>
++            </select></label>
++            <label class="pf-check theme-check"><input id="thHeaderSticky" type="checkbox"> Cabeçalho fixo ao rolar</label>
++            <label>Ordem das seções da página<select id="thBlocks">
++              <option value="intro,filters,products">Apresentação → Filtros → Produtos</option>
++              <option value="intro,products,filters">Apresentação → Produtos → Filtros</option>
++              <option value="filters,intro,products">Filtros → Apresentação → Produtos</option>
++              <option value="filters,products,intro">Filtros → Produtos → Apresentação</option>
++              <option value="products,intro,filters">Produtos → Apresentação → Filtros</option>
++              <option value="products,filters,intro">Produtos → Filtros → Apresentação</option>
++            </select></label>
++            <label>Alinhamento do título do catálogo<select id="thCatalogAlign">
++              <option value="left">Esquerda</option>
++              <option value="center">Centro</option>
++              <option value="right">Direita</option>
++            </select></label>
++            <label>Colunas de produtos (computador)<input id="thGridDesktop" type="number" min="1" max="6" step="1"></label>
++            <label>Colunas de produtos (tablet)<input id="thGridTablet" type="number" min="1" max="4" step="1"></label>
++            <label>Colunas de produtos (celular)<input id="thGridMobile" type="number" min="1" max="2" step="1"></label>
++            <label>Estilo dos cartões<select id="thCardStyle">
++              <option value="minimal">Minimalista</option>
++              <option value="boxed">Com caixa</option>
++              <option value="elevated">Elevado (sombra)</option>
++              <option value="outlined">Contornado</option>
++            </select></label>
++            <label>Alinhamento dos cartões<select id="thCardAlign">
++              <option value="left">Esquerda</option>
++              <option value="center">Centro</option>
++              <option value="right">Direita</option>
++            </select></label>
++            <label>Proporção das fotos<select id="thImageRatio">
++              <option value="portrait">Retrato</option>
++              <option value="square">Quadrada</option>
++              <option value="landscape">Paisagem</option>
++              <option value="auto">Automática</option>
++            </select></label>
++            <label>Ajuste das fotos<select id="thImageFit">
++              <option value="cover">Preencher (cortar)</option>
++              <option value="contain">Mostrar inteira</option>
++            </select></label>
++            <label>Cantos arredondados (px)<input id="thRadius" type="number" min="0" max="40" step="1"></label>
++            <label>Cantos dos botões (px)<input id="thButtonRadius" type="number" min="0" max="40" step="1"></label>
++            <label>Sombra dos cartões<select id="thShadow">
++              <option value="none">Nenhuma</option>
++              <option value="soft">Suave</option>
++              <option value="medium">Média</option>
++              <option value="strong">Forte</option>
++            </select></label>
++            <label>Alinhamento do rodapé<select id="thFooterAlign">
++              <option value="left">Esquerda</option>
++              <option value="center">Centro</option>
++              <option value="right">Direita</option>
++            </select></label>
++            <label>Ordem do rodapé<select id="thFooterOrder">
++              <option value="logo,description,contact">Logo → Descrição → Contato</option>
++              <option value="logo,contact,description">Logo → Contato → Descrição</option>
++              <option value="description,contact,logo">Descrição → Contato → Logo</option>
++              <option value="description,logo,contact">Descrição → Logo → Contato</option>
++              <option value="contact,logo,description">Contato → Logo → Descrição</option>
++              <option value="contact,description,logo">Contato → Descrição → Logo</option>
++            </select></label>
++            <label class="pf-check theme-check"><input id="thAnimations" type="checkbox"> Animações suaves</label>
++          </div>
++        </div>
++
++        <div class="theme-pane" data-theme-pane="visibility" hidden>
++          <div class="theme-grid theme-visibility">
++            <label class="pf-check"><input id="thShowSearch" type="checkbox"> Campo de busca</label>
++            <label class="pf-check"><input id="thShowFilters" type="checkbox"> Filtros de categoria</label>
++            <label class="pf-check"><input id="thShowResultCount" type="checkbox"> Contagem de resultados</label>
++            <label class="pf-check"><input id="thShowCategory" type="checkbox"> Categoria nos cartões</label>
++            <label class="pf-check"><input id="thShowUnit" type="checkbox"> Unidade nos cartões</label>
++            <label class="pf-check"><input id="thShowStock" type="checkbox"> Aviso de estoque baixo</label>
++            <label class="pf-check"><input id="thShowQuickAdd" type="checkbox"> Botão adicionar rápido</label>
++            <label class="pf-check"><input id="thShowFooterDescription" type="checkbox"> Descrição no rodapé</label>
++            <label class="pf-check"><input id="thShowFooterContact" type="checkbox"> Contatos no rodapé</label>
++          </div>
++        </div>
++      </section>
++
+       <section class="panel" aria-labelledby="catalogTitleAdmin">
+         <div class="panel-head">
+           <div><h2 id="catalogTitleAdmin">Catálogo</h2><p>Importação e exportação usam JSON. Imagens novas devem ser URLs HTTPS ou arquivos já publicados em <code>/assets/</code>.</p></div>
+@@ -158,6 +351,15 @@
+     <form class="product-form" id="productForm">
+       <div class="product-form-grid">
+         <label>Nome<input id="pfName" maxlength="160" required></label>
++        <label>Departamento<select id="pfDepartment">
++          <option value="vinhos">Vinhos</option>
++          <option value="sucos">Sucos</option>
++          <option value="cafes">Cafés</option>
++          <option value="petit-four">Petit Four</option>
++          <option value="">Outros</option>
++        </select></label>
++        <label>Categoria (texto livre)<input id="pfSubcategory" maxlength="100" placeholder="Ex.: Vinho Tinto Seco"></label>
++        <label>Marca<input id="pfBrand" maxlength="120" placeholder="Ex.: Marqués de Mendonça"></label>
+         <label>Preço base (R$)<input id="pfPrice" inputmode="decimal" required></label>
+         <label>Unidade / descrição curta<input id="pfUnit" maxlength="120"></label>
+         <label>Estoque (vazio = sem controle)<input id="pfStock" inputmode="numeric"></label>
+@@ -170,10 +372,17 @@
+         <label class="pf-check"><input id="pfAvailable" type="checkbox"> Disponível na loja</label>
+         <label class="pf-check"><input id="pfFeatured" type="checkbox"> Produto em destaque</label>
+       </div>
++      <label>Foto do produto (URL https:// ou /assets/…)<input id="pfImage" maxlength="2048" placeholder="https://…/foto.jpg" spellcheck="false"></label>
+       <label>Descrição<textarea id="pfDescription" maxlength="3000" rows="4" placeholder="História do produto, produtor, harmonização…"></textarea></label>
++      <div class="pf-variants-head">
++        <h3>Variações / subprodutos</h3>
++        <button class="button secondary" id="addVariantButton" type="button">➕ Adicionar variação</button>
++      </div>
++      <p class="theme-hint">Use variações para tamanhos ou versões do mesmo produto (ex.: 750ml e 375ml), cada uma com preço e estoque próprios.</p>
+       <div id="pfVariants"></div>
+       <div class="dialog-actions">
+         <button class="button primary" type="submit">Salvar produto</button>
++        <button class="button danger" id="deleteProductButton" type="button" hidden>Excluir produto</button>
+         <p class="feedback" id="productDialogFeedback" role="status" aria-live="polite"></p>
+       </div>
+     </form>
+diff --git a/public/css/admin.css b/public/css/admin.css
+index 162eafc..d3876b2 100644
+--- a/public/css/admin.css
++++ b/public/css/admin.css
+@@ -3,7 +3,7 @@
+ .metrics{grid-template-columns:repeat(5,minmax(0,1fr))}
+ .customers-filter{grid-template-columns:minmax(260px,520px)}
+ .dialog-shipping{display:grid;grid-template-columns:1fr 1fr auto;gap:10px;padding:18px 20px;border-bottom:1px solid var(--line);align-items:end;background:var(--sand)}
+-.dialog-shipping[hidden]{display:none}.dialog-shipping input{width:100%;border:1px solid var(--line);background:#fff;padding:11px 12px;color:var(--ink)}
++.dialog-shipping[hidden]{display:none!important}.dialog-shipping input{width:100%;border:1px solid var(--line);background:#fff;padding:11px 12px;color:var(--ink)}
+ .history-row{display:grid;grid-template-columns:130px 1fr;gap:12px;padding:8px 0;border-bottom:1px dashed var(--line);font-size:12px}.history-row:last-child{border-bottom:0}.history-row time{color:var(--muted)}.warning-box{padding:10px 12px;border:1px solid #d7b36c;background:#fff8e6;color:#7a5311;font-size:12px;line-height:1.5}
+ @media(max-width:980px){.metrics{grid-template-columns:repeat(3,1fr)}.dialog-shipping{grid-template-columns:1fr 1fr}.dialog-shipping .button{grid-column:1/-1}}
+ @media(max-width:780px){.metrics{grid-template-columns:repeat(2,1fr)}.dialog-shipping{grid-template-columns:1fr}.dialog-shipping .button{grid-column:auto}}
+@@ -28,3 +28,28 @@
+ @media(max-width:900px){.product-form-grid{grid-template-columns:1fr 1fr}.pf-variant{grid-template-columns:1fr 1fr}}
+ @media(max-width:560px){.product-form-grid{grid-template-columns:1fr}.pf-variant{grid-template-columns:1fr}}
+ .gift-message{padding:6px 10px;margin:2px 0 8px;background:#fff8e6;border-left:3px solid var(--gold);font-size:12px;color:#7a5311;font-style:italic}
++.theme-head-actions{display:flex;gap:10px;flex-wrap:wrap}
++.theme-tabs{display:flex;gap:6px;flex-wrap:wrap;margin:14px 0 18px;border-bottom:1px solid var(--line);padding-bottom:10px}
++.theme-tab{border:1px solid var(--line);background:#fff;color:var(--ink);padding:8px 14px;cursor:pointer;font-size:13px}
++.theme-tab.active{background:var(--wine);border-color:var(--wine);color:#fff}
++.theme-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
++.theme-grid label{display:grid;gap:6px;color:var(--wine);font-size:13px}
++.theme-grid input,.theme-grid select,.theme-grid textarea{border:1px solid var(--line);background:#fff;padding:10px 11px;color:var(--ink);font:inherit;width:100%}
++.theme-wide{grid-column:1/-1}
++.theme-colors{grid-template-columns:repeat(3,minmax(0,1fr))}
++.theme-color-item{font-size:12px}
++.theme-color-row{display:flex;gap:8px;align-items:center}
++.theme-color-row input[type=color]{width:44px;height:38px;padding:2px;border:1px solid var(--line);background:#fff;cursor:pointer;flex:0 0 auto}
++.theme-color-row input[type=text],.theme-color-row input:not([type=color]){flex:1}
++.theme-hint{color:var(--muted);font-size:12px;margin:10px 0 0}
++.theme-check{align-self:center}
++.theme-visibility{grid-template-columns:repeat(3,minmax(0,1fr))}
++.pf-variants-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:16px}
++.pf-variants-head h3{margin:0;color:var(--wine);font-family:Georgia,serif;font-weight:400;font-size:18px}
++.pf-variant-title-row{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:10px}
++.pf-variant-remove{color:var(--bad);border-color:var(--bad)}
++.button.danger{border-color:var(--bad);color:var(--bad);background:#fff}
++.button.danger:hover{background:var(--bad);color:#fff}
++@media(max-width:900px){.theme-grid,.theme-colors,.theme-visibility{grid-template-columns:1fr 1fr}}
++@media(max-width:560px){.theme-grid,.theme-colors,.theme-visibility{grid-template-columns:1fr}}
++.theme-color-nohex{opacity:.55}
+diff --git a/public/index.html b/public/index.html
+index 923655d..995d2a6 100644
+--- a/public/index.html
++++ b/public/index.html
+@@ -1,7 +1,7 @@
+ <!doctype html>
+ <!DOCTYPE html>
+ 
+-<html lang="pt-BR"><head><meta charset="utf-8"/><meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/><meta content="INTEGRALL — Explore todos os produtos disponíveis e monte seu pedido." name="description"/><meta content="#ffffff" name="theme-color"/><meta content="light" name="color-scheme"/><meta content="no-referrer" name="referrer"/><meta content="index,follow,max-image-preview:large" name="robots"/><meta content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'; worker-src 'none'" http-equiv="Content-Security-Policy"/><meta content="public-v9.1-2026-08-14" name="integrall-build"/><meta content="pt_BR" property="og:locale"/><meta content="website" property="og:type"/><meta content="INTEGRALL" property="og:site_name"/><meta content="INTEGRALL" property="og:title"/><meta content="INTEGRALL — Explore todos os produtos disponíveis e monte seu pedido." property="og:description"/><meta content="/assets/products/02-vinho-tinto-seco.webp" property="og:image"/><meta content="summary_large_image" name="twitter:card"/><meta content="/assets/products/02-vinho-tinto-seco.webp" name="twitter:image"/><meta content="INTEGRALL" name="twitter:title"/><meta content="INTEGRALL — Explore todos os produtos disponíveis e monte seu pedido." name="twitter:description"/><title>INTEGRALL | Boutique Gourmet</title><link href="/assets/icons/favicon.svg" id="siteFavicon" rel="icon"/><link href="/assets/icons/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/><script type="application/ld+json">{"@context":"https://schema.org","@type":"LocalBusiness","name":"INTEGRALL","email":"integrallwine@gmail.com"}</script><link href="/css/store.css" rel="stylesheet"/><link href="/css/checkout.css" rel="stylesheet"/></head><body><noscript><div style="padding:16px;background:#fff3cd;color:#4a0a1a;text-align:center;font-family:Arial,sans-serif"><strong>INTEGRALL</strong><br/>O catálogo interativo precisa de JavaScript. Use os canais de atendimento informados no rodapé.</div></noscript><div class="catalog-surface" id="catalogSurface">
++<html lang="pt-BR"><head><meta charset="utf-8"/><meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/><meta content="INTEGRALL — Explore todos os produtos disponíveis e monte seu pedido." name="description"/><meta content="#ffffff" name="theme-color"/><meta content="light" name="color-scheme"/><meta content="no-referrer" name="referrer"/><meta content="index,follow,max-image-preview:large" name="robots"/><meta content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'; worker-src 'none'" http-equiv="Content-Security-Policy"/><meta content="public-v9.6.2-2026-08-18" name="integrall-build"/><meta content="pt_BR" property="og:locale"/><meta content="website" property="og:type"/><meta content="INTEGRALL" property="og:site_name"/><meta content="INTEGRALL" property="og:title"/><meta content="INTEGRALL — Explore todos os produtos disponíveis e monte seu pedido." property="og:description"/><meta content="/assets/products/02-vinho-tinto-seco.webp" property="og:image"/><meta content="summary_large_image" name="twitter:card"/><meta content="/assets/products/02-vinho-tinto-seco.webp" name="twitter:image"/><meta content="INTEGRALL" name="twitter:title"/><meta content="INTEGRALL — Explore todos os produtos disponíveis e monte seu pedido." name="twitter:description"/><title>INTEGRALL | Boutique Gourmet</title><link href="/assets/icons/favicon.svg" id="siteFavicon" rel="icon"/><link href="/assets/icons/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180"/><script type="application/ld+json">{"@context":"https://schema.org","@type":"LocalBusiness","name":"INTEGRALL","email":"integrallwine@gmail.com"}</script><link href="/css/store.css" rel="stylesheet"/><link href="/css/checkout.css" rel="stylesheet"/></head><body><noscript><div style="padding:16px;background:#fff3cd;color:#4a0a1a;text-align:center;font-family:Arial,sans-serif"><strong>INTEGRALL</strong><br/>O catálogo interativo precisa de JavaScript. Use os canais de atendimento informados no rodapé.</div></noscript><div class="catalog-surface" id="catalogSurface">
+ <header class="header" data-visual-region="header">
+ <div class="wrap header-row">
+ <button aria-label="Ir para a vitrine" class="brand" data-header-slot="brand" data-page="vitrine" type="button">
+@@ -158,4 +158,4 @@
+ </section>
+ </div><div aria-live="polite" class="toast-stack" id="toasts"></div><script id="buildData" type="application/json">{"publicBuild":true,"version":9,"generatedAt":"2026-08-12T23:13:00-03:00","settings":{"catalogId":"catalog-1786110588222-8uuux6","brand":"INTEGRALL","subtitle":"Wine","catalogTitle":"Nossa seleção","catalogText":"Explore todos os produtos disponíveis e monte seu pedido.","whatsapp":"","email":"integrallwine@gmail.com","instagram":"@integrallwine","address":"Retirada e entrega combinadas no atendimento.","shipMode":"quote","fixed":0,"free":0,"zoneFallback":"quote","pickup":"Retirada disponível mediante confirmação no atendimento.","zones":[],"visual":{"version":1,"preset":"classic","assets":{"headerLogo":"","footerLogo":"","favicon":"","heroBackground":"","headerBackground":"","footerBackground":"","pageBackground":""},"colors":{"page":"#ffffff","surface":"#ffffff","surfaceAlt":"#faf9f7","surfaceMuted":"#f4f1ec","primary":"#4a0a1a","primaryHover":"#681126","accent":"#aa8952","text":"#211e1c","muted":"#77716c","line":"#e9e4dd","danger":"#a02c35","success":"#276447","buttonText":"#ffffff","headerBackground":"#ffffff","footerBackground":"#ffffff","cardBackground":"#ffffff","inputBackground":"#ffffff","heroText":"#4a0a1a","heroOverlay":"rgba(0,0,0,.28)","headerText":"#4a0a1a","headerMuted":"#3d3835","footerText":"#77716c","footerMuted":"#746f6b","footerHeading":"#4a0a1a","footerAccent":"#aa8952","price":"#302c29","badgeBackground":"rgba(255,255,255,.94)","badgeText":"#4a0a1a","outOfStockBackground":"rgba(74,10,26,.9)","outOfStockText":"#ffffff","overlay":"rgba(31,25,23,.38)"},"typography":{"bodyFont":"modern","headingFont":"editorial","customBody":"","customHeading":"","baseSize":16,"bodyWeight":400,"headingWeight":400,"lineHeight":1.55,"headingScale":1,"navSize":11,"navSpacing":0.15,"brandSpacing":0.25,"navTransform":"uppercase"},"layout":{"maxWidth":1240,"gutterDesktop":56,"gutterMobile":28,"headerLayout":"centered","headerSticky":false,"headerPadding":48,"navGap":40,"headerOrder":["brand","nav","actions"],"catalogAlign":"center","catalogTop":48,"catalogBottom":78,"introMaxWidth":710,"blocks":["intro","filters","products"],"toolbarLayout":"columns","gridColumnsDesktop":3,"gridColumnsTablet":2,"gridColumnsMobile":1,"gridGapX":34,"gridGapY":48,"cardStyle":"minimal","cardAlign":"center","cardPadding":0,"imageRatio":"portrait","imageFit":"cover","radius":0,"buttonRadius":0,"inputRadius":0,"shadow":"none","footerAlign":"center","footerOrder":["description","contact","logo"],"headerLogoMode":"text","footerLogoMode":"image","headerLogoWidth":220,"footerLogoWidth":170,"heroMode":"plain","heroPadding":0,"heroRadius":0,"animations":true},"visibility":{"category":true,"unit":true,"stock":true,"quickAdd":true,"search":true,"filters":true,"resultCount":true,"footerDescription":false,"footerContact":true},"customCss":""}},"products":[{"id":"product-1786125158091-2hwfps","name":"Suco Integral de Uva bordô","department":"sucos","subcategory":"Uva Bordô","brand":"Marqués de Mendonça","sku":"","imported":false,"country":"","region":"","price":2390,"unit":"Garrafa de 1L e 300ml","description":"","images":["/assets/products/01-suco-integral-de-uva-bord.webp"],"variants":[{"id":"variant-1786125213057-vsk38j","name":"300ml","price":1150,"stock":1000,"unit":"","position":1},{"id":"variant-1786125277805-0nrmsu","name":"1L","price":2390,"stock":1000,"unit":"","position":2}],"attributes":{"flavor":"Uva Bordô","volume":"1L e 300ml","kind":"100% Integral","sugar":"Sem adição de açucar e adoçantes","storage":"Pasteurizado"},"stock":null,"stockMin":3,"maxPerOrder":null,"restockDate":"","preparation":"","available":true,"featured":false,"madeToOrder":false,"seasonal":false,"giftEnabled":true,"position":1,"created":1786125158091,"updated":1786125308896,"deletedAt":null},{"id":"product-1786125523055-ivln6v","name":"Vinho Tinto Seco","department":"vinhos","subcategory":"Vinho Tinto Seco","brand":"Marqués de Mendonça","sku":"","imported":false,"country":"Brasil","region":"Serra Gaúcha","price":2699,"unit":"750ml","description":"Vinho varietal uva bordô","images":["/assets/products/02-vinho-tinto-seco.webp"],"variants":[{"id":"variant-1786125472992-y1279u","name":"750ml","price":2699,"stock":1000,"unit":"","position":1},{"id":"variant-1786125496593-h1h204","name":"375ml","price":2150,"stock":1000,"unit":"","position":2}],"attributes":{"wineType":"Tinto","grape":"Bordô","alcohol":"10,9","volume":"750ml","serving":"12° a 14°"},"stock":null,"stockMin":3,"maxPerOrder":null,"restockDate":"","preparation":"","available":true,"featured":false,"madeToOrder":false,"seasonal":false,"giftEnabled":true,"position":2,"created":1786125523055,"updated":1786125523055,"deletedAt":null},{"id":"product-1786125594468-rlk598","name":"Mentirinha","department":"petit-four","subcategory":"Biscoito Folheado","brand":"","sku":"","imported":false,"country":"","region":"","price":5490,"unit":"Caixa com 2kg","description":"","images":["/assets/products/03-mentirinha.webp"],"variants":[],"attributes":{"weight":"2kg","shelfLife":"6 meses","minOrder":"2 caixas"},"stock":null,"stockMin":3,"maxPerOrder":null,"restockDate":"","preparation":"","available":true,"featured":false,"madeToOrder":false,"seasonal":false,"giftEnabled":true,"position":3,"created":1786125594468,"updated":1786125594468,"deletedAt":null},{"id":"product-1786125689329-bqbvu9","name":"Vó Damazia","department":"cafes","subcategory":"Café Gerações","brand":"Gerações","sku":"","imported":false,"country":"","region":"","price":3990,"unit":"250g","description":"","images":["/assets/products/04-v-damazia.webp"],"variants":[],"attributes":{"origin":"Serra Gaúcha","bean":"Arabica","roast":"Média","weight":"250g"},"stock":null,"stockMin":3,"maxPerOrder":null,"restockDate":"","preparation":"","available":true,"featured":false,"madeToOrder":false,"seasonal":false,"giftEnabled":true,"position":4,"created":1786125689329,"updated":1786125689329,"deletedAt":null},{"id":"product-1786125745701-ydcfi8","name":"Vinho verde Pescada","department":"vinhos","subcategory":"Vinho Verde","brand":"Pescada","sku":"","imported":true,"country":"Portugal","region":"","price":6500,"unit":"750ml","description":"","images":["/assets/products/05-vinho-verde-pescada.webp"],"variants":[],"attributes":{"wineType":"Branco","volume":"750ml"},"stock":null,"stockMin":3,"maxPerOrder":null,"restockDate":"","preparation":"","available":true,"featured":false,"madeToOrder":false,"seasonal":false,"giftEnabled":true,"position":5,"created":1786125745701,"updated":1786125745701,"deletedAt":null}],"commerce":{"businessName":"","siteUrl":"","taxId":"","businessAddress":"","supportEmail":"","supportPhone":"","privacyText":"","termsText":"","returnsText":"","retentionDays":90,"pixKey":"","paymentLink":"","paymentMethods":{"whatsapp":false,"pix":false,"card":false},"apiBaseUrl":"","apiMode":"required","lastUpdated":"2026-08-12T00:00:00.000Z"}}</script>
+ 
+-<script defer="True" src="/js/store/age-gate.js?v=9.5.0"></script><script defer="True" src="/js/store/catalog.js?v=9.5.0"></script><script defer="True" src="/js/store/cart.js?v=9.5.0"></script><script defer="True" src="/js/store/shipping.js?v=9.5.0"></script><script defer="True" src="/js/store/api.js?v=9.5.0"></script><script defer="True" src="/js/store/checkout.js?v=9.5.0"></script><script defer="True" src="/js/store/app.js?v=9.5.0"></script></body></html>
+\ No newline at end of file
++<script defer="True" src="/js/store/age-gate.js?v=9.6.2"></script><script defer="True" src="/js/store/catalog.js?v=9.6.2"></script><script defer="True" src="/js/store/cart.js?v=9.6.2"></script><script defer="True" src="/js/store/shipping.js?v=9.6.2"></script><script defer="True" src="/js/store/api.js?v=9.6.2"></script><script defer="True" src="/js/store/checkout.js?v=9.6.2"></script><script defer="True" src="/js/store/app.js?v=9.6.2"></script></body></html>
+\ No newline at end of file
+diff --git a/public/js/admin.js b/public/js/admin.js
+index 03442ea..b28c36a 100644
+--- a/public/js/admin.js
++++ b/public/js/admin.js
+@@ -16,18 +16,48 @@
+ 
+   const money = cents => new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format((Number(cents)||0)/100);
+   const dateTime = value => { try { return value ? new Date(value).toLocaleString('pt-BR') : '—'; } catch { return '—'; } };
+-  function token() { return sessionStorage.getItem(TOKEN_KEY) || ''; }
++  // O token vive em memória (funciona mesmo quando o navegador bloqueia o
++  // sessionStorage, como em previews embutidos/iframes); o sessionStorage é
++  // apenas uma conveniência opcional para sobreviver ao recarregar a página.
++  let memoryToken = '';
++  function token() {
++    if (memoryToken) return memoryToken;
++    try { return sessionStorage.getItem(TOKEN_KEY) || ''; } catch { return ''; }
++  }
++  function storeToken(value) {
++    memoryToken = String(value || '');
++    try { sessionStorage.setItem(TOKEN_KEY, memoryToken); } catch { /* storage bloqueado: segue só na memória */ }
++  }
++  function clearToken() {
++    memoryToken = '';
++    try { sessionStorage.removeItem(TOKEN_KEY); } catch { /* ignora */ }
++  }
++  // Login automático via link: /admin?token=SEU_TOKEN (o token é removido da URL em seguida)
++  try {
++    const urlParams = new URLSearchParams(window.location.search);
++    const urlToken = (urlParams.get('token') || '').trim();
++    if (urlToken) {
++      storeToken(urlToken);
++      urlParams.delete('token');
++      const clean = window.location.pathname + (urlParams.toString() ? `?${urlParams}` : '') + window.location.hash;
++      window.history.replaceState(null, '', clean);
++    }
++  } catch { /* ignora */ }
+   function setFeedback(node, text, type='') { if (!node) return; node.textContent=text; node.className=`feedback${type?` ${type}`:''}`; }
+ 
+   async function request(path, options={}) {
+     const headers = new Headers(options.headers || {});
+     headers.set('Accept','application/json');
+     if (options.body) headers.set('Content-Type','application/json');
+-    if (token()) headers.set('Authorization',`Bearer ${token()}`);
++    if (token()) {
++      headers.set('Authorization',`Bearer ${token()}`);
++      // Redundância deliberada: alguns proxies/túneis removem o Authorization.
++      headers.set('X-Admin-Token', token());
++    }
+     const response = await fetch(path,{...options,headers});
+     const data = await response.json().catch(()=>({}));
+     if (response.status===401) {
+-      sessionStorage.removeItem(TOKEN_KEY);
++      clearToken();
+       showLogin('Token inválido ou sessão expirada.');
+       throw new Error(data.error || 'Não autorizado.');
+     }
+@@ -173,7 +203,15 @@
+   }
+ 
+   function parseReais(value) {
+-    const text=String(value||'').trim().replace(/\./g,'').replace(',','.'); const number=Number(text); if(!Number.isFinite(number)||number<0)return null; return Math.round(number*100);
++    // Aceita "21,50" (BR), "21.50" (internacional), "1.250,00" e "R$ 10,00".
++    // Regra igual à do backend (parsePriceCents): SE tem vírgula, pontos são
++    // milhar; SENÃO o ponto é decimal. Evita o erro de 100x ("28.50" → 2850,00).
++    const text=String(value||'').trim().replace(/^R\$\s*/i,'');
++    if(!text)return null;
++    const normalized=text.includes(',')?text.replace(/\./g,'').replace(',','.'):text;
++    const number=Number(normalized);
++    if(!Number.isFinite(number)||number<0)return null;
++    return Math.round(number*100);
+   }
+ 
+   async function saveShipping() {
+@@ -230,73 +268,320 @@
+ 
+   function intOrNull(value){const t=String(value||'').trim();if(!t)return null;const n=Number(t);return Number.isFinite(n)&&n>=0?Math.round(n):null}
+ 
++  function appendVariantBox(variantsRoot, variant) {
++    const box=document.createElement('div'); box.className='pf-variant';
++    if(variant?.id)box.dataset.variantId=variant.id; else box.dataset.newVariant='1';
++    const head=document.createElement('div'); head.className='pf-variant-title-row';
++    const title=document.createElement('div'); title.className='pf-variant-title'; title.textContent=variant?.id?`Variação: ${variant.name||''}`:'Nova variação'; head.append(title);
++    const removeButton=document.createElement('button'); removeButton.type='button'; removeButton.className='row-button pf-variant-remove'; removeButton.textContent='Remover';
++    removeButton.addEventListener('click',()=>box.remove()); head.append(removeButton); box.append(head);
++    const fields=[
++      ['Nome','name',variant?.name||''],
++      ['Preço (R$)','price',variant?(Number(variant.price||0)/100).toFixed(2).replace('.',','):''],
++      ['Estoque','stock',variant?.stock==null?'':variant.stock],
++      ['Peso (g)','weightGrams',variant?.weightGrams==null?'':variant.weightGrams]
++    ];
++    for (const [labelText,key,value] of fields) {
++      const label=document.createElement('label'); label.textContent=labelText;
++      const input=document.createElement('input'); input.dataset.variantField=key; input.value=value;
++      label.append(input); box.append(label);
++    }
++    variantsRoot.append(box);
++  }
++
+   function openProductDialog(product) {
+-    activeProduct=product;
+-    $('#productDialogTitle').textContent=product.name;
+-    $('#pfName').value=product.name||'';
+-    $('#pfPrice').value=(Number(product.price)/100).toFixed(2).replace('.',',');
+-    $('#pfUnit').value=product.unit||'';
+-    $('#pfStock').value=product.stock==null?'':product.stock;
+-    $('#pfMinPerOrder').value=product.minPerOrder==null?'':product.minPerOrder;
+-    $('#pfMaxPerOrder').value=product.maxPerOrder==null?'':product.maxPerOrder;
+-    $('#pfWeight').value=product.weightGrams==null?'':product.weightGrams;
+-    $('#pfLength').value=product.lengthCm==null?'':product.lengthCm;
+-    $('#pfWidth').value=product.widthCm==null?'':product.widthCm;
+-    $('#pfHeight').value=product.heightCm==null?'':product.heightCm;
+-    $('#pfAvailable').checked=product.available!==false;
+-    $('#pfFeatured').checked=product.featured===true;
+-    $('#pfDescription').value=product.description||'';
+-    const variantsRoot=$('#pfVariants'); variantsRoot.replaceChildren();
+-    for (const variant of product.variants||[]) {
+-      const box=document.createElement('div'); box.className='pf-variant'; box.dataset.variantId=variant.id;
+-      const title=document.createElement('div'); title.className='pf-variant-title'; title.textContent=`Variante: ${variant.name}`; box.append(title);
+-      const fields=[['Nome','name',variant.name||''],['Preço (R$)','price',(Number(variant.price)/100).toFixed(2).replace('.',',')],['Estoque','stock',variant.stock==null?'':variant.stock],['Peso (g)','weightGrams',variant.weightGrams==null?'':variant.weightGrams]];
+-      for (const [labelText,key,value] of fields) {
+-        const label=document.createElement('label'); label.textContent=labelText;
+-        const input=document.createElement('input'); input.dataset.variantField=key; input.value=value;
+-        label.append(input); box.append(label);
+-      }
+-      variantsRoot.append(box);
++    activeProduct=product; // null = criação
++    const creating=!product;
++    $('#productDialogTitle').textContent=creating?'Novo produto':product.name;
++    $('#pfName').value=product?.name||'';
++    // Departamento: se o produto usa um departamento fora da lista fixa
++    // (ex.: "mercearia"), adiciona a opção dinamicamente — sem isso o select
++    // cairia em "" e o PATCH apagaria o departamento silenciosamente.
++    const departmentSelect=$('#pfDepartment');
++    departmentSelect.querySelectorAll('option[data-dynamic]').forEach(option=>option.remove());
++    const departmentValue=product?.department??'vinhos';
++    if(![...departmentSelect.options].some(option=>option.value===departmentValue)){
++      const option=document.createElement('option');
++      option.value=departmentValue; option.textContent=`${departmentValue} (personalizado)`; option.dataset.dynamic='1';
++      departmentSelect.append(option);
+     }
++    departmentSelect.value=departmentValue;
++    $('#pfSubcategory').value=product?.subcategory||'';
++    $('#pfBrand').value=product?.brand||'';
++    $('#pfPrice').value=product?(Number(product.price)/100).toFixed(2).replace('.',','):'';
++    $('#pfUnit').value=product?.unit||'';
++    $('#pfStock').value=product?.stock==null?'':product.stock;
++    $('#pfMinPerOrder').value=product?.minPerOrder==null?'':product.minPerOrder;
++    $('#pfMaxPerOrder').value=product?.maxPerOrder==null?'':product.maxPerOrder;
++    $('#pfWeight').value=product?.weightGrams==null?'':product.weightGrams;
++    $('#pfLength').value=product?.lengthCm==null?'':product.lengthCm;
++    $('#pfWidth').value=product?.widthCm==null?'':product.widthCm;
++    $('#pfHeight').value=product?.heightCm==null?'':product.heightCm;
++    $('#pfAvailable').checked=product?product.available!==false:true;
++    $('#pfFeatured').checked=product?.featured===true;
++    $('#pfImage').value=product?.images?.[0]||'';
++    $('#pfDescription').value=product?.description||'';
++    $('#deleteProductButton').hidden=creating;
++    const variantsRoot=$('#pfVariants'); variantsRoot.replaceChildren();
++    for (const variant of product?.variants||[]) appendVariantBox(variantsRoot, variant);
+     setFeedback($('#productDialogFeedback'),'');
+-    $('#productDialog').showModal();
++    const dialog=$('#productDialog');
++    if(!dialog.open)dialog.showModal();
++  }
++
++  function collectVariants() {
++    return [...document.querySelectorAll('#pfVariants .pf-variant')].map(box=>{
++      const get=key=>box.querySelector(`[data-variant-field="${key}"]`)?.value ?? '';
++      const name=get('name').trim();
++      if(!name)throw new Error('Toda variação precisa de um nome (ex.: 750ml).');
++      const variantPrice=parseReais(get('price'));
++      if(variantPrice==null)throw new Error(`Preço inválido na variação ${name}.`);
++      const entry={name,price:variantPrice,stock:intOrNull(get('stock')),weightGrams:intOrNull(get('weightGrams'))};
++      if(box.dataset.variantId)entry.id=box.dataset.variantId;
++      return entry;
++    });
++  }
++
++  function collectProductForm() {
++    const price=parseReais($('#pfPrice').value);
++    if(price==null)throw new Error('Informe um preço válido, por exemplo 21,50.');
++    const image=$('#pfImage').value.trim();
++    if(image && !/^https:\/\//i.test(image) && !image.startsWith('/assets/'))throw new Error('A foto precisa ser um link https:// ou um caminho /assets/….');
++    return {
++      name:$('#pfName').value.trim(),
++      department:$('#pfDepartment').value,
++      subcategory:$('#pfSubcategory').value.trim(),
++      brand:$('#pfBrand').value.trim(),
++      price,
++      unit:$('#pfUnit').value.trim(),
++      description:$('#pfDescription').value.trim(),
++      images:image?[image]:[],
++      stock:intOrNull($('#pfStock').value),
++      minPerOrder:intOrNull($('#pfMinPerOrder').value),
++      maxPerOrder:intOrNull($('#pfMaxPerOrder').value),
++      weightGrams:intOrNull($('#pfWeight').value),
++      lengthCm:intOrNull($('#pfLength').value),
++      widthCm:intOrNull($('#pfWidth').value),
++      heightCm:intOrNull($('#pfHeight').value),
++      available:$('#pfAvailable').checked,
++      featured:$('#pfFeatured').checked
++    };
+   }
+ 
+   async function saveProduct(event) {
+     event.preventDefault();
+-    if(!activeProduct?.id)return;
+     const button=$('#productForm button[type="submit"]'); button.disabled=true;
+     try {
+-      const price=parseReais($('#pfPrice').value);
+-      if(price==null)throw new Error('Informe um preço válido, por exemplo 21,50.');
+-      const patch={
+-        name:$('#pfName').value.trim(),
+-        price,
+-        unit:$('#pfUnit').value.trim(),
+-        description:$('#pfDescription').value.trim(),
+-        stock:intOrNull($('#pfStock').value),
+-        minPerOrder:intOrNull($('#pfMinPerOrder').value),
+-        maxPerOrder:intOrNull($('#pfMaxPerOrder').value),
+-        weightGrams:intOrNull($('#pfWeight').value),
+-        lengthCm:intOrNull($('#pfLength').value),
+-        widthCm:intOrNull($('#pfWidth').value),
+-        heightCm:intOrNull($('#pfHeight').value),
+-        available:$('#pfAvailable').checked,
+-        featured:$('#pfFeatured').checked
+-      };
+-      const variants=[...document.querySelectorAll('#pfVariants .pf-variant')].map(box=>{
+-        const get=key=>box.querySelector(`[data-variant-field="${key}"]`)?.value ?? '';
+-        const variantPrice=parseReais(get('price'));
+-        if(variantPrice==null)throw new Error(`Preço inválido na variante ${get('name')||box.dataset.variantId}.`);
+-        return {id:box.dataset.variantId,name:get('name').trim(),price:variantPrice,stock:intOrNull(get('stock')),weightGrams:intOrNull(get('weightGrams'))};
+-      });
+-      if(variants.length)patch.variants=variants;
+-      await request(`/api/admin/products/${encodeURIComponent(activeProduct.id)}`,{method:'PATCH',body:JSON.stringify(patch)});
+-      setFeedback($('#productDialogFeedback'),'Produto salvo.','ok');
++      const payload=collectProductForm();
++      const variants=collectVariants();
++      if(activeProduct?.id){
++        // PATCH cobre os campos simples e ATUALIZA variações existentes;
++        // criação/remoção de variações e troca de foto exigem PUT do catálogo
++        // completo (o PATCH nunca remove variações, por segurança).
++        const patch={...payload};
++        delete patch.images;
++        const kept=variants.filter(v=>v.id);
++        if(kept.length)patch.variants=kept;
++        await request(`/api/admin/products/${encodeURIComponent(activeProduct.id)}`,{method:'PATCH',body:JSON.stringify(patch)});
++        const created=variants.filter(v=>!v.id);
++        const keptIds=new Set(kept.map(v=>v.id));
++        const removed=(activeProduct.variants||[]).filter(v=>!keptIds.has(v.id));
++        const imageChanged=$('#pfImage').value.trim()!==(activeProduct.images?.[0]||'');
++        if(created.length||removed.length||imageChanged){
++          const data=await request('/api/admin/products');
++          const all=Array.isArray(data.products)?data.products:[];
++          const target=all.find(p=>p.id===activeProduct.id);
++          if(target){
++            if(imageChanged){
++              // preserva as demais fotos: só a primeira é trocada/removida
++              const rest=(target.images||[]).slice(1);
++              target.images=payload.images.length?[...payload.images,...rest]:rest;
++            }
++            target.variants=(target.variants||[]).filter(v=>keptIds.has(v.id));
++            for(const nv of created)target.variants=[...target.variants,{...nv,id:`variant-${Date.now()}-${Math.random().toString(36).slice(2,8)}`}];
++            await request('/api/admin/catalog',{method:'PUT',body:JSON.stringify({products:all})});
++          }
++        }
++        setFeedback($('#productDialogFeedback'),'Produto salvo.','ok');
++      } else {
++        const body={...payload};
++        if(variants.length)body.variants=variants;
++        await request('/api/admin/products',{method:'POST',body:JSON.stringify(body)});
++        setFeedback($('#productDialogFeedback'),'Produto criado! Ele já aparece na loja.','ok');
++        $('#productDialogTitle').textContent=payload.name;
++      }
++      const savedId=activeProduct?.id;
+       await Promise.all([loadProducts(),loadCatalog()]);
++      if(savedId){
++        // Ressincroniza o formulário com o estado real do servidor: sem isso,
++        // variações recém-criadas continuariam marcadas como "novas" no DOM e
++        // um segundo clique em Salvar as duplicaria.
++        const fresh=products.find(p=>p.id===savedId);
++        if(fresh){openProductDialog(fresh);setFeedback($('#productDialogFeedback'),'Produto salvo.','ok')}
++      } else {
++        $('#productDialog').close();
++      }
+     } catch(error){setFeedback($('#productDialogFeedback'),error.message,'bad')} finally{button.disabled=false}
+   }
+ 
++  async function deleteProduct() {
++    if(!activeProduct?.id)return;
++    if(!confirm(`Excluir "${activeProduct.name}" da loja? Esta ação não pode ser desfeita.`))return;
++    const button=$('#deleteProductButton'); button.disabled=true;
++    try {
++      await request(`/api/admin/products/${encodeURIComponent(activeProduct.id)}`,{method:'DELETE'});
++      $('#productDialog').close();
++      setFeedback($('#productsFeedback'),'Produto excluído.','ok');
++      await Promise.all([loadProducts(),loadCatalog()]);
++    } catch(error){setFeedback($('#productDialogFeedback'),error.message,'bad')} finally{button.disabled=false}
++  }
++
++  // ── Personalização da loja ────────────────────────────────────────────
++  let themeSettings=null;
++  const THEME_COLOR_LABELS={
++    page:'Fundo da página',surface:'Fundo dos painéis',surfaceAlt:'Fundo alternativo',surfaceMuted:'Fundo suave',
++    primary:'Cor principal (vinho)',primaryHover:'Cor principal — hover',accent:'Cor de destaque (dourado)',
++    text:'Texto',muted:'Texto secundário',line:'Linhas e bordas',danger:'Avisos de erro',success:'Confirmações',
++    buttonText:'Texto dos botões',headerBackground:'Fundo do cabeçalho',footerBackground:'Fundo do rodapé',
++    cardBackground:'Fundo dos cartões',inputBackground:'Fundo dos campos',heroText:'Título do topo',heroOverlay:'Véu sobre imagem do topo',
++    headerText:'Texto do cabeçalho',headerMuted:'Texto secundário do cabeçalho',footerText:'Texto do rodapé',footerMuted:'Texto secundário do rodapé',
++    footerHeading:'Títulos do rodapé',footerAccent:'Destaques do rodapé',price:'Preços',badgeBackground:'Fundo das etiquetas',badgeText:'Texto das etiquetas',
++    outOfStockBackground:'Etiqueta esgotado — fundo',outOfStockText:'Etiqueta esgotado — texto',overlay:'Véu dos modais'
++  };
++  function hexish(value){const text=String(value||'').trim();return /^#[0-9a-fA-F]{6}$/.test(text)?text:null}
++  function renderThemeColors(colors) {
++    const grid=$('#themeColorsGrid'); if(!grid)return; grid.replaceChildren();
++    for (const [key,label] of Object.entries(THEME_COLOR_LABELS)) {
++      const wrapper=document.createElement('label'); wrapper.className='theme-color-item'; wrapper.textContent=label;
++      const row=document.createElement('div'); row.className='theme-color-row';
++      const picker=document.createElement('input'); picker.type='color'; picker.dataset.colorPicker=key;
++      const text=document.createElement('input'); text.dataset.colorKey=key; text.value=colors?.[key]||''; text.placeholder='#4a0a1a ou rgba(…)'; text.spellcheck=false;
++      const hx=hexish(text.value); if(hx)picker.value=hx; else picker.classList.add('theme-color-nohex');
++      picker.addEventListener('input',()=>{text.value=picker.value});
++      text.addEventListener('input',()=>{const h=hexish(text.value);if(h)picker.value=h});
++      row.append(picker,text); wrapper.append(row); grid.append(wrapper);
++    }
++  }
++  function fillThemeForm(settings) {
++    const s=settings||{}; const v=s.visual||{}; const t=v.typography||{}; const l=v.layout||{}; const a=v.assets||{}; const show=v.visibility||{};
++    $('#thBrand').value=s.brand||''; $('#thSubtitle').value=s.subtitle||'';
++    $('#thCatalogTitle').value=s.catalogTitle||''; $('#thCatalogText').value=s.catalogText||'';
++    $('#thEmail').value=s.email||''; $('#thInstagram').value=s.instagram||''; $('#thWhatsapp').value=s.whatsapp||'';
++    $('#thAddress').value=s.address||''; $('#thPickup').value=s.pickup||'';
++    renderThemeColors(v.colors||{});
++    $('#thHeadingFont').value=t.headingFont||'editorial'; $('#thBodyFont').value=t.bodyFont||'modern';
++    $('#thCustomHeading').value=t.customHeading||''; $('#thCustomBody').value=t.customBody||'';
++    $('#thBaseSize').value=t.baseSize??16; $('#thBodyWeight').value=t.bodyWeight??400; $('#thHeadingWeight').value=t.headingWeight??400;
++    $('#thLineHeight').value=t.lineHeight??1.55; $('#thHeadingScale').value=t.headingScale??1;
++    $('#thNavSize').value=t.navSize??11; $('#thNavSpacing').value=t.navSpacing??0.15; $('#thNavTransform').value=t.navTransform||'uppercase';
++    $('#thHeaderLogo').value=a.headerLogo||''; $('#thFooterLogo').value=a.footerLogo||''; $('#thFavicon').value=a.favicon||'';
++    $('#thHeroBackground').value=a.heroBackground||''; $('#thHeaderBackground').value=a.headerBackground||'';
++    $('#thFooterBackgroundImg').value=a.footerBackground||''; $('#thPageBackground').value=a.pageBackground||'';
++    $('#thHeaderLogoMode').value=l.headerLogoMode||'text'; $('#thFooterLogoMode').value=l.footerLogoMode||'text';
++    $('#thHeaderLogoWidth').value=l.headerLogoWidth??220; $('#thFooterLogoWidth').value=l.footerLogoWidth??170;
++    $('#thHeroMode').value=l.heroMode||'plain';
++    $('#thMaxWidth').value=l.maxWidth??1240; $('#thHeaderLayout').value=l.headerLayout||'centered'; $('#thHeaderSticky').checked=l.headerSticky===true;
++    $('#thBlocks').value=Array.isArray(l.blocks)&&l.blocks.length===3?l.blocks.join(','):'intro,filters,products';
++    $('#thCatalogAlign').value=l.catalogAlign||'center';
++    $('#thGridDesktop').value=l.gridColumnsDesktop??3; $('#thGridTablet').value=l.gridColumnsTablet??2; $('#thGridMobile').value=l.gridColumnsMobile??1;
++    $('#thCardStyle').value=l.cardStyle||'minimal'; $('#thCardAlign').value=l.cardAlign||'center';
++    $('#thImageRatio').value=l.imageRatio||'portrait'; $('#thImageFit').value=l.imageFit||'cover';
++    $('#thRadius').value=l.radius??0; $('#thButtonRadius').value=l.buttonRadius??0; $('#thShadow').value=l.shadow||'none';
++    $('#thFooterAlign').value=l.footerAlign||'center';
++    $('#thFooterOrder').value=Array.isArray(l.footerOrder)&&l.footerOrder.length===3?l.footerOrder.join(','):'logo,description,contact';
++    $('#thAnimations').checked=l.animations!==false;
++    $('#thShowSearch').checked=show.search!==false; $('#thShowFilters').checked=show.filters!==false; $('#thShowResultCount').checked=show.resultCount!==false;
++    $('#thShowCategory').checked=show.category!==false; $('#thShowUnit').checked=show.unit!==false; $('#thShowStock').checked=show.stock!==false;
++    $('#thShowQuickAdd').checked=show.quickAdd!==false; $('#thShowFooterDescription').checked=show.footerDescription!==false; $('#thShowFooterContact').checked=show.footerContact!==false;
++  }
++  function num(id,fallback){const raw=String($(id).value??'').trim();if(!raw)return fallback;const value=Number(raw.replace(',','.'));return Number.isFinite(value)?value:fallback}
++  function collectThemeForm() {
++    const colors={};
++    document.querySelectorAll('#themeColorsGrid [data-color-key]').forEach(input=>{const value=input.value.trim();if(value)colors[input.dataset.colorKey]=value});
++    const base=themeSettings||{};
++    return {
++      ...base,
++      brand:$('#thBrand').value.trim(),
++      subtitle:$('#thSubtitle').value.trim(),
++      catalogTitle:$('#thCatalogTitle').value.trim(),
++      catalogText:$('#thCatalogText').value.trim(),
++      email:$('#thEmail').value.trim(),
++      instagram:$('#thInstagram').value.trim(),
++      whatsapp:$('#thWhatsapp').value.trim(),
++      address:$('#thAddress').value.trim(),
++      pickup:$('#thPickup').value.trim(),
++      visual:{
++        ...(base.visual||{}),
++        colors,
++        typography:{
++          ...(base.visual?.typography||{}),
++          headingFont:$('#thHeadingFont').value,bodyFont:$('#thBodyFont').value,
++          customHeading:$('#thCustomHeading').value.trim(),customBody:$('#thCustomBody').value.trim(),
++          baseSize:num('#thBaseSize',16),bodyWeight:num('#thBodyWeight',400),headingWeight:num('#thHeadingWeight',400),
++          lineHeight:num('#thLineHeight',1.55),headingScale:num('#thHeadingScale',1),
++          navSize:num('#thNavSize',11),navSpacing:num('#thNavSpacing',.15),navTransform:$('#thNavTransform').value
++        },
++        assets:{
++          ...(base.visual?.assets||{}),
++          headerLogo:$('#thHeaderLogo').value.trim(),footerLogo:$('#thFooterLogo').value.trim(),favicon:$('#thFavicon').value.trim(),
++          heroBackground:$('#thHeroBackground').value.trim(),headerBackground:$('#thHeaderBackground').value.trim(),
++          footerBackground:$('#thFooterBackgroundImg').value.trim(),pageBackground:$('#thPageBackground').value.trim()
++        },
++        layout:{
++          ...(base.visual?.layout||{}),
++          headerLogoMode:$('#thHeaderLogoMode').value,footerLogoMode:$('#thFooterLogoMode').value,
++          headerLogoWidth:num('#thHeaderLogoWidth',220),footerLogoWidth:num('#thFooterLogoWidth',170),heroMode:$('#thHeroMode').value,
++          maxWidth:num('#thMaxWidth',1240),headerLayout:$('#thHeaderLayout').value,headerSticky:$('#thHeaderSticky').checked,
++          blocks:$('#thBlocks').value.split(','),catalogAlign:$('#thCatalogAlign').value,
++          gridColumnsDesktop:num('#thGridDesktop',3),gridColumnsTablet:num('#thGridTablet',2),gridColumnsMobile:num('#thGridMobile',1),
++          cardStyle:$('#thCardStyle').value,cardAlign:$('#thCardAlign').value,
++          imageRatio:$('#thImageRatio').value,imageFit:$('#thImageFit').value,
++          radius:num('#thRadius',0),buttonRadius:num('#thButtonRadius',0),shadow:$('#thShadow').value,
++          footerAlign:$('#thFooterAlign').value,footerOrder:$('#thFooterOrder').value.split(','),
++          animations:$('#thAnimations').checked
++        },
++        visibility:{
++          search:$('#thShowSearch').checked,filters:$('#thShowFilters').checked,resultCount:$('#thShowResultCount').checked,
++          category:$('#thShowCategory').checked,unit:$('#thShowUnit').checked,stock:$('#thShowStock').checked,
++          quickAdd:$('#thShowQuickAdd').checked,footerDescription:$('#thShowFooterDescription').checked,footerContact:$('#thShowFooterContact').checked
++        }
++      }
++    };
++  }
++  async function loadTheme() {
++    try {
++      const data=await request('/api/admin/settings');
++      themeSettings=data.settings||{};
++      fillThemeForm(themeSettings);
++      setFeedback($('#themeFeedback'),'');
++    } catch(error){setFeedback($('#themeFeedback'),error.message,'bad')}
++  }
++  async function saveTheme() {
++    // Guarda-corpo: sem os dados carregados do servidor, salvar enviaria um
++    // formulário vazio e apagaria textos da loja. Recarrega antes.
++    if(!themeSettings){
++      setFeedback($('#themeFeedback'),'Os dados ainda não foram carregados. Clique em "Atualizar dados" e tente novamente.','bad');
++      return;
++    }
++    const button=$('#themeSaveButton'); button.disabled=true;
++    setFeedback($('#themeFeedback'),'Salvando…');
++    try {
++      const settings=collectThemeForm();
++      const data=await request('/api/admin/settings',{method:'PUT',body:JSON.stringify({settings})});
++      themeSettings=data.settings||settings;
++      fillThemeForm(themeSettings);
++      setFeedback($('#themeFeedback'),'Personalização salva! Abra "Ver loja" para conferir o resultado.','ok');
++    } catch(error){setFeedback($('#themeFeedback'),error.message,'bad')} finally{button.disabled=false}
++  }
++  function bindThemeTabs() {
++    document.querySelectorAll('.theme-tab').forEach(tab=>{
++      tab.addEventListener('click',()=>{
++        document.querySelectorAll('.theme-tab').forEach(item=>item.classList.toggle('active',item===tab));
++        document.querySelectorAll('.theme-pane').forEach(pane=>{pane.hidden=pane.dataset.themePane!==tab.dataset.themeTab});
++      });
++    });
++  }
++
+   function couponTypeLabel(type){return type==='percent'?'Porcentagem':type==='fixed'?'Valor fixo':'Frete grátis'}
+   function couponValueLabel(coupon){
+     if(coupon.type==='percent')return `${coupon.value}%`;
+@@ -371,16 +656,16 @@
+ 
+   async function login(event) {
+     event.preventDefault(); const value=$('#adminToken').value.trim(); if(!value)return;
+-    sessionStorage.setItem(TOKEN_KEY,value); setFeedback($('#loginFeedback'),'Validando…');
++    storeToken(value); setFeedback($('#loginFeedback'),'Validando…');
+     try { await request('/api/admin/orders?limit=1'); showDashboard(); $('#adminToken').value=''; await loadAll(); }
+-    catch(error){sessionStorage.removeItem(TOKEN_KEY);setFeedback($('#loginFeedback'),error.message,'bad')}
++    catch(error){clearToken();setFeedback($('#loginFeedback'),error.message,'bad')}
+   }
+ 
+-  async function loadAll() { await Promise.all([loadOrders(),loadCustomers(),loadCatalog(),loadCoupons(),loadProducts(),checkHealth()]); }
++  async function loadAll() { await Promise.all([loadOrders(),loadCustomers(),loadCatalog(),loadCoupons(),loadProducts(),loadTheme(),checkHealth()]); }
+ 
+   function bind() {
+     $('#loginForm').addEventListener('submit',login);
+-    $('#logoutButton').addEventListener('click',()=>{sessionStorage.removeItem(TOKEN_KEY);orders=[];customers=[];catalog=null;showLogin('Sessão encerrada.');});
++    $('#logoutButton').addEventListener('click',()=>{clearToken();orders=[];customers=[];catalog=null;showLogin('Sessão encerrada.');});
+     $('#refreshButton').addEventListener('click',loadAll);
+     let searchTimer; $('#orderSearch').addEventListener('input',()=>{clearTimeout(searchTimer);searchTimer=setTimeout(loadOrders,300)}); $('#orderStatus').addEventListener('change',loadOrders);
+     let customerTimer; $('#customerSearch')?.addEventListener('input',()=>{clearTimeout(customerTimer);customerTimer=setTimeout(loadCustomers,300)});
+@@ -389,6 +674,12 @@
+     $('#productsBody')?.addEventListener('click',event=>{const button=event.target.closest('[data-product-id]');if(!button)return;const product=products.find(p=>p.id===button.dataset.productId);if(product)openProductDialog(product)});
+     $('#productForm')?.addEventListener('submit',saveProduct);
+     $('#closeProductDialog')?.addEventListener('click',()=>$('#productDialog').close());
++    $('#newProductButton')?.addEventListener('click',()=>openProductDialog(null));
++    $('#addVariantButton')?.addEventListener('click',()=>appendVariantBox($('#pfVariants'),null));
++    $('#deleteProductButton')?.addEventListener('click',deleteProduct);
++    $('#themeSaveButton')?.addEventListener('click',saveTheme);
++    $('#themeReloadButton')?.addEventListener('click',()=>{if(themeSettings)fillThemeForm(themeSettings);setFeedback($('#themeFeedback'),'Mudanças não salvas foram descartadas.','ok')});
++    bindThemeTabs();
+     $('#couponForm')?.addEventListener('submit',addCoupon);
+     $('#couponType')?.addEventListener('change',()=>{const type=$('#couponType').value;const label=$('#couponValueLabel');const input=$('#couponValue');if(type==='free_shipping'){label.style.opacity='.45';input.disabled=true;input.value=''}else{label.style.opacity='';input.disabled=false;input.placeholder=type==='percent'?'10':'10,00'}});
+     $('#couponsBody')?.addEventListener('click',event=>{
+diff --git a/public/js/store/catalog.js b/public/js/store/catalog.js
+index 02ac2a8..6e1dfac 100644
+--- a/public/js/store/catalog.js
++++ b/public/js/store/catalog.js
+@@ -636,9 +636,21 @@ ${publicMode ? scopeVisualCss(v.customCss) : ''}`;
+   }
+ 
+   function findZone(cep) {
+-    const number = Number(digits(cep));
++    const clean = digits(cep);
++    const number = Number(clean);
+     if (!Number.isFinite(number)) return null;
+-    return (state.settings.zones || []).find(zone => zone.active !== false && number >= Number(digits(zone.cepStart)) && number <= Number(digits(zone.cepEnd))) || null;
++    // Aceita AMBOS os formatos de zona: o legado do editor (cepStart/cepEnd)
++    // e o sanitizado pelo servidor (startCep/endCep/prefix) — o catálogo
++    // vindo de /api/catalog usa o segundo; sem isso a loja diria "CEP fora
++    // das zonas" enquanto o servidor cobraria o valor da zona.
++    return (state.settings.zones || []).find(zone => {
++      if (zone.active === false) return false;
++      const prefix = digits(zone.prefix ?? zone.cepPrefix ?? '');
++      if (prefix && clean.startsWith(prefix)) return true;
++      const start = digits(zone.startCep ?? zone.cepStart ?? '');
++      const end = digits(zone.endCep ?? zone.cepEnd ?? '');
++      return start.length === 8 && end.length === 8 && number >= Number(start) && number <= Number(end);
++    }) || null;
+   }
+ 
+   function calculateShipping(subtotal, choice = state.checkout.choice, cep = state.checkout.cep) {
+@@ -649,7 +661,7 @@ ${publicMode ? scopeVisualCss(v.customCss) : ''}`;
+     if (state.settings.shipMode === 'fixed') { price = Number(state.settings.fixed) || 0; label = 'Frete fixo configurado'; }
+     else if (state.settings.shipMode === 'zones') {
+       const zone = findZone(cep);
+-      if (zone) { price = Number(zone.price) || 0; days = zone.days || ''; minimum = Number(zone.minOrder) || 0; label = zone.name || 'Zona de entrega'; }
++      if (zone) { price = Number(zone.price) || 0; days = zone.days || zone.deadline || ''; minimum = Number(zone.minOrder) || 0; label = zone.label || zone.name || 'Zona de entrega'; }
+       else if (state.settings.zoneFallback === 'unavailable') return {status: 'unavailable', choice, price: null, label: 'Entrega indisponível para este CEP.'};
+       else return {status: 'quote', choice, price: null, label: 'CEP fora das zonas. Valor e prazo serão confirmados no atendimento.'};
+     } else return {status: 'quote', choice, price: null, label: 'Valor e prazo serão confirmados no atendimento.'};
+diff --git a/public/js/store/checkout.js b/public/js/store/checkout.js
+index 364739f..98dfac7 100644
+--- a/public/js/store/checkout.js
++++ b/public/js/store/checkout.js
+@@ -284,9 +284,14 @@
+ 
+   function couponDiscountCents(subtotalCents) {
+     if (!appliedCoupon) return 0;
+-    if (appliedCoupon.type === 'percent') return Math.floor(subtotalCents * appliedCoupon.value / 100);
+-    if (appliedCoupon.type === 'fixed') return Math.min(appliedCoupon.value, Math.max(0, subtotalCents - 100));
+-    return 0;
++    // MESMA regra do servidor (couponDiscount): o desconto nunca deixa o
++    // subtotal abaixo de R$ 1,00 — sem isso um cupom de 100% mostraria total
++    // R$ 0,00 aqui e o servidor cobraria R$ 1,00 (divergência no fechamento).
++    let discount = 0;
++    if (appliedCoupon.type === 'percent') discount = Math.floor(subtotalCents * appliedCoupon.value / 100);
++    else if (appliedCoupon.type === 'fixed') discount = appliedCoupon.value;
++    else return 0;
++    return Math.max(0, Math.min(discount, Math.max(0, subtotalCents - 100)));
+   }
+ 
+   /** Frete atualmente selecionado nas opções de transportadora (centavos) ou null. */
+diff --git a/server.js b/server.js
+index e53eb91..ba0c389 100644
+--- a/server.js
++++ b/server.js
+@@ -168,7 +168,7 @@ app.get('/api/health', readLimiter, asyncRoute(async (_req, res) => {
+   res.json({
+     ok: true,
+     name: 'INTEGRALL API',
+-    version: '9.5.0',
++    version: '9.6.1',
+     database: databaseHealth.mode,
+     mercadoPago: mercadoPago.configured,
+     adminConfigured: Boolean(config.adminToken),
+@@ -370,7 +370,9 @@ app.post('/api/orders', orderLimiter, publicJson, asyncRoute(async (req, res) =>
+       totalCents: result.order.totalCents,
+       requiresShippingQuote: result.order.requiresShippingQuote,
+       checkoutToken: result.order.checkoutToken,
+-      onlinePaymentAvailable: mercadoPago.configured && !result.order.requiresShippingQuote
++      // paymentCanStart cobre o replay idempotente: se o clientOrderId repetido
++      // devolve um pedido já pago/cancelado, não podemos anunciar pagamento.
++      onlinePaymentAvailable: mercadoPago.configured && paymentCanStart(result.order) && !result.order.requiresShippingQuote
+     },
+     idempotent: !result.created
+   });
+@@ -654,6 +656,109 @@ class HttpError extends Error {
+   constructor(status, message) { super(message); this.status = status; }
+ }
+ 
++function newId(prefix) {
++  return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
++}
++
++// Cria um produto novo. O corpo aceita os mesmos campos editáveis do PATCH
++// e opcionalmente `variants` (subprodutos) sem id — os ids são gerados aqui.
++app.post('/api/admin/products', adminLimiter, admin, publicJson, asyncRoute(async (req, res) => {
++  const body = req.body && typeof req.body === 'object' && !Array.isArray(req.body) ? req.body : {};
++  const name = cleanText(body.name, 160);
++  if (!name) return res.status(400).json({error: 'Informe o nome do produto.'});
++  const productId = newId('product');
++  const now = Date.now();
++  if (Array.isArray(body.variants) && body.variants.some(variant => !cleanText(variant?.name, 120))) {
++    return res.status(400).json({error: 'Toda variação precisa de um nome (ex.: 750ml).'});
++  }
++  const variants = (Array.isArray(body.variants) ? body.variants : []).slice(0, 100).map((variant, index) => ({
++    id: cleanText(variant?.id, 120) || newId('variant'),
++    name: cleanText(variant?.name, 120),
++    price: variant?.price,
++    stock: variant?.stock ?? null,
++    unit: cleanText(variant?.unit, 120),
++    weightGrams: variant?.weightGrams ?? null,
++    position: index + 1
++  }));
++  const product = {
++    id: productId,
++    name,
++    department: cleanText(body.department, 80),
++    subcategory: cleanText(body.subcategory, 100),
++    brand: cleanText(body.brand, 120),
++    price: body.price ?? 0,
++    unit: cleanText(body.unit, 120),
++    description: cleanText(body.description, 3000),
++    images: Array.isArray(body.images) ? body.images : [],
++    variants,
++    attributes: body.attributes,
++    stock: body.stock ?? null,
++    minPerOrder: body.minPerOrder ?? null,
++    maxPerOrder: body.maxPerOrder ?? null,
++    weightGrams: body.weightGrams ?? null,
++    lengthCm: body.lengthCm ?? null,
++    widthCm: body.widthCm ?? null,
++    heightCm: body.heightCm ?? null,
++    available: body.available !== false,
++    featured: body.featured === true,
++    giftEnabled: body.giftEnabled !== false,
++    created: now,
++    updated: now
++  };
++  let next;
++  try {
++    next = await repo.mutateCatalog(current => {
++      const products = [...(current.products || []), {...product, position: (current.products || []).length + 1}];
++      return normalizeCatalog({...current, products});
++    });
++  } catch (error) {
++    return res.status(400).json({error: error?.message || 'Produto inválido.'});
++  }
++  res.status(201).json({ok: true, product: next.products.find(item => item.id === productId)});
++}));
++
++// Exclui um produto do catálogo (remoção real; pedidos já registrados
++// guardam os próprios dados e não são afetados).
++app.delete('/api/admin/products/:id', adminLimiter, admin, asyncRoute(async (req, res) => {
++  const productId = cleanText(req.params.id, 120);
++  try {
++    await repo.mutateCatalog(current => {
++      const products = (current.products || []).filter(product => product.id !== productId);
++      if (products.length === (current.products || []).length) throw new HttpError(404, 'Produto não encontrado.');
++      return normalizeCatalog({...current, products});
++    });
++  } catch (error) {
++    if (error instanceof HttpError) return res.status(error.status).json({error: error.message});
++    return res.status(400).json({error: error?.message || 'Não foi possível excluir.'});
++  }
++  res.json({ok: true});
++}));
++
++// Personalização da loja: lê e grava apenas o bloco `settings` do catálogo
++// (marca, textos, contatos, visual completo). A sanitização acontece no
++// normalizeCatalog — nada além do permitido entra.
++app.get('/api/admin/settings', adminLimiter, admin, asyncRoute(async (_req, res) => {
++  const catalog = await repo.getCatalog();
++  res.json({settings: catalog.settings || {}});
++}));
++
++app.put('/api/admin/settings', adminLimiter, admin, adminCatalogJson, asyncRoute(async (req, res) => {
++  const body = req.body && typeof req.body === 'object' && !Array.isArray(req.body) ? req.body : {};
++  if (!body.settings || typeof body.settings !== 'object' || Array.isArray(body.settings)) {
++    return res.status(400).json({error: 'Envie um objeto settings.'});
++  }
++  let next;
++  try {
++    next = await repo.mutateCatalog(current => normalizeCatalog({
++      ...current,
++      settings: {...current.settings, ...body.settings, visual: body.settings.visual ?? current.settings?.visual}
++    }));
++  } catch (error) {
++    return res.status(400).json({error: error?.message || 'Personalização inválida.'});
++  }
++  res.json({ok: true, settings: next.settings});
++}));
++
+ app.patch('/api/admin/products/:id', adminLimiter, admin, publicJson, asyncRoute(async (req, res) => {
+   const productId = cleanText(req.params.id, 120);
+   const patch = req.body && typeof req.body === 'object' && !Array.isArray(req.body) ? req.body : {};
+@@ -802,7 +907,7 @@ if (config.orderExpireDays > 0) {
+ }
+ 
+ const server = app.listen(config.port, () => {
+-  console.log(`INTEGRALL v9.5 em http://localhost:${config.port} (${repo.persistent ? 'PostgreSQL' : 'memória de desenvolvimento'})`);
++  console.log(`INTEGRALL v9.6 em http://localhost:${config.port} (${repo.persistent ? 'PostgreSQL' : 'memória de desenvolvimento'})`);
+   for (const warning of configWarnings()) console.warn(`[config] AVISO: ${warning}`);
+ });
+ 
+diff --git a/src/correios.js b/src/correios.js
+index d0547aa..62b23ec 100644
+--- a/src/correios.js
++++ b/src/correios.js
+@@ -187,7 +187,11 @@ export class CorreiosService {
+             weightGrams: Math.min(box.weightGrams, 30_000),
+             lengthCm: Math.min(100, box.lengthCm),
+             widthCm: Math.min(100, box.widthCm),
+-            heightCm: Math.min(100, box.heightCm)
++            heightCm: Math.min(100, box.heightCm),
++            // Peso REAL da caixa (sem teto): uma caixa cadastrada acima de
++            // 30kg precisa disparar a trava de overweight, não ser cotada
++            // silenciosamente como 30kg (preço errado e recusa no balcão).
++            boxWeightRaw: box.weightGrams
+           });
+           qty -= box.units;
+         }
+@@ -244,7 +248,7 @@ export class CorreiosService {
+       packages.push({weightGrams: 300, lengthCm: 16, widthCm: 11, heightCm: 10});
+     }
+ 
+-    const overweight = packages.some(pkg => (pkg.looseWeightRaw || pkg.weightGrams) > 30_000);
++    const overweight = packages.some(pkg => (pkg.looseWeightRaw || pkg.boxWeightRaw || pkg.weightGrams) > 30_000);
+     return {packages, missingData, overweight};
+   }
+ 
+diff --git a/src/repository.js b/src/repository.js
+index 7642a02..f896439 100644
+--- a/src/repository.js
++++ b/src/repository.js
+@@ -409,12 +409,27 @@ export class Repository {
+     const staleStatuses = ['received', 'awaiting_payment', 'payment_failed', 'payment_expired'];
+     const expired = [];
+ 
++    // Patch FUNCIONAL: reconfirma o status DENTRO do lock. Sem isso, um
++    // webhook poderia marcar o pedido como pago entre o SELECT e o UPDATE,
++    // e o cancelamento automático sobrescreveria um pedido pago (TOCTOU).
++    // O flag `applied` (por pedido) distingue "cancelei agora" de "já estava
++    // em outro estado" — evita e-mail de expiração duplicado/indevido.
++    const auditNote = {source: 'system', note: `Pedido cancelado automaticamente após ${days} dia(s) sem pagamento.`};
++    const expireOne = async id => {
++      let applied = false;
++      const next = await this.updateOrder(id, current => {
++        if (staleStatuses.includes(current.status) && String(current.createdAt) < cutoff) {
++          applied = true;
++          return {status: 'cancelled'};
++        }
++        return null;
++      }, auditNote);
++      if (next && applied) expired.push(next);
++    };
++
+     if (!this.pool) {
+       for (const [id, order] of this.memoryOrders) {
+-        if (staleStatuses.includes(order.status) && String(order.createdAt) < cutoff) {
+-          const next = await this.updateOrder(id, {status: 'cancelled'}, {source: 'system', note: `Pedido cancelado automaticamente após ${days} dia(s) sem pagamento.`});
+-          if (next) expired.push(next);
+-        }
++        if (staleStatuses.includes(order.status) && String(order.createdAt) < cutoff) await expireOne(id);
+       }
+       return expired;
+     }
+@@ -426,10 +441,7 @@ export class Repository {
+         LIMIT 200`,
+       [staleStatuses, cutoff]
+     );
+-    for (const row of rows) {
+-      const next = await this.updateOrder(row.id, {status: 'cancelled'}, {source: 'system', note: `Pedido cancelado automaticamente após ${days} dia(s) sem pagamento.`});
+-      if (next) expired.push(next);
+-    }
++    for (const row of rows) await expireOne(row.id);
+     return expired;
+   }
+ 
+diff --git a/src/security.js b/src/security.js
+index 176b2c2..de3f23d 100644
+--- a/src/security.js
++++ b/src/security.js
+@@ -22,8 +22,22 @@ export function adminAuth(expectedToken) {
+   return (req, res, next) => {
+     if (!expectedToken) return res.status(503).json({error: 'Área administrativa não configurada.'});
+     const auth = String(req.headers.authorization || '');
+-    const token = auth.startsWith('Bearer ') ? auth.slice(7) : '';
+-    if (!safeEqual(token, expectedToken)) return res.status(401).json({error: 'Não autorizado.'});
++    const bearer = auth.startsWith('Bearer ') ? auth.slice(7) : '';
++    // Aceita também o cabeçalho X-Admin-Token: alguns proxies/túneis de preview
++    // consomem ou removem o cabeçalho Authorization padrão no caminho.
++    const custom = String(req.headers['x-admin-token'] || '');
++    const token = bearer || custom;
++    if (!safeEqual(token, expectedToken)) {
++      if (process.env.ADMIN_AUTH_DEBUG === 'true') {
++        // Diagnóstico SEM vazar o conteúdo: um token quase-correto nos logs
++        // seria praticamente a senha. Registra apenas tamanho e categorias.
++        const text = String(token);
++        const nonAscii = [...text].filter((ch) => ch.codePointAt(0) > 126 || ch.codePointAt(0) < 32).length;
++        const spaces = (text.match(/\s/g) || []).length;
++        console.warn(`[admin-auth] token recusado: ${text.length} caracteres (esperado ${expectedToken.length}); nãoASCII=${nonAscii}; espaços=${spaces}; viaBearer=${Boolean(bearer)}; viaXAdminToken=${Boolean(custom)}`);
++      }
++      return res.status(401).json({error: 'Não autorizado.'});
++    }
+     res.setHeader('Cache-Control', 'no-store');
+     next();
+   };
+diff --git a/tests/catalog.test.js b/tests/catalog.test.js
+index 88463ff..79e72ad 100644
+--- a/tests/catalog.test.js
++++ b/tests/catalog.test.js
+@@ -1,7 +1,7 @@
+ import test from 'node:test';
+ import assert from 'node:assert/strict';
+ import {readFile} from 'node:fs/promises';
+-import {normalizeCatalog, publicCatalog, buildOrder, calculateShipping, cleanText} from '../src/catalog.js';
++import {normalizeCatalog, publicCatalog, buildOrder, calculateShipping, cleanText, couponDiscount} from '../src/catalog.js';
+ 
+ const raw = JSON.parse(await readFile(new URL('../data/catalog.json', import.meta.url), 'utf8'));
+ const catalog = normalizeCatalog(raw);
+@@ -360,3 +360,16 @@ test('cleanText remove caracteres invisíveis e overrides bidirecionais (anti-sp
+   assert.equal(cleanText('x\u2066y\u2069z'), 'xyz');       // isolates bidi
+   assert.equal(cleanText('José & Maria — ok'), 'José & Maria — ok'); // texto legítimo intacto
+ });
++
++test('couponDiscount nunca deixa o subtotal abaixo de R$ 1,00 (paridade com o front)', () => {
++  // Cupom de 100%: desconto capado em subtotal-100 (servidor cobra no mínimo R$ 1,00)
++  assert.equal(couponDiscount({type: 'percent', value: 100}, 1000, 0), 900);
++  // Cupom fixo maior que o subtotal: mesmo cap
++  assert.equal(couponDiscount({type: 'fixed', value: 5000}, 1000, 0), 900);
++  // Cupom normal não é afetado pelo cap
++  assert.equal(couponDiscount({type: 'percent', value: 10}, 10000, 0), 1000);
++  // free_shipping desconta exatamente o frete
++  assert.equal(couponDiscount({type: 'free_shipping'}, 10000, 2350), 2350);
++  // Subtotal minúsculo: desconto nunca fica negativo
++  assert.equal(couponDiscount({type: 'percent', value: 50}, 80, 0), 0);
++});
+diff --git a/tests/correios.test.js b/tests/correios.test.js
+index 066ff01..112d1c6 100644
+--- a/tests/correios.test.js
++++ b/tests/correios.test.js
+@@ -64,7 +64,7 @@ test('caixas reais são usadas para quantidades fechadas e o restante vai avulso
+   // 12 vinhos = exatamente a caixa master real
+   const twelve = service.packOrder([{productId: 'vinho', variantId: 'v750', qty: 12}], products);
+   assert.equal(twelve.packages.length, 1);
+-  assert.deepEqual(twelve.packages[0], {weightGrams: 14000, lengthCm: 30, widthCm: 30, heightCm: 24});
++  assert.deepEqual(twelve.packages[0], {weightGrams: 14000, lengthCm: 30, widthCm: 30, heightCm: 24, boxWeightRaw: 14000});
+ 
+   // 6 vinhos = caixa de 6 real (7,25kg, não estimativa)
+   const six = service.packOrder([{productId: 'vinho', variantId: 'v750', qty: 6}], products);
+diff --git a/tests/http.test.js b/tests/http.test.js
+index 4289bbe..8e451ff 100644
+--- a/tests/http.test.js
++++ b/tests/http.test.js
+@@ -267,3 +267,66 @@ test('frete não pode mudar com pagamento em andamento (preferência MP ativa)',
+   assert.equal(blocked.status, 409);
+   assert.match(blocked.data.error, /pagamento em andamento/i);
+ });
++
++test('admin cria produto com variações, aparece na loja e pode ser excluído', async () => {
++  // sem token → recusado
++  const denied = await api('/api/admin/products', {method: 'POST', body: {name: 'X'}});
++  assert.equal(denied.status, 401);
++  // cria com variações (subprodutos)
++  const created = await api('/api/admin/products', {method: 'POST', headers: ADMIN, body: {
++    name: 'Vinho Teste HTTP', department: 'vinhos', subcategory: 'Teste', brand: 'Casa Teste',
++    price: 4990, unit: '750ml', description: 'Produto de teste automatizado.',
++    stock: 10, weightGrams: 1300, lengthCm: 9, widthCm: 9, heightCm: 31,
++    variants: [{name: '750ml', price: 4990, stock: 10, weightGrams: 1300}, {name: '375ml', price: 2990, stock: 5, weightGrams: 750}]
++  }});
++  assert.equal(created.status, 201);
++  const product = created.data.product;
++  assert.ok(product.id.startsWith('product-'));
++  assert.equal(product.variants.length, 2);
++  assert.ok(product.variants.every(v => v.id.startsWith('variant-')));
++  // aparece no catálogo público
++  const publicCatalog = (await api('/api/catalog')).data;
++  const found = publicCatalog.products.find(p => p.id === product.id);
++  assert.ok(found, 'produto criado deve aparecer na loja');
++  assert.equal(found.isAlcoholic, true);
++  // nome vazio → 400
++  const invalid = await api('/api/admin/products', {method: 'POST', headers: ADMIN, body: {price: 100}});
++  assert.equal(invalid.status, 400);
++  // exclui
++  const removed = await api(`/api/admin/products/${product.id}`, {method: 'DELETE', headers: ADMIN});
++  assert.equal(removed.status, 200);
++  const after = (await api('/api/catalog')).data;
++  assert.ok(!after.products.some(p => p.id === product.id), 'produto excluído sai da loja');
++  // excluir de novo → 404
++  const again = await api(`/api/admin/products/${product.id}`, {method: 'DELETE', headers: ADMIN});
++  assert.equal(again.status, 404);
++});
++
++test('admin salva personalização (settings + visual) e a loja pública reflete', async () => {
++  const before = (await api('/api/admin/settings', {headers: ADMIN})).data.settings;
++  assert.ok(before && typeof before === 'object');
++  const saved = await api('/api/admin/settings', {method: 'PUT', headers: ADMIN, body: {settings: {
++    ...before,
++    brand: 'INTEGRALL TESTE',
++    catalogTitle: 'Título Personalizado',
++    visual: {...before.visual, colors: {...before.visual?.colors, primary: '#123456'},
++      typography: {...before.visual?.typography, headingFont: 'classic', baseSize: 18},
++      layout: {...before.visual?.layout, gridColumnsDesktop: 4, cardStyle: 'boxed'}}
++  }}});
++  assert.equal(saved.status, 200);
++  assert.equal(saved.data.settings.brand, 'INTEGRALL TESTE');
++  assert.equal(saved.data.settings.visual.colors.primary, '#123456');
++  assert.equal(saved.data.settings.visual.typography.headingFont, 'classic');
++  assert.equal(saved.data.settings.visual.layout.gridColumnsDesktop, 4);
++  // catálogo público reflete
++  const pub = (await api('/api/catalog')).data;
++  assert.equal(pub.settings.brand, 'INTEGRALL TESTE');
++  assert.equal(pub.settings.visual.colors.primary, '#123456');
++  // valores fora do limite são normalizados, não rejeitados
++  const clamped = await api('/api/admin/settings', {method: 'PUT', headers: ADMIN, body: {settings: {
++    ...saved.data.settings, visual: {...saved.data.settings.visual, layout: {...saved.data.settings.visual.layout, gridColumnsDesktop: 99}}
++  }}});
++  assert.equal(clamped.status, 200);
++  // restaura marca original para não interferir em outros testes
++  await api('/api/admin/settings', {method: 'PUT', headers: ADMIN, body: {settings: before}});
++});

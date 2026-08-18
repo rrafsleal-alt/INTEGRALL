@@ -22,8 +22,22 @@ export function adminAuth(expectedToken) {
   return (req, res, next) => {
     if (!expectedToken) return res.status(503).json({error: 'Área administrativa não configurada.'});
     const auth = String(req.headers.authorization || '');
-    const token = auth.startsWith('Bearer ') ? auth.slice(7) : '';
-    if (!safeEqual(token, expectedToken)) return res.status(401).json({error: 'Não autorizado.'});
+    const bearer = auth.startsWith('Bearer ') ? auth.slice(7) : '';
+    // Aceita também o cabeçalho X-Admin-Token: alguns proxies/túneis de preview
+    // consomem ou removem o cabeçalho Authorization padrão no caminho.
+    const custom = String(req.headers['x-admin-token'] || '');
+    const token = bearer || custom;
+    if (!safeEqual(token, expectedToken)) {
+      if (process.env.ADMIN_AUTH_DEBUG === 'true') {
+        // Diagnóstico SEM vazar o conteúdo: um token quase-correto nos logs
+        // seria praticamente a senha. Registra apenas tamanho e categorias.
+        const text = String(token);
+        const nonAscii = [...text].filter((ch) => ch.codePointAt(0) > 126 || ch.codePointAt(0) < 32).length;
+        const spaces = (text.match(/\s/g) || []).length;
+        console.warn(`[admin-auth] token recusado: ${text.length} caracteres (esperado ${expectedToken.length}); nãoASCII=${nonAscii}; espaços=${spaces}; viaBearer=${Boolean(bearer)}; viaXAdminToken=${Boolean(custom)}`);
+      }
+      return res.status(401).json({error: 'Não autorizado.'});
+    }
     res.setHeader('Cache-Control', 'no-store');
     next();
   };
