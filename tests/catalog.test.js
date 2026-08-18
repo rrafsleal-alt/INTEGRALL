@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
-import {normalizeCatalog, publicCatalog, buildOrder, calculateShipping} from '../src/catalog.js';
+import {normalizeCatalog, publicCatalog, buildOrder, calculateShipping, cleanText} from '../src/catalog.js';
 
 const raw = JSON.parse(await readFile(new URL('../data/catalog.json', import.meta.url), 'utf8'));
 const catalog = normalizeCatalog(raw);
@@ -352,4 +352,11 @@ test('catálogo público sincroniza modo/valores de frete do servidor', () => {
   // sem config de servidor, mantém o que está no catálogo
   const untouched = publicCatalog(catalog, {...baseConfig, shippingMode: '', shippingFixedCents: null, freeShippingCents: null});
   assert.equal(untouched.settings.shipMode, catalog.settings.shipMode);
+});
+
+test('cleanText remove caracteres invisíveis e overrides bidirecionais (anti-spoofing)', () => {
+  assert.equal(cleanText('abc\u202Edef'), 'abcdef');       // RLO
+  assert.equal(cleanText('a\u200Bb\uFEFFc'), 'abc');       // zero-width + BOM
+  assert.equal(cleanText('x\u2066y\u2069z'), 'xyz');       // isolates bidi
+  assert.equal(cleanText('José & Maria — ok'), 'José & Maria — ok'); // texto legítimo intacto
 });

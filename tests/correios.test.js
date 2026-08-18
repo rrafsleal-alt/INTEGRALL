@@ -250,3 +250,28 @@ test('parse de preço tolera formato brasileiro e internacional (proteção cont
   assert.equal(result.options.find(o => o.code === '03298').priceCents, 2850);
   assert.equal(result.options.find(o => o.code === '03220').priceCents, 123456);
 });
+
+test('lote de preço é fatiado em blocos de 5 (limite do manual V2.4)', async () => {
+  const batchSizes = [];
+  const fetchImpl = async (url, options) => {
+    if (url.includes('/token/')) return {ok: true, status: 200, json: async () => ({token: 't', expiraEm: new Date(Date.now() + 3600_000).toISOString()})};
+    if (url.includes('/preco/')) {
+      const body = JSON.parse(options.body);
+      batchSizes.push(body.parametrosProduto.length);
+      if (body.parametrosProduto.length > 5) return {ok: false, status: 400, text: async () => 'Limite excedido', json: async () => ({})};
+      return {ok: true, status: 200, json: async () => body.parametrosProduto.map(p => ({coProduto: p.coProduto, pcFinal: '10,00'}))};
+    }
+    if (url.includes('/prazo/')) return {ok: true, status: 200, json: async () => ([])};
+    throw new Error('URL inesperada');
+  };
+  const service = new CorreiosService({...CONFIG, fetchImpl});
+  // 3 volumes × 2 serviços = 6 parâmetros → lotes [5, 1]
+  const pack = {packages: [
+    {weightGrams: 14000, lengthCm: 30, widthCm: 30, heightCm: 24},
+    {weightGrams: 14000, lengthCm: 30, widthCm: 30, heightCm: 24},
+    {weightGrams: 7250, lengthCm: 30, widthCm: 25, heightCm: 17}
+  ], missingData: false, overweight: false};
+  const result = await service.quote('01001000', pack);
+  assert.ok(batchSizes.every(size => size <= 5), `lotes: ${batchSizes}`);
+  assert.equal(result.options.find(o => o.code === '03298').priceCents, 3000); // 3 volumes × R$10
+});

@@ -252,3 +252,18 @@ test('robots.txt é servido e bloqueia /admin e /api', async () => {
   assert.match(text, /Disallow: \/admin/);
   assert.match(text, /Disallow: \/api\//);
 });
+
+test('frete não pode mudar com pagamento em andamento (preferência MP ativa)', async () => {
+  const catalog = (await api('/api/catalog')).data;
+  const juice = catalog.products.find(p => p.department === 'sucos');
+  const order = (await api('/api/orders', {method: 'POST', body: {
+    clientOrderId: 'HTTP-AWAITING-SHIP',
+    items: [{productId: juice.id, variantId: juice.variants[0].id, qty: 1}],
+    shipping: {choice: 'delivery', cep: '01310930', street: 'R', number: '1', neighborhood: 'B', city: 'SP', state: 'SP'},
+    customer: {name: 'A', email: 'a@example.com'}
+  }})).data.order;
+  await api(`/api/admin/orders/${order.id}`, {method: 'PATCH', headers: ADMIN, body: {status: 'awaiting_payment'}});
+  const blocked = await api(`/api/admin/orders/${order.id}/shipping`, {method: 'PATCH', headers: ADMIN, body: {shippingCents: 9999}});
+  assert.equal(blocked.status, 409);
+  assert.match(blocked.data.error, /pagamento em andamento/i);
+});

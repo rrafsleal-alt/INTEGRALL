@@ -46,3 +46,11 @@ test('pagamento expirado fica explícito e pode ser tentado novamente', () => {
   assert.equal(result.nextStatus, 'payment_expired');
   assert.equal(result.paymentStatus, 'expired');
 });
+
+test('pagamento aprovado de pedido cancelado vai para revisão, nunca ressuscita como pago', () => {
+  const order = {status: 'cancelled', totalCents: 5000, payment: {preferenceId: 'pref-1'}};
+  const payment = {status: 'approved', transaction_amount: 50, currency_id: 'BRL', preference_id: 'pref-1', transaction_amount_refunded: 0};
+  const result = evaluatePayment(order, payment);
+  assert.equal(result.nextStatus, 'payment_review');
+  assert.equal(result.warning, 'approved_after_cancel');
+});

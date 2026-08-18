@@ -24,6 +24,8 @@ const DEFAULT_SERVICES = [
 const TOKEN_SAFETY_WINDOW_MS = 5 * 60 * 1000;
 const QUOTE_CACHE_TTL_MS = 10 * 60 * 1000;
 const QUOTE_CACHE_MAX = 500;
+// Manual V2.4 (seção API Preço): "precificação de até 5 simulações" por lote.
+const MAX_PARAMS_PER_BATCH = 5;
 
 // Converte preço da API em centavos, tolerando ambos os formatos:
 // brasileiro "1.234,56" (ponto = milhar) e internacional "1234.56" (ponto = decimal).
@@ -327,10 +329,18 @@ export class CorreiosService {
       cepDestino: destination
     }));
 
-    const [priceData, prazoData] = await Promise.all([
-      this.authorizedPost('/preco/v1/nacional', {idLote: '1', parametrosProduto: priceParams}),
+    // Fatia em lotes de até 5 parâmetros (limite do manual): com 2 serviços e
+    // 3+ volumes o total passa de 5 e a API recusaria o lote inteiro.
+    const priceBatches = [];
+    for (let start = 0; start < priceParams.length; start += MAX_PARAMS_PER_BATCH) {
+      priceBatches.push(priceParams.slice(start, start + MAX_PARAMS_PER_BATCH));
+    }
+    const [priceChunks, prazoData] = await Promise.all([
+      Promise.all(priceBatches.map((batch, index) =>
+        this.authorizedPost('/preco/v1/nacional', {idLote: String(index + 1), parametrosProduto: batch}))),
       this.authorizedPost('/prazo/v1/nacional', {idLote: '1', parametrosPrazo: prazoParams}).catch(() => null)
     ]);
+    const priceData = priceChunks.flatMap(chunk => Array.isArray(chunk) ? chunk : []);
 
     const prazoByService = new Map();
     for (const item of Array.isArray(prazoData) ? prazoData : []) {

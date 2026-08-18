@@ -282,9 +282,13 @@ async function resolveCorreiosShipping(body, catalog) {
   if (body?.shipping?.choice !== 'delivery') return null;
   try {
     const productsById = new Map(catalog.products.map(product => [product.id, product]));
+    const declaredCents = estimateSubtotalCents(body.items, productsById);
+    // Acima do limiar de frete grátis, buildOrder zera o frete de qualquer
+    // forma — não gasta chamadas de API das transportadoras à toa.
+    const freeThreshold = Number(config.freeShippingCents ?? catalog.settings?.free) || 0;
+    if (freeThreshold > 0 && declaredCents >= freeThreshold) return null;
     const pack = correios.packOrder(Array.isArray(body.items) ? body.items : [], productsById);
     const requestedService = cleanText(body?.shipping?.service, 20);
-    const declaredCents = estimateSubtotalCents(body.items, productsById);
     const result = await quoteAllCarriers(body.shipping.cep, pack, declaredCents, countOrderUnits(body.items));
     const chosen = (requestedService && result.options.find(option => option.code === requestedService)) || result.cheapest;
     return {
@@ -311,8 +315,18 @@ app.post('/api/shipping/quote', statusLimiter, publicJson, asyncRoute(async (req
   const catalog = await repo.getCatalog();
   const productsById = new Map(catalog.products.map(product => [product.id, product]));
   const pack = correios.packOrder(items, productsById);
+  const subtotalCents = estimateSubtotalCents(items, productsById);
+
+  // Frete grátis por limiar: buildOrder zera o frete acima de FREE_SHIPPING_CENTS.
+  // A cotação precisa refletir a MESMA regra — sem isso o cliente veria um
+  // preço aqui e outro (grátis) no fechamento.
+  const freeThreshold = Number(config.freeShippingCents ?? catalog.settings?.free) || 0;
+  if (freeThreshold > 0 && subtotalCents >= freeThreshold) {
+    return res.json({options: [{service: 'FREE', label: 'Frete grátis', priceCents: 0, days: null, volumes: 1}]});
+  }
+
   try {
-    const result = await quoteAllCarriers(cep, pack, estimateSubtotalCents(items, productsById), countOrderUnits(items));
+    const result = await quoteAllCarriers(cep, pack, subtotalCents, countOrderUnits(items));
     res.json({
       options: result.options.map(option => ({
         service: option.code,
@@ -487,6 +501,15 @@ app.post('/api/webhooks/mercadopago', webhookLimiter, publicJson, asyncRoute(asy
 
   const evaluation = evaluatePayment(order, payment);
   if (!evaluation.shouldUpdate) {
+    // Divergência ignorada (ex.: 2º pagamento com outra preferência num pedido
+    // já pago) precisa ficar VISÍVEL no pedido: pode haver dinheiro do cliente
+    // retido sem registro. Grava no histórico para o admin tratar/reembolsar.
+    if (evaluation.warning) {
+      await repo.updateOrder(order.id, {}, {
+        source: 'mercadopago-webhook',
+        note: `ATENÇÃO: webhook ignorado (${evaluation.warning}) — pagamento ${payment.id} status ${payment.status || '?'} valor ${payment.transaction_amount ?? '?'}. Verifique se há cobrança duplicada para reembolsar.`
+      }).catch(error => console.error('Falha ao registrar warning de webhook:', error?.message || error));
+    }
     return res.status(200).json({ok: true, ignored: true, ...(evaluation.warning ? {warning: evaluation.warning} : {})});
   }
 
@@ -540,6 +563,13 @@ app.patch('/api/admin/orders/:id/shipping', adminLimiter, admin, publicJson, asy
   if (['paid', 'preparing', 'ready', 'completed', 'refunded', 'chargeback'].includes(order.status)) {
     return res.status(409).json({error: 'O frete não pode ser alterado depois da confirmação financeira/operacional.'});
   }
+  // Com pagamento em andamento, a preferência do Mercado Pago com o TOTAL
+  // ANTIGO ainda está ativa: se o frete mudasse agora, o cliente poderia pagar
+  // o valor antigo pela URL que já recebeu e ter o pagamento recusado pelo
+  // webhook (amount_mismatch). Bloqueia até a tentativa expirar/falhar.
+  if (order.status === 'awaiting_payment') {
+    return res.status(409).json({error: 'Há um pagamento em andamento com o total atual. Aguarde a conclusão ou expiração da tentativa antes de alterar o frete.'});
+  }
   const shippingCents = centsFromBody(req.body?.shippingCents);
   if (shippingCents == null) return res.status(400).json({error: 'Informe o frete em centavos (zero ou valor positivo).'});
   const label = cleanText(req.body?.label, 160) || 'Frete confirmado pela loja';
@@ -573,7 +603,15 @@ app.patch('/api/admin/orders/:id/tracking', adminLimiter, admin, publicJson, asy
   const trackingCarrier = cleanText(req.body?.trackingCarrier, 80);
   let trackingUrl = cleanText(req.body?.trackingUrl, 500);
   if (trackingUrl && !/^https:\/\/[^\s]+$/i.test(trackingUrl)) return res.status(400).json({error: 'O link de rastreio precisa ser uma URL HTTPS.'});
-  if (!trackingUrl && trackingCode) trackingUrl = `https://rastreamento.correios.com.br/app/index.php?objetos=${encodeURIComponent(trackingCode)}`;
+  // Link automático correto por transportadora: etiqueta Correios (AA…BR)
+  // ganha link dos Correios; código numérico (Jadlog) ganha o tracking Jadlog.
+  if (!trackingUrl && trackingCode) {
+    if (/^[A-Z]{2}\d{9}[A-Z]{2}$/.test(trackingCode)) {
+      trackingUrl = `https://rastreamento.correios.com.br/app/index.php?objetos=${encodeURIComponent(trackingCode)}`;
+    } else if (/^\d{8,14}$/.test(trackingCode)) {
+      trackingUrl = `https://www.jadlog.com.br/tracking?cte=${encodeURIComponent(trackingCode)}`;
+    }
+  }
   const note = trackingCode
     ? `Código de rastreio informado: ${trackingCode}${trackingCarrier ? ` (${trackingCarrier})` : ''}.`
     : 'Código de rastreio removido.';
@@ -739,7 +777,12 @@ let expireTimer = null;
 if (config.orderExpireDays > 0) {
   const sweep = () => {
     repo.expireStaleOrders(config.orderExpireDays)
-      .then(ids => { if (ids.length) console.log(`Pedidos expirados automaticamente: ${ids.join(', ')}`); })
+      .then(expired => {
+        if (!expired.length) return;
+        console.log(`Pedidos expirados automaticamente: ${expired.map(order => order.id).join(', ')}`);
+        // Notifica o cliente: sem isso, o pedido dele sumiria em silêncio.
+        for (const order of expired) sendOrderEmail(order, 'status');
+      })
       .catch(error => console.error('Falha na expiração automática de pedidos:', error?.message || error));
   };
   expireTimer = setInterval(sweep, 6 * 60 * 60 * 1000);

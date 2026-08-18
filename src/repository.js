@@ -56,6 +56,9 @@ function mergeOrder(current, patch, {source = 'system', note = ''} = {}) {
       source,
       note: String(note || '').slice(0, 500)
     });
+    // Cap do histórico: webhooks repetidos/edições não podem inflar o JSONB
+    // indefinidamente. 100 eventos cobrem qualquer ciclo de vida real.
+    if (next.history.length > 100) next.history = next.history.slice(-100);
   }
   return next;
 }
@@ -393,7 +396,7 @@ export class Repository {
       for (const [id, order] of this.memoryOrders) {
         if (staleStatuses.includes(order.status) && String(order.createdAt) < cutoff) {
           const next = await this.updateOrder(id, {status: 'cancelled'}, {source: 'system', note: `Pedido cancelado automaticamente após ${days} dia(s) sem pagamento.`});
-          if (next) expired.push(next.id);
+          if (next) expired.push(next);
         }
       }
       return expired;
@@ -408,7 +411,7 @@ export class Repository {
     );
     for (const row of rows) {
       const next = await this.updateOrder(row.id, {status: 'cancelled'}, {source: 'system', note: `Pedido cancelado automaticamente após ${days} dia(s) sem pagamento.`});
-      if (next) expired.push(next.id);
+      if (next) expired.push(next);
     }
     return expired;
   }

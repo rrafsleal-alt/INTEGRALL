@@ -10,8 +10,13 @@ const VISUAL_LAYOUT_KEYS = ['maxWidth','gutterDesktop','gutterMobile','headerLay
 const VISUAL_VISIBILITY_KEYS = ['category','unit','stock','quickAdd','search','filters','resultCount','footerDescription','footerContact'];
 const PRODUCT_ATTRIBUTE_KEYS = ['wineType','grape','vintage','alcohol','volume','serving','pairing','origin','bean','roast','grind','intensity','weight','method','flavor','kind','sugar','ingredients','storage','quantity','flavors','allergens','shelfLife','minOrder'];
 
+// Caracteres invisíveis/bidirecionais Unicode: zero-width (200B-200D, FEFF),
+// overrides bidi (202A-202E, 2066-2069) e word joiner (2060). Permitiriam
+// spoofing visual de nomes no Admin, e-mails e CSV — removidos na entrada.
+const invisibleChars = /[\u200B-\u200D\u2060\uFEFF\u202A-\u202E\u2066-\u2069]/g;
+
 export function cleanText(value, max = 500) {
-  return String(value ?? '').replace(controlChars, '').trim().slice(0, max);
+  return String(value ?? '').replace(controlChars, '').replace(invisibleChars, '').trim().slice(0, max);
 }
 
 function cents(value, fallback = 0) {

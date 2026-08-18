@@ -59,7 +59,8 @@ test('pedidos antigos sem pagamento expiram; pedidos pagos nunca expiram', async
   await repo.createOrder({...base, id: 'OLD-PAID', clientOrderId: 'c2', status: 'paid'});
   await repo.createOrder({...base, id: 'NEW-RECEIVED', clientOrderId: 'c3', status: 'received', createdAt: new Date().toISOString()});
   const expired = await repo.expireStaleOrders(7);
-  assert.deepEqual(expired.sort(), ['OLD-RECEIVED']);
+  assert.deepEqual(expired.map(order => order.id).sort(), ['OLD-RECEIVED']);
+  assert.equal(expired[0].status, 'cancelled'); // pedido completo (para notificação por e-mail)
   assert.equal((await repo.getOrder('OLD-RECEIVED')).status, 'cancelled');
   assert.equal((await repo.getOrder('OLD-PAID')).status, 'paid');
   assert.equal((await repo.getOrder('NEW-RECEIVED')).status, 'received');

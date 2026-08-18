@@ -29,6 +29,12 @@ export function evaluatePayment(order, payment) {
   if (status === 'approved') {
     if (refundedCents >= expectedCents && expectedCents > 0) return {shouldUpdate: true, nextStatus: 'refunded', paymentStatus: 'refunded'};
     if (refundedCents > 0) return {shouldUpdate: true, nextStatus: 'payment_review', paymentStatus: 'partially_refunded'};
+    // Pagamento aprovado de pedido CANCELADO não pode ressuscitá-lo como
+    // 'paid' (a loja pode ter cancelado por falta de estoque). Vai para
+    // revisão: o dinheiro entrou e a operação decide (reembolsar ou atender).
+    if (order.status === 'cancelled') {
+      return {shouldUpdate: true, nextStatus: 'payment_review', paymentStatus: 'approved_after_cancel', warning: 'approved_after_cancel'};
+    }
     return {
       shouldUpdate: true,
       nextStatus: ['preparing', 'ready', 'completed'].includes(order.status) ? order.status : 'paid',
