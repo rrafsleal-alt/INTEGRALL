@@ -21,6 +21,19 @@ const DEFAULT_SERVICES = [
   {code: '03220', label: 'SEDEX'}
 ];
 
+// Valor Declarado: o código do serviço adicional VARIA POR SERVIÇO na tabela
+// dos Correios — 019 = VD Nacional Premium (SEDEX), 064 = VD Nacional Standard
+// (PAC). Enviar 019 num PAC faz a API recusar o adicional (ou o lote).
+// Serviços fora do mapa cotam SEM valor declarado (preço sai; seguro não).
+const DECLARED_VALUE_CODES = {
+  '03220': '019', // SEDEX CONTRATO AG
+  '03158': '019', // SEDEX 10
+  '03140': '019', // SEDEX 12
+  '03204': '019', // SEDEX HOJE
+  '03298': '064', // PAC CONTRATO AG
+  '03328': '064'  // PAC PAGAMENTO NA ENTREGA
+};
+
 const TOKEN_SAFETY_WINDOW_MS = 5 * 60 * 1000;
 const QUOTE_CACHE_TTL_MS = 10 * 60 * 1000;
 const QUOTE_CACHE_MAX = 500;
@@ -45,7 +58,7 @@ function digits(value) {
 }
 
 export class CorreiosService {
-  constructor({user, accessCode, postageCard, contract, originCep, services, homolog = false, baseUrl, fetchImpl} = {}) {
+  constructor({user, accessCode, postageCard, contract, originCep, services, homolog = false, baseUrl, apiVersion, fetchImpl} = {}) {
     this.user = String(user || '').trim();
     this.accessCode = String(accessCode || '').trim();
     this.postageCard = digits(postageCard);
@@ -53,6 +66,10 @@ export class CorreiosService {
     this.originCep = digits(originCep).slice(0, 8);
     this.homolog = Boolean(homolog);
     this.base = String(baseUrl || '').trim() || (this.homolog ? HOMOLOG_BASE : PRODUCTION_BASE);
+    // O manual oficial diverge internamente: os exemplos cURL usam /preco/v1,
+    // mas a seção "Ambientes Disponíveis" cita /preco/v3. Default v1 (o dos
+    // exemplos); ajustável por CORREIOS_API_VERSION sem mudança de código.
+    this.apiVersion = /^v\d+$/.test(String(apiVersion || '').trim()) ? String(apiVersion).trim() : 'v1';
     this.services = this.parseServices(services);
     this.fetch = fetchImpl || globalThis.fetch.bind(globalThis);
     this.token = null;
@@ -301,8 +318,11 @@ export class CorreiosService {
     // Uma requisição por (serviço × volume); a API aceita lote de parâmetros.
     const priceParams = [];
     for (const [serviceIndex, service] of this.services.entries()) {
+      // Código do Valor Declarado correto PARA ESTE serviço (019 SEDEX,
+      // 064 PAC); serviço sem código mapeado cota sem o adicional.
+      const declaredCode = DECLARED_VALUE_CODES[service.code] || '';
       for (const [volumeIndex, pkg] of volumes.entries()) {
-        const declaredShare = declared > 0
+        const declaredShare = declared > 0 && declaredCode
           ? Math.max(1, Math.round(declared * pkg.weightGrams / totalWeight)) : 0;
         priceParams.push({
           coProduto: service.code,
@@ -315,7 +335,7 @@ export class CorreiosService {
           largura: String(pkg.widthCm),
           altura: String(pkg.heightCm),
           ...(declaredShare > 0 ? {
-            servicosAdicionais: [{coServAdicional: '019'}],
+            servicosAdicionais: [{coServAdicional: declaredCode}],
             vlDeclarado: (declaredShare / 100).toFixed(2)
           } : {})
         });
@@ -337,8 +357,8 @@ export class CorreiosService {
     }
     const [priceChunks, prazoData] = await Promise.all([
       Promise.all(priceBatches.map((batch, index) =>
-        this.authorizedPost('/preco/v1/nacional', {idLote: String(index + 1), parametrosProduto: batch}))),
-      this.authorizedPost('/prazo/v1/nacional', {idLote: '1', parametrosPrazo: prazoParams}).catch(() => null)
+        this.authorizedPost(`/preco/${this.apiVersion}/nacional`, {idLote: String(index + 1), parametrosProduto: batch}))),
+      this.authorizedPost(`/prazo/${this.apiVersion}/nacional`, {idLote: '1', parametrosPrazo: prazoParams}).catch(() => null)
     ]);
     const priceData = priceChunks.flatMap(chunk => Array.isArray(chunk) ? chunk : []);
 

@@ -48,11 +48,14 @@ Veja `.env.example` com todos os comentários. Resumo dos blocos:
 
 ### Frete automático — Correios (contrato)
 
+> **Pré-requisito do contrato** (manual oficial da API Preço): os serviços **38202 – API PREÇOS** e **38210 – API PRAZOS** precisam estar **vinculados ao contrato e aos cartões de postagem** (modalidade a faturar). Sem esse cadastro a API retorna "restrita" — peça a liberação ao representante comercial dos Correios antes de configurar.
+
 1. No CWS (`https://cws.correios.com.br`), gere o **código de acesso a APIs** (Gestão de acesso a APIs).
 2. Preencha `CORREIOS_USER` (usuário Meu Correios PJ), `CORREIOS_ACCESS_CODE`, `CORREIOS_POSTAGE_CARD` (cartão de postagem) e `CORREIOS_ORIGIN_CEP`.
 3. `SHIPPING_MODE=correios` ativa a cotação automática. Serviços padrão: `03298` (PAC contrato) e `03220` (SEDEX contrato) — ajuste `CORREIOS_SERVICES` conforme sua ficha técnica.
-4. `CORREIOS_HOMOLOG=true` usa o ambiente `apihom` para testes.
-5. O valor declarado (seguro, serviço 019) é enviado automaticamente com o subtotal do pedido — essencial para garrafas.
+4. `CORREIOS_HOMOLOG=true` usa o ambiente `apihom` para testes (exige conta no Meu Correios **Homologação** e senha de APIs no CWS Homologação).
+5. O valor declarado (seguro) é enviado automaticamente com o subtotal do pedido, com o **código correto por serviço** (019 no SEDEX, 064 no PAC) — essencial para garrafas.
+6. `CORREIOS_API_VERSION` (padrão `v1`): o manual cita `/preco/v1` nos exemplos e `/preco/v3` na seção Ambientes; se a homologação exigir v3, ajuste a variável sem mudar código.
 
 ### Frete automático — Jadlog
 

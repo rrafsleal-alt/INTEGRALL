@@ -275,3 +275,61 @@ test('lote de preço é fatiado em blocos de 5 (limite do manual V2.4)', async (
   assert.ok(batchSizes.every(size => size <= 5), `lotes: ${batchSizes}`);
   assert.equal(result.options.find(o => o.code === '03298').priceCents, 3000); // 3 volumes × R$10
 });
+
+test('valor declarado usa o código correto POR SERVIÇO (019 SEDEX, 064 PAC — manual oficial)', async () => {
+  const sent = [];
+  const fetchImpl = async (url, options) => {
+    if (url.includes('/token/')) return {ok: true, status: 200, json: async () => ({token: 't', expiraEm: new Date(Date.now() + 3600_000).toISOString()})};
+    if (url.includes('/preco/')) {
+      const body = JSON.parse(options.body);
+      sent.push(...body.parametrosProduto);
+      return {ok: true, status: 200, json: async () => body.parametrosProduto.map(p => ({coProduto: p.coProduto, pcFinal: '10,00'}))};
+    }
+    if (url.includes('/prazo/')) return {ok: true, status: 200, json: async () => ([])};
+    throw new Error('URL inesperada');
+  };
+  const service = new CorreiosService({...CONFIG, fetchImpl});
+  const pack = {packages: [{weightGrams: 1000, lengthCm: 16, widthCm: 11, heightCm: 10}], missingData: false, overweight: false};
+  await service.quote('01001000', pack, 10000); // com valor declarado
+
+  const pac = sent.find(p => p.coProduto === '03298');
+  const sedex = sent.find(p => p.coProduto === '03220');
+  assert.equal(pac.servicosAdicionais[0].coServAdicional, '064', 'PAC deve usar VD 064');
+  assert.equal(sedex.servicosAdicionais[0].coServAdicional, '019', 'SEDEX deve usar VD 019');
+
+  // Serviço desconhecido: cota SEM valor declarado (não arrisca recusa do lote)
+  const custom = new CorreiosService({...CONFIG, services: '99999:Custom', fetchImpl});
+  sent.length = 0;
+  await custom.quote('01001000', pack, 10000);
+  assert.equal(sent[0].servicosAdicionais, undefined);
+  assert.equal(sent[0].vlDeclarado, undefined);
+});
+
+test('versão da API é configurável (v1 padrão dos exemplos; v3 da seção Ambientes)', async () => {
+  const urls = [];
+  const fetchImpl = async (url, options) => {
+    urls.push(url);
+    if (url.includes('/token/')) return {ok: true, status: 200, json: async () => ({token: 't', expiraEm: new Date(Date.now() + 3600_000).toISOString()})};
+    if (url.includes('/preco/')) {
+      const body = JSON.parse(options.body);
+      return {ok: true, status: 200, json: async () => body.parametrosProduto.map(p => ({coProduto: p.coProduto, pcFinal: '10,00'}))};
+    }
+    if (url.includes('/prazo/')) return {ok: true, status: 200, json: async () => ([])};
+    throw new Error('URL inesperada');
+  };
+  const pack = {packages: [{weightGrams: 1000, lengthCm: 16, widthCm: 11, heightCm: 10}], missingData: false, overweight: false};
+
+  const v1 = new CorreiosService({...CONFIG, fetchImpl});
+  await v1.quote('01001000', pack);
+  assert.ok(urls.some(u => u.includes('/preco/v1/nacional')));
+
+  urls.length = 0;
+  const v3 = new CorreiosService({...CONFIG, apiVersion: 'v3', fetchImpl});
+  await v3.quote('01001000', pack);
+  assert.ok(urls.some(u => u.includes('/preco/v3/nacional')));
+  assert.ok(urls.some(u => u.includes('/prazo/v3/nacional')));
+
+  // valor inválido cai no default v1
+  const bad = new CorreiosService({...CONFIG, apiVersion: 'hack/../x', fetchImpl});
+  assert.equal(bad.apiVersion, 'v1');
+});

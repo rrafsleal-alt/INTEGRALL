@@ -44,6 +44,7 @@ export const config = Object.freeze({
   correiosServices: text('CORREIOS_SERVICES'),
   correiosHomolog: bool('CORREIOS_HOMOLOG', false),
   correiosBaseUrl: text('CORREIOS_BASE_URL'),
+  correiosApiVersion: text('CORREIOS_API_VERSION'),
 
   // Jadlog (API Embarcador)
   jadlogToken: text('JADLOG_TOKEN'),

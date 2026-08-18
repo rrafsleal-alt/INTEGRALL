@@ -34,7 +34,8 @@ const correios = new CorreiosService({
   originCep: config.correiosOriginCep,
   services: config.correiosServices,
   homolog: config.correiosHomolog,
-  baseUrl: config.correiosBaseUrl
+  baseUrl: config.correiosBaseUrl,
+  apiVersion: config.correiosApiVersion
 });
 const jadlog = new JadlogService({
   token: config.jadlogToken,
