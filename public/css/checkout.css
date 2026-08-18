@@ -33,3 +33,58 @@
 .detail-order-grid span{display:block;color:var(--muted);font-size:.62rem;margin-bottom:2px}.detail-order-grid b{font-size:.76rem;color:var(--wine)}
 .order-timeline{margin:14px 0}.order-timeline h3{font:400 1rem var(--serif);color:var(--wine);margin:0 0 8px}.timeline-row{display:grid;grid-template-columns:12px 1fr;gap:8px;padding:7px 0}.timeline-dot{width:8px;height:8px;border-radius:50%;background:var(--gold);margin-top:5px}.timeline-row b{display:block;font-size:.73rem}.timeline-row small{display:block;color:var(--muted);font-size:.62rem;line-height:1.45;margin-top:2px}
 @media(max-width:620px){.delivery-address>.two,.checkout-options>.two,.detail-order-grid{grid-template-columns:1fr}}
+
+/* ===== Verificação de idade (18+) — minimalista ===== */
+html.age-locked{overflow:hidden}
+.age-gate{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(23,8,12,.88);backdrop-filter:blur(8px)}
+.age-gate-card{max-width:340px;width:100%;background:#fff;padding:42px 34px;text-align:center;display:grid;gap:20px}
+.age-gate-brand{margin:0;font-size:.62rem;letter-spacing:.3em;text-transform:uppercase;color:var(--gold)}
+.age-gate-title{margin:0;font:400 1.35rem var(--serif);color:var(--wine)}
+.age-gate-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:2px}
+.age-gate-denied{margin:0;color:var(--danger);font-size:.7rem;line-height:1.5}
+.age-gate-denied[hidden]{display:none}
+.age-gate-footnote{margin:0;font-size:.54rem;letter-spacing:.06em;color:var(--muted);line-height:1.6}
+.age-gate-leaving{opacity:0;transition:opacity .25s ease}
+@media(prefers-reduced-motion:reduce){.age-gate-leaving{transition:none}}
+
+/* ===== Confirmação 18+ no checkout ===== */
+.age-confirm{display:flex;gap:9px;align-items:flex-start;padding:10px 12px;border:1px solid var(--line);background:var(--sand);font-size:.7rem;line-height:1.5;cursor:pointer}
+.age-confirm input{margin-top:2px;accent-color:var(--wine)}
+.age-confirm[hidden]{display:none}
+
+/* ===== Cupom de desconto ===== */
+.coupon-row{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end}
+.coupon-row .group{margin:0}
+.coupon-feedback{font-size:.66rem;line-height:1.5;color:var(--muted)}
+.coupon-feedback.ok{color:var(--ok)}
+.coupon-feedback.bad{color:var(--danger)}
+.sum-line.discount b{color:var(--ok)}
+.sum-line.discount[hidden]{display:none}
+
+/* ===== Rastreio no acompanhamento ===== */
+.order-tracking-box{margin:12px 0;padding:12px;border:1px solid var(--line);background:var(--sand);display:grid;gap:6px}
+.order-tracking-box[hidden]{display:none}
+.order-tracking-box span{font-size:.62rem;color:var(--muted)}
+.order-tracking-box b{font-size:.8rem;color:var(--wine);word-break:break-all}
+.order-tracking-box a{font-size:.7rem;color:var(--wine);text-decoration:underline;text-underline-offset:3px}
+
+/* ===== Opções de frete Correios ===== */
+.correios-options{display:grid;gap:8px;padding:12px;border:1px solid var(--line);background:var(--sand)}
+.correios-options[hidden]{display:none}
+.correios-options>strong{font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--wine)}
+.correios-option{display:flex;gap:9px;align-items:center;padding:8px 10px;border:1px solid var(--line);background:#fff;font-size:.72rem;cursor:pointer}
+.correios-option input{accent-color:var(--wine)}
+.correios-option small{color:var(--muted)}
+.correios-note{margin:0;font-size:.68rem;color:var(--muted);line-height:1.5}
+
+/* ===== Linha do tempo de rastreamento ===== */
+.tracking-events{display:grid;gap:7px;margin:6px 0}
+.tracking-eta{padding:8px 10px;background:#fff;border:1px solid var(--line);font-size:.7rem;color:var(--wine);font-weight:600}
+.tracking-event{display:grid;grid-template-columns:14px 1fr;gap:8px;align-items:start;padding:5px 0;opacity:.75}
+.tracking-event.latest{opacity:1}
+.tracking-event.latest b{color:var(--wine)}
+.tracking-dot{width:8px;height:8px;border-radius:50%;background:var(--line);margin-top:4px}
+.tracking-event.latest .tracking-dot{background:var(--ok)}
+.tracking-event b{display:block;font-size:.72rem}
+.tracking-event small{display:block;color:var(--muted);font-size:.6rem;margin-top:1px}
+.tracking-note{font-size:.66rem;color:var(--muted);line-height:1.5}

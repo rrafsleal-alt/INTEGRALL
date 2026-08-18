@@ -12,6 +12,11 @@ function digits(value) {
   return String(value || '').replace(/\D/g, '');
 }
 
+/** Escapa curingas do LIKE (% e _) para que a busca seja literal. */
+function likePattern(term) {
+  return `%${String(term).replace(/([\\%_])/g, '\\$1')}%`;
+}
+
 function customerKey(customer = {}) {
   const email = String(customer.email || '').trim().toLowerCase();
   const phone = digits(customer.phone);
@@ -51,6 +56,9 @@ function mergeOrder(current, patch, {source = 'system', note = ''} = {}) {
       source,
       note: String(note || '').slice(0, 500)
     });
+    // Cap do histórico: webhooks repetidos/edições não podem inflar o JSONB
+    // indefinidamente. 100 eventos cobrem qualquer ciclo de vida real.
+    if (next.history.length > 100) next.history = next.history.slice(-100);
   }
   return next;
 }
@@ -162,6 +170,40 @@ export class Repository {
     return catalog;
   }
 
+  /**
+   * Atualização atômica do catálogo: lê com lock (FOR UPDATE), aplica o
+   * `mutator` sobre o estado MAIS RECENTE e salva na mesma transação.
+   * Elimina a corrida ler→modificar→salvar entre edições do Admin e a baixa
+   * de estoque dos webhooks/pedidos (que também trava a linha do catálogo).
+   * O mutator recebe o catálogo atual e retorna o próximo (ou lança para abortar).
+   */
+  async mutateCatalog(mutator) {
+    if (!this.pool) {
+      const next = await mutator(clone(this.memoryCatalog));
+      this.memoryCatalog = clone(next);
+      return this.getCatalog();
+    }
+    const client = await this.pool.connect();
+    try {
+      await client.query('BEGIN');
+      const {rows} = await client.query('SELECT data FROM integrall_catalog WHERE id = 1 FOR UPDATE');
+      const current = rows[0]?.data ?? clone(this.initialCatalog);
+      const next = await mutator(current);
+      await client.query(
+        `INSERT INTO integrall_catalog (id, data, updated_at) VALUES (1, $1::jsonb, NOW())
+         ON CONFLICT (id) DO UPDATE SET data = EXCLUDED.data, updated_at = NOW()`,
+        [JSON.stringify(next)]
+      );
+      await client.query('COMMIT');
+      return next;
+    } catch (error) {
+      try { await client.query('ROLLBACK'); } catch {}
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+
   async getOrder(id) {
     if (!this.pool) return this.memoryOrders.has(id) ? clone(this.memoryOrders.get(id)) : null;
     const {rows} = await this.pool.query('SELECT data FROM integrall_orders WHERE id = $1', [id]);
@@ -240,11 +282,22 @@ export class Repository {
     }
   }
 
+  /**
+   * Atualiza um pedido com lock (FOR UPDATE).
+   * `patch` pode ser um objeto OU uma função (currentFresh) => patch | null.
+   * A forma funcional é avaliada DENTRO do lock, sobre o estado mais recente —
+   * obrigatória para decisões dependentes de estado (ex.: webhook de
+   * pagamento), eliminando TOCTOU entre ler o pedido e gravar a decisão.
+   * Retornar null da função aborta sem gravar (retorna o estado atual).
+   */
   async updateOrder(id, patch, options = {}) {
+    const resolvePatch = current => (typeof patch === 'function' ? patch(current) : patch);
     if (!this.pool) {
       const current = await this.getOrder(id);
       if (!current) return null;
-      let next = mergeOrder(current, patch, options);
+      const resolved = resolvePatch(current);
+      if (resolved == null) return clone(current);
+      let next = mergeOrder(current, resolved, typeof options === 'function' ? options(current) : options);
       if (!current.inventoryCommittedAt && INVENTORY_COMMIT_STATUSES.has(next.status)) {
         const result = commitInventory(this.memoryCatalog, next);
         this.memoryCatalog = result.catalog;
@@ -264,7 +317,13 @@ export class Repository {
         await client.query('ROLLBACK');
         return null;
       }
-      let next = mergeOrder(current, patch, options);
+      // Forma funcional: decide o patch DENTRO do lock, sobre o estado fresco.
+      const resolved = resolvePatch(current);
+      if (resolved == null) {
+        await client.query('ROLLBACK');
+        return current;
+      }
+      let next = mergeOrder(current, resolved, typeof options === 'function' ? options(current) : options);
 
       if (!current.inventoryCommittedAt && INVENTORY_COMMIT_STATUSES.has(next.status)) {
         const catalogResult = await client.query('SELECT data FROM integrall_catalog WHERE id = 1 FOR UPDATE');
@@ -299,7 +358,7 @@ export class Repository {
         .slice(0, safeLimit);
     }
 
-    const pattern = q ? `%${q}%` : '';
+    const pattern = q ? likePattern(q) : '';
     const {rows} = await this.pool.query(
       `SELECT data
          FROM integrall_orders
@@ -328,7 +387,7 @@ export class Repository {
         .sort((a, b) => String(b.lastOrderAt || '').localeCompare(String(a.lastOrderAt || '')))
         .slice(0, safeLimit);
     }
-    const pattern = q ? `%${q}%` : '';
+    const pattern = q ? likePattern(q) : '';
     const {rows} = await this.pool.query(
       `SELECT data FROM integrall_customers
        WHERE ($1 = '' OR LOWER(CONCAT_WS(' ', COALESCE(data->>'name',''), COALESCE(data->>'email',''), COALESCE(data->>'phone',''))) LIKE $1)
@@ -337,6 +396,41 @@ export class Repository {
       [pattern, safeLimit]
     );
     return rows.map(row => row.data);
+  }
+
+  /**
+   * Cancela pedidos sem pagamento criados há mais de `days` dias.
+   * Considera apenas estados pré-financeiros; nunca toca pedidos pagos.
+   */
+  async expireStaleOrders(days) {
+    const cutoffMs = Number(days) * 86_400_000;
+    if (!Number.isFinite(cutoffMs) || cutoffMs <= 0) return [];
+    const cutoff = new Date(Date.now() - cutoffMs).toISOString();
+    const staleStatuses = ['received', 'awaiting_payment', 'payment_failed', 'payment_expired'];
+    const expired = [];
+
+    if (!this.pool) {
+      for (const [id, order] of this.memoryOrders) {
+        if (staleStatuses.includes(order.status) && String(order.createdAt) < cutoff) {
+          const next = await this.updateOrder(id, {status: 'cancelled'}, {source: 'system', note: `Pedido cancelado automaticamente após ${days} dia(s) sem pagamento.`});
+          if (next) expired.push(next);
+        }
+      }
+      return expired;
+    }
+
+    const {rows} = await this.pool.query(
+      `SELECT id FROM integrall_orders
+        WHERE data->>'status' = ANY($1)
+          AND created_at < $2
+        LIMIT 200`,
+      [staleStatuses, cutoff]
+    );
+    for (const row of rows) {
+      const next = await this.updateOrder(row.id, {status: 'cancelled'}, {source: 'system', note: `Pedido cancelado automaticamente após ${days} dia(s) sem pagamento.`});
+      if (next) expired.push(next);
+    }
+    return expired;
   }
 
   async health() {

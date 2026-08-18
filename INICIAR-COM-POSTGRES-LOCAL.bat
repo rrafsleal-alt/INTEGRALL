@@ -19,6 +19,7 @@ if errorlevel 1 (
   exit /b 1
 )
 
+if not exist ".env" copy ".env.example" ".env" >nul
 powershell -NoProfile -Command "$p='.env'; $s=Get-Content $p -Raw; $url='DATABASE_URL=postgresql://integrall:integrall_local_2026@localhost:5433/integrall'; if($s -match '(?m)^DATABASE_URL=.*$'){ $s=[regex]::Replace($s,'(?m)^DATABASE_URL=.*$',$url) } else { $s += \"`r`n$url`r`n\" }; Set-Content -Path $p -Value $s -Encoding utf8"
 
 echo PostgreSQL configurado em localhost:5433.

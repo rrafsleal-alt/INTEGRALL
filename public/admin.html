@@ -8,8 +8,8 @@
   <meta name="theme-color" content="#4a0a1a">
   <title>INTEGRALL | Administração</title>
   <link rel="icon" href="/assets/icons/favicon.svg">
-  <link rel="stylesheet" href="/css/admin.css?v=9.2.0">
-  <script src="/js/admin.js?v=9.2.0" defer></script>
+  <link rel="stylesheet" href="/css/admin.css?v=9.5.0">
+  <script src="/js/admin.js?v=9.5.0" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#main">Ir para o conteúdo</a>
@@ -96,6 +96,48 @@
         <p class="empty" id="customersEmpty" hidden>Nenhum cliente encontrado.</p>
       </section>
 
+      <section class="panel" aria-labelledby="productsTitle">
+        <div class="panel-head">
+          <div><h2 id="productsTitle">Produtos</h2><p>Edite preço, estoque, peso e dimensões sem mexer em JSON. Peso e dimensões são usados pelo cálculo de frete dos Correios.</p></div>
+        </div>
+        <p class="feedback" id="productsFeedback" role="status" aria-live="polite"></p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Produto</th><th>Preço</th><th>Estoque</th><th>Peso</th><th>Disponível</th><th></th></tr></thead>
+            <tbody id="productsBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="panel" aria-labelledby="couponsTitle">
+        <div class="panel-head">
+          <div><h2 id="couponsTitle">Cupons de desconto</h2><p>Os cupons são validados e aplicados exclusivamente pelo servidor. Códigos aceitam letras, números, hífen e sublinhado.</p></div>
+        </div>
+        <form class="coupon-form" id="couponForm">
+          <div class="coupon-form-grid">
+            <label>Código<input id="couponCode" maxlength="40" required minlength="3" placeholder="BEMVINDO10" spellcheck="false" style="text-transform:uppercase"></label>
+            <label>Tipo<select id="couponType">
+              <option value="percent">Porcentagem (%)</option>
+              <option value="fixed">Valor fixo (R$)</option>
+              <option value="free_shipping">Frete grátis</option>
+            </select></label>
+            <label id="couponValueLabel">Valor<input id="couponValue" inputmode="decimal" placeholder="10"></label>
+            <label>Pedido mínimo (R$)<input id="couponMin" inputmode="decimal" placeholder="0,00"></label>
+            <label>Validade<input id="couponExpires" type="date"></label>
+            <label>Observação<input id="couponNote" maxlength="200" placeholder="Campanha, origem…"></label>
+          </div>
+          <button class="button primary" type="submit">Adicionar cupom</button>
+        </form>
+        <p class="feedback" id="couponsFeedback" role="status" aria-live="polite"></p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Código</th><th>Tipo</th><th>Valor</th><th>Mínimo</th><th>Validade</th><th>Status</th><th></th></tr></thead>
+            <tbody id="couponsBody"></tbody>
+          </table>
+        </div>
+        <p class="empty" id="couponsEmpty" hidden>Nenhum cupom cadastrado.</p>
+      </section>
+
       <section class="panel" aria-labelledby="catalogTitleAdmin">
         <div class="panel-head">
           <div><h2 id="catalogTitleAdmin">Catálogo</h2><p>Importação e exportação usam JSON. Imagens novas devem ser URLs HTTPS ou arquivos já publicados em <code>/assets/</code>.</p></div>
@@ -111,6 +153,32 @@
     </section>
   </main>
 
+  <dialog id="productDialog">
+    <div class="dialog-head"><h2 id="productDialogTitle">Produto</h2><button class="icon-button" id="closeProductDialog" type="button" aria-label="Fechar">✕</button></div>
+    <form class="product-form" id="productForm">
+      <div class="product-form-grid">
+        <label>Nome<input id="pfName" maxlength="160" required></label>
+        <label>Preço base (R$)<input id="pfPrice" inputmode="decimal" required></label>
+        <label>Unidade / descrição curta<input id="pfUnit" maxlength="120"></label>
+        <label>Estoque (vazio = sem controle)<input id="pfStock" inputmode="numeric"></label>
+        <label>Mín. por pedido<input id="pfMinPerOrder" inputmode="numeric" placeholder="1"></label>
+        <label>Máx. por pedido<input id="pfMaxPerOrder" inputmode="numeric" placeholder="999"></label>
+        <label>Peso (g) — p/ frete<input id="pfWeight" inputmode="numeric" placeholder="Ex.: 1300"></label>
+        <label>Comprimento (cm)<input id="pfLength" inputmode="numeric" placeholder="Ex.: 30"></label>
+        <label>Largura (cm)<input id="pfWidth" inputmode="numeric" placeholder="Ex.: 12"></label>
+        <label>Altura (cm)<input id="pfHeight" inputmode="numeric" placeholder="Ex.: 12"></label>
+        <label class="pf-check"><input id="pfAvailable" type="checkbox"> Disponível na loja</label>
+        <label class="pf-check"><input id="pfFeatured" type="checkbox"> Produto em destaque</label>
+      </div>
+      <label>Descrição<textarea id="pfDescription" maxlength="3000" rows="4" placeholder="História do produto, produtor, harmonização…"></textarea></label>
+      <div id="pfVariants"></div>
+      <div class="dialog-actions">
+        <button class="button primary" type="submit">Salvar produto</button>
+        <p class="feedback" id="productDialogFeedback" role="status" aria-live="polite"></p>
+      </div>
+    </form>
+  </dialog>
+
   <dialog id="orderDialog">
     <div class="dialog-head"><h2 id="dialogTitle">Pedido</h2><button class="icon-button" id="closeDialog" type="button" aria-label="Fechar">✕</button></div>
     <div id="orderDetails"></div>
@@ -120,6 +188,15 @@
       <label for="shippingQuoteLabel">Descrição do frete</label>
       <input id="shippingQuoteLabel" maxlength="160" value="Frete confirmado pela loja">
       <button class="button secondary" id="saveShippingButton" type="button">Salvar frete</button>
+    </div>
+    <div class="dialog-shipping" id="trackingPanel" hidden>
+      <label for="trackingCodeInput">Código de rastreio</label>
+      <input id="trackingCodeInput" maxlength="80" placeholder="Ex.: AA123456789BR" spellcheck="false" style="text-transform:uppercase">
+      <label for="trackingCarrierInput">Transportadora</label>
+      <input id="trackingCarrierInput" maxlength="80" placeholder="Ex.: Correios">
+      <label for="trackingUrlInput">Link de rastreio (opcional — Correios é gerado automaticamente)</label>
+      <input id="trackingUrlInput" maxlength="500" placeholder="https://…" spellcheck="false">
+      <button class="button secondary" id="saveTrackingButton" type="button">Salvar rastreio</button>
     </div>
     <div class="dialog-status">
       <label for="dialogStatus">Alterar status</label>

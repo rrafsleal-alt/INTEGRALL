@@ -33,6 +33,34 @@ services:
         value: quote
       - key: ALLOW_PAYMENT_WITH_QUOTED_SHIPPING
         value: "false"
+      # Frete automático (preencha para testar em homologação; use CORREIOS_HOMOLOG=true)
+      - key: CORREIOS_USER
+        sync: false
+      - key: CORREIOS_ACCESS_CODE
+        sync: false
+      - key: CORREIOS_POSTAGE_CARD
+        sync: false
+      - key: CORREIOS_ORIGIN_CEP
+        sync: false
+      - key: CORREIOS_HOMOLOG
+        value: "true"
+      - key: JADLOG_TOKEN
+        sync: false
+      - key: JADLOG_CNPJ
+        sync: false
+      - key: CARRIER_SPLIT_UNITS
+        value: "12"
+      # E-mail transacional (opcional no teste)
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASSWORD
+        sync: false
+      - key: SMTP_FROM
+        sync: false
+      - key: ORDER_EXPIRE_DAYS
+        value: "7"
 
 databases:
   - name: integrall-db-test

@@ -9,6 +9,11 @@
   const LAST_ORDER_KEY = 'integrall_last_order_v9';
   let memoryAttempt = null;
   let activeTrackedOrder = null;
+  let appliedCoupon = null;
+  let correiosOptions = [];
+  let correiosSelected = '';
+  let correiosQuoteTimer = null;
+  let correiosLastKey = '';
 
   const STATUS_LABELS = Object.freeze({
     received: 'Pedido recebido',
@@ -86,15 +91,40 @@
     } catch {}
   }
 
+  // A referência do último pedido (número + autorização de consulta) persiste
+  // em localStorage para que o cliente possa voltar depois — inclusive pelo
+  // link do e-mail de confirmação. A consulta pública não expõe dados
+  // pessoais (ver publicOrder no servidor), apenas status/valores/rastreio.
   function saveLastOrder(value) {
+    try { localStorage.setItem(LAST_ORDER_KEY, JSON.stringify(value)); } catch {}
     try { sessionStorage.setItem(LAST_ORDER_KEY, JSON.stringify(value)); } catch {}
   }
 
   function loadLastOrder() {
     try {
-      const value = JSON.parse(sessionStorage.getItem(LAST_ORDER_KEY) || 'null');
+      const raw = localStorage.getItem(LAST_ORDER_KEY) || sessionStorage.getItem(LAST_ORDER_KEY) || 'null';
+      const value = JSON.parse(raw);
       return value && typeof value === 'object' ? value : null;
     } catch { return null; }
+  }
+
+  /**
+   * Focus trap: mantém o Tab circulando dentro do modal aberto (WCAG 2.4.3).
+   * Aplica uma única vez por elemento; ativo apenas enquanto o modal está aberto.
+   */
+  function trapFocus(modal) {
+    if (!modal || modal.dataset.focusTrapped) return;
+    modal.dataset.focusTrapped = '1';
+    modal.addEventListener('keydown', event => {
+      if (event.key !== 'Tab' || !modal.classList.contains('open')) return;
+      const focusables = [...modal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])')]
+        .filter(el => !el.disabled && !el.hidden && el.offsetParent !== null);
+      if (!focusables.length) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+    });
   }
 
   function injectAccessibility() {
@@ -129,6 +159,7 @@
     };
     modal.querySelector('.close-btn').addEventListener('click', close);
     document.addEventListener('keydown', event => { if (event.key === 'Escape' && modal.classList.contains('open')) close(); });
+    trapFocus(modal);
     return modal;
   }
 
@@ -182,22 +213,28 @@
     const root = $('#paymentMethods');
     if (!root) return;
     const cfg = config();
+    const onlineActive = cfg.paymentMethods?.card === true;
     const selected = root.querySelector('input:checked')?.value;
-    const methods = [['order', 'Registrar pedido', 'Criar o pedido agora e realizar o pagamento depois, quando necessário']];
-    if (cfg.paymentMethods?.card === true) methods.unshift(['card', 'Pagar online — Mercado Pago', 'PIX ou cartão no ambiente seguro do Mercado Pago']);
+    const methods = [];
+    if (onlineActive) {
+      methods.push(['card', 'PIX ou cartão', 'Pagamento imediato no ambiente seguro do Mercado Pago']);
+      methods.push(['order', 'Combinar com a loja', 'Finalize o pedido agora e acerte o pagamento diretamente com a INTEGRALL']);
+    } else {
+      methods.push(['order', 'Finalizar pedido', 'Seu pedido é enviado à INTEGRALL, que confirma o pagamento e a entrega com você']);
+    }
     const button = $('#checkout');
     root.replaceChildren(...methods.map((method, index) => createPaymentOption(method[0], method[1], method[2], selected ? selected === method[0] : index === 0)));
     if (button) button.disabled = false;
     const syncLabel = () => {
       if (!button) return;
-      button.textContent = root.querySelector('input:checked')?.value === 'card' ? 'Criar pedido e pagar' : 'Registrar pedido';
+      button.textContent = root.querySelector('input:checked')?.value === 'card' ? 'Ir para o pagamento' : 'Finalizar pedido';
     };
     root.onchange = syncLabel;
     syncLabel();
     const note = $('#paymentAvailabilityNote');
-    if (note) note.textContent = cfg.paymentMethods?.card === true
-      ? 'Pagamento online ativo: após criar o pedido, você será levado ao Mercado Pago para escolher PIX ou cartão.'
-      : 'Pagamento online ainda não está ativo. O pedido será registrado normalmente e o Mercado Pago aparecerá automaticamente quando as credenciais forem configuradas.';
+    if (note) note.textContent = onlineActive
+      ? 'Você será levado ao ambiente seguro do Mercado Pago para concluir o pagamento. O pedido é confirmado automaticamente.'
+      : 'Após finalizar, você recebe o número do pedido e a INTEGRALL combina o pagamento e a entrega com você.';
   }
 
   function hydrateCustomerFields() {
@@ -211,6 +248,255 @@
       if (node && !node.value) node.value = cleanText(profile[key], max);
       node?.addEventListener('input', saveProfile);
     }
+  }
+
+  function cartHasAlcohol() {
+    const app = globalThis.__integrallApp;
+    const items = app?.cartDetails?.() || [];
+    return items.some(item => {
+      const product = item.product || {};
+      // Flag calculada pelo servidor (publicCatalog) — fonte única de verdade.
+      if (typeof product.isAlcoholic === 'boolean') return product.isAlcoholic;
+      // Fallback para catálogo embutido antigo (sem a flag).
+      const department = String(product.department || '').toLowerCase();
+      return ['vinhos', 'vinho', 'espumantes', 'cervejas', 'cerveja', 'destilados', 'licores', 'bebidas-alcoolicas'].includes(department) || Boolean(product.attributes?.alcohol);
+    });
+  }
+
+  function syncAgeConfirm() {
+    const row = $('#ageConfirmRow');
+    if (!row) return;
+    row.hidden = !cartHasAlcohol();
+  }
+
+  function couponFeedback(message, type = '') {
+    const node = $('#couponFeedback');
+    if (!node) return;
+    node.textContent = message;
+    node.className = `coupon-feedback${type ? ` ${type}` : ''}`;
+  }
+
+  function clearCoupon(silent = false) {
+    appliedCoupon = null;
+    if (!silent) couponFeedback('');
+    syncDiscountRow();
+  }
+
+  function couponDiscountCents(subtotalCents) {
+    if (!appliedCoupon) return 0;
+    if (appliedCoupon.type === 'percent') return Math.floor(subtotalCents * appliedCoupon.value / 100);
+    if (appliedCoupon.type === 'fixed') return Math.min(appliedCoupon.value, Math.max(0, subtotalCents - 100));
+    return 0;
+  }
+
+  /** Frete atualmente selecionado nas opções de transportadora (centavos) ou null. */
+  function selectedCarrierShipping() {
+    if (!correiosEnabled() || !correiosOptions.length) return null;
+    const option = correiosOptions.find(item => item.service === correiosSelected) || correiosOptions[0];
+    return option ? {priceCents: option.priceCents, label: option.label} : null;
+  }
+
+  /**
+   * Resumo unificado do carrinho: subtotal + frete escolhido (Correios/Jadlog,
+   * fixo ou zonas) − desconto do cupom. Mantém o total do carrinho IGUAL ao
+   * que o servidor cobrará — nada de surpresa no fechamento.
+   */
+  function syncDiscountRow() {
+    const row = $('#cartDiscountRow');
+    const valueNode = $('#cartDiscount');
+    const totalNode = $('#cartTotal');
+    const shippingNode = $('#cartShipping');
+    if (!row || !valueNode) return;
+    const app = globalThis.__integrallApp;
+    const subtotal = Number(app?.cartSubtotal?.() || 0);
+    const choice = app?.getState?.()?.checkout?.choice;
+
+    // 1) Frete efetivo: transportadora escolhida > cálculo local (fixo/zonas) > pendente
+    let shippingCents = null;
+    let shippingLabel = '';
+    if (choice === 'pickup') {
+      shippingCents = 0;
+    } else if (choice === 'delivery') {
+      const carrier = selectedCarrierShipping();
+      if (carrier) {
+        shippingCents = carrier.priceCents;
+        shippingLabel = carrier.label;
+      } else {
+        const quote = app?.calculateShipping?.(subtotal);
+        if (quote && quote.price != null) shippingCents = quote.price;
+      }
+    }
+    if (shippingNode && shippingLabel && shippingCents != null) {
+      const text = `${shippingLabel} — ${formatMoney(shippingCents)}`;
+      if (shippingNode.textContent !== text) shippingNode.textContent = text;
+    }
+
+    // 2) Desconto do cupom (free_shipping desconta o frete cotado)
+    let discount = 0;
+    if (appliedCoupon && subtotal > 0) {
+      if (appliedCoupon.type === 'free_shipping') discount = Math.max(0, shippingCents || 0);
+      else discount = couponDiscountCents(subtotal);
+    }
+    if (discount > 0) {
+      row.hidden = false;
+      valueNode.textContent = appliedCoupon.type === 'free_shipping'
+        ? `Frete grátis (− ${formatMoney(discount)})`
+        : `− ${formatMoney(discount)}`;
+    } else if (appliedCoupon && appliedCoupon.type === 'free_shipping' && subtotal > 0) {
+      row.hidden = false;
+      valueNode.textContent = 'Frete grátis com cupom';
+    } else {
+      row.hidden = true;
+    }
+
+    // 3) Total real
+    if (totalNode && subtotal > 0) {
+      const next = choice === 'delivery' && shippingCents == null
+        ? `${formatMoney(Math.max(0, subtotal - (appliedCoupon && appliedCoupon.type !== 'free_shipping' ? discount : 0)))} + entrega`
+        : formatMoney(Math.max(0, subtotal + (shippingCents || 0) - discount));
+      if (totalNode.textContent !== next) totalNode.textContent = next;
+    }
+  }
+
+  async function applyCoupon() {
+    const input = $('#couponInput');
+    const button = $('#couponApply');
+    const code = cleanText(input?.value, 40).toUpperCase();
+    if (!code) { clearCoupon(); couponFeedback('Informe o código do cupom.', 'bad'); return; }
+    const app = globalThis.__integrallApp;
+    const subtotal = Number(app?.cartSubtotal?.() || 0);
+    if (subtotal <= 0) { couponFeedback('Adicione produtos à sacola antes de aplicar o cupom.', 'bad'); return; }
+    if (button) button.disabled = true;
+    try {
+      const state = app?.getState?.();
+      const quote = app?.calculateShipping?.(subtotal);
+      const response = await globalThis.IntegrallApi.request('/api/coupons/validate', {
+        method: 'POST',
+        body: JSON.stringify({
+          code,
+          subtotalCents: subtotal,
+          shippingChoice: state?.checkout?.choice || '',
+          shippingQuoted: Boolean(quote && quote.price === null && state?.checkout?.choice === 'delivery')
+        })
+      });
+      appliedCoupon = response.coupon;
+      if (input) input.value = appliedCoupon.code;
+      const label = appliedCoupon.type === 'percent'
+        ? `${appliedCoupon.value}% de desconto`
+        : appliedCoupon.type === 'fixed'
+          ? `${formatMoney(appliedCoupon.value)} de desconto`
+          : 'frete grátis';
+      couponFeedback(`Cupom ${appliedCoupon.code} aplicado: ${label}. O valor final é confirmado pelo servidor.`, 'ok');
+      syncDiscountRow();
+    } catch (error) {
+      clearCoupon(true);
+      couponFeedback(error?.message || 'Cupom inválido.', 'bad');
+    } finally {
+      if (button) button.disabled = false;
+    }
+  }
+
+  function correiosEnabled() {
+    return Boolean(globalThis.__integrallPublicHealth?.features?.correiosShipping);
+  }
+
+  function correiosBox() {
+    let box = $('#correiosOptions');
+    if (box) return box;
+    const anchor = $('#deliveryAddressFields');
+    if (!anchor) return null;
+    box = document.createElement('div');
+    box.id = 'correiosOptions';
+    box.className = 'correios-options';
+    box.hidden = true;
+    anchor.after(box);
+    box.addEventListener('change', event => {
+      if (event.target?.name === 'correiosService') {
+        correiosSelected = event.target.value;
+        syncDiscountRow();
+      }
+    });
+    return box;
+  }
+
+  function renderCorreiosOptions(message) {
+    const box = correiosBox();
+    if (!box) return;
+    box.replaceChildren();
+    const app = globalThis.__integrallApp;
+    const delivery = app?.getState?.()?.checkout?.choice === 'delivery';
+    if (!correiosEnabled() || !delivery) { box.hidden = true; return; }
+    box.hidden = false;
+    const title = document.createElement('strong');
+    title.textContent = 'Opções de frete';
+    box.append(title);
+    if (message) {
+      const note = document.createElement('p');
+      note.className = 'correios-note';
+      note.textContent = message;
+      box.append(note);
+      return;
+    }
+    for (const option of correiosOptions) {
+      const label = document.createElement('label');
+      label.className = 'correios-option';
+      const input = document.createElement('input');
+      input.type = 'radio';
+      input.name = 'correiosService';
+      input.value = option.service;
+      input.checked = option.service === correiosSelected;
+      const copy = document.createElement('span');
+      const name = document.createElement('b');
+      name.textContent = `${option.label} — ${formatMoney(option.priceCents)}`;
+      copy.append(name);
+      if (option.days != null) {
+        const small = document.createElement('small');
+        small.textContent = ` até ${option.days} dia(s) útil(eis)`;
+        copy.append(small);
+      }
+      label.append(input, copy);
+      box.append(label);
+    }
+  }
+
+  async function refreshCorreiosQuote() {
+    if (!correiosEnabled()) return;
+    const app = globalThis.__integrallApp;
+    const state = app?.getState?.();
+    if (state?.checkout?.choice !== 'delivery') { renderCorreiosOptions(); return; }
+    const cep = digits(state?.checkout?.cep).slice(0, 8);
+    const items = (app?.cartDetails?.() || []).map(item => ({
+      productId: item.product.id,
+      variantId: item.variantId || '',
+      qty: Math.max(1, Number(item.qty) || 1)
+    }));
+    if (cep.length !== 8 || !items.length) { renderCorreiosOptions('Informe o CEP para calcular o frete.'); return; }
+    const key = `${cep}|${JSON.stringify(items)}`;
+    if (key === correiosLastKey && correiosOptions.length) { renderCorreiosOptions(); return; }
+    renderCorreiosOptions('Calculando frete…');
+    try {
+      const response = await globalThis.IntegrallApi.request('/api/shipping/quote', {
+        method: 'POST',
+        body: JSON.stringify({cep, items})
+      });
+      correiosOptions = Array.isArray(response.options) ? response.options : [];
+      correiosLastKey = key;
+      if (!correiosOptions.some(option => option.service === correiosSelected)) {
+        correiosSelected = correiosOptions[0]?.service || '';
+      }
+      renderCorreiosOptions(correiosOptions.length ? '' : 'Nenhuma opção de frete disponível para este CEP.');
+      syncDiscountRow();
+    } catch (error) {
+      correiosOptions = [];
+      correiosLastKey = '';
+      renderCorreiosOptions(error?.message || 'Não foi possível calcular o frete agora. O pedido pode ser registrado com frete a confirmar.');
+    }
+  }
+
+  function scheduleCorreiosQuote() {
+    if (!correiosEnabled()) return;
+    clearTimeout(correiosQuoteTimer);
+    correiosQuoteTimer = setTimeout(refreshCorreiosQuote, 400);
   }
 
   function syncAddressVisibility() {
@@ -235,6 +521,7 @@
       shipping: {
         choice: state.checkout?.choice || '',
         cep: digits(state.checkout?.cep).slice(0, 8),
+        service: correiosEnabled() ? cleanText(correiosSelected, 20) : '',
         street: cleanText($('#deliveryStreet')?.value, 180),
         number: cleanText($('#deliveryNumber')?.value, 40),
         complement: cleanText($('#deliveryComplement')?.value, 120),
@@ -248,13 +535,16 @@
         qty: Math.max(1, Math.min(999, Number(item.qty) || 1)),
         gift: Boolean(item.gift),
         giftMessage: cleanText(item.giftMessage, 240)
-      }))
+      })),
+      couponCode: appliedCoupon ? cleanText(appliedCoupon.code, 40) : '',
+      ageConfirmed: Boolean($('#ageConfirmCheckbox')?.checked)
     };
   }
 
   function validateDraft(draft) {
     if (!draft.customer.name) return 'Informe seu nome.';
     if (!draft.customer.email && !draft.customer.phone) return 'Informe um e-mail ou telefone para contato.';
+    if (cartHasAlcohol() && !draft.ageConfirmed) return 'Confirme que você tem 18 anos ou mais para comprar bebidas alcoólicas.';
     if (draft.shipping.choice === 'delivery') {
       if (draft.shipping.cep.length !== 8) return 'Informe um CEP válido.';
       if (!draft.shipping.street || !draft.shipping.number || !draft.shipping.neighborhood || !draft.shipping.city || !/^[A-Z]{2}$/.test(draft.shipping.state)) {
@@ -318,6 +608,7 @@
       <div class="modal-body">
         <div class="order-status-hero"><span id="orderStatusBadge"></span><strong id="orderStatusId"></strong><p id="orderStatusMessage"></p></div>
         <div class="detail-order-grid" id="orderStatusSummary"></div>
+        <div class="order-tracking-box" hidden id="orderTrackingBox"></div>
         <div class="order-timeline" id="orderTimeline"></div>
         <div class="checkout-action-row">
           <button class="btn primary" type="button" id="orderPayButton" hidden>Pagar agora</button>
@@ -333,6 +624,7 @@
     $('#orderRefreshButton').addEventListener('click', () => refreshTrackedOrder());
     $('#orderPayButton').addEventListener('click', () => startPaymentForTrackedOrder());
     $('#orderSupportButton').addEventListener('click', () => openSupport());
+    trapFocus(modal);
     return modal;
   }
 
@@ -386,17 +678,48 @@
     summary.replaceChildren();
     const rows = [
       ['Subtotal', formatMoney(order.subtotalCents)],
-      ['Frete', order.shippingCents == null ? 'A confirmar' : formatMoney(order.shippingCents)],
+      ['Frete', order.shippingCents == null ? 'A confirmar' : formatMoney(order.shippingCents)]
+    ];
+    if (Number(order.discountCents) > 0) rows.push([`Desconto${order.coupon ? ` (${order.coupon})` : ''}`, `− ${formatMoney(order.discountCents)}`]);
+    rows.push(
       ['Total', order.shippingCents == null ? `${formatMoney(order.totalCents)} + frete` : formatMoney(order.totalCents)],
       ['Recebimento', order.shipping?.choice === 'pickup' ? 'Retirada' : 'Entrega'],
       ['Pagamento', order.payment?.status || (order.onlinePaymentAvailable ? 'Disponível' : 'Não iniciado')],
       ['Atualizado', formatDate(order.updatedAt)]
-    ];
+    );
     for (const [label, value] of rows) {
       const cell = document.createElement('div');
       const small = document.createElement('span'); small.textContent = label;
       const strong = document.createElement('b'); strong.textContent = value;
       cell.append(small, strong); summary.append(cell);
+    }
+    const trackingBox = $('#orderTrackingBox');
+    if (trackingBox) {
+      trackingBox.replaceChildren();
+      if (order.trackingCode) {
+        const label = document.createElement('span');
+        label.textContent = `Rastreamento do envio${order.trackingCarrier ? ` — ${order.trackingCarrier}` : ''}`;
+        const code = document.createElement('b');
+        code.textContent = order.trackingCode;
+        trackingBox.append(label, code);
+        const events = document.createElement('div');
+        events.className = 'tracking-events';
+        events.id = 'trackingEvents';
+        events.textContent = 'Consultando a transportadora…';
+        trackingBox.append(events);
+        if (order.trackingUrl && /^https:\/\//i.test(order.trackingUrl)) {
+          const link = document.createElement('a');
+          link.href = order.trackingUrl;
+          link.target = '_blank';
+          link.rel = 'noopener noreferrer';
+          link.textContent = 'Ver no site da transportadora';
+          trackingBox.append(link);
+        }
+        trackingBox.hidden = false;
+        loadTrackingEvents(order);
+      } else {
+        trackingBox.hidden = true;
+      }
     }
     const timeline = $('#orderTimeline'); timeline.replaceChildren();
     const events = Array.isArray(order.history) ? order.history : [];
@@ -417,6 +740,56 @@
     const app = globalThis.__integrallApp;
     $('#orderSupportButton').hidden = !(digits(app?.getState?.()?.settings?.whatsapp || cfg.supportPhone) || cfg.supportEmail);
     modal.classList.add('open'); modal.setAttribute('aria-hidden', 'false'); document.body.classList.add('lock');
+  }
+
+  async function loadTrackingEvents(order) {
+    const container = $('#trackingEvents');
+    if (!container) return;
+    const reference = loadLastOrder();
+    if (!reference?.id || !reference?.checkoutToken) { container.textContent = ''; return; }
+    try {
+      const data = await globalThis.IntegrallApi.request('/api/orders/tracking', {
+        method: 'POST',
+        body: JSON.stringify({orderId: reference.id, checkoutToken: reference.checkoutToken})
+      });
+      container.replaceChildren();
+      if (data.expectedDelivery) {
+        const eta = document.createElement('div');
+        eta.className = 'tracking-eta';
+        try {
+          eta.textContent = `Previsão de entrega: ${new Date(data.expectedDelivery).toLocaleDateString('pt-BR')}`;
+        } catch { eta.textContent = `Previsão de entrega: ${data.expectedDelivery}`; }
+        container.append(eta);
+      }
+      const events = Array.isArray(data.events) ? data.events.slice(0, 8) : [];
+      if (!events.length) {
+        container.append(Object.assign(document.createElement('div'), {className: 'tracking-note', textContent: 'A transportadora ainda não registrou movimentações. Volte mais tarde.'}));
+        return;
+      }
+      for (const [index, event] of events.entries()) {
+        const row = document.createElement('div');
+        row.className = `tracking-event${index === 0 ? ' latest' : ''}`;
+        const dot = document.createElement('span');
+        dot.className = 'tracking-dot';
+        const copy = document.createElement('div');
+        const title = document.createElement('b');
+        title.textContent = event.description || 'Atualização';
+        const meta = document.createElement('small');
+        const when = event.at ? formatDate(event.at) : '';
+        meta.textContent = [when, event.location].filter(Boolean).join(' • ');
+        copy.append(title, meta);
+        row.append(dot, copy);
+        container.append(row);
+      }
+    } catch (error) {
+      container.textContent = '';
+      const note = document.createElement('div');
+      note.className = 'tracking-note';
+      note.textContent = error?.message?.includes('não está configurado')
+        ? 'Acompanhe pelo link da transportadora abaixo.'
+        : (error?.message || 'Rastreamento indisponível no momento — tente novamente mais tarde.');
+      container.append(note);
+    }
   }
 
   async function fetchOrderStatus(reference = loadLastOrder()) {
@@ -450,6 +823,8 @@
       status: order.status || 'received',
       subtotalCents: order.subtotalCents,
       shippingCents: order.shippingCents,
+      discountCents: order.discountCents,
+      coupon: order.coupon,
       totalCents: order.totalCents,
       requiresShippingQuote: order.requiresShippingQuote,
       shipping: {choice: app.getState()?.checkout?.choice || ''},
@@ -510,9 +885,12 @@
       }
 
       clearAttempt();
+      clearCoupon();
+      const couponField = $('#couponInput');
+      if (couponField) couponField.value = '';
       globalThis.IntegrallCart?.clear?.();
       showOrderCreated(order, app);
-      notify(`Pedido ${order.id} registrado com sucesso.`, 'ok');
+      notify(`Pedido ${order.id} confirmado! Guarde o número para acompanhar.`, 'ok');
     } catch (error) {
       notify(error?.message || 'Não foi possível concluir o pedido.', 'bad');
     } finally {
@@ -553,18 +931,66 @@
 
   function refreshConfig() { renderPaymentMethods(); }
 
+  async function loadPublicHealth() {
+    try {
+      const health = await globalThis.IntegrallApi.request('/api/health');
+      globalThis.__integrallPublicHealth = health;
+      if (health?.features?.correiosShipping) scheduleCorreiosQuote();
+    } catch {}
+  }
+
   function init() {
     injectAccessibility();
     bindLegalLinks();
     hydrateCustomerFields();
     renderPaymentMethods();
     syncAddressVisibility();
+    syncAgeConfirm();
+    loadPublicHealth();
     document.addEventListener('click', handleCheckout, true);
     $('#trackLastOrder')?.addEventListener('click', async () => {
       try { await fetchOrderStatus(); }
       catch (error) { notify(error?.message || 'Nenhum pedido desta sessão para acompanhar.', 'bad'); }
     });
-    document.addEventListener('change', event => { if (event.target?.name === 'shippingChoice') setTimeout(syncAddressVisibility, 0); });
+    document.addEventListener('change', event => { if (event.target?.name === 'shippingChoice') setTimeout(() => { syncAddressVisibility(); syncDiscountRow(); scheduleCorreiosQuote(); }, 0); });
+    document.addEventListener('input', event => { if (event.target?.id === 'modalCep') scheduleCorreiosQuote(); });
+    $('#couponApply')?.addEventListener('click', applyCoupon);
+    $('#couponInput')?.addEventListener('keydown', event => { if (event.key === 'Enter') { event.preventDefault(); applyCoupon(); } });
+    $('#couponInput')?.addEventListener('input', () => { if (appliedCoupon) { clearCoupon(true); couponFeedback('Cupom alterado — clique em Aplicar para validar.', ''); } });
+    const cartObserver = new MutationObserver(() => { syncAgeConfirm(); syncDiscountRow(); scheduleCorreiosQuote(); });
+    const cartList = $('#cartList');
+    if (cartList) cartObserver.observe(cartList, {childList: true, subtree: true});
+    const totals = $('#cartTotal');
+    if (totals) new MutationObserver(() => syncDiscountRow()).observe(totals, {characterData: true, childList: true, subtree: true});
+    // Reaplica o rótulo do frete da transportadora quando o app re-renderiza o carrinho
+    const shippingNode = $('#cartShipping');
+    if (shippingNode) new MutationObserver(() => {
+      if (correiosEnabled() && correiosOptions.length && !shippingNode.dataset.syncing) {
+        shippingNode.dataset.syncing = '1';
+        syncDiscountRow();
+        delete shippingNode.dataset.syncing;
+      }
+    }).observe(shippingNode, {characterData: true, childList: true, subtree: true});
+    handleOrderDeepLink();
+  }
+
+  /**
+   * Link do e-mail de confirmação (?pedido=INT-...): abre o acompanhamento
+   * automaticamente. A autorização (checkoutToken) vem do armazenamento local
+   * do cliente; se ele abrir em outro dispositivo, orienta usar o mesmo
+   * navegador da compra ou falar com a loja.
+   */
+  async function handleOrderDeepLink() {
+    const query = new URLSearchParams(location.search);
+    const requested = cleanText(query.get('pedido'), 120);
+    if (!requested) return;
+    query.delete('pedido');
+    history.replaceState(null, '', location.pathname + (query.toString() ? `?${query}` : '') + location.hash);
+    const reference = loadLastOrder();
+    if (reference?.id === requested && reference?.checkoutToken) {
+      try { await fetchOrderStatus(reference); return; } catch {}
+    }
+    notify(`Para acompanhar o pedido ${requested}, abra este link no mesmo navegador em que a compra foi feita — ou fale com a INTEGRALL informando o número.`, 'bad');
   }
 
   globalThis.__integrallCheckout = Object.freeze({refreshConfig, config, handlePaymentReturn, showLastOrder: () => fetchOrderStatus()});

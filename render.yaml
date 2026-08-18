@@ -33,9 +33,47 @@ services:
       - key: MERCADO_PAGO_PAYMENT_EXPIRATION_DAYS
         value: "3"
       - key: SHIPPING_MODE
-        value: quote
+        value: correios
       - key: ALLOW_PAYMENT_WITH_QUOTED_SHIPPING
         value: "false"
+      - key: CORREIOS_USER
+        sync: false
+      - key: CORREIOS_ACCESS_CODE
+        sync: false
+      - key: CORREIOS_POSTAGE_CARD
+        sync: false
+      - key: CORREIOS_CONTRACT
+        sync: false
+      - key: CORREIOS_ORIGIN_CEP
+        sync: false
+      - key: CORREIOS_SERVICES
+        value: "03298:PAC,03220:SEDEX"
+      - key: JADLOG_TOKEN
+        sync: false
+      - key: JADLOG_CNPJ
+        sync: false
+      - key: JADLOG_CONTA
+        sync: false
+      - key: JADLOG_CONTRATO
+        sync: false
+      - key: JADLOG_MODALIDADE
+        value: "3"
+      - key: CARRIER_SPLIT_UNITS
+        value: "12"
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        value: "587"
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASSWORD
+        sync: false
+      - key: SMTP_FROM
+        sync: false
+      - key: SMTP_FROM_NAME
+        value: INTEGRALL
+      - key: ORDER_EXPIRE_DAYS
+        value: "7"
 
 databases:
   - name: integrall-db

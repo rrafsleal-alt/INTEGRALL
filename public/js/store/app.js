@@ -10,6 +10,19 @@
         document.head.append(canonical);
       }
       canonical.href = location.origin + location.pathname;
+      // og:image/twitter:image precisam de URL ABSOLUTA para funcionar no
+      // WhatsApp/Facebook; o HTML estático só conhece o caminho relativo.
+      for (const selector of ['meta[property="og:image"]', 'meta[name="twitter:image"]']) {
+        const meta = document.querySelector(selector);
+        if (meta && meta.content.startsWith('/')) meta.content = location.origin + meta.content;
+      }
+      let ogUrl = document.querySelector('meta[property="og:url"]');
+      if (!ogUrl) {
+        ogUrl = document.createElement('meta');
+        ogUrl.setAttribute('property', 'og:url');
+        document.head.append(ogUrl);
+      }
+      ogUrl.content = location.origin + location.pathname;
     }
 
     const state = app.getState();
