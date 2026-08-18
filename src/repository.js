@@ -282,11 +282,22 @@ export class Repository {
     }
   }
 
+  /**
+   * Atualiza um pedido com lock (FOR UPDATE).
+   * `patch` pode ser um objeto OU uma função (currentFresh) => patch | null.
+   * A forma funcional é avaliada DENTRO do lock, sobre o estado mais recente —
+   * obrigatória para decisões dependentes de estado (ex.: webhook de
+   * pagamento), eliminando TOCTOU entre ler o pedido e gravar a decisão.
+   * Retornar null da função aborta sem gravar (retorna o estado atual).
+   */
   async updateOrder(id, patch, options = {}) {
+    const resolvePatch = current => (typeof patch === 'function' ? patch(current) : patch);
     if (!this.pool) {
       const current = await this.getOrder(id);
       if (!current) return null;
-      let next = mergeOrder(current, patch, options);
+      const resolved = resolvePatch(current);
+      if (resolved == null) return clone(current);
+      let next = mergeOrder(current, resolved, typeof options === 'function' ? options(current) : options);
       if (!current.inventoryCommittedAt && INVENTORY_COMMIT_STATUSES.has(next.status)) {
         const result = commitInventory(this.memoryCatalog, next);
         this.memoryCatalog = result.catalog;
@@ -306,7 +317,13 @@ export class Repository {
         await client.query('ROLLBACK');
         return null;
       }
-      let next = mergeOrder(current, patch, options);
+      // Forma funcional: decide o patch DENTRO do lock, sobre o estado fresco.
+      const resolved = resolvePatch(current);
+      if (resolved == null) {
+        await client.query('ROLLBACK');
+        return current;
+      }
+      let next = mergeOrder(current, resolved, typeof options === 'function' ? options(current) : options);
 
       if (!current.inventoryCommittedAt && INVENTORY_COMMIT_STATUSES.has(next.status)) {
         const catalogResult = await client.query('SELECT data FROM integrall_catalog WHERE id = 1 FOR UPDATE');

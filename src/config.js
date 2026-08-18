@@ -81,3 +81,25 @@ export function assertProductionConfig() {
   if (config.mercadoPagoAccessToken && !config.mercadoPagoWebhookSecret) missing.push('MERCADO_PAGO_WEBHOOK_SECRET (obrigatório quando o Mercado Pago está ativo)');
   if (missing.length) throw new Error(`Configuração de produção incompleta: ${missing.join(', ')}`);
 }
+
+/**
+ * Avisos de coerência entre configurações (não bloqueiam o boot, mas
+ * denunciam combinações que degradam a operação silenciosamente).
+ */
+export function configWarnings() {
+  const warnings = [];
+  if (config.shippingMode === 'correios') {
+    const correiosReady = config.correiosUser && config.correiosAccessCode && config.correiosPostageCard && config.correiosOriginCep.length === 8;
+    const jadlogReady = config.jadlogToken && config.jadlogCnpj.length === 14 && config.correiosOriginCep.length === 8;
+    if (!correiosReady && !jadlogReady) {
+      warnings.push('SHIPPING_MODE=correios sem credenciais completas de Correios nem Jadlog: TODOS os pedidos de entrega cairão em cotação manual.');
+    }
+  }
+  if (config.orderExpireDays > 0 && config.mercadoPagoAccessToken && config.orderExpireDays < config.mercadoPagoExpirationDays) {
+    warnings.push(`ORDER_EXPIRE_DAYS (${config.orderExpireDays}) é menor que a expiração da preferência do Mercado Pago (${config.mercadoPagoExpirationDays} dias): pedidos podem ser cancelados com link de pagamento ainda ativo (a proteção approved_after_cancel cobre, mas gera revisão manual).`);
+  }
+  if (config.smtpHost && (!config.smtpUser || !config.smtpPassword || !config.smtpFrom)) {
+    warnings.push('SMTP_HOST definido mas SMTP_USER/SMTP_PASSWORD/SMTP_FROM incompletos: nenhum e-mail será enviado.');
+  }
+  return warnings;
+}

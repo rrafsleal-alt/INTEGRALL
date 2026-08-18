@@ -3,7 +3,7 @@ import process from 'node:process';
 import {readFile} from 'node:fs/promises';
 import {fileURLToPath} from 'node:url';
 import path from 'node:path';
-import {config, assertProductionConfig} from './src/config.js';
+import {config, assertProductionConfig, configWarnings} from './src/config.js';
 import {normalizeCatalog, publicCatalog, buildOrder, ORDER_STATUSES, cleanText, findCoupon, validateCoupon, couponDiscount} from './src/catalog.js';
 import {Repository} from './src/repository.js';
 import {securityHeaders, adminAuth, rateLimit, safeEqual} from './src/security.js';
@@ -499,35 +499,45 @@ app.post('/api/webhooks/mercadopago', webhookLimiter, publicJson, asyncRoute(asy
   const order = await repo.getOrder(orderId);
   if (!order) return res.status(200).json({ok: true, ignored: true});
 
-  const evaluation = evaluatePayment(order, payment);
-  if (!evaluation.shouldUpdate) {
+  // A avaliação roda DENTRO do lock do pedido (forma funcional do
+  // updateOrder), sobre o estado mais recente. Sem isso haveria TOCTOU:
+  // admin cancela entre a leitura e a gravação → 'approved' avaliado sobre o
+  // estado antigo ressuscitaria o pedido cancelado como pago.
+  let lastEvaluation = null;
+  const updated = await repo.updateOrder(order.id, current => {
+    const evaluation = evaluatePayment(current, payment);
+    lastEvaluation = evaluation;
+    if (!evaluation.shouldUpdate) return null; // aborta sem gravar
+    return {
+      status: evaluation.nextStatus,
+      payment: {
+        provider: 'mercadopago',
+        preferenceId: current.payment?.preferenceId || payment.preference_id || '',
+        paymentId: String(payment.id),
+        status: evaluation.paymentStatus,
+        statusDetail: cleanText(payment.status_detail, 160),
+        approvedAt: payment.date_approved || '',
+        refundedCents: Math.round(Number(payment.transaction_amount_refunded || 0) * 100)
+      }
+    };
+  }, current => ({
+    source: 'mercadopago-webhook',
+    note: `Pagamento atualizado para ${lastEvaluation?.paymentStatus || payment.status || 'desconhecido'}.`
+  }));
+
+  if (lastEvaluation && !lastEvaluation.shouldUpdate) {
     // Divergência ignorada (ex.: 2º pagamento com outra preferência num pedido
     // já pago) precisa ficar VISÍVEL no pedido: pode haver dinheiro do cliente
     // retido sem registro. Grava no histórico para o admin tratar/reembolsar.
-    if (evaluation.warning) {
+    if (lastEvaluation.warning) {
       await repo.updateOrder(order.id, {}, {
         source: 'mercadopago-webhook',
-        note: `ATENÇÃO: webhook ignorado (${evaluation.warning}) — pagamento ${payment.id} status ${payment.status || '?'} valor ${payment.transaction_amount ?? '?'}. Verifique se há cobrança duplicada para reembolsar.`
+        note: `ATENÇÃO: webhook ignorado (${lastEvaluation.warning}) — pagamento ${payment.id} status ${payment.status || '?'} valor ${payment.transaction_amount ?? '?'}. Verifique se há cobrança duplicada para reembolsar.`
       }).catch(error => console.error('Falha ao registrar warning de webhook:', error?.message || error));
     }
-    return res.status(200).json({ok: true, ignored: true, ...(evaluation.warning ? {warning: evaluation.warning} : {})});
+    return res.status(200).json({ok: true, ignored: true, ...(lastEvaluation.warning ? {warning: lastEvaluation.warning} : {})});
   }
 
-  const updated = await repo.updateOrder(order.id, {
-    status: evaluation.nextStatus,
-    payment: {
-      provider: 'mercadopago',
-      preferenceId: order.payment?.preferenceId || payment.preference_id || '',
-      paymentId: String(payment.id),
-      status: evaluation.paymentStatus,
-      statusDetail: cleanText(payment.status_detail, 160),
-      approvedAt: payment.date_approved || '',
-      refundedCents: Math.round(Number(payment.transaction_amount_refunded || 0) * 100)
-    }
-  }, {
-    source: 'mercadopago-webhook',
-    note: `Pagamento atualizado para ${evaluation.paymentStatus || payment.status || 'desconhecido'}.`
-  });
   if (updated && order.status !== updated.status && EMAIL_STATUS_EVENTS.has(updated.status)) sendOrderEmail(updated, 'status');
   res.status(200).json({ok: true});
 }));
@@ -792,6 +802,7 @@ if (config.orderExpireDays > 0) {
 
 const server = app.listen(config.port, () => {
   console.log(`INTEGRALL v9.5 em http://localhost:${config.port} (${repo.persistent ? 'PostgreSQL' : 'memória de desenvolvimento'})`);
+  for (const warning of configWarnings()) console.warn(`[config] AVISO: ${warning}`);
 });
 
 async function shutdown(signal) {

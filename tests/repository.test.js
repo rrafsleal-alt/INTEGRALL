@@ -107,3 +107,29 @@ test('busca com % e _ é tratada literalmente (sem curinga acidental)', async ()
   assert.equal(hits.length, 1);
   assert.equal(hits[0].id, 'A1');
 });
+
+test('updateOrder funcional: decisão tomada sobre o estado fresco (anti-TOCTOU do webhook)', async () => {
+  const repo = new Repository({databaseUrl: '', initialCatalog: {version: 9, settings: {}, commerce: {}, coupons: [], products: []}, production: false});
+  await repo.init();
+  const base = {clientOrderId: 'toctou-1', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), customer: {name: 'X', email: 'x@x.com'}, items: [], subtotalCents: 5000, shippingCents: 0, totalCents: 5000, payment: {preferenceId: 'pref-1'}};
+  await repo.createOrder({...base, id: 'TOCTOU-1', status: 'awaiting_payment'});
+
+  // Simula admin cancelando ANTES da decisão do webhook ser aplicada
+  await repo.updateOrder('TOCTOU-1', {status: 'cancelled'}, {source: 'admin'});
+
+  // Webhook usa a forma funcional: enxerga 'cancelled' e decide payment_review
+  let seenStatus = null;
+  const updated = await repo.updateOrder('TOCTOU-1', current => {
+    seenStatus = current.status;
+    if (current.status === 'cancelled') return {status: 'payment_review'};
+    return {status: 'paid'};
+  }, () => ({source: 'webhook'}));
+  assert.equal(seenStatus, 'cancelled');
+  assert.equal(updated.status, 'payment_review');
+
+  // Retornar null aborta sem gravar
+  const before = await repo.getOrder('TOCTOU-1');
+  const aborted = await repo.updateOrder('TOCTOU-1', () => null, {source: 'noop'});
+  assert.equal(aborted.status, before.status);
+  assert.equal((aborted.history || []).length, (before.history || []).length);
+});
