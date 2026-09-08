@@ -1,21 +1,3 @@
-services:
-  postgres:
-    image: postgres:16-alpine
-    container_name: integrall-postgres
-    restart: unless-stopped
-    environment:
-      POSTGRES_DB: integrall
-      POSTGRES_USER: integrall
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-integrall_local_2026}
-    ports:
-      - "5433:5432"
-    volumes:
-      - integrall_pgdata:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U integrall -d integrall"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
-
-volumes:
-  integrall_pgdata:
+version https://git-lfs.github.com/spec/v1
+oid sha256:ffca67b6b6ada3ab0ac9f6e32864db1f36d3c06fc1e372082a48f50b7b2937e2
+size 526

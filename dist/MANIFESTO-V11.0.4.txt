@@ -1,26 +1,3 @@
-REVISÃO POSTERIOR — CORREIOS PAC/SEDEX: consulte CONFIGURAR-CORREIOS.md e TESTES-CORREIOS.md. O conteúdo abaixo é histórico.
-
-> HISTÓRICO DA PRIMEIRA AUDITORIA. A revisão vigente desta entrega é R2; consulte REVISAO-CLIENTE-R2.md e TESTES-CLIENTE-R2.md. Resultados antigos abaixo não certificam a revisão atual.
-
-INTEGRALL — MANIFESTO DE ENTREGA
-Data: 2026-09-06
-Entrada: INTEGRALL-v11.1.8-COMPLETO-CORRIGIDO(1).zip
-Saída solicitada: INTEGRALL-v11.0.4-corrigido-auditado.zip
-Versão interna mantida: 11.1.8 (não houve downgrade)
-Fonte: server.js, src/, public/, package.json, package-lock.json
-Dados preservados: data/catalog*.json, data/local-state/, data/media-seed/, public/assets/
-Testes: tests/, scripts/*regression*, scripts/audit-*
-Documentação atual: CORRECOES-V11.0.4.md, TESTES-V11.0.4.md,
-ARQUIVOS-ALTERADOS-V11.0.4.md, PATCH-V11.0.4.diff
-Evidências: docs/evidencias-v11.0.4/
-Integridade de fonte: MANIFEST.sha256 e npm run source:verify
-Build: dist/, BUILD-INFO.json e BUILD-MANIFEST.sha256
-Instalação: npm ci (não concluída neste ambiente)
-Desenvolvimento: configure o arquivo privado e execute npm run dev
-Testes locais: npm run test:offline (224 aprovados)
-Controladores reais: npm run test:audit; adaptador HTTP de teste, não Express
-Build parcial: npm run build:offline (concluído)
-Build completo: npm run build (falhou por dependência Express ausente)
-Smoke do pacote estático: npm run test:production:http
-Resultado: correções implementadas; homologação de produção NÃO concluída.
-Registro do reteste do ZIP: RETESTE-ZIP-V11.0.4.txt externo, associado ao hash final.
+version https://git-lfs.github.com/spec/v1
+oid sha256:4461bdd1dfedda8d70bb6d9e2fb3d4205bdd7211959c1ae7461d315ab22d46b8
+size 1620

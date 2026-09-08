@@ -1,14 +1,3 @@
-{
-  "project": "integrall-online",
-  "version": "11.1.8",
-  "generatedAt": "2026-09-08T14:00:02.970Z",
-  "node": "v24.14.0",
-  "sourceRevision": null,
-  "model": "Node.js/Express com arquivos estáticos; pacote de implantação",
-  "validation": {
-    "profile": "full",
-    "integrationTests": "passed",
-    "externalServices": "not-validated",
-    "note": "Integração HTTP local aprovada; serviços externos requerem homologação separada."
-  }
-}
+version https://git-lfs.github.com/spec/v1
+oid sha256:a68bb48f8cc2be1c1406e8206dc6126a63184a06d9368271e0d9c05e50a58721
+size 452
