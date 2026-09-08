@@ -1,0 +1,26 @@
+{
+  "name": "integrall-online",
+  "version": "11.1.8",
+  "private": true,
+  "type": "module",
+  "description": "Loja INTEGRALL v11.1.8 com integração Correios Preço/Prazo, cotação protegida e embalagens cadastradas.",
+  "engines": {
+    "node": ">=20.12 <27"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "start:local": "node --env-file=.env server.js",
+    "correios:check": "node scripts/check-correios.mjs",
+    "catalog:show-all": "node scripts/show-all-products.mjs",
+    "correios:check:local": "node --env-file=.env scripts/check-correios.mjs",
+    "db:migrate": "node scripts/migrate.mjs",
+    "media:verify": "node scripts/verify-media.mjs",
+    "deployment:check": "node scripts/deployment-check.mjs",
+    "release:verify": "node scripts/verify-release.mjs ."
+  },
+  "dependencies": {
+    "express": "5.1.0",
+    "mercadopago": "3.4.0",
+    "pg": "8.16.3"
+  }
+}

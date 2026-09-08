@@ -1,0 +1,9 @@
+{
+  "status": "REPROVADO",
+  "widths": 18,
+  "failures": [
+    "layout-simulation-1440x900-csszoom-1.25",
+    "layout-simulation-1440x900-csszoom-1.5",
+    "layout-simulation-1440x900-csszoom-2"
+  ]
+}

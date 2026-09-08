@@ -1,0 +1,200 @@
+{
+  "mode": "Chromium isolado + ponte HTTP local + módulos reais + Correios simulado; NÃO Express/API externa",
+  "results": [
+    {
+      "scenario": "cotacao-e-layout-280px",
+      "status": "APROVADO",
+      "details": {
+        "options": 2,
+        "text": "Opções de fretePAC — R$ 23,17Até 8 dias úteis após a postagem • 1 volumeSEDEX — R$ 26,46Até 4 dias úteis após a postagem • 1 volumePrazo do transporte após a postagem; não inclui o tempo de preparação da loja. Cotação válida por até 5 minutos e reconfirmada ao concluir.",
+        "total": "R$ 73,17",
+        "viewport": 280,
+        "left": 20,
+        "right": 245,
+        "scroll": 265
+      }
+    },
+    {
+      "scenario": "escolha-SEDEX-280px",
+      "status": "APROVADO",
+      "details": true
+    },
+    {
+      "scenario": "cotacao-e-layout-320px",
+      "status": "APROVADO",
+      "details": {
+        "options": 2,
+        "text": "Opções de fretePAC — R$ 23,17Até 8 dias úteis após a postagem • 1 volumeSEDEX — R$ 26,46Até 4 dias úteis após a postagem • 1 volumePrazo do transporte após a postagem; não inclui o tempo de preparação da loja. Cotação válida por até 5 minutos e reconfirmada ao concluir.",
+        "total": "R$ 73,17",
+        "viewport": 320,
+        "left": 20,
+        "right": 285,
+        "scroll": 305
+      }
+    },
+    {
+      "scenario": "escolha-SEDEX-320px",
+      "status": "APROVADO",
+      "details": true
+    },
+    {
+      "scenario": "cotacao-e-layout-375px",
+      "status": "APROVADO",
+      "details": {
+        "options": 2,
+        "text": "Opções de fretePAC — R$ 23,17Até 8 dias úteis após a postagem • 1 volumeSEDEX — R$ 26,46Até 4 dias úteis após a postagem • 1 volumePrazo do transporte após a postagem; não inclui o tempo de preparação da loja. Cotação válida por até 5 minutos e reconfirmada ao concluir.",
+        "total": "R$ 73,17",
+        "viewport": 375,
+        "left": 20,
+        "right": 340,
+        "scroll": 360
+      }
+    },
+    {
+      "scenario": "escolha-SEDEX-375px",
+      "status": "APROVADO",
+      "details": true
+    },
+    {
+      "scenario": "cotacao-e-layout-430px",
+      "status": "APROVADO",
+      "details": {
+        "options": 2,
+        "text": "Opções de fretePAC — R$ 23,17Até 8 dias úteis após a postagem • 1 volumeSEDEX — R$ 26,46Até 4 dias úteis após a postagem • 1 volumePrazo do transporte após a postagem; não inclui o tempo de preparação da loja. Cotação válida por até 5 minutos e reconfirmada ao concluir.",
+        "total": "R$ 73,17",
+        "viewport": 430,
+        "left": 20,
+        "right": 395,
+        "scroll": 415
+      }
+    },
+    {
+      "scenario": "escolha-SEDEX-430px",
+      "status": "APROVADO",
+      "details": true
+    },
+    {
+      "scenario": "cotacao-e-layout-768px",
+      "status": "APROVADO",
+      "details": {
+        "options": 2,
+        "text": "Opções de fretePAC — R$ 23,17Até 8 dias úteis após a postagem • 1 volumeSEDEX — R$ 26,46Até 4 dias úteis após a postagem • 1 volumePrazo do transporte após a postagem; não inclui o tempo de preparação da loja. Cotação válida por até 5 minutos e reconfirmada ao concluir.",
+        "total": "R$ 73,17",
+        "viewport": 768,
+        "left": 333,
+        "right": 733,
+        "scroll": 753
+      }
+    },
+    {
+      "scenario": "escolha-SEDEX-768px",
+      "status": "APROVADO",
+      "details": true
+    },
+    {
+      "scenario": "cotacao-e-layout-1024px",
+      "status": "APROVADO",
+      "details": {
+        "options": 2,
+        "text": "Opções de fretePAC — R$ 23,17Até 8 dias úteis após a postagem • 1 volumeSEDEX — R$ 26,46Até 4 dias úteis após a postagem • 1 volumePrazo do transporte após a postagem; não inclui o tempo de preparação da loja. Cotação válida por até 5 minutos e reconfirmada ao concluir.",
+        "total": "R$ 73,17",
+        "viewport": 1024,
+        "left": 589,
+        "right": 989,
+        "scroll": 1009
+      }
+    },
+    {
+      "scenario": "escolha-SEDEX-1024px",
+      "status": "APROVADO",
+      "details": true
+    },
+    {
+      "scenario": "cotacao-e-layout-1440px",
+      "status": "APROVADO",
+      "details": {
+        "options": 2,
+        "text": "Opções de fretePAC — R$ 23,17Até 8 dias úteis após a postagem • 1 volumeSEDEX — R$ 26,46Até 4 dias úteis após a postagem • 1 volumePrazo do transporte após a postagem; não inclui o tempo de preparação da loja. Cotação válida por até 5 minutos e reconfirmada ao concluir.",
+        "total": "R$ 73,17",
+        "viewport": 1440,
+        "left": 1005,
+        "right": 1405,
+        "scroll": 1425
+      }
+    },
+    {
+      "scenario": "escolha-SEDEX-1440px",
+      "status": "APROVADO",
+      "details": true
+    },
+    {
+      "scenario": "cotacao-e-layout-1920px",
+      "status": "APROVADO",
+      "details": {
+        "options": 2,
+        "text": "Opções de fretePAC — R$ 23,17Até 8 dias úteis após a postagem • 1 volumeSEDEX — R$ 26,46Até 4 dias úteis após a postagem • 1 volumePrazo do transporte após a postagem; não inclui o tempo de preparação da loja. Cotação válida por até 5 minutos e reconfirmada ao concluir.",
+        "total": "R$ 73,17",
+        "viewport": 1920,
+        "left": 1485,
+        "right": 1885,
+        "scroll": 1905
+      }
+    },
+    {
+      "scenario": "escolha-SEDEX-1920px",
+      "status": "APROVADO",
+      "details": true
+    },
+    {
+      "scenario": "cotacao-disponivel-com-health-indisponivel",
+      "status": "APROVADO",
+      "details": true
+    },
+    {
+      "scenario": "quantidade-invalida-cotacao-e-soma-volumes",
+      "status": "APROVADO",
+      "details": true
+    },
+    {
+      "scenario": "retirada-remove-cotacao-sem-credenciais",
+      "status": "APROVADO",
+      "details": true
+    },
+    {
+      "scenario": "resposta-antiga-CEP-nao-sobrescreve-escolha-nova",
+      "status": "APROVADO",
+      "details": true
+    },
+    {
+      "scenario": "falha-provedor-nao-vira-frete-gratis-e-permite-manual",
+      "status": "APROVADO",
+      "details": true
+    },
+    {
+      "scenario": "repetir-cotacao-apos-recuperacao",
+      "status": "APROVADO",
+      "details": true
+    },
+    {
+      "scenario": "expiracao-visual-remove-opcao-antiga",
+      "status": "APROVADO",
+      "details": true
+    },
+    {
+      "scenario": "checkout-recusa-preco-alterado-e-pede-reconfirmacao",
+      "status": "APROVADO",
+      "details": true
+    },
+    {
+      "scenario": "checkout-SEDEX-persistencia-metadata-recibo-e-total",
+      "status": "APROVADO",
+      "details": {
+        "service": "03220",
+        "receiptIncluded": true,
+        "total": "76,46",
+        "providerRechecked": true
+      }
+    }
+  ],
+  "failures": []
+}

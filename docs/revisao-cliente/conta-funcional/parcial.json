@@ -1,0 +1,150 @@
+[
+  {
+    "test": "Logout disponível com pedidos ainda carregando",
+    "status": "APROVADO",
+    "observed": {
+      "ok": true,
+      "logoutWhileOrdersPending": true,
+      "pageErrors": []
+    }
+  },
+  {
+    "test": "Resposta de sessão anterior não desfaz logout",
+    "status": "APROVADO",
+    "observed": {
+      "ok": true,
+      "resurrectedSession": false,
+      "pageErrors": []
+    }
+  },
+  {
+    "test": "Pedidos atrasados não acrescentam ações privadas na tela de login",
+    "status": "APROVADO",
+    "observed": {
+      "ok": true,
+      "privateActionsOnLogin": 0,
+      "pageErrors": []
+    }
+  },
+  {
+    "test": "Solicitação antiga de código não substitui tela reaberta",
+    "status": "APROVADO",
+    "observed": {
+      "ok": true,
+      "oldCodeViewReappeared": false,
+      "pageErrors": []
+    }
+  },
+  {
+    "test": "Comprar novamente preserva trava de rolagem da sacola",
+    "status": "APROVADO",
+    "observed": {
+      "locked": true,
+      "cartOpen": true,
+      "accountOpen": false,
+      "ok": true,
+      "pageErrors": []
+    }
+  },
+  {
+    "test": "Logout com sessão expirada volta ao login",
+    "status": "APROVADO",
+    "observed": {
+      "ok": true,
+      "loginVisible": true,
+      "pageErrors": []
+    }
+  },
+  {
+    "test": "Falha de logout não simula sucesso; nova tentativa funciona",
+    "status": "APROVADO",
+    "observed": {
+      "ok": true,
+      "keptOnFailure": true,
+      "retryWorks": true,
+      "pageErrors": []
+    }
+  },
+  {
+    "test": "Endereço incompleto não é enviado como cadastro válido",
+    "status": "APROVADO",
+    "observed": {
+      "ok": true,
+      "invalidAddressSubmitted": false,
+      "pageErrors": []
+    }
+  },
+  {
+    "test": "Consultar o e-mail em outra aba não apaga a etapa do código",
+    "status": "APROVADO",
+    "observed": {
+      "ok": true,
+      "codeViewPreserved": true,
+      "pageErrors": []
+    }
+  },
+  {
+    "test": "Fechar e reabrir durante login não prende a conta em carregamento",
+    "status": "APROVADO",
+    "observed": {
+      "ok": true,
+      "stillChecking": false,
+      "pageErrors": []
+    }
+  },
+  {
+    "test": "Gravação antiga de perfil não substitui a nova conta",
+    "status": "APROVADO",
+    "observed": {
+      "ok": true,
+      "currentAccountTitle": "Minha conta — nova@example.com",
+      "pageErrors": []
+    }
+  },
+  {
+    "test": "Notificação de outra aba revalida sessão revogada",
+    "status": "APROVADO",
+    "observed": {
+      "ok": true,
+      "privateActions": 0,
+      "pageErrors": []
+    }
+  },
+  {
+    "test": "Endereço completo continua sendo enviado e exibido",
+    "status": "APROVADO",
+    "observed": {
+      "ok": true,
+      "submitted": 1,
+      "pageErrors": []
+    }
+  },
+  {
+    "test": "Produto: atualização silenciosa respeita scroll false",
+    "status": "APROVADO",
+    "observed": {
+      "ok": true,
+      "scrollY": 0,
+      "pageErrors": []
+    }
+  },
+  {
+    "test": "Produto: abertura agendada é descartada ao mudar de rota",
+    "status": "APROVADO",
+    "observed": {
+      "ok": true,
+      "oldProductReopened": false,
+      "pageErrors": []
+    }
+  },
+  {
+    "test": "Conta: diálogo nomeado e foco inicial em controle útil",
+    "status": "APROVADO",
+    "observed": {
+      "ok": true,
+      "namedDialog": 1,
+      "focusedId": "closeAccount",
+      "pageErrors": []
+    }
+  }
+]

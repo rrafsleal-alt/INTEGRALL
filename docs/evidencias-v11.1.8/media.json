@@ -1,0 +1,43 @@
+{
+  "integrall-hero-loop.mp4": {
+    "programs": [],
+    "stream_groups": [],
+    "streams": [
+      {
+        "codec_name": "h264",
+        "codec_type": "video",
+        "width": 1280,
+        "height": 1502,
+        "r_frame_rate": "24/1"
+      }
+    ],
+    "format": {
+      "duration": "8.000000",
+      "size": "5118949"
+    }
+  },
+  "integrall-hero-mobile.mp4": {
+    "programs": [],
+    "stream_groups": [],
+    "streams": [
+      {
+        "codec_name": "h264",
+        "codec_type": "video",
+        "width": 720,
+        "height": 846,
+        "r_frame_rate": "24/1"
+      }
+    ],
+    "format": {
+      "duration": "8.000000",
+      "size": "1735476"
+    }
+  },
+  "recoveryTotals": {
+    "version": 1,
+    "originalCount": 43,
+    "uniqueContents": 33,
+    "originalBytes": 98094806,
+    "optimizedUniqueBytes": 9763438
+  }
+}

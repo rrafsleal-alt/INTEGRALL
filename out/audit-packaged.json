@@ -1,0 +1,29 @@
+{
+  "mode": "packaged-delivery",
+  "products": 227,
+  "variants": 52,
+  "duplicateProductIds": {},
+  "duplicateSlugs": {},
+  "duplicateVariantIds": {},
+  "duplicateSkus": {
+    "332": [
+      "Vinho Tinto Seco",
+      "Tinto Seco Galão"
+    ],
+    "331": [
+      "Tinto Suave",
+      "Tinto Suave Galão"
+    ],
+    "333": [
+      "Tinto Demi Sec",
+      "Branco Seco Galão"
+    ]
+  },
+  "missingImages": [],
+  "invalidVariantImages": [],
+  "invalidBoxVariants": [],
+  "activeWithoutPrice": [],
+  "productsWithoutImage": [],
+  "sourcePdfAudit": "NAO_EXECUTADO_NO_ZIP",
+  "ok": true
+}

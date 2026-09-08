@@ -1,0 +1,5 @@
+
+> integrall-online@11.1.8 test:production:http
+> node scripts/production-http-smoke.mjs dist/public
+
+PRODUCTION HTTP SMOKE OK - 10 cenários; 448 hashes verificados

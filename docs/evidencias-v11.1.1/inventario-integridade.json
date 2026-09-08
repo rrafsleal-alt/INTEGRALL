@@ -1,0 +1,82 @@
+{
+  "html": {
+    "public/404.html": {
+      "bytes": 785,
+      "elements": 17,
+      "ids": 0,
+      "duplicateIds": [],
+      "imagesWithoutAlt": 0,
+      "buttonsWithoutType": 0,
+      "unlabeledControls": 0
+    },
+    "public/500.html": {
+      "bytes": 784,
+      "elements": 17,
+      "ids": 0,
+      "duplicateIds": [],
+      "imagesWithoutAlt": 0,
+      "buttonsWithoutType": 0,
+      "unlabeledControls": 0
+    },
+    "public/admin.html": {
+      "bytes": 49442,
+      "elements": 794,
+      "ids": 239,
+      "duplicateIds": [],
+      "imagesWithoutAlt": 0,
+      "buttonsWithoutType": 0,
+      "unlabeledControls": 0
+    },
+    "public/index.html": {
+      "bytes": 42531,
+      "elements": 512,
+      "ids": 144,
+      "duplicateIds": [],
+      "imagesWithoutAlt": 0,
+      "buttonsWithoutType": 0,
+      "unlabeledControls": 0
+    }
+  },
+  "assetReferences": {
+    "total": 249,
+    "unique": 229,
+    "missing": []
+  },
+  "catalog": {
+    "products": 227,
+    "departments": {
+      "cafes": 7,
+      "petit-four": 82,
+      "sucos": 9,
+      "vinhos": 129
+    },
+    "available": 5,
+    "unavailable": 222,
+    "priceZero": 222,
+    "variants": 52,
+    "variantImageAssignments": 0,
+    "duplicateProductIds": [],
+    "missingProductIds": 0,
+    "duplicateSlugs": [],
+    "missingSlugs": 0,
+    "duplicateVariantIds": [],
+    "duplicateSourceCodes": [
+      "331",
+      "332",
+      "333"
+    ],
+    "productsWithoutImages": 0,
+    "missingLocalProductImages": [],
+    "variantImagesOutsideGallery": []
+  },
+  "images": {
+    "files": 228,
+    "totalBytes": 15533977,
+    "decodeErrors": []
+  },
+  "filesystem": {
+    "unicodeFilenames": [],
+    "symlinks": [],
+    "unexpectedEmptyFiles": []
+  }
+}

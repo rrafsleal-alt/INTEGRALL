@@ -1,0 +1,17 @@
+INTEGRALL Online — Manifesto v11.1.2
+
+Versão final do código: 11.1.2
+Objetivo: popup de produto sem deslocamento, upload múltiplo de fotos corrigido e catálogo progressivo.
+
+Validações principais:
+- npm run verify:v11.1.2
+- python3 scripts/browser-regression.py --root . --out docs/evidencias-v11.1.2/pos-correcao
+- python3 scripts/admin-browser-regression.py . docs/evidencias-v11.1.2/admin
+- python3 scripts/gallery-browser-regression.py . docs/evidencias-v11.1.2/galeria
+- npm run test:production
+
+Comportamento:
+- 12 produtos exibidos por vez; mais itens somente por ação do usuário.
+- Produto em popup modal responsivo, sem scroll automático da página.
+- Até 12 fotos por produto; seleção múltipla funcional no Admin.
+- Foto específica por variação preservada.

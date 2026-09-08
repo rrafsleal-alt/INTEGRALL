@@ -1,0 +1,22 @@
+[
+  {
+    "name": "npm-ci",
+    "exit": 1,
+    "seconds": 31.11
+  },
+  {
+    "name": "full-verify",
+    "exit": 1,
+    "seconds": 21.64
+  },
+  {
+    "name": "store-regression-short",
+    "exit": 0,
+    "seconds": 15.46
+  },
+  {
+    "name": "shipping-regression",
+    "exit": 0,
+    "seconds": 38.17
+  }
+]

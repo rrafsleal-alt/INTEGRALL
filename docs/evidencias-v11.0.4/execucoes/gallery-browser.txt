@@ -1,0 +1,1 @@
+GALLERY BROWSER AUDIT OK: 2 arquivos selecionados juntos, 2 uploads, 3 fotos persistidas no payload e foto de variação vinculada.

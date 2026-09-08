@@ -1,0 +1,538 @@
+diff --git a/original/src/catalog.js b/work/src/catalog.js
+index 83a6879..bcde2e5 100644
+--- a/original/src/catalog.js
++++ b/work/src/catalog.js
+@@ -2,6 +2,7 @@ import {randomBytes} from 'node:crypto';
+ 
+ const clone = value => JSON.parse(JSON.stringify(value));
+ const controlChars = /[\u0000-\u001F\u007F]/g;
++const multilineControlChars = /[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g;
+ 
+ const VISUAL_ASSET_KEYS = ['headerLogo','footerLogo','favicon','heroBackground','headerBackground','footerBackground','pageBackground'];
+ const VISUAL_COLOR_KEYS = ['page','surface','surfaceAlt','surfaceMuted','primary','primaryHover','accent','text','muted','line','danger','success','buttonText','headerBackground','footerBackground','cardBackground','inputBackground','heroText','heroOverlay','headerText','headerMuted','footerText','footerMuted','footerHeading','footerAccent','price','badgeBackground','badgeText','outOfStockBackground','outOfStockText','overlay'];
+@@ -19,6 +20,15 @@ export function cleanText(value, max = 500) {
+   return String(value ?? '').replace(controlChars, '').replace(invisibleChars, '').trim().slice(0, max);
+ }
+ 
++export function cleanMultilineText(value, max = 10_000) {
++  return String(value ?? '')
++    .replace(/\r\n?/g, '\n')
++    .replace(multilineControlChars, '')
++    .replace(invisibleChars, '')
++    .trim()
++    .slice(0, max);
++}
++
+ export function slugify(value) {
+   return String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 100) || 'produto';
+ }
+@@ -163,9 +173,9 @@ function sanitizeCommerce(value) {
+     businessAddress: cleanText(source.businessAddress, 500),
+     supportEmail: cleanText(source.supportEmail, 254),
+     supportPhone: cleanText(source.supportPhone, 40),
+-    privacyText: cleanText(source.privacyText, 10_000),
+-    termsText: cleanText(source.termsText, 10_000),
+-    returnsText: cleanText(source.returnsText, 10_000),
++    privacyText: cleanMultilineText(source.privacyText, 10_000),
++    termsText: cleanMultilineText(source.termsText, 10_000),
++    returnsText: cleanMultilineText(source.returnsText, 10_000),
+     retentionDays: integer(source.retentionDays, 90, 1, 3650),
+     pixKey: cleanText(source.pixKey, 180),
+     paymentLink: safeHttpsUrl(source.paymentLink),
+diff --git a/original/public/js/store/checkout.js b/work/public/js/store/checkout.js
+index dc64294..0d3e310 100644
+--- a/original/public/js/store/checkout.js
++++ b/work/public/js/store/checkout.js
+@@ -4,12 +4,14 @@
+   const $ = (selector, root = document) => root.querySelector(selector);
+   const digits = value => String(value || '').replace(/\D/g, '');
+   const cleanText = (value, max = 1000) => String(value ?? '').replace(/[\u0000-\u001F\u007F]/g, '').trim().slice(0, max);
++  const cleanMultilineText = (value, max = 10000) => String(value ?? '').replace(/\r\n?/g, '\n').replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, '').trim().slice(0, max);
+   const CUSTOMER_KEY = 'integrall_customer_profile_v9';
+   const ORDER_ATTEMPT_KEY = 'integrall_order_attempt_v9';
+   const LAST_ORDER_KEY = 'integrall_last_order_v9';
+   let memoryAttempt = null;
+   let activeTrackedOrder = null;
+   let orderModalOpener = null;
++  let legalModalOpener = null;
+   let appliedCoupon = null;
+   let correiosOptions = [];
+   let correiosSelected = '';
+@@ -56,9 +58,9 @@
+   function config() {
+     const remote = globalThis.__integrallPublicConfig;
+     const merged = {...DEFAULT_CONFIG, ...embeddedConfig(), ...(remote && typeof remote === 'object' ? remote : {})};
+-    merged.privacyText = cleanText(merged.privacyText, 10000) || DEFAULT_CONFIG.privacyText;
+-    merged.termsText = cleanText(merged.termsText, 10000) || DEFAULT_CONFIG.termsText;
+-    merged.returnsText = cleanText(merged.returnsText, 10000) || DEFAULT_CONFIG.returnsText;
++    merged.privacyText = cleanMultilineText(merged.privacyText, 10000) || DEFAULT_CONFIG.privacyText;
++    merged.termsText = cleanMultilineText(merged.termsText, 10000) || DEFAULT_CONFIG.termsText;
++    merged.returnsText = cleanMultilineText(merged.returnsText, 10000) || DEFAULT_CONFIG.returnsText;
+     return merged;
+   }
+ 
+@@ -132,6 +134,56 @@
+     });
+   }
+ 
++  function blockingLayerOpen() {
++    return Boolean(
++      $('#overlay')?.classList.contains('open') ||
++      $('#accountModal')?.classList.contains('open') ||
++      $('#legalModal')?.classList.contains('open') ||
++      $('#orderStatusModal')?.classList.contains('open')
++    );
++  }
++
++  function syncBodyLock() {
++    document.body.classList.toggle('lock', blockingLayerOpen());
++  }
++
++  function closeAccountLayer() {
++    document.dispatchEvent(new CustomEvent('integrall:close-account', {detail: {restoreFocus: false}}));
++  }
++
++  function closeStoreLayers({keep = ''} = {}) {
++    const app = globalThis.__integrallApp;
++    app?.closeProductDetails?.({returnFocus: false, updateHistory: true});
++    app?.closeCart?.({returnFocus: false});
++    closeAccountLayer();
++    if (keep !== 'legal') closeLegal({restoreFocus: false});
++    if (keep !== 'order') closeOrderStatusModal({restoreFocus: false});
++    syncBodyLock();
++  }
++
++  function ensureStandaloneBackdrop(id, close) {
++    let backdrop = $(`#${id}`);
++    if (backdrop) return backdrop;
++    backdrop = document.createElement('div');
++    backdrop.id = id;
++    backdrop.className = 'standalone-modal-backdrop';
++    backdrop.hidden = true;
++    backdrop.setAttribute('aria-hidden', 'true');
++    backdrop.addEventListener('click', close);
++    document.body.append(backdrop);
++    return backdrop;
++  }
++
++  function setStandaloneModalState(modal, backdrop, open) {
++    modal?.classList.toggle('open', open);
++    modal?.setAttribute('aria-hidden', open ? 'false' : 'true');
++    if (backdrop) {
++      backdrop.hidden = !open;
++      backdrop.classList.toggle('open', open);
++    }
++    syncBodyLock();
++  }
++
+   function injectAccessibility() {
+     if (!$('.integrall-skip-link')) {
+       const link = document.createElement('a');
+@@ -146,6 +198,19 @@
+     $('#search')?.setAttribute('enterkeyhint', 'search');
+   }
+ 
++  function closeLegal({restoreFocus = true} = {}) {
++    const modal = $('#legalModal');
++    if (!modal?.classList.contains('open')) return false;
++    const previous = legalModalOpener;
++    legalModalOpener = null;
++    setStandaloneModalState(modal, $('#legalModalBackdrop'), false);
++    if (restoreFocus) setTimeout(() => {
++      const target = previous?.isConnected && previous.offsetParent !== null ? previous : $('[data-legal="privacy"]');
++      target?.focus?.({preventScroll: true});
++    }, 20);
++    return true;
++  }
++
+   function ensureLegalModal() {
+     if ($('#legalModal')) return $('#legalModal');
+     const modal = document.createElement('section');
+@@ -157,33 +222,29 @@
+     modal.setAttribute('aria-labelledby', 'legalTitle');
+     modal.innerHTML = '<div class="panel-head"><h2 id="legalTitle"></h2><button class="close-btn" type="button" aria-label="Fechar">✕</button></div><div class="modal-body"><div class="legal-meta" id="legalMeta"></div><div class="legal-copy" id="legalCopy"></div></div>';
+     document.body.append(modal);
+-    const close = () => {
+-      modal.classList.remove('open');
+-      modal.setAttribute('aria-hidden', 'true');
+-      document.body.classList.remove('lock');
+-    };
+-    modal.querySelector('.close-btn').addEventListener('click', close);
+-    document.addEventListener('keydown', event => { if (event.key === 'Escape' && modal.classList.contains('open')) close(); });
++    ensureStandaloneBackdrop('legalModalBackdrop', () => closeLegal());
++    modal.querySelector('.close-btn').addEventListener('click', () => closeLegal());
++    document.addEventListener('keydown', event => { if (event.key === 'Escape' && modal.classList.contains('open')) closeLegal(); });
+     trapFocus(modal);
+     return modal;
+   }
+ 
+-  function openLegal(kind) {
++  function openLegal(kind, opener = document.activeElement) {
+     const cfg = config();
+     const content = {
+       privacy: ['Privacidade', cfg.privacyText],
+       terms: ['Termos de uso', cfg.termsText],
+       returns: ['Trocas, devoluções e cancelamentos', cfg.returnsText]
+     }[kind] || ['Termos de uso', cfg.termsText];
++    legalModalOpener = opener instanceof HTMLElement ? opener : null;
++    closeStoreLayers({keep: 'legal'});
+     const modal = ensureLegalModal();
+     $('#legalTitle').textContent = content[0];
+-    $('#legalCopy').textContent = cleanText(content[1], 10000) || 'Informação ainda não configurada.';
++    $('#legalCopy').textContent = cleanMultilineText(content[1], 10000) || 'Informação ainda não configurada.';
+     const details = [cfg.businessName, cfg.businessAddress, cfg.supportEmail, cfg.supportPhone].map(v => cleanText(v, 500)).filter(Boolean);
+     $('#legalMeta').textContent = details.join(' • ');
+-    modal.classList.add('open');
+-    modal.setAttribute('aria-hidden', 'false');
+-    document.body.classList.add('lock');
+-    modal.querySelector('.close-btn')?.focus();
++    setStandaloneModalState(modal, $('#legalModalBackdrop'), true);
++    modal.querySelector('.close-btn')?.focus({preventScroll: true});
+   }
+ 
+   function bindLegalLinks() {
+@@ -192,7 +253,7 @@
+       const trigger = event.target.closest?.('[data-legal]');
+       if (!trigger) return;
+       event.preventDefault();
+-      openLegal(trigger.dataset.legal);
++      openLegal(trigger.dataset.legal, trigger);
+     });
+   }
+ 
+@@ -608,6 +669,19 @@
+ 
+   function orderPayload(draft, clientOrderId) { return {clientOrderId, ...draft}; }
+ 
++  function closeOrderStatusModal({restoreFocus = true} = {}) {
++    const modal = $('#orderStatusModal');
++    if (!modal?.classList.contains('open')) return false;
++    const previous = orderModalOpener;
++    orderModalOpener = null;
++    setStandaloneModalState(modal, $('#orderStatusModalBackdrop'), false);
++    if (restoreFocus) setTimeout(() => {
++      const target = previous?.isConnected && previous.offsetParent !== null ? previous : $('#openCart');
++      target?.focus?.({preventScroll: true});
++    }, 20);
++    return true;
++  }
++
+   function ensureOrderModal() {
+     if ($('#orderStatusModal')) return $('#orderStatusModal');
+     const modal = document.createElement('section');
+@@ -632,12 +706,13 @@
+         </div>
+       </div>`;
+     document.body.append(modal);
+-    const close = () => { modal.classList.remove('open'); modal.setAttribute('aria-hidden', 'true'); document.body.classList.remove('lock'); const previous=orderModalOpener;orderModalOpener=null;setTimeout(()=>{const target=previous?.isConnected&&previous.offsetParent!==null?previous:$('#openCart');target?.focus?.({preventScroll:true});},20); };
+-    modal.querySelector('.close-btn').addEventListener('click', close);
+-    $('#orderCloseButton').addEventListener('click', close);
++    ensureStandaloneBackdrop('orderStatusModalBackdrop', () => closeOrderStatusModal());
++    modal.querySelector('.close-btn').addEventListener('click', () => closeOrderStatusModal());
++    $('#orderCloseButton').addEventListener('click', () => closeOrderStatusModal());
+     $('#orderRefreshButton').addEventListener('click', () => refreshTrackedOrder());
+     $('#orderPayButton').addEventListener('click', () => startPaymentForTrackedOrder());
+     $('#orderSupportButton').addEventListener('click', () => openSupport());
++    document.addEventListener('keydown', event => { if (event.key === 'Escape' && modal.classList.contains('open')) closeOrderStatusModal(); });
+     trapFocus(modal);
+     return modal;
+   }
+@@ -684,8 +759,7 @@
+   function renderTrackedOrder(order) {
+     activeTrackedOrder = order;
+     orderModalOpener = document.activeElement instanceof HTMLElement ? document.activeElement : $('#openCart');
+-    globalThis.__integrallApp?.closeProductDetails?.({returnFocus:false,updateHistory:true});
+-    globalThis.__integrallApp?.closeCart?.({returnFocus:false});
++    closeStoreLayers({keep: 'order'});
+     const modal = ensureOrderModal();
+     $('#orderStatusBadge').textContent = STATUS_LABELS[order.status] || order.status || 'Pedido';
+     $('#orderStatusBadge').className = `order-status-badge ${order.status || ''}`;
+@@ -760,7 +834,8 @@
+     const cfg = config();
+     const app = globalThis.__integrallApp;
+     $('#orderSupportButton').hidden = !(digits(app?.getState?.()?.settings?.whatsapp || cfg.supportPhone) || cfg.supportEmail);
+-    modal.classList.add('open'); modal.setAttribute('aria-hidden', 'false'); document.body.classList.add('lock');
++    setStandaloneModalState(modal, $('#orderStatusModalBackdrop'), true);
++    modal.querySelector('.close-btn')?.focus({preventScroll: true});
+   }
+ 
+   async function loadTrackingEvents(order) {
+diff --git a/original/public/js/store/commerce-v111.js b/work/public/js/store/commerce-v111.js
+index e743ca3..518b77c 100644
+--- a/original/public/js/store/commerce-v111.js
++++ b/work/public/js/store/commerce-v111.js
+@@ -92,6 +92,7 @@
+ 
+   async function openAccount(){state.pendingFavoriteId='';accountOpen(true);await loadSession();await renderAccount()}
+   $('#openAccount')?.addEventListener('click',openAccount);$('#closeAccount')?.addEventListener('click',()=>accountOpen(false));$('#accountBackdrop')?.addEventListener('click',()=>accountOpen(false));$('#modalFavorite')?.addEventListener('click',toggleFavorite);$('#reviewForm')?.addEventListener('submit',submitReview);$('#restockAlertForm')?.addEventListener('submit',submitRestock);
++  document.addEventListener('integrall:close-account',event=>{if($('#accountModal')?.classList.contains('open'))accountOpen(false,{restoreFocus:event.detail?.restoreFocus!==false})});
+   document.addEventListener('keydown',event=>{if(!$('#accountModal')?.classList.contains('open'))return;if(event.key==='Escape'){event.preventDefault();accountOpen(false);return}if(event.key!=='Tab')return;const items=accountFocusables();if(!items.length){event.preventDefault();return}const first=items[0],last=items[items.length-1];if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus()}else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus()}});
+   document.addEventListener('integrall:product-opened',event=>{state.activeProductId=event.detail?.productId||'';syncFavoriteButton();syncRestockBox();loadReviews(state.activeProductId)});
+   document.addEventListener('integrall:product-closed',()=>{state.activeProductId='';state.reviewRequest++;$('#reviewsList')?.replaceChildren();const summary=$('#reviewsSummary');if(summary)summary.textContent='';syncFavoriteButton();syncRestockBox()});
+diff --git a/original/public/css/checkout.css b/work/public/css/checkout.css
+index 53eadef..45bf235 100644
+--- a/original/public/css/checkout.css
++++ b/work/public/css/checkout.css
+@@ -88,3 +88,13 @@ html.age-locked{overflow:hidden}
+ .tracking-event b{display:block;font-size:.72rem}
+ .tracking-event small{display:block;color:var(--muted);font-size:.6rem;margin-top:1px}
+ .tracking-note{font-size:.66rem;color:var(--muted);line-height:1.5}
++
++/* ===== Camadas autônomas (termos e acompanhamento) =====
++ * Mantêm backdrop, bloqueio de scroll e ordem visual coerentes mesmo quando
++ * abertas fora do popup de produto/sacola. O JS garante exclusividade entre
++ * as camadas; o backdrop não aplica blur para evitar sensação de travamento.
++ */
++.standalone-modal-backdrop{position:fixed;inset:0;z-index:115;background:rgba(31,25,23,.18);opacity:0;visibility:hidden;transition:opacity .18s ease,visibility .18s ease;backdrop-filter:none;-webkit-backdrop-filter:none}
++.standalone-modal-backdrop.open{opacity:1;visibility:visible}
++#legalModal{width:min(760px,calc(100% - 28px))}
++@media(prefers-reduced-motion:reduce){.standalone-modal-backdrop{transition:none}}
+diff --git a/original/scripts/browser-regression.py b/work/scripts/browser-regression.py
+index 07b271f..7c8fdd7 100644
+--- a/original/scripts/browser-regression.py
++++ b/work/scripts/browser-regression.py
+@@ -1,5 +1,5 @@
+ #!/usr/bin/env python3
+-"""Regressão visual/funcional da loja INTEGRALL v11.1.4 sem backend.
++"""Regressão visual/funcional da loja INTEGRALL v11.1.5 sem backend.
+ 
+ Valida popup de produto sem deslocamento de página, galeria/foto por variação,
+ fechamento e foco, fallback de imagem, catálogo progressivo (12 por vez),
+@@ -93,6 +93,7 @@ def main() -> int:
+     styles = [(root / "public" / rel).read_text("utf-8") for rel in STYLE_FILES]
+     catalog_js = (root / "public/js/store/catalog.js").read_text("utf-8")
+     commerce_js = (root / "public/js/store/commerce-v111.js").read_text("utf-8")
++    checkout_js = (root / "public/js/store/checkout.js").read_text("utf-8")
+     products, first, second = build_products()
+ 
+     results: list[dict[str, Any]] = []
+@@ -269,6 +270,38 @@ def main() -> int:
+         search_ok = search_focus["option"] and bool(search_focus["activeDesc"]) and search_closed["hidden"] and search_closed["focused"] and search_closed["expanded"] == 'false'
+         if not search_ok: failures.append("search-keyboard: navegação de sugestões inconsistente")
+         results.append({"scenario":"search-keyboard","status":"APROVADO" if search_ok else "REPROVADO","focus":search_focus,"closed":search_closed})
++
++        # Termos/Privacidade usam camada exclusiva: não podem ficar empilhados
++        # sobre produto/sacola/conta nem liberar o scroll enquanto outra camada
++        # bloqueadora estiver ativa. O texto também deve preservar parágrafos.
++        page.evaluate("(cfg) => { globalThis.__integrallPublicConfig = cfg; }", {
++            "privacyText": "PRIVACIDADE\n\nLinha 1\nLinha 2",
++            "termsText": "TERMOS\n\nItem A\nItem B",
++            "returnsText": "TROCAS\n\nPrazo\nCondição",
++        })
++        page.add_script_tag(content=checkout_js); page.wait_for_timeout(80)
++        page.evaluate("() => globalThis.__integrallApp.openProduct('audit-product-a',{updateHash:false,focus:false})"); page.wait_for_timeout(30)
++        page.evaluate("() => document.querySelector('[data-legal=\"privacy\"]')?.click()"); page.wait_for_timeout(40)
++        legal_open = page.evaluate("""() => {
++          const modal=document.querySelector('#legalModal'),backdrop=document.querySelector('#legalModalBackdrop');
++          return {
++            productHidden:document.querySelector('#productDetails')?.hidden,
++            legalOpen:modal?.classList.contains('open'),
++            backdropOpen:backdrop?.classList.contains('open'),
++            backdropHidden:backdrop?.hidden,
++            backdropFilter:backdrop?getComputedStyle(backdrop).backdropFilter:'',
++            overlayOpen:document.querySelector('#overlay')?.classList.contains('open'),
++            bodyLocked:document.body.classList.contains('lock'),
++            copy:document.querySelector('#legalCopy')?.textContent||''
++          };
++        }""")
++        page.screenshot(path=str(out / "legal-modal-1024.png"), full_page=True)
++        page.locator('#legalModalBackdrop').dispatch_event('click'); page.wait_for_timeout(30)
++        legal_closed = page.evaluate("() => ({open:document.querySelector('#legalModal')?.classList.contains('open'),bodyLocked:document.body.classList.contains('lock'),backdropHidden:document.querySelector('#legalModalBackdrop')?.hidden})")
++        legal_ok = legal_open["productHidden"] and legal_open["legalOpen"] and legal_open["backdropOpen"] and not legal_open["backdropHidden"] and legal_open["backdropFilter"] in ('none','') and not legal_open["overlayOpen"] and legal_open["bodyLocked"] and '\n\n' in legal_open["copy"] and not legal_closed["open"] and not legal_closed["bodyLocked"] and legal_closed["backdropHidden"]
++        if not legal_ok: failures.append("legal-layering: termos/privacidade empilharam camada, perderam parágrafos ou deixaram scroll incoerente")
++        results.append({"scenario":"legal-layering-and-multiline","status":"APROVADO" if legal_ok else "REPROVADO","open":legal_open,"closed":legal_closed})
++
+         context.close(); browser.close()
+ 
+     (out / "browser-regression.json").write_text(json.dumps(results, ensure_ascii=False, indent=2), encoding="utf-8")
+diff --git a/original/scripts/production-http-smoke.mjs b/work/scripts/production-http-smoke.mjs
+index a19533e..170e702 100644
+--- a/original/scripts/production-http-smoke.mjs
++++ b/work/scripts/production-http-smoke.mjs
+@@ -7,6 +7,8 @@ import {fileURLToPath} from 'node:url';
+ 
+ const root = path.resolve(process.argv[2] || path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'dist', 'public'));
+ const dist = path.dirname(root);
++const packageInfo = JSON.parse(await readFile(path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'package.json'), 'utf8'));
++const expectedBuildMarker = `public-v${String(packageInfo.version || '')}-`;
+ const types = new Map([
+   ['.html', 'text/html; charset=utf-8'], ['.css', 'text/css; charset=utf-8'],
+   ['.js', 'text/javascript; charset=utf-8'], ['.json', 'application/json; charset=utf-8'],
+@@ -55,7 +57,7 @@ const base = `http://127.0.0.1:${address.port}`;
+ 
+ try {
+   const checks = [
+-    ['/', text => text.includes('public-v11.1.4-') && text.includes('id="productDetails"')],
++    ['/', text => text.includes(expectedBuildMarker) && text.includes('id="productDetails"')],
+     ['/produto/suco-integral-de-uva-bordo', text => text.includes('id="buildData"') && text.includes('suco-integral-de-uva-bordo')],
+     ['/admin.html', text => text.includes('id="loginForm"') && text.includes('Administração INTEGRALL')],
+     ['/css/store.css', text => text.includes('.product-details-inline') && text.includes('position:fixed') && text.includes('.catalog-pagination')],
+diff --git a/original/scripts/production-browser-smoke.py b/work/scripts/production-browser-smoke.py
+index 7cc5d4c..eea11ed 100644
+--- a/original/scripts/production-browser-smoke.py
++++ b/work/scripts/production-browser-smoke.py
+@@ -1,5 +1,5 @@
+ #!/usr/bin/env python3
+-"""Serve e valida o build estático de produção da INTEGRALL v11.1.4.
++"""Serve e valida o build estático de produção da INTEGRALL v11.1.5.
+ 
+ O teste usa ``dist/public`` com fallback para ``/produto/<slug>`` e confirma
+ o comportamento atual de popup: rota direta abre um único produto em camada
+@@ -65,7 +65,7 @@ class SpaHandler(SimpleHTTPRequestHandler):
+ def main() -> int:
+     parser = argparse.ArgumentParser()
+     parser.add_argument("--root", type=Path, default=Path("dist/public"))
+-    parser.add_argument("--out", type=Path, default=Path("docs/evidencias-v11.1.4/build-http"))
++    parser.add_argument("--out", type=Path, default=Path("docs/evidencias-v11.1.5/build-http"))
+     parser.add_argument("--chromium", default="/usr/bin/chromium")
+     args = parser.parse_args()
+ 
+diff --git a/original/scripts/gallery-browser-regression.py b/work/scripts/gallery-browser-regression.py
+index fb7cefb..e706fd1 100644
+--- a/original/scripts/gallery-browser-regression.py
++++ b/work/scripts/gallery-browser-regression.py
+@@ -5,7 +5,7 @@ from playwright.sync_api import sync_playwright
+ import json, re, sys, base64
+ 
+ ROOT=Path(sys.argv[1] if len(sys.argv)>1 else '.').resolve()
+-OUT=Path(sys.argv[2] if len(sys.argv)>2 else 'docs/evidencias-v11.1.4/galeria').resolve(); OUT.mkdir(parents=True,exist_ok=True)
++OUT=Path(sys.argv[2] if len(sys.argv)>2 else 'docs/evidencias-v11.1.5/galeria').resolve(); OUT.mkdir(parents=True,exist_ok=True)
+ html=(ROOT/'public/admin.html').read_text('utf-8')
+ css=(ROOT/'public/css/admin.css').read_text('utf-8')
+ html=re.sub(r'<link rel="stylesheet" href="[^"]+">',f'<style>{css}</style>',html,count=1)
+diff --git a/original/tests/v11.1.4-ux.test.js b/work/tests/v11.1.4-ux.test.js
+index aa9fa66..f7cf006 100644
+--- a/original/tests/v11.1.4-ux.test.js
++++ b/work/tests/v11.1.4-ux.test.js
+@@ -13,7 +13,8 @@ test('v11.1.4 coordena camadas em vez de empilhar conta, produto e sacola', asyn
+   assert.match(commerce, /app\.closeProductDetails\?\.\(\{returnFocus:false,updateHistory:true\}\)/);
+   assert.match(commerce, /app\.closeCart\?\.\(\{returnFocus:false\}\)/);
+   assert.match(commerce, /accountFocusables\(\)/);
+-  assert.match(checkout, /__integrallApp\?\.closeCart\?\.\(\{returnFocus:false\}\)/);
++  assert.match(checkout, /const app = globalThis\.__integrallApp/);
++  assert.match(checkout, /app\?\.closeCart\?\.\(\{returnFocus: false\}\)/);
+ });
+ 
+ test('favorito solicitado antes do login é preservado e aplicado após autenticar', async () => {
+diff --git a/original/package.json b/work/package.json
+index 86d25be..abd57ad 100644
+--- a/original/package.json
++++ b/work/package.json
+@@ -1,9 +1,9 @@
+ {
+   "name": "integrall-online",
+-  "version": "11.1.4",
++  "version": "11.1.5",
+   "private": true,
+   "type": "module",
+-  "description": "Loja INTEGRALL v11.1.4 com UX de camadas coordenadas, busca acessível, galeria multipla, popup fluido e auditoria reproduzível.",
++  "description": "Loja INTEGRALL v11.1.5 com camadas modais coordenadas, textos legais preservados, busca acessível, galeria múltipla, popup fluido e auditoria reproduzível.",
+   "engines": {
+     "node": ">=20.12 <27"
+   },
+@@ -22,20 +22,21 @@
+     "build": "npm run catalog:embed && npm run check && npm run audit && node scripts/build-production.mjs",
+     "verify": "npm run catalog:embed && npm run check && npm run test:offline && npm run security:scan && npm run audit && npm run build:production",
+     "admin:check-default": "node scripts/check-default-admin.mjs",
+-    "test:dependency-free": "node --test --test-concurrency=1 tests/auth.test.js tests/carrier-split.test.js tests/catalog.test.js tests/correios.test.js tests/customer-auth-hardening.test.js tests/default-admin.test.js tests/image-upload.test.js tests/jadlog.test.js tests/mailer.test.js tests/order-state.test.js tests/payment-state.test.js tests/payments-checkout.test.js tests/providers.test.js tests/public-order.test.js tests/repository.test.js tests/v11.1-commerce.test.js tests/v11.1.2-ux.test.js tests/v11.1.3-ux.test.js tests/variant-images.test.js tests/visual-editor.test.js tests/v11.1.4-ux.test.js",
++    "test:dependency-free": "node --test --test-concurrency=1 tests/auth.test.js tests/carrier-split.test.js tests/catalog.test.js tests/correios.test.js tests/customer-auth-hardening.test.js tests/default-admin.test.js tests/image-upload.test.js tests/jadlog.test.js tests/mailer.test.js tests/order-state.test.js tests/payment-state.test.js tests/payments-checkout.test.js tests/providers.test.js tests/public-order.test.js tests/repository.test.js tests/v11.1-commerce.test.js tests/v11.1.2-ux.test.js tests/v11.1.3-ux.test.js tests/variant-images.test.js tests/visual-editor.test.js tests/v11.1.4-ux.test.js tests/v11.1.5-ux.test.js",
+     "test:http": "node --test --test-concurrency=1 tests/http.test.js",
+-    "test:offline": "node --test --test-concurrency=1 tests/auth.test.js tests/carrier-split.test.js tests/catalog.test.js tests/correios.test.js tests/customer-auth-hardening.test.js tests/default-admin.test.js tests/image-upload.test.js tests/jadlog.test.js tests/mailer.test.js tests/order-state.test.js tests/payment-state.test.js tests/payments-checkout.test.js tests/providers.test.js tests/public-order.test.js tests/repository.test.js tests/v11.1-commerce.test.js tests/v11.1.2-ux.test.js tests/v11.1.3-ux.test.js tests/variant-images.test.js tests/visual-editor.test.js tests/v11.1.4-ux.test.js",
+-    "test:browser": "python3 scripts/browser-regression.py --root . --out docs/evidencias-v11.1.4/loja",
++    "test:offline": "node --test --test-concurrency=1 tests/auth.test.js tests/carrier-split.test.js tests/catalog.test.js tests/correios.test.js tests/customer-auth-hardening.test.js tests/default-admin.test.js tests/image-upload.test.js tests/jadlog.test.js tests/mailer.test.js tests/order-state.test.js tests/payment-state.test.js tests/payments-checkout.test.js tests/providers.test.js tests/public-order.test.js tests/repository.test.js tests/v11.1-commerce.test.js tests/v11.1.2-ux.test.js tests/v11.1.3-ux.test.js tests/variant-images.test.js tests/visual-editor.test.js tests/v11.1.4-ux.test.js tests/v11.1.5-ux.test.js",
++    "test:browser": "python3 scripts/browser-regression.py --root . --out docs/evidencias-v11.1.5/loja",
+     "build:production": "npm run catalog:embed && node scripts/build-production.mjs",
+-    "test:browser:admin": "python3 scripts/admin-browser-regression.py . docs/evidencias-v11.1.4/admin",
++    "test:browser:admin": "python3 scripts/admin-browser-regression.py . docs/evidencias-v11.1.5/admin",
+     "catalog:embed": "node scripts/sync-embedded-catalog.mjs",
+-    "test:browser:production": "python3 scripts/browser-regression.py --root dist --out docs/evidencias-v11.1.4/build-producao",
++    "test:browser:production": "python3 scripts/browser-regression.py --root dist --out docs/evidencias-v11.1.5/build-producao",
+     "test:production:http": "node scripts/production-http-smoke.mjs dist/public",
+     "test:production": "npm run build:production && npm run test:production:http && npm run test:browser:production",
+-    "test:browser:production:http": "python3 scripts/production-browser-smoke.py --root dist/public --out docs/evidencias-v11.1.4/build-http",
++    "test:browser:production:http": "python3 scripts/production-browser-smoke.py --root dist/public --out docs/evidencias-v11.1.5/build-http",
+     "verify:v11.1.2": "npm run catalog:embed && npm run check && npm run test:dependency-free && npm run security:scan && npm run audit",
+     "verify:v11.1.3": "npm run catalog:embed && npm run check && npm run test:dependency-free && npm run security:scan && npm run audit",
+-    "verify:v11.1.4": "npm run catalog:embed && npm run check && npm run test:dependency-free && npm run security:scan && npm run audit && python3 tools/audit_products.py"
++    "verify:v11.1.4": "npm run catalog:embed && npm run check && npm run test:dependency-free && npm run security:scan && npm run audit && python3 tools/audit_products.py",
++    "verify:v11.1.5": "npm run catalog:embed && npm run check && npm run test:dependency-free && npm run security:scan && npm run audit && python3 tools/audit_products.py"
+   },
+   "dependencies": {
+     "express": "5.1.0",
+diff --git a/original/package-lock.json b/work/package-lock.json
+index 6334a22..b7d797d 100644
+--- a/original/package-lock.json
++++ b/work/package-lock.json
+@@ -1,12 +1,12 @@
+ {
+   "name": "integrall-online",
+-  "version": "11.1.4",
++  "version": "11.1.5",
+   "lockfileVersion": 3,
+   "requires": true,
+   "packages": {
+     "": {
+       "name": "integrall-online",
+-      "version": "11.1.4",
++      "version": "11.1.5",
+       "dependencies": {
+         "express": "5.1.0",
+         "mercadopago": "3.4.0",
+diff --git a/tmp/tmp.IYekJs0dFJ b/work/tests/v11.1.5-ux.test.js
+index e69de29..5934cba 100644
+--- a/tmp/tmp.IYekJs0dFJ
++++ b/work/tests/v11.1.5-ux.test.js
+@@ -0,0 +1,53 @@
++import test from 'node:test';
++import assert from 'node:assert/strict';
++import {readFile} from 'node:fs/promises';
++import {cleanMultilineText, normalizeCatalog} from '../src/catalog.js';
++
++const read = path => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
++
++test('textos legais preservam quebras de linha sem aceitar controles perigosos', () => {
++  assert.equal(cleanMultilineText('Título\r\n\r\nLinha 1\u0000\nLinha 2'), 'Título\n\nLinha 1\nLinha 2');
++  const catalog = normalizeCatalog({commerce:{
++    privacyText:'PRIVACIDADE\n\nLinha 1\nLinha 2',
++    termsText:'TERMOS\n\nItem A\nItem B',
++    returnsText:'TROCAS\n\nPrazo\nCondição'
++  }});
++  assert.equal(catalog.commerce.privacyText, 'PRIVACIDADE\n\nLinha 1\nLinha 2');
++  assert.equal(catalog.commerce.termsText, 'TERMOS\n\nItem A\nItem B');
++  assert.equal(catalog.commerce.returnsText, 'TROCAS\n\nPrazo\nCondição');
++});
++
++test('modais legais e de pedido usam backdrop próprio e coordenador único de camadas', async () => {
++  const [checkout, css, commerce] = await Promise.all([
++    read('public/js/store/checkout.js'), read('public/css/checkout.css'), read('public/js/store/commerce-v111.js')
++  ]);
++  assert.match(checkout, /function closeStoreLayers\(/);
++  assert.match(checkout, /function ensureStandaloneBackdrop\(/);
++  assert.match(checkout, /function setStandaloneModalState\(/);
++  assert.match(checkout, /ensureStandaloneBackdrop\('legalModalBackdrop'/);
++  assert.match(checkout, /ensureStandaloneBackdrop\('orderStatusModalBackdrop'/);
++  assert.match(checkout, /closeStoreLayers\(\{keep: 'legal'\}\)/);
++  assert.match(checkout, /closeStoreLayers\(\{keep: 'order'\}\)/);
++  assert.match(checkout, /cleanMultilineText\(merged\.privacyText/);
++  assert.match(commerce, /integrall:close-account/);
++  assert.match(css, /\.standalone-modal-backdrop\{/);
++  assert.match(css, /backdrop-filter:none/);
++});
++
++test('fechar uma camada autônoma não remove o lock se outra camada bloqueadora continuar aberta', async () => {
++  const checkout = await read('public/js/store/checkout.js');
++  assert.match(checkout, /function blockingLayerOpen\(\)/);
++  assert.match(checkout, /document\.body\.classList\.toggle\('lock', blockingLayerOpen\(\)\)/);
++  assert.doesNotMatch(checkout, /legalModal[\s\S]{0,1200}document\.body\.classList\.remove\('lock'\)/);
++  assert.doesNotMatch(checkout, /orderStatusModal[\s\S]{0,1600}document\.body\.classList\.remove\('lock'\)/);
++});
++
++test('fallback público embutido mantém os parágrafos dos textos legais', async () => {
++  const html = await read('public/index.html');
++  const match = html.match(/<script id="buildData" type="application\/json">([\s\S]*?)<\/script>/);
++  assert.ok(match, '#buildData ausente');
++  const embedded = JSON.parse(match[1]);
++  assert.match(embedded.commerce.privacyText, /POLÍTICA DE PRIVACIDADE\n\n/);
++  assert.ok((embedded.commerce.termsText.match(/\n/g) || []).length >= 2);
++  assert.ok((embedded.commerce.returnsText.match(/\n/g) || []).length >= 2);
++});

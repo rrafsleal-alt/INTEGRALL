@@ -1,0 +1,39 @@
+INTEGRALL Online — Manifesto v11.1.3
+Data da revisão: 2026-09-02
+
+Objetivo da versão:
+- popup sem desfoque e com rolagem natural;
+- roda do mouse sobre o fundo encaminhada ao popup;
+- imagens quadradas sem borda e sem cortar a foto principal;
+- carrossel de fotos diretamente nos cards e também no popup;
+- gesto lateral, setas e teclado para navegar entre imagens;
+- Admin sem rolagens internas desnecessárias e com handoff da roda da prévia;
+- manutenção do upload múltiplo e foto por variação.
+
+Validação executada nesta versão:
+- npm run check: 60 arquivos JavaScript aprovados;
+- npm run test:dependency-free: 138/138 aprovados;
+- npm test: 153 cenários, 138 aprovados, 15 SKIP, 0 falhas;
+- npm audit --offline: 0 vulnerabilidades;
+- npm run security:scan: aprovado;
+- npm run audit: aprovado;
+- loja Chromium: 18/18 larguras, 280 a 2560 px;
+- Admin Chromium: 18/18 larguras, overflow=0, console errors=0;
+- galeria: 2 arquivos escolhidos juntos, 2 uploads, 3 fotos persistidas e foto de variação vinculada;
+- build de produção: 292 arquivos, manifesto verificado;
+- smoke HTTP: 8/8;
+- build em Chromium: 18/18 larguras.
+
+Observações reais:
+- 15 testes da suíte completa são SKIP por dependerem de condições/serviços externos; não foram contabilizados como aprovados.
+- PostgreSQL, Mercado Pago, Correios, Jadlog e SMTP reais exigem credenciais/serviços externos para homologação completa.
+- O catálogo entregue possui a funcionalidade de imagem por variação, porém 0 variações já vêm preenchidas com imagem específica; isso é configurado no Admin conforme as fotos forem cadastradas.
+
+Comandos principais:
+- npm ci
+- npm run dev
+- npm run verify:v11.1.3
+- npm test
+- npm run test:browser
+- npm run test:browser:admin
+- npm run test:production

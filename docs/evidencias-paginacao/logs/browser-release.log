@@ -1,0 +1,57 @@
+APROVADO 227 produtos preservados e nenhum oculto; 222 sem preço continuam sob consulta
+APROVADO Gourmet: primeira página contém 12 de 82, com 7 páginas
+APROVADO Primeira página: Anterior desabilitado e número atual indicado
+APROVADO Gourmet página 1: 12 itens
+APROVADO Gourmet página 2: 12 itens
+APROVADO Gourmet página 3: 12 itens
+APROVADO Gourmet página 4: 12 itens
+APROVADO Gourmet página 5: 12 itens
+APROVADO Gourmet página 6: 12 itens
+APROVADO Gourmet página 7: 10 itens
+APROVADO 82 produtos Gourmet alcançáveis sem duplicar ou omitir
+APROVADO Última página: Próxima desabilitada
+APROVADO Clique no número substitui a página e leva foco ao catálogo
+APROVADO Próxima avança para 3
+APROVADO Voltar restaura a página 2 e o departamento Gourmet
+REPROVADO Voltar mantém os resultados abaixo do cabeçalho
+APROVADO Avançar restaura a página 3
+APROVADO Paginação por teclado funciona e o foco inicia nos resultados
+APROVADO Produto sob consulta abre na página selecionada sem permitir compra
+APROVADO Fechar o produto mantém a página 4
+APROVADO Pesquisa volta à página 1 e filtra
+APROVADO Busca vazia não deixa paginação nem cards antigos
+APROVADO Limpar filtros recupera os 82 produtos paginados
+APROVADO Alterar categoria volta à primeira página
+APROVADO Alterar ordenação volta à primeira página
+APROVADO Filtro avançado volta à primeira página e mantém compra protegida
+APROVADO Vitrine: todas as 19 páginas cobrem exatamente 227 produtos
+APROVADO Atualização do catálogo mantém a página atual
+APROVADO Atualização de promoções não reinicia a paginação
+APROVADO Atualização de configurações não reinicia a paginação
+APROVADO Redução do catálogo limita a página antiga sem deixar tela vazia
+APROVADO vinhos: até 12 de 129, primeira página
+APROVADO vinhos: garrafas/embalagens inteiras com contain
+APROVADO cafes: até 12 de 7, primeira página
+APROVADO cafes: garrafas/embalagens inteiras com contain
+APROVADO sucos: até 12 de 9, primeira página
+APROVADO sucos: garrafas/embalagens inteiras com contain
+APROVADO 280px: 12 cards iguais, quadros quadrados, fotos preenchidas e sem overflow
+APROVADO 320px: 12 cards iguais, quadros quadrados, fotos preenchidas e sem overflow
+APROVADO 360px: 12 cards iguais, quadros quadrados, fotos preenchidas e sem overflow
+APROVADO 375px: 12 cards iguais, quadros quadrados, fotos preenchidas e sem overflow
+APROVADO 390px: 12 cards iguais, quadros quadrados, fotos preenchidas e sem overflow
+APROVADO 412px: 12 cards iguais, quadros quadrados, fotos preenchidas e sem overflow
+APROVADO 430px: 12 cards iguais, quadros quadrados, fotos preenchidas e sem overflow
+APROVADO 480px: 12 cards iguais, quadros quadrados, fotos preenchidas e sem overflow
+APROVADO 600px: 12 cards iguais, quadros quadrados, fotos preenchidas e sem overflow
+APROVADO 768px: 12 cards iguais, quadros quadrados, fotos preenchidas e sem overflow
+APROVADO 820px: 12 cards iguais, quadros quadrados, fotos preenchidas e sem overflow
+APROVADO 1024px: 12 cards iguais, quadros quadrados, fotos preenchidas e sem overflow
+APROVADO 1280px: 12 cards iguais, quadros quadrados, fotos preenchidas e sem overflow
+APROVADO 1366px: 12 cards iguais, quadros quadrados, fotos preenchidas e sem overflow
+APROVADO 1440px: 12 cards iguais, quadros quadrados, fotos preenchidas e sem overflow
+APROVADO 1600px: 12 cards iguais, quadros quadrados, fotos preenchidas e sem overflow
+APROVADO 1920px: 12 cards iguais, quadros quadrados, fotos preenchidas e sem overflow
+APROVADO 2560px: 12 cards iguais, quadros quadrados, fotos preenchidas e sem overflow
+APROVADO Sem erros JavaScript no navegador
+{"status": "REPROVADO", "checks": 56, "failures": ["Voltar mantém os resultados abaixo do cabeçalho"]}

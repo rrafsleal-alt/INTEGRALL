@@ -1,0 +1,818 @@
+--- a/LEIA-ME-PRIMEIRO.txt
++++ b/LEIA-ME-PRIMEIRO.txt
+@@ -1,4 +1,4 @@
+-INTEGRALL v11.1.2 — POPUP, GALERIA E CATÁLOGO PROGRESSIVO
++INTEGRALL v11.1.4 — REVISÃO DE COERÊNCIA, NAVEGAÇÃO E ESTABILIDADE
+ 
+ PRINCIPAIS RECURSOS
+ - Loja completa com catálogo, carrinho, pedidos, frete, promoções e Mercado Pago.
+@@ -7,7 +7,10 @@
+ - Admin com produtos, fotos, variações, pedidos, clientes, promoções e editor visual.
+ - Até 12 fotos por produto; cada variação pode ser vinculada a uma foto da galeria.
+ - Produto abre em popup central, sem deslocar a página; fecha por botão, clique fora ou Esc.
++- Carrossel de fotos nos cards e no popup quando houver duas ou mais imagens.
+ - Catálogo mostra 12 produtos por vez; os demais aparecem somente ao clicar em “Ver mais”.
++- Busca com sugestões navegáveis por teclado e fechamento consistente.
++- Produto, sacola, conta e acompanhamento de pedido não ficam empilhados de forma conflitante.
+ - URLs individuais /produto/<slug>, SEO e sitemap.
+ 
+ PARA RODAR
+@@ -24,15 +27,16 @@
+   ADMIN_SESSION_SECRET e CUSTOMER_AUTH_SECRET persistentes.
+ 
+ VALIDAÇÃO
+-- npm run verify:v11.1.2
++- npm run verify:v11.1.4
+ - npm test
+ - npm run test:browser
+ - npm run test:browser:admin
+ - npm run test:production
++- python3 tools/audit_products.py
+ 
+ LEITURA OBRIGATÓRIA
+-ALTERACOES-V11.1.2.md
++ALTERACOES-V11.1.4.md
++TESTES-V11.1.4.md
+ AUDITORIA-FORENSE-V11.1.1.md
+-TESTES-V11.1.1.md
+ DEPLOYMENT_RUNBOOK.md
+ SECURITY.md
+--- a/README.md
++++ b/README.md
+@@ -1,4 +1,4 @@
+-# INTEGRALL Online v11.1.3 — Popup fluido, carrossel de imagens e rolagem natural
++# INTEGRALL Online v11.1.4 — Auditoria de coerência, navegação e camadas
+ 
+ Loja virtual da **INTEGRALL | Boutique Gourmet** — vinhos, sucos, cafés e petit four — com catálogo, carrinho, pedidos server-side, clientes, acompanhamento de pedido, painel administrativo, PostgreSQL, **frete automático (Correios + Jadlog)**, **e-mail transacional**, cupons de desconto, verificação de idade 18+ e integração **Mercado Pago Checkout Pro** pronta para credenciais.
+ 
+@@ -145,7 +145,7 @@
+ 
+ ```bash
+ npm run admin:check-default    # valida a credencial inicial sem imprimi-la
+-npm run verify:v11.1.3         # 138 testes independentes + sintaxe + segurança + auditoria
++npm run verify:v11.1.4         # suíte independente + sintaxe + segurança + auditoria do pacote
+ npm test                       # suíte total; HTTP exige dependências instaladas
+ npm run test:browser           # loja em Chromium, 18 larguras
+ npm run test:browser:admin     # login/Admin em Chromium, 18 larguras
+@@ -166,7 +166,7 @@
+ 
+ ```bash
+ npm run admin:check-default      # confirma a credencial inicial local sem imprimi-la
+-npm run verify:v11.1.3          # sintaxe + 138 testes independentes + segurança + auditoria
++npm run verify:v11.1.4          # sintaxe + suíte independente + segurança + auditoria do pacote
+ npm test                        # suíte total; exige dependências para os testes HTTP
+ npm run test:browser            # loja em Chromium, 18 larguras
+ npm run test:browser:admin      # Admin/login/logout em Chromium, 18 larguras
+@@ -176,7 +176,7 @@
+ 
+ O gate `npm run verify` permanece como atalho amplo. Em CI com dependências instaladas, execute também `npm run test:http`, `npm run test:smoke` e, quando a política do navegador permitir loopback, `npm run test:browser:production:http`.
+ 
+-A revisão de UX atual está documentada em `ALTERACOES-V11.1.3.md` e nas evidências em `docs/evidencias-v11.1.3/`. Os relatórios anteriores permanecem no pacote como histórico técnico.
++A revisão atual está documentada em `ALTERACOES-V11.1.4.md` e nas evidências em `docs/evidencias-v11.1.4/`. Os relatórios anteriores permanecem no pacote como histórico técnico.
+ 
+ ## Deploy (Render)
+ 
+@@ -192,7 +192,7 @@
+ - [ ] Access Token + Webhook Secret do Mercado Pago; webhook configurado; compra de teste aprovada
+ - [ ] CNPJ no catálogo; preços, estoques e descrições revisados
+ - [ ] Caixas com colmeia divisória para garrafas (exigência das transportadoras)
+-- [ ] `npm run verify:v11.1.3`, `npm test` e `npm run build:production` aprovados no CI/deploy
++- [ ] `npm run verify:v11.1.4`, `npm test` e `npm run build:production` aprovados no CI/deploy
+ 
+ ## Documentação de referência
+ 
+@@ -203,6 +203,18 @@
+ - Manual Jadlog: https://www.jadlog.com.br/jadlog/arquivos/api_integracao.pdf
+ - Mercado Pago: https://www.mercadopago.com.br/developers/pt/docs/checkout-pro/payment-notifications
+ 
++## Novidades v11.1.4
++
++A v11.1.4 é uma revisão de coerência e estabilidade sobre a v11.1.3. As camadas da loja agora são coordenadas: produto, sacola, conta do cliente e acompanhamento de pedido não permanecem empilhados de forma concorrente. O bloqueio de rolagem e a restauração de foco acompanham a camada realmente ativa, evitando tela aparentemente travada ou foco preso atrás de outro modal.
++
++O fluxo de **Favoritos** também foi corrigido para visitantes: se o cliente tocar no coração sem estar autenticado, o produto pretendido é lembrado e salvo automaticamente depois que o código de acesso for validado. Antes, o login podia abrir por cima do produto e a intenção do favorito era perdida.
++
++A busca ganhou comportamento completo por teclado e semântica de combobox: `↑`/`↓` percorrem sugestões, `Esc` fecha e devolve o foco, clique fora fecha a lista e `aria-activedescendant` acompanha a opção ativa. Isso elimina sugestões visuais que antes não tinham navegação equivalente por teclado.
++
++A ferramenta `tools/audit_products.py` agora funciona também **no ZIP entregue**, mesmo sem os PDFs-fonte opcionais. Nesse modo ela audita IDs, slugs, imagens, vínculos de variação, caixas, disponibilidade/preço e registra códigos comerciais compartilhados sem tratá-los incorretamente como IDs técnicos duplicados. A auditoria completa contra PDFs continua disponível quando as fontes e dependências Python opcionais forem fornecidas.
++
++Por fim, scripts de validação e documentação foram sincronizados com a arquitetura atual em popup. O smoke de produção não exige mais o layout antigo de detalhes abaixo do catálogo, que era uma regra histórica da v11.1.1 e gerava falso negativo em uma versão correta.
++
+ ## Novidades v11.1.3
+ 
+ A v11.1.3 refina a experiência de navegação sem retirar nenhuma função da v11.1.2. O popup do produto não usa mais desfoque no fundo, ganhou escurecimento muito leve e se tornou o próprio contêiner de rolagem. A roda do mouse sobre a área externa do popup também é encaminhada para o produto, evitando a sensação de tela travada.
+--- a/package-lock.json
++++ b/package-lock.json
+@@ -1,12 +1,12 @@
+ {
+   "name": "integrall-online",
+-  "version": "11.1.3",
++  "version": "11.1.4",
+   "lockfileVersion": 3,
+   "requires": true,
+   "packages": {
+     "": {
+       "name": "integrall-online",
+-      "version": "11.1.3",
++      "version": "11.1.4",
+       "dependencies": {
+         "express": "5.1.0",
+         "mercadopago": "3.4.0",
+--- a/package.json
++++ b/package.json
+@@ -1,9 +1,9 @@
+ {
+   "name": "integrall-online",
+-  "version": "11.1.3",
++  "version": "11.1.4",
+   "private": true,
+   "type": "module",
+-  "description": "Loja INTEGRALL v11.1.3 com popup fluido, carrossel nos cards e no produto, imagens quadradas sem bordas e rolagem natural no Admin.",
++  "description": "Loja INTEGRALL v11.1.4 com UX de camadas coordenadas, busca acessível, galeria multipla, popup fluido e auditoria reproduzível.",
+   "engines": {
+     "node": ">=20.12 <27"
+   },
+@@ -22,19 +22,20 @@
+     "build": "npm run catalog:embed && npm run check && npm run audit && node scripts/build-production.mjs",
+     "verify": "npm run catalog:embed && npm run check && npm run test:offline && npm run security:scan && npm run audit && npm run build:production",
+     "admin:check-default": "node scripts/check-default-admin.mjs",
+-    "test:dependency-free": "node --test --test-concurrency=1 tests/auth.test.js tests/carrier-split.test.js tests/catalog.test.js tests/correios.test.js tests/customer-auth-hardening.test.js tests/default-admin.test.js tests/image-upload.test.js tests/jadlog.test.js tests/mailer.test.js tests/order-state.test.js tests/payment-state.test.js tests/payments-checkout.test.js tests/providers.test.js tests/public-order.test.js tests/repository.test.js tests/v11.1-commerce.test.js tests/v11.1.2-ux.test.js tests/v11.1.3-ux.test.js tests/variant-images.test.js tests/visual-editor.test.js",
++    "test:dependency-free": "node --test --test-concurrency=1 tests/auth.test.js tests/carrier-split.test.js tests/catalog.test.js tests/correios.test.js tests/customer-auth-hardening.test.js tests/default-admin.test.js tests/image-upload.test.js tests/jadlog.test.js tests/mailer.test.js tests/order-state.test.js tests/payment-state.test.js tests/payments-checkout.test.js tests/providers.test.js tests/public-order.test.js tests/repository.test.js tests/v11.1-commerce.test.js tests/v11.1.2-ux.test.js tests/v11.1.3-ux.test.js tests/variant-images.test.js tests/visual-editor.test.js tests/v11.1.4-ux.test.js",
+     "test:http": "node --test --test-concurrency=1 tests/http.test.js",
+-    "test:offline": "node --test --test-concurrency=1 tests/auth.test.js tests/carrier-split.test.js tests/catalog.test.js tests/correios.test.js tests/customer-auth-hardening.test.js tests/default-admin.test.js tests/image-upload.test.js tests/jadlog.test.js tests/mailer.test.js tests/order-state.test.js tests/payment-state.test.js tests/payments-checkout.test.js tests/providers.test.js tests/public-order.test.js tests/repository.test.js tests/v11.1-commerce.test.js tests/v11.1.2-ux.test.js tests/v11.1.3-ux.test.js tests/variant-images.test.js tests/visual-editor.test.js",
+-    "test:browser": "python3 scripts/browser-regression.py --root . --out docs/evidencias-v11.1.3/loja",
++    "test:offline": "node --test --test-concurrency=1 tests/auth.test.js tests/carrier-split.test.js tests/catalog.test.js tests/correios.test.js tests/customer-auth-hardening.test.js tests/default-admin.test.js tests/image-upload.test.js tests/jadlog.test.js tests/mailer.test.js tests/order-state.test.js tests/payment-state.test.js tests/payments-checkout.test.js tests/providers.test.js tests/public-order.test.js tests/repository.test.js tests/v11.1-commerce.test.js tests/v11.1.2-ux.test.js tests/v11.1.3-ux.test.js tests/variant-images.test.js tests/visual-editor.test.js tests/v11.1.4-ux.test.js",
++    "test:browser": "python3 scripts/browser-regression.py --root . --out docs/evidencias-v11.1.4/loja",
+     "build:production": "npm run catalog:embed && node scripts/build-production.mjs",
+-    "test:browser:admin": "python3 scripts/admin-browser-regression.py . docs/evidencias-v11.1.3/admin",
++    "test:browser:admin": "python3 scripts/admin-browser-regression.py . docs/evidencias-v11.1.4/admin",
+     "catalog:embed": "node scripts/sync-embedded-catalog.mjs",
+-    "test:browser:production": "python3 scripts/browser-regression.py --root dist --out docs/evidencias-v11.1.3/build-producao",
++    "test:browser:production": "python3 scripts/browser-regression.py --root dist --out docs/evidencias-v11.1.4/build-producao",
+     "test:production:http": "node scripts/production-http-smoke.mjs dist/public",
+     "test:production": "npm run build:production && npm run test:production:http && npm run test:browser:production",
+-    "test:browser:production:http": "python3 scripts/production-browser-smoke.py --root dist/public --out docs/evidencias-v11.1.3/build-http",
++    "test:browser:production:http": "python3 scripts/production-browser-smoke.py --root dist/public --out docs/evidencias-v11.1.4/build-http",
+     "verify:v11.1.2": "npm run catalog:embed && npm run check && npm run test:dependency-free && npm run security:scan && npm run audit",
+-    "verify:v11.1.3": "npm run catalog:embed && npm run check && npm run test:dependency-free && npm run security:scan && npm run audit"
++    "verify:v11.1.3": "npm run catalog:embed && npm run check && npm run test:dependency-free && npm run security:scan && npm run audit",
++    "verify:v11.1.4": "npm run catalog:embed && npm run check && npm run test:dependency-free && npm run security:scan && npm run audit && python3 tools/audit_products.py"
+   },
+   "dependencies": {
+     "express": "5.1.0",
+--- a/public/404.html
++++ b/public/404.html
+@@ -8,7 +8,7 @@
+   <meta name="theme-color" content="#24090d">
+   <title>Página não encontrada | INTEGRALL</title>
+   <link rel="icon" href="/assets/icons/favicon.svg">
+-  <link rel="stylesheet" href="/css/error.css?v=11.1.3">
++  <link rel="stylesheet" href="/css/error.css?v=11.1.4">
+ </head>
+ <body>
+   <main>
+--- a/public/500.html
++++ b/public/500.html
+@@ -8,7 +8,7 @@
+   <meta name="theme-color" content="#24090d">
+   <title>Serviço indisponível | INTEGRALL</title>
+   <link rel="icon" href="/assets/icons/favicon.svg">
+-  <link rel="stylesheet" href="/css/error.css?v=11.1.3">
++  <link rel="stylesheet" href="/css/error.css?v=11.1.4">
+ </head>
+ <body>
+   <main>
+--- a/public/admin.html
++++ b/public/admin.html
+@@ -8,8 +8,8 @@
+   <meta name="theme-color" content="#4a0a1a">
+   <title>INTEGRALL | Administração</title>
+   <link rel="icon" href="/assets/icons/favicon.svg">
+-  <link rel="stylesheet" href="/css/admin.css?v=11.1.3">
+-  <script src="/js/admin.js?v=11.1.3" defer></script>
++  <link rel="stylesheet" href="/css/admin.css?v=11.1.4">
++  <script src="/js/admin.js?v=11.1.4" defer></script>
+ </head>
+ <body>
+   <a class="skip-link" href="#main">Ir para o conteúdo</a>
+--- a/public/index.html
++++ b/public/index.html
+@@ -9,7 +9,7 @@
+ <meta name="referrer" content="no-referrer"/>
+ <meta name="robots" content="index,follow,max-image-preview:large"/>
+ <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'self'; worker-src 'none'"/>
+-<meta name="integrall-build" content="public-v11.1.3-2026-09-02"/>
++<meta name="integrall-build" content="public-v11.1.4-2026-09-02"/>
+ <meta property="og:locale" content="pt_BR"/>
+ <meta property="og:type" content="website"/>
+ <meta property="og:site_name" content="INTEGRALL"/>
+@@ -28,10 +28,10 @@
+ <link id="siteFavicon" rel="icon" href="/assets/icons/favicon.svg"/>
+ <link rel="apple-touch-icon" sizes="180x180" href="/assets/icons/apple-touch-icon.png"/>
+ <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":["Organization","Store"],"@id":"#organization","name":"INTEGRALL","email":"integrallwine@gmail.com","logo":"/assets/icons/apple-touch-icon.png"},{"@type":"WebSite","@id":"#website","name":"INTEGRALL","publisher":{"@id":"#organization"},"inLanguage":"pt-BR"}]}</script>
+-<link rel="stylesheet" href="/css/store.css?v=11.1.3"/>
+-<link rel="stylesheet" href="/css/checkout.css?v=11.1.3"/>
+-<link rel="stylesheet" href="/css/premium-v104.css?v=11.1.3"/>
+-<link rel="stylesheet" href="/css/commerce-v111.css?v=11.1.3"/>
++<link rel="stylesheet" href="/css/store.css?v=11.1.4"/>
++<link rel="stylesheet" href="/css/checkout.css?v=11.1.4"/>
++<link rel="stylesheet" href="/css/premium-v104.css?v=11.1.4"/>
++<link rel="stylesheet" href="/css/commerce-v111.css?v=11.1.4"/>
+ </head>
+ <body>
+ <noscript><div style="padding:16px;background:#fff3cd;color:#4a0a1a;text-align:center;font-family:Arial,sans-serif"><strong>INTEGRALL</strong><br/>O catálogo interativo precisa de JavaScript. Use os canais de atendimento informados no rodapé.</div></noscript>
+@@ -56,7 +56,7 @@
+         <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg>
+       </button>
+       <button aria-expanded="false" aria-label="Abrir menu" class="menu-btn premium-menu" id="menuBtn" type="button"><span></span><span></span></button>
+-      <button aria-label="Abrir minha conta" class="premium-icon-btn account-header-btn" id="openAccount" type="button">
++      <button aria-label="Abrir minha conta" aria-expanded="false" aria-controls="accountModal" class="premium-icon-btn account-header-btn" id="openAccount" type="button">
+         <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5.5 20c.7-4 3-6 6.5-6s5.8 2 6.5 6"/></svg>
+         <span class="sr-only">Minha conta</span>
+       </button>
+@@ -165,7 +165,7 @@
+         </div>
+         <div class="toolbar commerce-toolbar">
+           <div class="search-smart-wrap">
+-            <input aria-autocomplete="list" aria-controls="searchSuggestions" aria-expanded="false" aria-label="Buscar produtos" autocomplete="off" class="field" enterkeyhint="search" id="search" maxlength="100" placeholder="Ex.: vinho argentino até R$ 80" type="search"/>
++            <input role="combobox" aria-haspopup="listbox" aria-autocomplete="list" aria-controls="searchSuggestions" aria-expanded="false" aria-label="Buscar produtos" autocomplete="off" class="field" enterkeyhint="search" id="search" maxlength="100" placeholder="Ex.: vinho argentino até R$ 80" type="search"/>
+             <div class="search-suggestions" id="searchSuggestions" role="listbox" hidden></div>
+           </div>
+           <select aria-label="Filtrar por categoria" class="select" id="category"><option value="all">Todas as categorias</option></select>
+@@ -216,7 +216,7 @@
+         <h2 id="modalName"></h2>
+         <div class="modal-commerce-heading"><p class="big-price" id="modalPrice"></p><button class="favorite-btn" id="modalFavorite" type="button" aria-label="Salvar nos favoritos" title="Salvar nos favoritos">♡</button></div>
+         <div class="product-promotion-badges" id="modalPromotionBadges"></div>
+-        <button class="review-summary-button" id="modalReviewSummary" type="button" hidden></button>
++        <button class="review-summary-button" id="modalReviewSummary" type="button" aria-label="Ver avaliações do produto" hidden></button>
+ 
+         <div class="form-row product-option-row">
+           <div class="group" hidden id="variantGroup"><label for="modalVariant">Opção</label><select class="select" id="modalVariant"></select></div>
+@@ -363,6 +363,6 @@
+     <div id="accountContent"></div>
+   </div>
+ </section>
+-<div aria-live="polite" class="toast-stack" id="toasts"></div><script id="buildData" type="application/json">{"publicBuild":true,"appVersion":"11.1.3","version":10,"settings":{"catalogId":"catalog-1786110588222-8uuux6","brand":"INTEGRALL","subtitle":"Wine","catalogTitle":"Nossa seleção","catalogText":"Explore uma curadoria de vinhos, cafés, sucos e sabores especiais.","whatsapp":"","email":"integrallwine@gmail.com","instagram":"@integrallwine","address":"Retirada e entrega combinadas no atendimento.","footerDescription":"","shipMode":"quote","fixed":0,"free":0,"zoneFallback":"quote","pickup":"Retirada disponível mediante confirmação no atendimento.","zones":[],"visual":{"version":1,"preset":"editorial","assets":{"headerLogo":"","footerLogo":"","favicon":"","heroBackground":"/assets/brand/integrall-hero-cover.webp","headerBackground":"","footerBackground":"","pageBackground":""},"colors":{"page":"#ffffff","surface":"#ffffff","surfaceAlt":"#faf9f7","surfaceMuted":"#f4f1ec","primary":"#520f1a","primaryHover":"#711827","accent":"#b58a50","text":"#241c18","muted":"#756a62","line":"#dfd4c6","danger":"#a02c35","success":"#276447","buttonText":"#ffffff","headerBackground":"#24090d","footerBackground":"#35080e","cardBackground":"#ffffff","inputBackground":"#ffffff","heroText":"#fff7ec","heroOverlay":"rgba(0,0,0,.28)","headerText":"#f7ecdc","headerMuted":"#e5d7c5","footerText":"#e8d9c9","footerMuted":"#bdab9a","footerHeading":"#f6e9d7","footerAccent":"#c69b5a","price":"#302c29","badgeBackground":"rgba(255,255,255,.94)","badgeText":"#4a0a1a","outOfStockBackground":"rgba(74,10,26,.9)","outOfStockText":"#ffffff","overlay":"rgba(31,25,23,.18)"},"typography":{"bodyFont":"modern","headingFont":"classic","customBody":"","customHeading":"","baseSize":16,"bodyWeight":400,"headingWeight":400,"lineHeight":1.55,"headingScale":1.05,"navSize":10,"navSpacing":0.13,"brandSpacing":0.28,"navTransform":"uppercase"},"layout":{"maxWidth":1360,"gutterDesktop":64,"gutterMobile":20,"headerLayout":"inline","headerSticky":true,"headerPadding":20,"navGap":28,"headerOrder":["brand","nav","actions"],"catalogAlign":"left","catalogTop":80,"catalogBottom":100,"introMaxWidth":710,"blocks":["intro","filters","products"],"toolbarLayout":"columns","gridColumnsDesktop":4,"gridColumnsTablet":2,"gridColumnsMobile":1,"gridGapX":18,"gridGapY":46,"cardStyle":"minimal","cardAlign":"left","cardPadding":0,"imageRatio":"square","imageFit":"contain","radius":0,"buttonRadius":0,"inputRadius":0,"shadow":"none","footerAlign":"center","footerOrder":["description","contact","logo"],"headerLogoMode":"text","footerLogoMode":"text","headerLogoWidth":220,"footerLogoWidth":170,"heroMode":"plain","heroPadding":0,"heroRadius":0,"animations":true},"visibility":{"category":true,"unit":true,"stock":true,"quickAdd":true,"search":true,"filters":true,"resultCount":true,"footerDescription":true,"footerContact":true,"headerBrand":true,"headerNav":true,"headerActions":true,"intro":true,"filterBlock":true,"products":true,"footerLogo":true},"customCss":""}},"products":[{"id":"product-1786125158091-2hwfps","name":"Suco Integral de Uva bordô","slug":"suco-integral-de-uva-bordo","department":"sucos","subcategory":"Uva Bordô","brand":"Marqués de Mendonça","sku":"","imported":false,"country":"","region":"","price":2390,"unit":"Garrafa de 1L e 300ml","description":"Suco 100% integral de uva bordô, sem adição de açúcar, água ou conservantes. Pasteurizado para preservar o sabor intenso e os antioxidantes naturais da fruta. Produzido pela Marqués de Mendonça, é o suco de quem leva uva a sério: encorpado, de cor profunda e doçura natural da própria fruta. Disponível em garrafas de 300ml e 1 litro.","images":["/assets/products/01-suco-integral-de-uva-bord.webp"],"variants":[{"id":"variant-1786125213057-vsk38j","name":"300ml","price":1150,"stock":60,"unit":"","weightGrams":520,"image":"","position":1},{"id":"variant-1786125277805-0nrmsu","name":"1L","price":2390,"stock":60,"unit":"","weightGrams":1500,"image":"","position":2}],"attributes":{"volume":"1L e 300ml","flavor":"Uva Bordô","kind":"100% Integral","sugar":"Sem adição de açucar e adoçantes","storage":"Pasteurizado"},"stock":null,"stockMin":3,"maxPerOrder":null,"minPerOrder":null,"weightGrams":null,"lengthCm":9,"widthCm":9,"heightCm":32,"boxes":[{"variantId":"variant-1786125213057-vsk38j","units":12,"lengthCm":23,"widthCm":18,"heightCm":19,"weightGrams":6200},{"variantId":"variant-1786125277805-0nrmsu","units":12,"lengthCm":37,"widthCm":27,"heightCm":29,"weightGrams":18000}],"restockDate":"","preparation":"","available":true,"hidden":false,"featured":false,"madeToOrder":false,"seasonal":false,"giftEnabled":true,"position":1,"created":1786125158091,"updated":1786125308896,"deletedAt":null},{"id":"product-1786125523055-ivln6v","name":"Vinho Tinto Seco","slug":"vinho-tinto-seco","department":"vinhos","subcategory":"Vinho Tinto Seco","brand":"Marqués de Mendonça","sku":"332","imported":false,"country":"Brasil","region":"Serra Gaúcha","price":2699,"unit":"750ml","description":"Vinho tinto seco varietal de uva bordô, produzido pela Marqués de Mendonça na Serra Gaúcha. Aromas de frutas vermelhas maduras, corpo leve e taninos macios — um tinto honesto e fácil de gostar, ideal para o dia a dia. Harmoniza com massas ao molho vermelho, queijos e churrasco. Sirva entre 12° e 14°C. Teor alcoólico: 10,9%. Garrafas de 750ml e 375ml. Códigos do catálogo PDF: 332. Formatos: 750ml.","images":["/assets/products/02-vinho-tinto-seco.webp"],"variants":[{"id":"variant-1786125472992-y1279u","name":"750ml","price":2699,"stock":48,"unit":"","weightGrams":1300,"image":"","position":1},{"id":"variant-1786125496593-h1h204","name":"375ml","price":2150,"stock":24,"unit":"","weightGrams":750,"image":"","position":2}],"attributes":{"wineType":"Tinto","grape":"Bordô","alcohol":"10,9","volume":"750ml","serving":"12° a 14°"},"stock":null,"stockMin":3,"maxPerOrder":null,"minPerOrder":null,"weightGrams":null,"lengthCm":9,"widthCm":9,"heightCm":31,"boxes":[{"variantId":"variant-1786125472992-y1279u","units":12,"lengthCm":30,"widthCm":30,"heightCm":24,"weightGrams":14000},{"variantId":"variant-1786125472992-y1279u","units":6,"lengthCm":30,"widthCm":25,"heightCm":17,"weightGrams":7250}],"restockDate":"","preparation":"","available":true,"hidden":false,"featured":false,"madeToOrder":false,"seasonal":false,"giftEnabled":true,"position":2,"created":1786125523055,"updated":1786125523055,"deletedAt":null},{"id":"product-1786125594468-rlk598","name":"Mentirinha","slug":"mentirinha","department":"petit-four","subcategory":"Biscoito Folheado","brand":"Jurerê","sku":"948","imported":false,"country":"","region":"","price":5490,"unit":"Caixa com 2kg","description":"Biscoito folheado tradicional, crocante e delicado, feito em fornadas artesanais. A caixa de 2kg rende bem e é perfeita para servir com café, chá ou vinho de sobremesa. Validade de 6 meses. Pedido mínimo de 2 caixas. Códigos do catálogo PDF: 948. Formatos: Caixa 2 kg.","images":["/assets/products/03-mentirinha.webp"],"variants":[],"attributes":{"weight":"2kg","quantity":"caixa 2 kg","shelfLife":"6 meses","minOrder":"2 caixas"},"stock":30,"stockMin":3,"maxPerOrder":null,"minPerOrder":2,"weightGrams":2200,"lengthCm":35,"widthCm":25,"heightCm":12,"boxes":[],"restockDate":"","preparation":"","available":true,"hidden":false,"featured":false,"madeToOrder":false,"seasonal":false,"giftEnabled":true,"position":3,"created":1786125594468,"updated":1786125594468,"deletedAt":null},{"id":"product-1786125689329-bqbvu9","name":"Vó Damazia","slug":"vo-damazia","department":"cafes","subcategory":"Café Gerações","brand":"Gerações","sku":"","imported":false,"country":"","region":"","price":3990,"unit":"250g","description":"Café Gerações Vó Damazia: grãos 100% arábica cultivados na Serra Gaúcha, torra média que revela notas de chocolate e caramelo com acidez equilibrada. Uma homenagem de família em cada xícara. Embalagem de 250g.","images":["/assets/products/04-v-damazia.webp"],"variants":[],"attributes":{"origin":"Serra Gaúcha","bean":"Arabica","roast":"Média","weight":"250g","method":"Torrado e moído","kind":"100% Arábica"},"stock":40,"stockMin":3,"maxPerOrder":null,"minPerOrder":null,"weightGrams":300,"lengthCm":18,"widthCm":8,"heightCm":26,"boxes":[],"restockDate":"","preparation":"","available":true,"hidden":false,"featured":false,"madeToOrder":false,"seasonal":false,"giftEnabled":true,"position":4,"created":1786125689329,"updated":1786125689329,"deletedAt":null},{"id":"product-1786125745701-ydcfi8","name":"Vinho verde Pescada","slug":"vinho-verde-pescada","department":"vinhos","subcategory":"Vinho Verde","brand":"Pescada","sku":"","imported":true,"country":"Portugal","region":"","price":6500,"unit":"750ml","description":"Vinho verde branco Pescada, importado de Portugal. Leve, fresco e levemente frisante, com notas cítricas e finalização limpa — o companheiro ideal de peixes, frutos do mar e tardes quentes. Sirva bem gelado. Garrafa de 750ml.","images":["/assets/products/05-vinho-verde-pescada.webp"],"variants":[],"attributes":{"wineType":"Branco","volume":"750ml"},"stock":24,"stockMin":3,"maxPerOrder":null,"minPerOrder":null,"weightGrams":1300,"lengthCm":9,"widthCm":9,"heightCm":31,"boxes":[{"variantId":"","units":12,"lengthCm":30,"widthCm":30,"heightCm":24,"weightGrams":14000},{"variantId":"","units":6,"lengthCm":30,"widthCm":25,"heightCm":17,"weightGrams":7250}],"restockDate":"","preparation":"","available":true,"hidden":false,"featured":false,"madeToOrder":false,"seasonal":false,"giftEnabled":true,"position":5,"created":1786125745701,"updated":1786125745701,"deletedAt":null}],"promotions":[],"commerce":{"businessName":"INTEGRALL | Boutique Gourmet","siteUrl":"","taxId":"","businessAddress":"","supportEmail":"","supportPhone":"","privacyText":"POLÍTICA DE PRIVACIDADEA INTEGRALL coleta apenas os dados necessários para processar o seu pedido: nome, contato (e-mail ou telefone) e, quando houver entrega, o endereço. Esses dados são usados exclusivamente para: registrar e entregar o pedido, emitir comunicações sobre o próprio pedido e cumprir obrigações fiscais.Não vendemos nem compartilhamos seus dados com terceiros para fins de marketing. Os dados de pagamento são processados diretamente pelo provedor de pagamento (Mercado Pago) em ambiente próprio — a INTEGRALL não armazena números de cartão.Conforme a Lei Geral de Proteção de Dados (Lei nº 13.709/2018), você pode solicitar a qualquer momento acesso, correção ou exclusão dos seus dados pelo nosso canal de atendimento. Os registros de pedidos são retidos pelo prazo necessário ao cumprimento de obrigações legais e fiscais.","termsText":"TERMOS DE USO1. Os preços, promoções, disponibilidade de estoque e prazos exibidos na loja podem ser atualizados sem aviso prévio; o valor válido é o confirmado no fechamento do pedido.2. A venda de bebidas alcoólicas é proibida para menores de 18 anos (Lei nº 13.106/2015). Ao comprar produtos alcoólicos, o cliente declara ser maior de idade, e a idade poderá ser conferida na entrega ou retirada mediante documento.3. O pedido é confirmado após o registro no sistema; o pagamento online, quando disponível, é processado pelo Mercado Pago em ambiente seguro.4. Para entregas via Correios, o prazo informado é uma estimativa da transportadora e começa a contar após a confirmação do pagamento e a postagem do pedido.5. Casos omissos serão tratados pelo canal de atendimento da loja.","returnsText":"TROCAS, DEVOLUÇÕES E CANCELAMENTOSDireito de arrependimento (art. 49 do Código de Defesa do Consumidor): em compras realizadas fora do estabelecimento comercial, você pode desistir da compra em até 7 (sete) dias corridos a partir do recebimento do produto, com devolução integral do valor pago, desde que o produto esteja lacrado e em condições de revenda.Produtos com avaria, violação ou erro de envio: comunique o ocorrido em até 7 dias pelo canal de atendimento, com fotos, informando o número do pedido. Faremos a substituição ou o reembolso integral, incluindo o frete.Por se tratar de produtos alimentícios e bebidas, não aceitamos devolução de itens abertos ou parcialmente consumidos, salvo em caso de vício de qualidade.Cancelamentos antes do envio podem ser solicitados a qualquer momento pelo canal de atendimento com estorno integral.","retentionDays":90,"pixKey":"","paymentLink":"","paymentMethods":{"whatsapp":false,"pix":false,"card":false},"apiBaseUrl":"","apiMode":"required","lastUpdated":"2026-08-12T00:00:00.000Z"}}</script>
++<div aria-live="polite" class="toast-stack" id="toasts"></div><script id="buildData" type="application/json">{"publicBuild":true,"appVersion":"11.1.4","version":10,"settings":{"catalogId":"catalog-1786110588222-8uuux6","brand":"INTEGRALL","subtitle":"Wine","catalogTitle":"Nossa seleção","catalogText":"Explore uma curadoria de vinhos, cafés, sucos e sabores especiais.","whatsapp":"","email":"integrallwine@gmail.com","instagram":"@integrallwine","address":"Retirada e entrega combinadas no atendimento.","footerDescription":"","shipMode":"quote","fixed":0,"free":0,"zoneFallback":"quote","pickup":"Retirada disponível mediante confirmação no atendimento.","zones":[],"visual":{"version":1,"preset":"editorial","assets":{"headerLogo":"","footerLogo":"","favicon":"","heroBackground":"/assets/brand/integrall-hero-cover.webp","headerBackground":"","footerBackground":"","pageBackground":""},"colors":{"page":"#ffffff","surface":"#ffffff","surfaceAlt":"#faf9f7","surfaceMuted":"#f4f1ec","primary":"#520f1a","primaryHover":"#711827","accent":"#b58a50","text":"#241c18","muted":"#756a62","line":"#dfd4c6","danger":"#a02c35","success":"#276447","buttonText":"#ffffff","headerBackground":"#24090d","footerBackground":"#35080e","cardBackground":"#ffffff","inputBackground":"#ffffff","heroText":"#fff7ec","heroOverlay":"rgba(0,0,0,.28)","headerText":"#f7ecdc","headerMuted":"#e5d7c5","footerText":"#e8d9c9","footerMuted":"#bdab9a","footerHeading":"#f6e9d7","footerAccent":"#c69b5a","price":"#302c29","badgeBackground":"rgba(255,255,255,.94)","badgeText":"#4a0a1a","outOfStockBackground":"rgba(74,10,26,.9)","outOfStockText":"#ffffff","overlay":"rgba(31,25,23,.18)"},"typography":{"bodyFont":"modern","headingFont":"classic","customBody":"","customHeading":"","baseSize":16,"bodyWeight":400,"headingWeight":400,"lineHeight":1.55,"headingScale":1.05,"navSize":10,"navSpacing":0.13,"brandSpacing":0.28,"navTransform":"uppercase"},"layout":{"maxWidth":1360,"gutterDesktop":64,"gutterMobile":20,"headerLayout":"inline","headerSticky":true,"headerPadding":20,"navGap":28,"headerOrder":["brand","nav","actions"],"catalogAlign":"left","catalogTop":80,"catalogBottom":100,"introMaxWidth":710,"blocks":["intro","filters","products"],"toolbarLayout":"columns","gridColumnsDesktop":4,"gridColumnsTablet":2,"gridColumnsMobile":1,"gridGapX":18,"gridGapY":46,"cardStyle":"minimal","cardAlign":"left","cardPadding":0,"imageRatio":"square","imageFit":"contain","radius":0,"buttonRadius":0,"inputRadius":0,"shadow":"none","footerAlign":"center","footerOrder":["description","contact","logo"],"headerLogoMode":"text","footerLogoMode":"text","headerLogoWidth":220,"footerLogoWidth":170,"heroMode":"plain","heroPadding":0,"heroRadius":0,"animations":true},"visibility":{"category":true,"unit":true,"stock":true,"quickAdd":true,"search":true,"filters":true,"resultCount":true,"footerDescription":true,"footerContact":true,"headerBrand":true,"headerNav":true,"headerActions":true,"intro":true,"filterBlock":true,"products":true,"footerLogo":true},"customCss":""}},"products":[{"id":"product-1786125158091-2hwfps","name":"Suco Integral de Uva bordô","slug":"suco-integral-de-uva-bordo","department":"sucos","subcategory":"Uva Bordô","brand":"Marqués de Mendonça","sku":"","imported":false,"country":"","region":"","price":2390,"unit":"Garrafa de 1L e 300ml","description":"Suco 100% integral de uva bordô, sem adição de açúcar, água ou conservantes. Pasteurizado para preservar o sabor intenso e os antioxidantes naturais da fruta. Produzido pela Marqués de Mendonça, é o suco de quem leva uva a sério: encorpado, de cor profunda e doçura natural da própria fruta. Disponível em garrafas de 300ml e 1 litro.","images":["/assets/products/01-suco-integral-de-uva-bord.webp"],"variants":[{"id":"variant-1786125213057-vsk38j","name":"300ml","price":1150,"stock":60,"unit":"","weightGrams":520,"image":"","position":1},{"id":"variant-1786125277805-0nrmsu","name":"1L","price":2390,"stock":60,"unit":"","weightGrams":1500,"image":"","position":2}],"attributes":{"volume":"1L e 300ml","flavor":"Uva Bordô","kind":"100% Integral","sugar":"Sem adição de açucar e adoçantes","storage":"Pasteurizado"},"stock":null,"stockMin":3,"maxPerOrder":null,"minPerOrder":null,"weightGrams":null,"lengthCm":9,"widthCm":9,"heightCm":32,"boxes":[{"variantId":"variant-1786125213057-vsk38j","units":12,"lengthCm":23,"widthCm":18,"heightCm":19,"weightGrams":6200},{"variantId":"variant-1786125277805-0nrmsu","units":12,"lengthCm":37,"widthCm":27,"heightCm":29,"weightGrams":18000}],"restockDate":"","preparation":"","available":true,"hidden":false,"featured":false,"madeToOrder":false,"seasonal":false,"giftEnabled":true,"position":1,"created":1786125158091,"updated":1786125308896,"deletedAt":null},{"id":"product-1786125523055-ivln6v","name":"Vinho Tinto Seco","slug":"vinho-tinto-seco","department":"vinhos","subcategory":"Vinho Tinto Seco","brand":"Marqués de Mendonça","sku":"332","imported":false,"country":"Brasil","region":"Serra Gaúcha","price":2699,"unit":"750ml","description":"Vinho tinto seco varietal de uva bordô, produzido pela Marqués de Mendonça na Serra Gaúcha. Aromas de frutas vermelhas maduras, corpo leve e taninos macios — um tinto honesto e fácil de gostar, ideal para o dia a dia. Harmoniza com massas ao molho vermelho, queijos e churrasco. Sirva entre 12° e 14°C. Teor alcoólico: 10,9%. Garrafas de 750ml e 375ml. Códigos do catálogo PDF: 332. Formatos: 750ml.","images":["/assets/products/02-vinho-tinto-seco.webp"],"variants":[{"id":"variant-1786125472992-y1279u","name":"750ml","price":2699,"stock":48,"unit":"","weightGrams":1300,"image":"","position":1},{"id":"variant-1786125496593-h1h204","name":"375ml","price":2150,"stock":24,"unit":"","weightGrams":750,"image":"","position":2}],"attributes":{"wineType":"Tinto","grape":"Bordô","alcohol":"10,9","volume":"750ml","serving":"12° a 14°"},"stock":null,"stockMin":3,"maxPerOrder":null,"minPerOrder":null,"weightGrams":null,"lengthCm":9,"widthCm":9,"heightCm":31,"boxes":[{"variantId":"variant-1786125472992-y1279u","units":12,"lengthCm":30,"widthCm":30,"heightCm":24,"weightGrams":14000},{"variantId":"variant-1786125472992-y1279u","units":6,"lengthCm":30,"widthCm":25,"heightCm":17,"weightGrams":7250}],"restockDate":"","preparation":"","available":true,"hidden":false,"featured":false,"madeToOrder":false,"seasonal":false,"giftEnabled":true,"position":2,"created":1786125523055,"updated":1786125523055,"deletedAt":null},{"id":"product-1786125594468-rlk598","name":"Mentirinha","slug":"mentirinha","department":"petit-four","subcategory":"Biscoito Folheado","brand":"Jurerê","sku":"948","imported":false,"country":"","region":"","price":5490,"unit":"Caixa com 2kg","description":"Biscoito folheado tradicional, crocante e delicado, feito em fornadas artesanais. A caixa de 2kg rende bem e é perfeita para servir com café, chá ou vinho de sobremesa. Validade de 6 meses. Pedido mínimo de 2 caixas. Códigos do catálogo PDF: 948. Formatos: Caixa 2 kg.","images":["/assets/products/03-mentirinha.webp"],"variants":[],"attributes":{"weight":"2kg","quantity":"caixa 2 kg","shelfLife":"6 meses","minOrder":"2 caixas"},"stock":30,"stockMin":3,"maxPerOrder":null,"minPerOrder":2,"weightGrams":2200,"lengthCm":35,"widthCm":25,"heightCm":12,"boxes":[],"restockDate":"","preparation":"","available":true,"hidden":false,"featured":false,"madeToOrder":false,"seasonal":false,"giftEnabled":true,"position":3,"created":1786125594468,"updated":1786125594468,"deletedAt":null},{"id":"product-1786125689329-bqbvu9","name":"Vó Damazia","slug":"vo-damazia","department":"cafes","subcategory":"Café Gerações","brand":"Gerações","sku":"","imported":false,"country":"","region":"","price":3990,"unit":"250g","description":"Café Gerações Vó Damazia: grãos 100% arábica cultivados na Serra Gaúcha, torra média que revela notas de chocolate e caramelo com acidez equilibrada. Uma homenagem de família em cada xícara. Embalagem de 250g.","images":["/assets/products/04-v-damazia.webp"],"variants":[],"attributes":{"origin":"Serra Gaúcha","bean":"Arabica","roast":"Média","weight":"250g","method":"Torrado e moído","kind":"100% Arábica"},"stock":40,"stockMin":3,"maxPerOrder":null,"minPerOrder":null,"weightGrams":300,"lengthCm":18,"widthCm":8,"heightCm":26,"boxes":[],"restockDate":"","preparation":"","available":true,"hidden":false,"featured":false,"madeToOrder":false,"seasonal":false,"giftEnabled":true,"position":4,"created":1786125689329,"updated":1786125689329,"deletedAt":null},{"id":"product-1786125745701-ydcfi8","name":"Vinho verde Pescada","slug":"vinho-verde-pescada","department":"vinhos","subcategory":"Vinho Verde","brand":"Pescada","sku":"","imported":true,"country":"Portugal","region":"","price":6500,"unit":"750ml","description":"Vinho verde branco Pescada, importado de Portugal. Leve, fresco e levemente frisante, com notas cítricas e finalização limpa — o companheiro ideal de peixes, frutos do mar e tardes quentes. Sirva bem gelado. Garrafa de 750ml.","images":["/assets/products/05-vinho-verde-pescada.webp"],"variants":[],"attributes":{"wineType":"Branco","volume":"750ml"},"stock":24,"stockMin":3,"maxPerOrder":null,"minPerOrder":null,"weightGrams":1300,"lengthCm":9,"widthCm":9,"heightCm":31,"boxes":[{"variantId":"","units":12,"lengthCm":30,"widthCm":30,"heightCm":24,"weightGrams":14000},{"variantId":"","units":6,"lengthCm":30,"widthCm":25,"heightCm":17,"weightGrams":7250}],"restockDate":"","preparation":"","available":true,"hidden":false,"featured":false,"madeToOrder":false,"seasonal":false,"giftEnabled":true,"position":5,"created":1786125745701,"updated":1786125745701,"deletedAt":null}],"promotions":[],"commerce":{"businessName":"INTEGRALL | Boutique Gourmet","siteUrl":"","taxId":"","businessAddress":"","supportEmail":"","supportPhone":"","privacyText":"POLÍTICA DE PRIVACIDADEA INTEGRALL coleta apenas os dados necessários para processar o seu pedido: nome, contato (e-mail ou telefone) e, quando houver entrega, o endereço. Esses dados são usados exclusivamente para: registrar e entregar o pedido, emitir comunicações sobre o próprio pedido e cumprir obrigações fiscais.Não vendemos nem compartilhamos seus dados com terceiros para fins de marketing. Os dados de pagamento são processados diretamente pelo provedor de pagamento (Mercado Pago) em ambiente próprio — a INTEGRALL não armazena números de cartão.Conforme a Lei Geral de Proteção de Dados (Lei nº 13.709/2018), você pode solicitar a qualquer momento acesso, correção ou exclusão dos seus dados pelo nosso canal de atendimento. Os registros de pedidos são retidos pelo prazo necessário ao cumprimento de obrigações legais e fiscais.","termsText":"TERMOS DE USO1. Os preços, promoções, disponibilidade de estoque e prazos exibidos na loja podem ser atualizados sem aviso prévio; o valor válido é o confirmado no fechamento do pedido.2. A venda de bebidas alcoólicas é proibida para menores de 18 anos (Lei nº 13.106/2015). Ao comprar produtos alcoólicos, o cliente declara ser maior de idade, e a idade poderá ser conferida na entrega ou retirada mediante documento.3. O pedido é confirmado após o registro no sistema; o pagamento online, quando disponível, é processado pelo Mercado Pago em ambiente seguro.4. Para entregas via Correios, o prazo informado é uma estimativa da transportadora e começa a contar após a confirmação do pagamento e a postagem do pedido.5. Casos omissos serão tratados pelo canal de atendimento da loja.","returnsText":"TROCAS, DEVOLUÇÕES E CANCELAMENTOSDireito de arrependimento (art. 49 do Código de Defesa do Consumidor): em compras realizadas fora do estabelecimento comercial, você pode desistir da compra em até 7 (sete) dias corridos a partir do recebimento do produto, com devolução integral do valor pago, desde que o produto esteja lacrado e em condições de revenda.Produtos com avaria, violação ou erro de envio: comunique o ocorrido em até 7 dias pelo canal de atendimento, com fotos, informando o número do pedido. Faremos a substituição ou o reembolso integral, incluindo o frete.Por se tratar de produtos alimentícios e bebidas, não aceitamos devolução de itens abertos ou parcialmente consumidos, salvo em caso de vício de qualidade.Cancelamentos antes do envio podem ser solicitados a qualquer momento pelo canal de atendimento com estorno integral.","retentionDays":90,"pixKey":"","paymentLink":"","paymentMethods":{"whatsapp":false,"pix":false,"card":false},"apiBaseUrl":"","apiMode":"required","lastUpdated":"2026-08-12T00:00:00.000Z"}}</script>
+ 
+-<script defer src="/js/store/age-gate.js?v=11.1.3"></script><script defer src="/js/store/catalog.js?v=11.1.3"></script><script defer src="/js/store/cart.js?v=11.1.3"></script><script defer src="/js/store/shipping.js?v=11.1.3"></script><script defer src="/js/store/api.js?v=11.1.3"></script><script defer src="/js/store/checkout.js?v=11.1.3"></script><script defer src="/js/store/app.js?v=11.1.3"></script><script defer src="/js/store/commerce-v111.js?v=11.1.3"></script><script defer src="/js/store/premium-v104.js?v=11.1.3"></script></body></html>
+\ No newline at end of file
++<script defer src="/js/store/age-gate.js?v=11.1.4"></script><script defer src="/js/store/catalog.js?v=11.1.4"></script><script defer src="/js/store/cart.js?v=11.1.4"></script><script defer src="/js/store/shipping.js?v=11.1.4"></script><script defer src="/js/store/api.js?v=11.1.4"></script><script defer src="/js/store/checkout.js?v=11.1.4"></script><script defer src="/js/store/app.js?v=11.1.4"></script><script defer src="/js/store/commerce-v111.js?v=11.1.4"></script><script defer src="/js/store/premium-v104.js?v=11.1.4"></script></body></html>
+\ No newline at end of file
+--- a/public/js/store/catalog.js
++++ b/public/js/store/catalog.js
+@@ -564,10 +564,22 @@
+     for(const [key,id] of [['country','filterCountry'],['type','filterType'],['grape','filterGrape'],['origin','filterOrigin'],['flavor','filterFlavor']]) state.filters[key]=$('#'+id)?.value||'all';
+   }
+   function advancedFilterCount(){return Object.entries(state.filters).reduce((sum,[key,value])=>sum+(key==='imported'?(value?1:0):(value&&value!=='all'?1:0)),0)}
++  function closeSearchSuggestions({focusInput=false}={}) {
++    const box=$('#searchSuggestions'),input=$('#search');
++    if(box){box.hidden=true;$$('[data-suggest-product]',box).forEach(option=>option.setAttribute('aria-selected','false'));}
++    if(input){input.setAttribute('aria-expanded','false');input.removeAttribute('aria-activedescendant');if(focusInput)input.focus({preventScroll:true});}
++  }
++  function moveSearchSuggestion(step) {
++    const box=$('#searchSuggestions'),input=$('#search');if(!box||box.hidden||!input)return false;
++    const options=$$('[data-suggest-product]',box);if(!options.length)return false;
++    const current=options.indexOf(document.activeElement);let index=current<0?(step>0?0:options.length-1):(current+step+options.length)%options.length;
++    options.forEach((option,i)=>option.setAttribute('aria-selected',String(i===index)));
++    options[index].focus({preventScroll:true});input.setAttribute('aria-activedescendant',options[index].id);return true;
++  }
+   function updateSearchSuggestions() {
+-    const box=$('#searchSuggestions'),input=$('#search');if(!box||!input)return;const query=parseSearchIntent(state.search);if(norm(state.search).length<2||(!query.terms.length&&query.minPrice==null&&query.maxPrice==null)){box.hidden=true;box.replaceChildren();input.setAttribute('aria-expanded','false');return}
++    const box=$('#searchSuggestions'),input=$('#search');if(!box||!input)return;const query=parseSearchIntent(state.search);if(norm(state.search).length<2||(!query.terms.length&&query.minPrice==null&&query.maxPrice==null)){box.replaceChildren();closeSearchSuggestions();return}
+     const results=state.products.filter(p=>p.hidden!==true&&pageMatches(p)).map(product=>{const hay=productSearchText(product);const matches=query.terms.every(term=>hay.includes(term));const price=basePrice(product);if(!matches||(query.minPrice!=null&&price<query.minPrice)||(query.maxPrice!=null&&price>query.maxPrice))return null;const name=norm(product.name);const score=query.terms.reduce((sum,term)=>sum+(name.startsWith(term)?5:name.includes(term)?3:hay.includes(term)?1:0),0)+Number(product.featured||0);return{product,score}}).filter(Boolean).sort((a,b)=>b.score-a.score||a.product.name.localeCompare(b.product.name,'pt-BR')).slice(0,6);
+-    box.replaceChildren();results.forEach(({product})=>{const button=el('button','search-suggestion');button.type='button';button.dataset.suggestProduct=product.id;button.setAttribute('role','option');const image=document.createElement('img');setProductImage(image,productImages(product)[0],product,'');const copy=el('span');copy.append(el('strong','',product.name),el('small','',[product.brand,product.country||product.region].filter(Boolean).join(' • ')||product.subcategory||''));button.append(image,copy,el('span','search-suggestion-price',money(basePrice(product))));box.append(button)});box.hidden=!results.length;input.setAttribute('aria-expanded',String(results.length>0));
++    box.replaceChildren();results.forEach(({product},index)=>{const button=el('button','search-suggestion');button.type='button';button.id=`searchSuggestion-${index}`;button.dataset.suggestProduct=product.id;button.setAttribute('role','option');button.setAttribute('aria-selected','false');const image=document.createElement('img');setProductImage(image,productImages(product)[0],product,'');const copy=el('span');copy.append(el('strong','',product.name),el('small','',[product.brand,product.country||product.region].filter(Boolean).join(' • ')||product.subcategory||''));button.append(image,copy,el('span','search-suggestion-price',money(basePrice(product))));box.append(button)});box.hidden=!results.length;input.setAttribute('aria-expanded',String(results.length>0));input.removeAttribute('aria-activedescendant');
+   }
+ 
+   function filteredProducts() {
+@@ -1081,6 +1093,7 @@
+   }
+ 
+   function openCart() { renderCart(); layers.open($('#cartDrawer')); }
++  function closeCart({returnFocus=true}={}) { if(layers.current()!==$('#cartDrawer'))return false;layers.close(returnFocus);return true; }
+ 
+   function whatsappUrl(message) {
+     const phone = digits(state.settings.whatsapp); return phone ? `https://wa.me/${phone}?text=${encodeURIComponent(message)}` : '';
+@@ -1139,6 +1152,7 @@
+     $$('[data-page]').forEach(button => button.addEventListener('click', event => { event.preventDefault(); navigate(button.dataset.page); }));
+     window.addEventListener('popstate', () => { if (layers.current()) layers.close(false); closeProductDetails({returnFocus:false, updateHistory:false}); const route = routeFromLocation(); applyPage(route.page); if (route.productId) setTimeout(() => openProduct(route.productId, {focus:false}), 40); });
+     $('#search').addEventListener('input', event => { state.search = event.target.value; resetProductWindow(); renderProducts(); updateSearchSuggestions(); });
++    $('#search').addEventListener('keydown', event => { if((event.key==='ArrowDown'||event.key==='ArrowUp')&&moveSearchSuggestion(event.key==='ArrowDown'?1:-1)){event.preventDefault();return;} if(event.key==='Escape'&&!$('#searchSuggestions')?.hidden){event.preventDefault();closeSearchSuggestions();} });
+     $('#category').addEventListener('change', event => { state.category = event.target.value; resetProductWindow(); renderProducts(); });
+     $('#sort').addEventListener('change', event => { state.sort = event.target.value; resetProductWindow(); renderProducts(); });
+     const advancedMap={filterCountry:'country',filterType:'type',filterGrape:'grape',filterOrigin:'origin',filterFlavor:'flavor',filterAvailability:'availability',filterMinPrice:'minPrice',filterMaxPrice:'maxPrice'};
+@@ -1152,6 +1166,9 @@
+     $('#closeProductDetails')?.addEventListener('click', () => closeProductDetails());
+     $('#loadMoreProducts')?.addEventListener('click',()=>{state.visibleCount+=CATALOG_PAGE_SIZE;renderProducts();});
+     document.addEventListener('keydown', event => {
++      const searchOption=event.target.closest?.('[data-suggest-product]');
++      if(searchOption&&(event.key==='ArrowDown'||event.key==='ArrowUp')){if(moveSearchSuggestion(event.key==='ArrowDown'?1:-1))event.preventDefault();return;}
++      if(searchOption&&event.key==='Escape'){event.preventDefault();closeSearchSuggestions({focusInput:true});return;}
+       const cardOpener = event.target.closest?.('.card-image-open');
+       if (cardOpener && (event.key === 'ArrowLeft' || event.key === 'ArrowRight')) {
+         const stage = cardOpener.closest('[data-card-gallery-product]');
+@@ -1160,10 +1177,11 @@
+       }
+       if (event.key === 'ArrowLeft' && productDetailsIsOpen()) { if (changeModalGallery(-1)) event.preventDefault(); return; }
+       if (event.key === 'ArrowRight' && productDetailsIsOpen()) { if (changeModalGallery(1)) event.preventDefault(); return; }
+-      if (event.key === 'Escape') { const suggestions=$('#searchSuggestions'); if(suggestions&&!suggestions.hidden){suggestions.hidden=true;$('#search')?.setAttribute('aria-expanded','false');return;} if(layers.current()){closeCurrentLayer();return;} if(productDetailsIsOpen())closeProductDetails(); }
++      if (event.key === 'Escape') { const suggestions=$('#searchSuggestions'); if(suggestions&&!suggestions.hidden){closeSearchSuggestions({focusInput:true});return;} if(layers.current()){closeCurrentLayer();return;} if(productDetailsIsOpen())closeProductDetails(); }
+     });
+     document.addEventListener('click', event => {
+-      const suggestion=event.target.closest('[data-suggest-product]'); if(suggestion){$('#searchSuggestions').hidden=true; openProduct(suggestion.dataset.suggestProduct,{updateHash:publicMode}); return;}
++      const suggestion=event.target.closest('[data-suggest-product]'); if(suggestion){closeSearchSuggestions(); openProduct(suggestion.dataset.suggestProduct,{updateHash:publicMode}); return;}
++      if(!event.target.closest?.('.search-smart-wrap')&&!$('#searchSuggestions')?.hidden)closeSearchSuggestions();
+       const cardGallery = event.target.closest('[data-card-gallery-step]'); if (cardGallery) { event.preventDefault(); event.stopPropagation(); changeCardGallery(cardGallery.dataset.cardProduct, Number(cardGallery.dataset.cardGalleryStep), cardGallery.closest('[data-card-gallery-product]')); return; }
+       const modalGallery = event.target.closest('[data-gallery-step]'); if (modalGallery) { event.preventDefault(); changeModalGallery(Number(modalGallery.dataset.galleryStep)); return; }
+       const detail = event.target.closest('[data-details]'); if (detail) { if (performance.now() < state.swipeSuppressedUntil) return; openProduct(detail.dataset.details, {updateHash: publicMode}); return; }
+@@ -1241,5 +1259,5 @@
+   const initialRoute = routeFromLocation(); applyPage(initialRoute.page); renderAdvancedFilters(); renderCart();
+   if (initialRoute.productId) setTimeout(() => openProduct(initialRoute.productId), 60);
+ 
+-  return {state, setProducts, setPromotions, setSettings, renderProducts, renderCart, renderCategories, renderAdvancedFilters, renderGallery, renderCardGalleryStage, changeCardGallery, changeModalGallery, openProduct, closeProductDetails, openCart, navigate, notify, calculateShipping, getState, getProduct, productImages, basePrice, regularBasePrice, linePrice, regularLinePrice, productVariants, selectedVariant, variantDisplayImage, productAvailable, stockLimit, money, norm, digits, cepMask, placeholderImage, normalizeVisual, buildVisualCss, scopeVisualCss, visualDefaults: visualClone(VISUAL_DEFAULTS), applyVisualTheme, checkoutValidation, checkoutMessage, cartDetails, cartSubtotal, openWhatsApp, whatsappUrl, saveCart, cleanCart, addReorderItems, effectiveFreeShippingThreshold, activeProductPromotions, automaticPromotionPreview};
++  return {state, setProducts, setPromotions, setSettings, renderProducts, renderCart, renderCategories, renderAdvancedFilters, renderGallery, renderCardGalleryStage, changeCardGallery, changeModalGallery, openProduct, closeProductDetails, openCart, closeCart, navigate, notify, calculateShipping, getState, getProduct, productImages, basePrice, regularBasePrice, linePrice, regularLinePrice, productVariants, selectedVariant, variantDisplayImage, productAvailable, stockLimit, money, norm, digits, cepMask, placeholderImage, normalizeVisual, buildVisualCss, scopeVisualCss, visualDefaults: visualClone(VISUAL_DEFAULTS), applyVisualTheme, checkoutValidation, checkoutMessage, cartDetails, cartSubtotal, openWhatsApp, whatsappUrl, saveCart, cleanCart, addReorderItems, effectiveFreeShippingThreshold, activeProductPromotions, automaticPromotionPreview};
+ })({embedded:__integrallData,publicMode:true});
+\ No newline at end of file
+--- a/public/js/store/checkout.js
++++ b/public/js/store/checkout.js
+@@ -9,6 +9,7 @@
+   const LAST_ORDER_KEY = 'integrall_last_order_v9';
+   let memoryAttempt = null;
+   let activeTrackedOrder = null;
++  let orderModalOpener = null;
+   let appliedCoupon = null;
+   let correiosOptions = [];
+   let correiosSelected = '';
+@@ -631,7 +632,7 @@
+         </div>
+       </div>`;
+     document.body.append(modal);
+-    const close = () => { modal.classList.remove('open'); modal.setAttribute('aria-hidden', 'true'); document.body.classList.remove('lock'); };
++    const close = () => { modal.classList.remove('open'); modal.setAttribute('aria-hidden', 'true'); document.body.classList.remove('lock'); const previous=orderModalOpener;orderModalOpener=null;setTimeout(()=>{const target=previous?.isConnected&&previous.offsetParent!==null?previous:$('#openCart');target?.focus?.({preventScroll:true});},20); };
+     modal.querySelector('.close-btn').addEventListener('click', close);
+     $('#orderCloseButton').addEventListener('click', close);
+     $('#orderRefreshButton').addEventListener('click', () => refreshTrackedOrder());
+@@ -682,6 +683,9 @@
+ 
+   function renderTrackedOrder(order) {
+     activeTrackedOrder = order;
++    orderModalOpener = document.activeElement instanceof HTMLElement ? document.activeElement : $('#openCart');
++    globalThis.__integrallApp?.closeProductDetails?.({returnFocus:false,updateHistory:true});
++    globalThis.__integrallApp?.closeCart?.({returnFocus:false});
+     const modal = ensureOrderModal();
+     $('#orderStatusBadge').textContent = STATUS_LABELS[order.status] || order.status || 'Pedido';
+     $('#orderStatusBadge').className = `order-status-badge ${order.status || ''}`;
+--- a/public/js/store/commerce-v111.js
++++ b/public/js/store/commerce-v111.js
+@@ -5,10 +5,10 @@
+   const api = globalThis.IntegrallApi;
+   if (!app || !api) return;
+ 
+-  const state = {authenticated:false, account:null, csrfToken:'', orders:[], pendingEmail:'', activeProductId:'', reviewRequest:0};
++  const state = {authenticated:false, account:null, csrfToken:'', orders:[], pendingEmail:'', activeProductId:'', reviewRequest:0, accountOpener:null, pendingFavoriteId:''};
+   const create = (tag, cls='', text='') => { const node=document.createElement(tag); if(cls)node.className=cls; if(text!==undefined&&text!=='')node.textContent=text; return node; };
+   const money = value => app.money(Number(value)||0);
+-  const statusLabels = {received:'Recebido',awaiting_payment:'Aguardando pagamento',paid:'Pago',payment_failed:'Falha no pagamento',payment_expired:'Pagamento expirado',payment_review:'Em revisão',preparing:'Preparando',ready:'Pronto',completed:'Concluído',cancelled:'Cancelado'};
++  const statusLabels = {received:'Recebido',awaiting_payment:'Aguardando pagamento',paid:'Pago',payment_failed:'Falha no pagamento',payment_expired:'Pagamento expirado',payment_review:'Em revisão',preparing:'Preparando',ready:'Pronto',completed:'Concluído',refunded:'Reembolsado',chargeback:'Contestação',cancelled:'Cancelado'};
+ 
+   async function request(path, options={}) {
+     const headers={...(options.headers||{})};
+@@ -16,8 +16,9 @@
+     return api.request(path,{...options,headers});
+   }
+   function setFeedback(selector,message,type=''){const node=$(selector);if(!node)return;node.textContent=message||'';node.className=`commerce-feedback${type?` ${type}`:''}`;}
+-  function accountOpen(open=true){const modal=$('#accountModal');if(!modal)return;modal.classList.toggle('open',open);modal.setAttribute('aria-hidden',String(!open));document.body.classList.toggle('lock',open);if(open)setTimeout(()=>$('#accountContent input, #accountContent button')?.focus(),30)}
+-  function accountButton(){const button=$('#openAccount');if(button){button.classList.toggle('has-session',state.authenticated);button.title=state.authenticated?`Minha conta — ${state.account?.email||''}`:'Entrar na minha conta';}}
++  function accountFocusables(){const modal=$('#accountModal');if(!modal)return[];return[...modal.querySelectorAll('button:not([disabled]),[href],input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])')].filter(node=>!node.hidden&&node.offsetParent!==null)}
++  function accountOpen(open=true,{restoreFocus=true}={}){const modal=$('#accountModal');if(!modal)return;if(open){state.accountOpener=document.activeElement instanceof HTMLElement?document.activeElement:null;app.closeProductDetails?.({returnFocus:false,updateHistory:true});app.closeCart?.({returnFocus:false});modal.classList.add('open');modal.setAttribute('aria-hidden','false');document.body.classList.add('lock');$('#openAccount')?.setAttribute('aria-expanded','true');setTimeout(()=>accountFocusables()[0]?.focus({preventScroll:true}),30);return}modal.classList.remove('open');modal.setAttribute('aria-hidden','true');document.body.classList.remove('lock');$('#openAccount')?.setAttribute('aria-expanded','false');state.pendingFavoriteId='';const previous=state.accountOpener;state.accountOpener=null;if(restoreFocus){const target=previous?.isConnected&&previous.offsetParent!==null?previous:$('#openAccount');setTimeout(()=>target?.focus?.({preventScroll:true}),20)}}
++  function accountButton(){const button=$('#openAccount');if(button){button.classList.toggle('has-session',state.authenticated);button.title=state.authenticated?`Minha conta — ${state.account?.email||''}`:'Entrar na minha conta';button.setAttribute('aria-expanded',String($('#accountModal')?.classList.contains('open')||false));}}
+   function syncCheckoutFromAccount(){if(!state.authenticated||!state.account)return;const name=$('#customerName'),email=$('#customerEmail'),phone=$('#customerPhone');if(name&&!name.value&&state.account.name){name.value=state.account.name;name.dispatchEvent(new Event('input',{bubbles:true}))}if(email&&!email.value)email.value=state.account.email||'';if(phone&&!phone.value)phone.value=state.account.phone||'';const address=(state.account.addresses||[])[0];if(address&&app.getState().checkout.choice==='delivery'){const map={deliveryStreet:'street',deliveryNumber:'number',deliveryNeighborhood:'neighborhood',deliveryComplement:'complement',deliveryCity:'city',deliveryState:'state'};for(const[id,key]of Object.entries(map)){const input=$('#'+id);if(input&&!input.value)input.value=address[key]||''}const cep=$('#modalCep');if(cep&&!cep.value&&address.cep)cep.value=app.cepMask(address.cep)}}
+ 
+   async function loadSession(){
+@@ -34,9 +35,11 @@
+     form.addEventListener('submit',async event=>{event.preventDefault();button.disabled=true;setFeedback('#accountLoginFeedback','Enviando…');try{state.pendingEmail=email.input.value.trim();const data=await request('/api/account/login/request',{method:'POST',body:JSON.stringify({email:state.pendingEmail})});renderCode(data.developmentCode||'');}catch(error){setFeedback('#accountLoginFeedback',error.message,'bad')}finally{button.disabled=false}});
+   }
+ 
++  async function applyPendingFavorite(){const id=state.pendingFavoriteId;if(!id||!state.authenticated||!state.account)return false;state.pendingFavoriteId='';const favorites=new Set(state.account.favorites||[]);if(favorites.has(id))return true;favorites.add(id);try{await saveProfile({favorites:[...favorites]});app.notify('Produto salvo nos favoritos.','ok');return true}catch(error){app.notify(error.message,'bad');return false}}
++
+   function renderCode(developmentCode=''){
+     const root=$('#accountContent');root.replaceChildren();root.append(create('p','',`Digite o código enviado para ${state.pendingEmail}.`));const form=create('form','account-code-form');const code=inputLabel('Código de 6 dígitos','text','',{inputmode:'numeric',autocomplete:'one-time-code',maxlength:'6',required:''});code.input.id='accountCode';const button=create('button','btn primary','Entrar');button.type='submit';const back=create('button','btn ghost small','Usar outro e-mail');back.type='button';const feedback=create('p','commerce-feedback');feedback.id='accountCodeFeedback';form.append(code.wrap,button,back,feedback);root.append(form);if(developmentCode){const dev=create('p','reservation-notice',`Ambiente local: código ${developmentCode}`);root.append(dev);code.input.value=developmentCode}
+-    back.addEventListener('click',renderLogin);form.addEventListener('submit',async event=>{event.preventDefault();button.disabled=true;try{const data=await request('/api/account/login/verify',{method:'POST',body:JSON.stringify({email:state.pendingEmail,code:code.input.value})});state.authenticated=true;state.account=data.account;state.csrfToken=data.csrfToken;accountButton();syncCheckoutFromAccount();await renderAccount();syncFavoriteButton();syncReviewForm();}catch(error){setFeedback('#accountCodeFeedback',error.message,'bad')}finally{button.disabled=false}});
++    back.addEventListener('click',renderLogin);form.addEventListener('submit',async event=>{event.preventDefault();button.disabled=true;try{const data=await request('/api/account/login/verify',{method:'POST',body:JSON.stringify({email:state.pendingEmail,code:code.input.value})});state.authenticated=true;state.account=data.account;state.csrfToken=data.csrfToken;accountButton();syncCheckoutFromAccount();await applyPendingFavorite();await renderAccount();syncFavoriteButton();syncReviewForm();}catch(error){setFeedback('#accountCodeFeedback',error.message,'bad')}finally{button.disabled=false}});
+   }
+ 
+   async function saveProfile(patch){const data=await request('/api/account/profile',{method:'PATCH',csrf:true,body:JSON.stringify(patch)});state.account=data.account;accountButton();syncCheckoutFromAccount();return data.account;}
+@@ -61,15 +64,15 @@
+   }
+ 
+   async function renderOrders(root){
+-    const section=appendAccountSection(root,'Meus pedidos');const loading=create('p','reservation-notice','Carregando pedidos…');section.append(loading);try{const data=await request('/api/account/orders');state.orders=Array.isArray(data.orders)?data.orders:[];loading.remove();if(!state.orders.length){section.append(create('p','reservation-notice','Você ainda não possui pedidos vinculados a este e-mail.'));return}state.orders.forEach(order=>{const card=create('article','account-order');const head=create('div','account-order-head');head.append(create('strong','',order.id),create('span','',statusLabels[order.status]||order.status));card.append(head,create('span','',`${new Date(order.createdAt).toLocaleDateString('pt-BR')} · ${money(order.totalCents)}`));const lines=create('div','account-order-lines',(order.items||[]).map(item=>`${item.qty}× ${item.name}${item.variant?` — ${item.variant}`:''}`).join(' · '));card.append(lines);if(order.canReorder){const again=create('button','btn outline small','Comprar novamente');again.type='button';again.addEventListener('click',async()=>{again.disabled=true;try{const result=await request('/api/account/reorder',{method:'POST',csrf:true,body:JSON.stringify({orderId:order.id})});const added=app.addReorderItems(result.items);if(added.added)accountOpen(false)}catch(error){app.notify(error.message,'bad')}finally{again.disabled=false}});card.append(again)}section.append(card)})}catch(error){loading.textContent=error.message;}
++    const section=appendAccountSection(root,'Meus pedidos');const loading=create('p','reservation-notice','Carregando pedidos…');section.append(loading);try{const data=await request('/api/account/orders');state.orders=Array.isArray(data.orders)?data.orders:[];loading.remove();if(!state.orders.length){section.append(create('p','reservation-notice','Você ainda não possui pedidos vinculados a este e-mail.'));return}state.orders.forEach(order=>{const card=create('article','account-order');const head=create('div','account-order-head');head.append(create('strong','',order.id),create('span','',statusLabels[order.status]||order.status));card.append(head,create('span','',`${new Date(order.createdAt).toLocaleDateString('pt-BR')} · ${money(order.totalCents)}`));const lines=create('div','account-order-lines',(order.items||[]).map(item=>`${item.qty}× ${item.name}${item.variant?` — ${item.variant}`:''}`).join(' · '));card.append(lines);if(order.canReorder){const again=create('button','btn outline small','Comprar novamente');again.type='button';again.addEventListener('click',async()=>{again.disabled=true;try{const result=await request('/api/account/reorder',{method:'POST',csrf:true,body:JSON.stringify({orderId:order.id})});const added=app.addReorderItems(result.items);if(added.added)accountOpen(false,{restoreFocus:false})}catch(error){app.notify(error.message,'bad')}finally{again.disabled=false}});card.append(again)}section.append(card)})}catch(error){loading.textContent=error.message;}
+   }
+ 
+   function renderFavorites(root){
+-    const section=appendAccountSection(root,'Favoritos');const ids=state.account?.favorites||[];const products=ids.map(id=>app.getProduct(id)).filter(Boolean);if(!products.length){section.append(create('p','reservation-notice','Nenhum produto salvo ainda. Use ♡ nos detalhes de um produto.'));return}const grid=create('div','account-favorites');products.forEach(product=>{const button=create('button','account-favorite');button.type='button';button.append(create('strong','',product.name),create('div','',money(app.basePrice(product))));button.addEventListener('click',()=>{accountOpen(false);app.openProduct(product.id,{updateHash:true})});grid.append(button)});section.append(grid);
++    const section=appendAccountSection(root,'Favoritos');const ids=state.account?.favorites||[];const products=ids.map(id=>app.getProduct(id)).filter(Boolean);if(!products.length){section.append(create('p','reservation-notice','Nenhum produto salvo ainda. Use ♡ nos detalhes de um produto.'));return}const grid=create('div','account-favorites');products.forEach(product=>{const button=create('button','account-favorite');button.type='button';button.append(create('strong','',product.name),create('div','',money(app.basePrice(product))));button.addEventListener('click',()=>{accountOpen(false,{restoreFocus:false});app.openProduct(product.id,{updateHash:true})});grid.append(button)});section.append(grid);
+   }
+ 
+   async function toggleFavorite(){
+-    const product=app.getProduct(state.activeProductId||app.getState().activeId);if(!product)return;if(!state.authenticated){accountOpen(true);renderLogin();return}const favorites=new Set(state.account?.favorites||[]);favorites.has(product.id)?favorites.delete(product.id):favorites.add(product.id);try{await saveProfile({favorites:[...favorites]});syncFavoriteButton();app.notify(favorites.has(product.id)?'Produto salvo nos favoritos.':'Produto removido dos favoritos.','ok')}catch(error){app.notify(error.message,'bad')}
++    const product=app.getProduct(state.activeProductId||app.getState().activeId);if(!product)return;if(!state.authenticated){state.pendingFavoriteId=product.id;accountOpen(true);renderLogin();return}const favorites=new Set(state.account?.favorites||[]);favorites.has(product.id)?favorites.delete(product.id):favorites.add(product.id);try{await saveProfile({favorites:[...favorites]});syncFavoriteButton();app.notify(favorites.has(product.id)?'Produto salvo nos favoritos.':'Produto removido dos favoritos.','ok')}catch(error){app.notify(error.message,'bad')}
+   }
+   function syncFavoriteButton(){const button=$('#modalFavorite');if(!button)return;const id=state.activeProductId||app.getState().activeId;const saved=Boolean(state.authenticated&&state.account?.favorites?.includes(id));button.classList.toggle('is-favorite',saved);button.textContent=saved?'♥':'♡';button.setAttribute('aria-label',saved?'Remover dos favoritos':'Salvar nos favoritos')}
+ 
+@@ -87,9 +90,9 @@
+   }
+   async function submitRestock(event){event.preventDefault();const product=app.getProduct(state.activeProductId||app.getState().activeId);if(!product)return;const button=event.currentTarget.querySelector('button');button.disabled=true;setFeedback('#restockFeedback','Registrando…');try{await request('/api/stock-alerts',{method:'POST',body:JSON.stringify({email:$('#restockEmail').value,productId:product.id,variantId:$('#modalVariant')?.value||''})});setFeedback('#restockFeedback','Pronto. Vamos avisar por e-mail quando voltar.','ok')}catch(error){setFeedback('#restockFeedback',error.message,'bad')}finally{button.disabled=false}}
+ 
+-  async function openAccount(){accountOpen(true);await loadSession();await renderAccount()}
++  async function openAccount(){state.pendingFavoriteId='';accountOpen(true);await loadSession();await renderAccount()}
+   $('#openAccount')?.addEventListener('click',openAccount);$('#closeAccount')?.addEventListener('click',()=>accountOpen(false));$('#accountBackdrop')?.addEventListener('click',()=>accountOpen(false));$('#modalFavorite')?.addEventListener('click',toggleFavorite);$('#reviewForm')?.addEventListener('submit',submitReview);$('#restockAlertForm')?.addEventListener('submit',submitRestock);
+-  document.addEventListener('keydown',event=>{if(event.key==='Escape'&&$('#accountModal')?.classList.contains('open'))accountOpen(false)});
++  document.addEventListener('keydown',event=>{if(!$('#accountModal')?.classList.contains('open'))return;if(event.key==='Escape'){event.preventDefault();accountOpen(false);return}if(event.key!=='Tab')return;const items=accountFocusables();if(!items.length){event.preventDefault();return}const first=items[0],last=items[items.length-1];if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus()}else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus()}});
+   document.addEventListener('integrall:product-opened',event=>{state.activeProductId=event.detail?.productId||'';syncFavoriteButton();syncRestockBox();loadReviews(state.activeProductId)});
+   document.addEventListener('integrall:product-closed',()=>{state.activeProductId='';state.reviewRequest++;$('#reviewsList')?.replaceChildren();const summary=$('#reviewsSummary');if(summary)summary.textContent='';syncFavoriteButton();syncRestockBox()});
+   document.addEventListener('integrall:variant-changed',()=>syncRestockBox());
+--- a/scripts/browser-regression.py
++++ b/scripts/browser-regression.py
+@@ -1,5 +1,5 @@
+ #!/usr/bin/env python3
+-"""Regressão visual/funcional da loja INTEGRALL v11.1.3 sem backend.
++"""Regressão visual/funcional da loja INTEGRALL v11.1.4 sem backend.
+ 
+ Valida popup de produto sem deslocamento de página, galeria/foto por variação,
+ fechamento e foco, fallback de imagem, catálogo progressivo (12 por vez),
+@@ -236,6 +236,39 @@
+         async_ok = stale["count"] == 0 and stale["summary"] == ""
+         if not async_ok: failures.append("async-reviews: resposta antiga reapareceu após fechamento")
+         results.append({"scenario":"async-reviews-after-close","status":"APROVADO" if async_ok else "REPROVADO","state":stale})
++        context.close()
++
++        # Conta não pode ficar empilhada sobre o popup do produto; Tab deve permanecer na conta.
++        context = browser.new_context(viewport={"width": 1024, "height": 900}, bypass_csp=True)
++        page = context.new_page(); page.route('https://integrall.test/**', lambda route: route.fulfill(status=200, content_type='image/png', body=transparent_png))
++        page.set_content(html, wait_until="domcontentloaded", timeout=10_000)
++        for css in styles: page.add_style_tag(content=css)
++        page.add_script_tag(content=catalog_js); page.evaluate("products => globalThis.__integrallApp.setProducts(products)", products)
++        page.evaluate("""() => {globalThis.IntegrallApi={request:async path=>path==='/api/account/session'?{authenticated:false}:({})};}""")
++        page.add_script_tag(content=commerce_js)
++        page.evaluate("() => globalThis.__integrallApp.openProduct('audit-product-a',{updateHash:false,focus:false})"); page.wait_for_timeout(30)
++        page.locator('#modalFavorite').dispatch_event('click'); page.wait_for_timeout(60)
++        account_open = page.evaluate("""() => ({productHidden:document.querySelector('#productDetails').hidden,accountOpen:document.querySelector('#accountModal').classList.contains('open'),overlayOpen:document.querySelector('#overlay').classList.contains('open'),bodyLocked:document.body.classList.contains('lock')})""")
++        tab_inside = True
++        for _ in range(6):
++            page.keyboard.press('Tab'); page.wait_for_timeout(5)
++            if not page.evaluate("() => Boolean(document.activeElement?.closest?.('#accountModal'))"):
++                tab_inside = False; break
++        page.locator('#closeAccount').dispatch_event('click'); page.wait_for_timeout(30)
++        account_closed = page.evaluate("""() => ({accountOpen:document.querySelector('#accountModal').classList.contains('open'),bodyLocked:document.body.classList.contains('lock')})""")
++        account_ok = account_open["productHidden"] and account_open["accountOpen"] and not account_open["overlayOpen"] and account_open["bodyLocked"] and tab_inside and not account_closed["accountOpen"] and not account_closed["bodyLocked"]
++        if not account_ok: failures.append("account-layering: conta empilhou camada ou foco escapou")
++        results.append({"scenario":"account-layering","status":"APROVADO" if account_ok else "REPROVADO","open":account_open,"tabInside":tab_inside,"closed":account_closed})
++
++        # Sugestões da busca precisam funcionar por teclado e fechar com Escape.
++        page.locator('#search').fill('produto'); page.locator('#search').dispatch_event('input'); page.wait_for_timeout(30)
++        page.locator('#search').focus(); page.keyboard.press('ArrowDown'); page.wait_for_timeout(10)
++        search_focus = page.evaluate("() => ({option:Boolean(document.activeElement?.matches?.('[data-suggest-product]')),activeDesc:document.querySelector('#search')?.getAttribute('aria-activedescendant')||''})")
++        page.keyboard.press('Escape'); page.wait_for_timeout(10)
++        search_closed = page.evaluate("() => ({hidden:document.querySelector('#searchSuggestions').hidden,focused:document.activeElement?.id==='search',expanded:document.querySelector('#search')?.getAttribute('aria-expanded')})")
++        search_ok = search_focus["option"] and bool(search_focus["activeDesc"]) and search_closed["hidden"] and search_closed["focused"] and search_closed["expanded"] == 'false'
++        if not search_ok: failures.append("search-keyboard: navegação de sugestões inconsistente")
++        results.append({"scenario":"search-keyboard","status":"APROVADO" if search_ok else "REPROVADO","focus":search_focus,"closed":search_closed})
+         context.close(); browser.close()
+ 
+     (out / "browser-regression.json").write_text(json.dumps(results, ensure_ascii=False, indent=2), encoding="utf-8")
+--- a/scripts/gallery-browser-regression.py
++++ b/scripts/gallery-browser-regression.py
+@@ -5,7 +5,7 @@
+ import json, re, sys, base64
+ 
+ ROOT=Path(sys.argv[1] if len(sys.argv)>1 else '.').resolve()
+-OUT=Path(sys.argv[2] if len(sys.argv)>2 else 'docs/evidencias-v11.1.3/galeria').resolve(); OUT.mkdir(parents=True,exist_ok=True)
++OUT=Path(sys.argv[2] if len(sys.argv)>2 else 'docs/evidencias-v11.1.4/galeria').resolve(); OUT.mkdir(parents=True,exist_ok=True)
+ html=(ROOT/'public/admin.html').read_text('utf-8')
+ css=(ROOT/'public/css/admin.css').read_text('utf-8')
+ html=re.sub(r'<link rel="stylesheet" href="[^"]+">',f'<style>{css}</style>',html,count=1)
+--- a/scripts/production-browser-smoke.py
++++ b/scripts/production-browser-smoke.py
+@@ -1,10 +1,10 @@
+ #!/usr/bin/env python3
+-"""Serve e valida o build estático de produção em Chromium real.
++"""Serve e valida o build estático de produção da INTEGRALL v11.1.4.
+ 
+-O teste usa a saída ``dist/public`` e um servidor HTTP local com fallback de
+-SPA para ``/produto/<slug>``. A API é deliberadamente respondida com 503 para
+-comprovar que o catálogo embutido do build permanece utilizável; isso não
+-substitui os testes HTTP do backend Express nem integrações externas.
++O teste usa ``dist/public`` com fallback para ``/produto/<slug>`` e confirma
++o comportamento atual de popup: rota direta abre um único produto em camada
++fixa, sem deslocamento/overflow, com carrinho, busca e assets funcionais. A API
++é respondida com 503 de propósito para exercitar o catálogo embutido.
+ """
+ from __future__ import annotations
+ 
+@@ -65,7 +65,7 @@
+ def main() -> int:
+     parser = argparse.ArgumentParser()
+     parser.add_argument("--root", type=Path, default=Path("dist/public"))
+-    parser.add_argument("--out", type=Path, default=Path("docs/evidencias-v11.1.1/pos-correcao"))
++    parser.add_argument("--out", type=Path, default=Path("docs/evidencias-v11.1.4/build-http"))
+     parser.add_argument("--chromium", default="/usr/bin/chromium")
+     args = parser.parse_args()
+ 
+@@ -116,9 +116,7 @@
+                     """() => {
+                       const app=globalThis.__integrallApp;
+                       const details=document.querySelector('#productDetails');
+-                      const productArea=document.querySelector('.catalog-products');
+                       const rect=details.getBoundingClientRect();
+-                      const productRect=productArea.getBoundingClientRect();
+                       return {
+                         products:app.getState().products.length,
+                         productName:document.querySelector('#modalName')?.textContent,
+@@ -126,9 +124,11 @@
+                         detailsCount:document.querySelectorAll('#productDetails').length,
+                         legacyModalCount:document.querySelectorAll('#productModal').length,
+                         detailsHidden:details.hidden,
++                        detailsOpen:details.classList.contains('open'),
+                         detailsPosition:getComputedStyle(details).position,
+-                        gridColumns:getComputedStyle(document.querySelector('.product-details-grid')).gridTemplateColumns,
+-                        detailsAfterCatalog:rect.top >= productRect.bottom - 1,
++                        popupWithinViewport:rect.left >= -1 && rect.right <= innerWidth + 1 && rect.top >= -1 && rect.bottom <= innerHeight + 1,
++                        bodyLocked:document.body.classList.contains('lock'),
++                        overlayOpen:document.querySelector('#overlay')?.classList.contains('open') || false,
+                         horizontalOverflow:document.documentElement.scrollWidth > document.documentElement.clientWidth + 1,
+                         canonical:document.querySelector('link[rel=canonical]')?.href || '',
+                         title:document.title,
+@@ -175,9 +175,10 @@
+                 checks = {
+                     "fiveEmbeddedProducts": initial["products"] == 5,
+                     "directProductRoute": initial["productName"] == "Suco Integral de Uva bordô" and bool(initial["activeId"]),
+-                    "singleInlineDetails": initial["detailsCount"] == 1 and initial["legacyModalCount"] == 0,
+-                    "normalFlow": initial["detailsPosition"] == "static" and initial["detailsAfterCatalog"],
+-                    "oneColumn": len(str(initial["gridColumns"]).split()) == 1,
++                    "singlePopupDetails": initial["detailsCount"] == 1 and initial["legacyModalCount"] == 0,
++                    "popupOpenAndFixed": initial["detailsOpen"] and not initial["detailsHidden"] and initial["detailsPosition"] == "fixed",
++                    "popupWithinViewport": initial["popupWithinViewport"],
++                    "modalLocksBackground": initial["bodyLocked"] and initial["overlayOpen"],
+                     "noHorizontalOverflow": not initial["horizontalOverflow"],
+                     "noAgeGateAfterRemember": not initial["ageGate"],
+                     "canonicalRoute": initial["canonical"].endswith("/produto/suco-integral-de-uva-bordo"),
+--- a/scripts/production-http-smoke.mjs
++++ b/scripts/production-http-smoke.mjs
+@@ -55,7 +55,7 @@
+ 
+ try {
+   const checks = [
+-    ['/', text => text.includes('public-v11.1.3-') && text.includes('id="productDetails"')],
++    ['/', text => text.includes('public-v11.1.4-') && text.includes('id="productDetails"')],
+     ['/produto/suco-integral-de-uva-bordo', text => text.includes('id="buildData"') && text.includes('suco-integral-de-uva-bordo')],
+     ['/admin.html', text => text.includes('id="loginForm"') && text.includes('Administração INTEGRALL')],
+     ['/css/store.css', text => text.includes('.product-details-inline') && text.includes('position:fixed') && text.includes('.catalog-pagination')],
+--- a/tests/v11.1.2-ux.test.js
++++ b/tests/v11.1.2-ux.test.js
+@@ -26,10 +26,10 @@
+   const pkg = JSON.parse(await text('package.json'));
+   const server = await text('server.js');
+   const html = await text('public/index.html');
+-  assert.equal(pkg.version, '11.1.3');
++  assert.match(pkg.version, /^11\.1\.(?:[2-9]|\d{2,})$/);
+   assert.match(server, /const appVersion = String\(packageMetadata\.version/);
+   assert.match(server, /version:\s*appVersion/);
+-  assert.match(html, /integrall-build" content="public-v11\.1\.3-/);
++  assert.match(html, new RegExp(`integrall-build\" content=\"public-v${pkg.version.replaceAll('.', '\\.')}[-]`));
+ });
+ 
+ test('detalhes do produto abrem em um único popup acessível sem deslocar o catálogo', async () => {
+@@ -126,10 +126,11 @@
+ });
+ 
+ test('CSS e JavaScript referenciados pelo HTML usam chave de versão para invalidar cache antigo', async () => {
++  const pkg = JSON.parse(await text('package.json'));
+   for (const relative of ['public/index.html', 'public/admin.html', 'public/404.html', 'public/500.html']) {
+     const html = await text(relative);
+     const refs = [...html.matchAll(/(?:src|href)=["'](\/(?:css|js)\/[^"']+)["']/g)].map(match => match[1]);
+-    const stale = refs.filter(value => !value.includes('?v=11.1.3'));
++    const stale = refs.filter(value => !value.includes(`?v=${pkg.version}`));
+     assert.deepEqual(stale, [], `${relative} contém assets sem versionamento: ${stale.join(', ')}`);
+   }
+ });
+--- a/tests/v11.1.3-ux.test.js
++++ b/tests/v11.1.3-ux.test.js
+@@ -11,8 +11,8 @@
+   const html = await text('public/index.html');
+   const css = await text('public/css/store.css');
+   const js = await text('public/js/store/catalog.js');
+-  assert.equal(pkg.version, '11.1.3');
+-  assert.match(html, /integrall-build" content="public-v11\.1\.3-/);
++  assert.match(pkg.version, /^11\.1\.(?:[3-9]|\d{2,})$/);
++  assert.match(html, new RegExp(`integrall-build\" content=\"public-v${pkg.version.replaceAll('.', '\\.')}[-]`));
+   assert.match(css, /\.overlay\{[^}]*backdrop-filter:none[^}]*-webkit-backdrop-filter:none/s);
+   assert.match(css, /\.product-details-inline\{[^}]*overflow-y:auto[^}]*overscroll-behavior:auto/s);
+   assert.match(css, /\.product-details-body\{[^}]*overflow:visible/s);
+@@ -65,10 +65,11 @@
+   assert.match(js, /imageFit\|\|'contain'/);
+ });
+ 
+-test('todas as referências públicas usam cache-busting da v11.1.3', async () => {
++test('todas as referências públicas usam cache-busting da versão atual', async () => {
++  const pkg = JSON.parse(await text('package.json'));
+   for (const relative of ['public/index.html','public/admin.html','public/404.html','public/500.html']) {
+     const html = await text(relative);
+     const refs = [...html.matchAll(/(?:src|href)=["'](\/(?:css|js)\/[^"']+)["']/g)].map(match => match[1]);
+-    assert.deepEqual(refs.filter(value => !value.includes('?v=11.1.3')), [], relative);
++    assert.deepEqual(refs.filter(value => !value.includes(`?v=${pkg.version}`)), [], relative);
+   }
+ });
+--- a/tools/README.md
++++ b/tools/README.md
+@@ -16,3 +16,12 @@
+ Conforme o script utilizado: Python 3.10+, PyMuPDF (`pymupdf`), Pillow e, apenas para OCR, `rapidocr-onnxruntime`. Essas dependências não são instaladas pelo npm e os PDFs de origem não estão incluídos no pacote de produção.
+ 
+ Os scripts devem ser executados a partir de uma cópia versionada e com backup do catálogo. Alguns deles regeneram `data/catalog.json` e removem imagens de produto não referenciadas.
++
++## Modo de auditoria no pacote entregue
++
++`python3 tools/audit_products.py` detecta automaticamente se os PDFs-fonte e as dependências Python opcionais estão disponíveis.
++
++- **Pacote padrão/ZIP entregue:** executa uma auditoria sem dependências externas sobre `data/catalog.json` e os assets públicos. Verifica IDs e slugs técnicos, referências de imagens, imagem por variação, referências de caixas, produtos ativos sem preço e produtos sem imagem. Os resultados são gravados em `out/audit-packaged.json` e `out/AUDITORIA-CATALOGO-PACOTE.md`.
++- **Ambiente de reconstrução com PDFs:** quando todas as fontes e bibliotecas opcionais estão presentes, mantém a auditoria completa contra os PDFs.
++
++Códigos comerciais/SKUs podem ser compartilhados no material de origem por apresentações diferentes. Por isso o modo de pacote os reporta como informação e não os usa como identificador técnico único; os identificadores que precisam ser únicos são `product.id`, `product.slug` e `variant.id`.
+--- a/tools/audit_products.py
++++ b/tools/audit_products.py
+@@ -14,8 +14,14 @@
+ repetidas, e peso/medidas sem os quais o frete nao fecha.
+ """
+ import json, os, re, unicodedata, collections
+-import pymupdf
+-from PIL import Image, ImageStat
++try:
++    import pymupdf
++except ImportError:  # opcional: só necessário quando os PDFs-fonte estão disponíveis
++    pymupdf = None
++try:
++    from PIL import Image, ImageStat
++except ImportError:  # opcional: auditoria do ZIP funciona sem Pillow
++    Image = ImageStat = None
+ 
+ from paths import PROJECT_ROOT, SOURCE_PDF_DIR, OUTPUT_DIR
+ 
+@@ -398,6 +404,104 @@
+     return "\n".join(L)
+ 
+ 
++
++def audit_packaged_delivery():
++    """Auditoria que funciona no ZIP entregue, sem PDFs nem bibliotecas Python extras.
++
++    Ela não tenta refazer a prova PDF -> produto; verifica apenas invariantes que
++    podem ser comprovadas pelos arquivos realmente distribuídos.
++    """
++    os.makedirs(OUT, exist_ok=True)
++    cat = json.load(open(f"{WORK}/data/catalog.json", encoding="utf-8"))
++    products = cat.get("products") or []
++    product_ids = [str(p.get("id") or "") for p in products]
++    slugs = [str(p.get("slug") or "") for p in products]
++    variant_rows = [(p, v) for p in products for v in (p.get("variants") or [])]
++    variant_ids = [str(v.get("id") or "") for _, v in variant_rows]
++    missing_images = []
++    invalid_variant_images = []
++    invalid_box_variants = []
++    for product in products:
++        gallery = list(product.get("images") or [])
++        variant_set = {str(v.get("id") or "") for v in (product.get("variants") or [])}
++        for image in gallery:
++            if str(image).startswith('/assets/') and not os.path.exists(f"{WORK}/public{image}"):
++                missing_images.append({"product": product.get("name"), "image": image})
++        for variant in product.get("variants") or []:
++            image = str(variant.get("image") or "")
++            if image and image not in gallery:
++                invalid_variant_images.append({"product": product.get("name"), "variant": variant.get("name"), "image": image})
++        for box in product.get("boxes") or []:
++            variant_id = str(box.get("variantId") or "")
++            if variant_id and variant_id not in variant_set:
++                invalid_box_variants.append({"product": product.get("name"), "variantId": variant_id})
++    active_zero_price = []
++    for product in products:
++        prices = [int(product.get("price") or 0)] + [int(v.get("price") or 0) for v in (product.get("variants") or [])]
++        if product.get("available") is not False and max(prices or [0]) <= 0:
++            active_zero_price.append(product.get("name"))
++    sku_map = collections.defaultdict(list)
++    for product in products:
++        sku = str(product.get("sku") or "").strip()
++        if sku:
++            sku_map[sku].append(product.get("name"))
++    duplicate_skus = {sku: names for sku, names in sku_map.items() if len(names) > 1}
++    result = {
++        "mode": "packaged-delivery",
++        "products": len(products),
++        "variants": len(variant_rows),
++        "duplicateProductIds": {x: c for x, c in collections.Counter(product_ids).items() if x and c > 1},
++        "duplicateSlugs": {x: c for x, c in collections.Counter(slugs).items() if x and c > 1},
++        "duplicateVariantIds": {x: c for x, c in collections.Counter(variant_ids).items() if x and c > 1},
++        "duplicateSkus": duplicate_skus,
++        "missingImages": missing_images,
++        "invalidVariantImages": invalid_variant_images,
++        "invalidBoxVariants": invalid_box_variants,
++        "activeWithoutPrice": active_zero_price,
++        "productsWithoutImage": [p.get("name") for p in products if not (p.get("images") or [])],
++        "sourcePdfAudit": "NAO_EXECUTADO_NO_ZIP",
++    }
++    result["ok"] = not any([
++        result["duplicateProductIds"], result["duplicateSlugs"], result["duplicateVariantIds"],
++        missing_images, invalid_variant_images, invalid_box_variants, active_zero_price, result["productsWithoutImage"]
++    ])
++    with open(f"{OUT}/audit-packaged.json", "w", encoding="utf-8") as handle:
++        json.dump(result, handle, ensure_ascii=False, indent=2)
++    lines = [
++        "# Auditoria do catálogo — modo pacote entregue", "",
++        "Este modo funciona apenas com os arquivos presentes no ZIP. A conferência forense contra os PDFs originais é marcada como **NÃO EXECUTADA** quando `catalogos-fonte/` não está disponível; o script não inventa essa prova.", "",
++        f"- Produtos: **{result['products']}**", f"- Variações: **{result['variants']}**",
++        f"- IDs de produto duplicados: **{len(result['duplicateProductIds'])}**",
++        f"- Slugs duplicados: **{len(result['duplicateSlugs'])}**",
++        f"- IDs de variação duplicados: **{len(result['duplicateVariantIds'])}**",
++        f"- Imagens ausentes: **{len(missing_images)}**", f"- Fotos de variação fora da galeria: **{len(invalid_variant_images)}**",
++        f"- Caixas apontando para variação inexistente: **{len(invalid_box_variants)}**", f"- Produtos ativos sem preço: **{len(active_zero_price)}**",
++        f"- Produtos sem imagem: **{len(result['productsWithoutImage'])}**", "",
++        "## SKUs compartilhados", "",
++        "SKU não é tratado como identificador técnico único. O catálogo-fonte pode reutilizar um código em apresentações/volumes diferentes. Duplicidades são informativas e não reprovam a auditoria:",
++    ]
++    if duplicate_skus:
++        for sku, names in sorted(duplicate_skus.items()): lines.append(f"- `{sku}`: " + "; ".join(names))
++    else:
++        lines.append("- Nenhum SKU compartilhado.")
++    lines += ["", f"**Resultado das invariantes do pacote: {'APROVADO' if result['ok'] else 'REPROVADO'}**", ""]
++    with open(f"{OUT}/AUDITORIA-CATALOGO-PACOTE.md", "w", encoding="utf-8") as handle:
++        handle.write("\n".join(lines))
++    return result, "\n".join(lines)
++
++
++def full_source_audit_available():
++    if pymupdf is None or Image is None or ImageStat is None:
++        return False
++    return all(os.path.exists(f"{PDFDIR}/{spec['file']}") for spec in SPECS.values())
++
++
+ if __name__ == "__main__":
+-    R = audit()
+-    print(write_md(R))
++    if full_source_audit_available():
++        R = audit()
++        print(write_md(R))
++    else:
++        result, report = audit_packaged_delivery()
++        print(report)
++        print("AVISO: PDFs-fonte e/ou dependências Python opcionais não estão disponíveis; a prova PDF -> produto não foi executada.")
++        raise SystemExit(0 if result["ok"] else 1)
+--- /dev/null
++++ b/tests/v11.1.4-ux.test.js
+@@ -0,0 +1,48 @@
++import test from 'node:test';
++import assert from 'node:assert/strict';
++import {readFile} from 'node:fs/promises';
++
++const read = path => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
++
++test('v11.1.4 coordena camadas em vez de empilhar conta, produto e sacola', async () => {
++  const [catalog, commerce, checkout] = await Promise.all([
++    read('public/js/store/catalog.js'), read('public/js/store/commerce-v111.js'), read('public/js/store/checkout.js')
++  ]);
++  assert.match(catalog, /function closeCart\(/);
++  assert.match(catalog, /openCart, closeCart,/);
++  assert.match(commerce, /app\.closeProductDetails\?\.\(\{returnFocus:false,updateHistory:true\}\)/);
++  assert.match(commerce, /app\.closeCart\?\.\(\{returnFocus:false\}\)/);
++  assert.match(commerce, /accountFocusables\(\)/);
++  assert.match(checkout, /__integrallApp\?\.closeCart\?\.\(\{returnFocus:false\}\)/);
++});
++
++test('favorito solicitado antes do login é preservado e aplicado após autenticar', async () => {
++  const commerce = await read('public/js/store/commerce-v111.js');
++  assert.match(commerce, /pendingFavoriteId/);
++  assert.match(commerce, /async function applyPendingFavorite\(/);
++  assert.match(commerce, /await applyPendingFavorite\(\)/);
++});
++
++test('busca inteligente expõe combobox e navegação por setas/Escape', async () => {
++  const [html, catalog] = await Promise.all([read('public/index.html'), read('public/js/store/catalog.js')]);
++  assert.match(html, /id="search"[^>]*role="combobox"|role="combobox"[^>]*id="search"/);
++  assert.match(catalog, /function moveSearchSuggestion\(/);
++  assert.match(catalog, /aria-activedescendant/);
++  assert.match(catalog, /event\.key==='ArrowDown'/);
++  assert.match(catalog, /closeSearchSuggestions\(\{focusInput:true\}\)/);
++});
++
++test('auditoria de catálogo do ZIP não depende obrigatoriamente dos PDFs-fonte', async () => {
++  const tool = await read('tools/audit_products.py');
++  assert.match(tool, /def audit_packaged_delivery\(\):/);
++  assert.match(tool, /NAO_EXECUTADO_NO_ZIP/);
++  assert.match(tool, /full_source_audit_available/);
++});
++
++test('smoke de produção valida o popup atual e não o layout antigo em fluxo', async () => {
++  const smoke = await read('scripts/production-browser-smoke.py');
++  assert.match(smoke, /popupOpenAndFixed/);
++  assert.match(smoke, /singlePopupDetails/);
++  assert.doesNotMatch(smoke, /"normalFlow"/);
++  assert.doesNotMatch(smoke, /"oneColumn"/);
++});

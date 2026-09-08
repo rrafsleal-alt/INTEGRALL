@@ -1,0 +1,30 @@
+INTEGRALL v10.1 — AJUSTES SOLICITADOS
+
+1. ADMIN SEM TOKEN
+- Não existe mais tela de login/token.
+- Na loja, clique 3 vezes na logo/marca INTEGRALL do rodapé para abrir /admin.
+- ABRIR-ADMIN.bat continua abrindo o painel diretamente.
+
+2. FOTO DO PRODUTO CORRIGIDA
+- Escolher JPG/PNG/WebP no computador agora faz upload real.
+- A imagem é otimizada no navegador antes do envio quando necessário.
+- Em PostgreSQL, as imagens ficam persistidas na tabela integrall_media.
+- Em uso local (npm run dev), catálogo e fotos também ficam gravados em data/local-state e sobrevivem ao reinício.
+- A URL /media/products/... é salva no produto e aparece na vitrine após salvar.
+
+3. EDITOR DE PRODUTOS SIMPLIFICADO
+- Tela principal: foto, nome, preço, estoque, departamento, categoria, marca e unidade.
+- Campos secundários ficam recolhidos em Estoque e frete, Variações e Descrição.
+- Botões claros para escolher/trocar/remover foto.
+- Removido o seletor de imagem duplicado da área de Personalização que só fazia preview.
+
+4. INICIALIZAÇÃO
+- O ZIP inclui um .env base sem segredos para npm run dev funcionar logo após npm install.
+
+IMPORTANTE
+O acesso por 3 cliques é um atalho oculto, não autenticação forte. Como solicitado, /admin e /api/admin não exigem token nesta versão.
+
+AJUSTE FINAL DE ROBUSTEZ
+------------------------
+- O caminho interno da foto enviada (/media/products/...) agora fica em campo oculto, sem validação nativa de URL do navegador.
+- Removido do editor o texto antigo que orientava a usar somente URL HTTPS/assets para imagens.

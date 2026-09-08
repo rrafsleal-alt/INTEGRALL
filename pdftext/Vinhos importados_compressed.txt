@@ -1,0 +1,337 @@
+
+===== PAGINA 1 =====
+
+
+===== PAGINA 2 =====
+
+
+===== PAGINA 3 =====
+8
+31
+200
+
+===== PAGINA 4 =====
+
+
+===== PAGINA 5 =====
+
+
+===== PAGINA 6 =====
+
+
+===== PAGINA 7 =====
+CÓD 435 CÓD 434
+CÓD 431
+CÓD 431 CÓD 430 CÓD 435
+CÓD 430
+CÓD 437
+CÓD 434 CÓD 437
+
+===== PAGINA 8 =====
+CÓD 433
+CÓD 436
+CÓD 433 CÓD 432
+CÓD 432
+CÓD 439
+CÓD 438 CÓD 436
+CÓD 438
+CÓD 439
+
+===== PAGINA 9 =====
+CÓD 478
+CÓD 476
+CÓD 478 CÓD 477
+CÓD 477
+CÓD 476
+
+===== PAGINA 10 =====
+CÓD 494
+CÓD 497
+CÓD 494 CÓD 495
+CÓD 495
+CÓD 496
+CÓD 496 CÓD 497
+
+===== PAGINA 11 =====
+CÓD 482
+CÓD 481
+CÓD 482 CÓD 483
+CÓD 483
+CÓD 484
+CÓD 481 CÓD 484
+
+===== PAGINA 12 =====
+CÓD 489
+CÓD 489
+CÓD 488
+CÓD 488
+
+
+===== PAGINA 13 =====
+CÓD 492
+CÓD 491
+CÓD 492 CÓD 493
+CÓD 493
+CÓD 491
+
+===== PAGINA 14 =====
+
+
+===== PAGINA 15 =====
+CÓD 466
+CÓD 466
+CÓD 467
+CÓD 467
+CÓD 465
+CÓD 465
+
+===== PAGINA 16 =====
+CÓD 451
+CÓD 455
+CÓD 451 CÓD 453
+CÓD 453
+CÓD 456
+CÓD 450 CÓD 455
+CÓD 450
+CÓD 454
+CÓD 456 CÓD 454
+
+===== PAGINA 17 =====
+DA PIPA. Colheita Selecionada
+CÓD 451
+Volume: 6 x 750ml
+Castas Uvas: Maria gomes 60% Bical 30%
+Arinto 10%
+DA PIPA. Colheita Selecionada
+CÓD 450
+Volume: 6 x 750ml
+Castas Uvas: Baga 50% Aragonez 20%
+Touriga Nacional 20% Syrah 10%
+DA PIPA. Reserva
+CÓD 460
+Volume: 6 x 750ml
+Castas Uvas: 50% Baga, 30% Aragonez e 20%
+Touriga-Nacional
+
+===== PAGINA 18 =====
+CÓD 471
+CÓD 470
+CÓD 471 CÓD 472
+CÓD 472
+CÓD 470
+
+===== PAGINA 19 =====
+CÓD 584
+CÓD 587
+CÓD 584 CÓD 585
+CÓD 588
+CÓD 585
+CÓD 586 CÓD 587
+CÓD 586
+CÓD 589
+CÓD 588 CÓD 589
+
+===== PAGINA 20 =====
+
+
+===== PAGINA 21 =====
+
+
+===== PAGINA 22 =====
+
+
+===== PAGINA 23 =====
+
+
+===== PAGINA 24 =====
+
+
+===== PAGINA 25 =====
+
+
+===== PAGINA 26 =====
+CÓD 526
+CÓD 525
+CÓD 526 CÓD 527
+CÓD 527
+CÓD 528
+CÓD 528
+CÓD 525
+
+===== PAGINA 27 =====
+CÓD 522
+CÓD 521
+CÓD 522 CÓD 523
+CÓD 523
+CÓD 524
+CÓD 524
+CÓD 521
+
+===== PAGINA 28 =====
+
+
+===== PAGINA 29 =====
+
+
+===== PAGINA 30 =====
+
+
+===== PAGINA 31 =====
+
+
+===== PAGINA 32 =====
+CÓD 539
+CÓD 542
+CÓD 539 CÓD 540
+CÓD 540
+CÓD 541
+CÓD 541
+CÓD 542
+
+===== PAGINA 33 =====
+
+
+===== PAGINA 34 =====
+
+
+===== PAGINA 35 =====
+CÓD 547
+CÓD 546
+CÓD 547 CÓD 546
+
+===== PAGINA 36 =====
+
+
+===== PAGINA 37 =====
+CHILE . D.O. VALLE CENTRAL . GLOBAL WINES . RELATOS DE VALPA
+CÓD 421
+RELATOS DE VALPA . Carménere
+CÓD 421
+Teor alcoólico: 13,5% | Volume: 6 x 750ml
+Castas Uvas: 100% Carménere
+D.O. VALLE CENTRAL
+RELATOS DE VALPA . Cabernet Sauvignon
+CÓD 420
+Teor alcoólico: 13,5% | Volume: 6 x 750ml
+Castas Uvas: 100% Cabernet Sauvignon
+D.O. VALLE CENTRAL
+RELATOS DE VALPA . Light Edition Red Wine
+CÓD 422
+Teor alcoólico: 8% | Volume: 6 x 750ml
+Baixas Calorias: 65 calorias por taça
+Castas Uvas: Blend Tinto
+D.O. VALLE CENTRAL
+RELATOS DE VALPA . Chardonnay
+Teor alcoólico: 13,5% | Volume: 6x 750ml
+Castas Uvas: 100% Chardonnay
+D.O. VALLE CENTRAL
+CÓD 420
+CÓD 422
+RELATOS DE VALPA . Light Edition White Wine
+Teor alcoólico: 8% | Volume: 6 x 750ml
+Baixas Calorias: 61 calorias por taça
+Castas Uvas: Blend White
+D.O. VALLE CENTRAL
+
+===== PAGINA 38 =====
+CHILE . D.O. VALLE CENTRAL . GLOBAL WINES . RELATOS DE VALPA
+RELATOS DE VALPA . Chardonnay
+Teor alcoólico: 13,5% | Volume: 12 x 375ml
+Castas Uvas: 100% Chardonnay
+D.O. VALLE CENTRAL
+RELATOS DE VALPA . Cabernet Sauvignon
+Teor alcoólico: 13,5% | Volume: 12x 375ml
+Castas Uvas: 100% Cabernet Sauvignon
+D.O. VALLE CENTRAL
+CÓD 424
+CÓD 423
+RELATOS DE VALPA . Cabernet Sauvignon
+CÓD 423
+Teor alcoólico: 13,5% | Volume: 24x 187ml
+Castas Uvas: 100% Cabernet Sauvignon
+D.O. VALLE CENTRAL
+RELATOS DE VALPA . Light Edition Rosé
+Teor alcoólico: 8% | Volume: 6 x 750ml
+Baixas Calorias: 65 calorias por taça
+Castas Uvas: Blend Rosé
+D.O. VALLE CENTRAL
+RELATOS DE VALPA . Chardonnay
+CÓD 424
+Teor alcoólico: 13,5% | Volume: 24 x 187ml
+Castas Uvas: 100% Chardonnay
+D.O. VALLE CENTRAL
+
+
+===== PAGINA 39 =====
+CÓD 402
+CÓD 403
+CÓD 402 CÓD 403
+CÓD 404
+CÓD 401
+CÓD 404 CÓD 401
+
+===== PAGINA 40 =====
+
+
+===== PAGINA 41 =====
+CÓD 560
+CÓD 562
+CÓD 560 CÓD 561
+CÓD 563
+CÓD 561
+CÓD 562 CÓD 563
+
+===== PAGINA 42 =====
+CÓD 571
+CÓD 572
+CÓD 571 CÓD 570
+CÓD 570
+CÓD 573
+CÓD 573 CÓD 572
+
+===== PAGINA 43 =====
+Linha Africana
+
+===== PAGINA 44 =====
+STORMHOEK. Cabernet Sauvignon Merlot
+CÓD 602
+Origem: Western Cape Volume: 6 x 750ml
+Castas Uvas: Cabernet Sauvignon e Merlot
+Africa do Sul
+STORMHOEK. Chardonnay
+CÓD 601
+Origem: Western Cape Volume: 6 x 750ml
+Castas Uvas: Chardonnay
+Africa do Sul
+STORMHOEK. Pinot Grigio
+CÓD 600
+Origem: Western Cape Volume: 6 x 750ml
+Castas Uvas: Pinot Grigio
+Africa do Sul
+STORMHOEK. Pinotage
+CÓD 603
+Origem: Western Cape Volume: 6 x 750ml
+Castas Uvas: Pinotage
+Africa do Sul
+
+===== PAGINA 45 =====
+STORMHOEK. Pinotage Malbec
+CÓD 604
+Origem: Western Cape Volume: 6 x 750ml
+Castas Uvas: Pinotage Malbec
+Africa do Sul
+STORMHOEK. Syrah
+CÓD 606
+Origem: Western Cape Volume: 6 x 750ml
+Castas Uvas: Syrah
+Africa do Sul
+STORMHOEK. Sauvignon Blanc
+CÓD 605
+Origem: Western Cape Volume: 6 x 750ml
+Castas Uvas: Syrah
+Africa do Sul
+             AFRICA DO SUL. WESTERN CAPE. STORMHOEK
+
+
+===== PAGINA 46 =====
+@vinicolacasanarducci

@@ -1,0 +1,94 @@
+{
+  "engine": "Chromium",
+  "mode": "about:blank com HTML/CSS/JS reais e API simulada",
+  "results": [
+    {
+      "width": 320,
+      "status": "APROVADO",
+      "loginLayout": {
+        "scrollWidth": 320,
+        "clientWidth": 320,
+        "overflow": 0
+      },
+      "dashboardLayout": {
+        "scrollWidth": 320,
+        "clientWidth": 320,
+        "overflow": 0
+      },
+      "scrollStyles": {
+        "inspector": "visible",
+        "preview": "visible",
+        "workspaceHeight": "939.781px"
+      },
+      "adminScrollHandoff": true,
+      "businessFormSavedInMock": false,
+      "console": []
+    },
+    {
+      "width": 390,
+      "status": "APROVADO",
+      "loginLayout": {
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "overflow": 0
+      },
+      "dashboardLayout": {
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "overflow": 0
+      },
+      "scrollStyles": {
+        "inspector": "visible",
+        "preview": "visible",
+        "workspaceHeight": "907.188px"
+      },
+      "adminScrollHandoff": true,
+      "businessFormSavedInMock": true,
+      "console": []
+    },
+    {
+      "width": 768,
+      "status": "APROVADO",
+      "loginLayout": {
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "overflow": 0
+      },
+      "dashboardLayout": {
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "overflow": 0
+      },
+      "scrollStyles": {
+        "inspector": "visible",
+        "preview": "visible",
+        "workspaceHeight": "904.594px"
+      },
+      "adminScrollHandoff": true,
+      "businessFormSavedInMock": false,
+      "console": []
+    },
+    {
+      "width": 1440,
+      "status": "APROVADO",
+      "loginLayout": {
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "overflow": 0
+      },
+      "dashboardLayout": {
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "overflow": 0
+      },
+      "scrollStyles": {
+        "inspector": "visible",
+        "preview": "visible",
+        "workspaceHeight": "702px"
+      },
+      "adminScrollHandoff": true,
+      "businessFormSavedInMock": true,
+      "console": []
+    }
+  ]
+}

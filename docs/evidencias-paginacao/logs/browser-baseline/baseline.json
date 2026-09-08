@@ -1,0 +1,746 @@
+{
+  "cards": 82,
+  "current": null,
+  "count": "Mostrando todos os 82 produtos",
+  "horizontal": false,
+  "frames": [
+    {
+      "id": "product-1786125594468-rlk598",
+      "w": 316.5,
+      "h": 316.5,
+      "cardHeight": 471.859375,
+      "fit": "contain",
+      "imageH": 316.5,
+      "actionsVisible": true
+    },
+    {
+      "id": "pdf-bis-972",
+      "w": 316.5,
+      "h": 316.5,
+      "cardHeight": 471.859375,
+      "fit": "contain",
+      "imageH": 316.5,
+      "actionsVisible": true
+    },
+    {
+      "id": "pdf-bis-973",
+      "w": 316.5,
+      "h": 316.5,
+      "cardHeight": 471.859375,
+      "fit": "contain",
+      "imageH": 316.5,
+      "actionsVisible": true
+    },
+    {
+      "id": "pdf-bis-974",
+      "w": 316.5,
+      "h": 316.5,
+      "cardHeight": 471.859375,
+      "fit": "contain",
+      "imageH": 316.5,
+      "actionsVisible": true
+    },
+    {
+      "id": "pdf-bis-976",
+      "w": 316.5,
+      "h": 316.5,
+      "cardHeight": 471.859375,
+      "fit": "contain",
+      "imageH": 316.5,
+      "actionsVisible": true
+    },
+    {
+      "id": "pdf-bis-975",
+      "w": 316.5,
+      "h": 316.5,
+      "cardHeight": 471.859375,
+      "fit": "contain",
+      "imageH": 316.5,
+      "actionsVisible": true
+    },
+    {
+      "id": "pdf-bis-924",
+      "w": 316.5,
+      "h": 316.5,
+      "cardHeight": 471.859375,
+      "fit": "contain",
+      "imageH": 316.5,
+      "actionsVisible": true
+    },
+    {
+      "id": "pdf-bis-903",
+      "w": 316.5,
+      "h": 316.5,
+      "cardHeight": 471.859375,
+      "fit": "contain",
+      "imageH": 316.5,
+      "actionsVisible": true
+    },
+    {
+      "id": "pdf-bis-901",
+      "w": 316.5,
+      "h": 316.5,
+      "cardHeight": 496.140625,
+      "fit": "contain",
+      "imageH": 316.5,
+      "actionsVisible": true
+    },
+    {
+      "id": "pdf-bis-926",
+      "w": 316.5,
+      "h": 316.5,
+      "cardHeight": 496.140625,
+      "fit": "contain",
+      "imageH": 316.5,
+      "actionsVisible": true
+    },
+    {
+      "id": "pdf-bis-925",
+      "w": 316.5,
+      "h": 316.5,
+      "cardHeight": 496.140625,
+      "fit": "contain",
+      "imageH": 316.5,
+      "actionsVisible": true
+    },
+    {
+      "id": "pdf-bis-955",
+      "w": 316.5,
+      "h": 316.5,
+      "cardHeight": 496.140625,
+      "fit": "contain",
+      "imageH": 316.5,
+      "actionsVisible": true
+    },
+    {
+      "id": "pdf-bis-956",
+      "w": 316.5,
+      "h": 316.5,
+      "cardHeight": 471.859375,
+      "fit": "contain",
+      "imageH": 316.5,
+      "actionsVisible": true
+    },
+    {
+      "id": "pdf-bis-920",
+      "w": 316.5,
+      "h": 316.5,
+      "cardHeight": 471.859375,
+      "fit": "contain",
+      "imageH": 316.5,
+      "actionsVisible": true
+    },
+    {
+      "id": "pdf-bis-921",
+      "w": 316.5,
+      "h": 316.5,
+      "cardHeight": 471.859375,
+      "fit": "contain",
+      "imageH": 316.5,
+      "actionsVisible": true
+    },
+    {
+      "id": "pdf-bis-910",
+      "w": 316.5,
+      "h": 316.5,
+      "cardHeight": 471.859375,
+      "fit": "contain",
+      "imageH": 316.5,
+      "actionsVisible": true
+    },
+    {
+      "id": "pdf-bis-932",
+      "w": 316.5,
+      "h": 316.5,
+      "cardHeight": 471.859375,
+      "fit": "contain",
+      "imageH": 316.5,
+      "actionsVisible": true
+    },
+    {
+      "id": "pdf-bis-993",
+      "w": 316.5,
+      "h": 316.5,
+      "cardHeight": 471.859375,
+      "fit": "contain",
+      "imageH": 316.5,
+      "actionsVisible": true
+    },
+    {
+      "id": "pdf-bis-904",
+      "w": 316.5,
+      "h": 316.5,
+      "cardHeight": 471.859375,
+      "fit": "contain",
+      "imageH": 316.5,
+      "actionsVisible": true
+    },
+    {
+      "id": "pdf-bis-931",
+      "w": 316.5,
+      "h": 316.5,
+      "cardHeight": 471.859375,
+      "fit": "contain",
+      "imageH": 316.5,
+      "actionsVisible": true
+    },
+    {
+      "id": "pdf-bis-909",
+      "w": 316.5,
+      "h": 316.5,
+      "cardHeight": 471.859375,
+      "fit": "contain",
+      "imageH": 316.5,
+      "actionsVisible": true
+    },
+    {
+      "id": "pdf-bis-917",
+      "w": 316.5,
+      "h": 316.5,
+      "cardHeight": 471.859375,
+      "fit": "contain",
+      "imageH": 316.5,
+      "actionsVisible": true
+    },
+    {
+      "id": "pdf-bis-927",
+      "w": 316.5,
+      "h": 316.5,
+      "cardHeight": 471.859375,
+      "fit": "contain",
+      "imageH": 316.5,
+      "actionsVisible": true
+    },
+    {
+      "id": "pdf-bis-923",
+      "w": 316.5,
+      "h": 316.5,
+      "cardHeight": 471.859375,
+      "fit": "contain",
+      "imageH": 316.5,
+      "actionsVisible": true
+    },
+    {
+      "id": "pdf-bis-970",
+      "w": 316.5,
+      "h": 316.5,
+      "cardHeight": 496.140625,
+      "fit": "contain",
+      "imageH": 316.5,
+      "actionsVisible": true
+    },
+    {
+      "id": "pdf-bis-959-965",
+      "w": 316.5,
+      "h": 316.5,
+      "cardHeight": 496.140625,
+      "fit": "contain",
+      "imageH": 316.5,
+      "actionsVisible": true
+    },
+    {
+      "id": "pdf-bis-961-960",
+      "w": 316.5,
+      "h": 316.5,
+      "cardHeight": 496.140625,
+      "fit": "contain",
+      "imageH": 316.5,
+      "actionsVisible": true
+    },
+    {
+      "id": "pdf-bis-962-966",
+      "w": 316.5,
+      "h": 316.5,
+      "cardHeight": 496.140625,
+      "fit": "contain",
+      "imageH": 316.5,
+      "actionsVisible": true
+    },
+    {
+      "id": "pdf-bis-958",
+      "w": 316.5,
+      "h": 316.5,
+      "cardHeight": 496.140625,
+      "fit": "contain",
+      "imageH": 316.5,
+      "actionsVisible": true
+    },
+    {
+      "id": "pdf-bis-964",
+      "w": 316.5,
+      "h": 316.5,
+      "cardHeight": 496.140625,
+      "fit": "contain",
+      "imageH": 316.5,
+      "actionsVisible": true
+    },
+    {
+      "id": "pdf-bis-963",
+      "w": 316.5,
+      "h": 316.5,
+      "cardHeight": 496.140625,
+      "fit": "contain",
+      "imageH": 316.5,
+      "actionsVisible": true
+    },
+    {
+      "id": "pdf-bis-990",
+      "w": 316.5,
+      "h": 316.5,
+      "cardHeight": 496.140625,
+      "fit": "contain",
+      "imageH": 316.5,
+      "actionsVisible": true
+    },
+    {
+      "id": "pdf-bis-988",
+      "w": 316.5,
+      "h": 316.5,
+      "cardHeight": 471.859375,
+      "fit": "contain",
+      "imageH": 316.5,
+      "actionsVisible": true
+    },
+    {
+      "id": "pdf-bis-989",
+      "w": 316.5,
+      "h": 316.5,
+      "cardHeight": 471.859375,
+      "fit": "contain",
+      "imageH": 316.5,
+      "actionsVisible": true
+    },
+    {
+      "id": "pdf-bis-991",
+      "w": 316.5,
+      "h": 316.5,
+      "cardHeight": 471.859375,
+      "fit": "contain",
+      "imageH": 316.5,
+      "actionsVisible": true
+    },
+    {
+      "id": "pdf-bis-928",
+      "w": 316.5,
+      "h": 316.5,
+      "cardHeight": 471.859375,
+      "fit": "contain",
+      "imageH": 316.5,
+      "actionsVisible": true
+    },
+    {
+      "id": "pdf-bis-979",
+      "w": 316.5,
+      "h": 316.5,
+      "cardHeight": 471.859375,
+      "fit": "contain",
+      "imageH": 316.5,
+      "actionsVisible": true
+    },
+    {
+      "id": "pdf-bis-953",
+      "w": 316.5,
+      "h": 316.5,
+      "cardHeight": 471.859375,
+      "fit": "contain",
+      "imageH": 316.5,
+      "actionsVisible": true
+    },
+    {
+      "id": "pdf-bis-954",
+      "w": 316.5,
+      "h": 316.5,
+      "cardHeight": 471.859375,
+      "fit": "contain",
+      "imageH": 316.5,
+      "actionsVisible": true
+    },
+    {
+      "id": "pdf-bis-994",
+      "w": 316.5,
+      "h": 316.5,
+      "cardHeight": 471.859375,
+      "fit": "contain",
+      "imageH": 316.5,
+      "actionsVisible": true
+    },
+    {
+      "id": "pdf-bis-951",
+      "w": 316.5,
+      "h": 316.5,
+      "cardHeight": 471.859375,
+      "fit": "contain",
+      "imageH": 316.5,
+      "actionsVisible": true
+    },
+    {
+      "id": "pdf-bis-969",
+      "w": 316.5,
+      "h": 316.5,
+      "cardHeight": 471.859375,
+      "fit": "contain",
+      "imageH": 316.5,
+      "actionsVisible": true
+    },
+    {
+      "id": "pdf-bis-922",
+      "w": 316.5,
+      "h": 316.5,
+      "cardHeight": 471.859375,
+      "fit": "contain",
+      "imageH": 316.5,
+      "actionsVisible": true
+    },
+    {
+      "id": "pdf-bis-957",
+      "w": 316.5,
+      "h": 316.5,
+      "cardHeight": 471.859375,
+      "fit": "contain",
+      "imageH": 316.5,
+      "actionsVisible": true
+    },
+    {
+      "id": "pdf-bis-952",
+      "w": 316.5,
+      "h": 316.5,
+      "cardHeight": 471.859375,
+      "fit": "contain",
+      "imageH": 316.5,
+      "actionsVisible": true
+    },
+    {
+      "id": "pdf-bis-967",
+      "w": 316.5,
+      "h": 316.5,
+      "cardHeight": 471.859375,
+      "fit": "contain",
+      "imageH": 316.5,
+      "actionsVisible": true
+    },
+    {
+      "id": "pdf-bis-930",
+      "w": 316.5,
+      "h": 316.5,
+      "cardHeight": 471.859375,
+      "fit": "contain",
+      "imageH": 316.5,
+      "actionsVisible": true
+    },
+    {
+      "id": "pdf-bis-929",
+      "w": 316.5,
+      "h": 316.5,
+      "cardHeight": 471.859375,
+      "fit": "contain",
+      "imageH": 316.5,
+      "actionsVisible": true
+    },
+    {
+      "id": "pdf-bis-905",
+      "w": 316.5,
+      "h": 316.5,
+      "cardHeight": 496.140625,
+      "fit": "contain",
+      "imageH": 316.5,
+      "actionsVisible": true
+    },
+    {
+      "id": "pdf-bis-992",
+      "w": 316.5,
+      "h": 316.5,
+      "cardHeight": 496.140625,
+      "fit": "contain",
+      "imageH": 316.5,
+      "actionsVisible": true
+    },
+    {
+      "id": "pdf-bis-986",
+      "w": 316.5,
+      "h": 316.5,
+      "cardHeight": 496.140625,
+      "fit": "contain",
+      "imageH": 316.5,
+      "actionsVisible": true
+    },
+    {
+      "id": "pdf-bis-900",
+      "w": 316.5,
+      "h": 316.5,
+      "cardHeight": 496.140625,
+      "fit": "contain",
+      "imageH": 316.5,
+      "actionsVisible": true
+    },
+    {
+      "id": "pdf-bis-950",
+      "w": 316.5,
+      "h": 316.5,
+      "cardHeight": 471.859375,
+      "fit": "contain",
+      "imageH": 316.5,
+      "actionsVisible": true
+    },
+    {
+      "id": "pdf-bis-934",
+      "w": 316.5,
+      "h": 316.5,
+      "cardHeight": 471.859375,
+      "fit": "contain",
+      "imageH": 316.5,
+      "actionsVisible": true
+    },
+    {
+      "id": "pdf-bis-933",
+      "w": 316.5,
+      "h": 316.5,
+      "cardHeight": 471.859375,
+      "fit": "contain",
+      "imageH": 316.5,
+      "actionsVisible": true
+    },
+    {
+      "id": "pdf-bis-971",
+      "w": 316.5,
+      "h": 316.5,
+      "cardHeight": 471.859375,
+      "fit": "contain",
+      "imageH": 316.5,
+      "actionsVisible": true
+    },
+    {
+      "id": "pdf-bis-977",
+      "w": 316.5,
+      "h": 316.5,
+      "cardHeight": 471.859375,
+      "fit": "contain",
+      "imageH": 316.5,
+      "actionsVisible": true
+    },
+    {
+      "id": "pdf-bis-978",
+      "w": 316.5,
+      "h": 316.5,
+      "cardHeight": 471.859375,
+      "fit": "contain",
+      "imageH": 316.5,
+      "actionsVisible": true
+    },
+    {
+      "id": "pdf-bis-902",
+      "w": 316.5,
+      "h": 316.5,
+      "cardHeight": 471.859375,
+      "fit": "contain",
+      "imageH": 316.5,
+      "actionsVisible": true
+    },
+    {
+      "id": "pdf-bis-912",
+      "w": 316.5,
+      "h": 316.5,
+      "cardHeight": 471.859375,
+      "fit": "contain",
+      "imageH": 316.5,
+      "actionsVisible": true
+    },
+    {
+      "id": "pdf-bis-935",
+      "w": 316.5,
+      "h": 316.5,
+      "cardHeight": 496.140625,
+      "fit": "contain",
+      "imageH": 316.5,
+      "actionsVisible": true
+    },
+    {
+      "id": "pdf-bis-913",
+      "w": 316.5,
+      "h": 316.5,
+      "cardHeight": 496.140625,
+      "fit": "contain",
+      "imageH": 316.5,
+      "actionsVisible": true
+    },
+    {
+      "id": "pdf-bis-985",
+      "w": 316.5,
+      "h": 316.5,
+      "cardHeight": 496.140625,
+      "fit": "contain",
+      "imageH": 316.5,
+      "actionsVisible": true
+    },
+    {
+      "id": "pdf-bis-981",
+      "w": 316.5,
+      "h": 316.5,
+      "cardHeight": 496.140625,
+      "fit": "contain",
+      "imageH": 316.5,
+      "actionsVisible": true
+    },
+    {
+      "id": "pdf-bis-984",
+      "w": 316.5,
+      "h": 316.5,
+      "cardHeight": 471.859375,
+      "fit": "contain",
+      "imageH": 316.5,
+      "actionsVisible": true
+    },
+    {
+      "id": "pdf-bis-982",
+      "w": 316.5,
+      "h": 316.5,
+      "cardHeight": 471.859375,
+      "fit": "contain",
+      "imageH": 316.5,
+      "actionsVisible": true
+    },
+    {
+      "id": "pdf-bis-983",
+      "w": 316.5,
+      "h": 316.5,
+      "cardHeight": 471.859375,
+      "fit": "contain",
+      "imageH": 316.5,
+      "actionsVisible": true
+    },
+    {
+      "id": "pdf-bis-919",
+      "w": 316.5,
+      "h": 316.5,
+      "cardHeight": 471.859375,
+      "fit": "contain",
+      "imageH": 316.5,
+      "actionsVisible": true
+    },
+    {
+      "id": "pdf-bis-918",
+      "w": 316.5,
+      "h": 316.5,
+      "cardHeight": 496.140625,
+      "fit": "contain",
+      "imageH": 316.5,
+      "actionsVisible": true
+    },
+    {
+      "id": "pdf-bis-949",
+      "w": 316.5,
+      "h": 316.5,
+      "cardHeight": 496.140625,
+      "fit": "contain",
+      "imageH": 316.5,
+      "actionsVisible": true
+    },
+    {
+      "id": "pdf-bis-987",
+      "w": 316.5,
+      "h": 316.5,
+      "cardHeight": 496.140625,
+      "fit": "contain",
+      "imageH": 316.5,
+      "actionsVisible": true
+    },
+    {
+      "id": "pdf-bis-943",
+      "w": 316.5,
+      "h": 316.5,
+      "cardHeight": 496.140625,
+      "fit": "contain",
+      "imageH": 316.5,
+      "actionsVisible": true
+    },
+    {
+      "id": "pdf-bis-937",
+      "w": 316.5,
+      "h": 316.5,
+      "cardHeight": 496.140625,
+      "fit": "contain",
+      "imageH": 316.5,
+      "actionsVisible": true
+    },
+    {
+      "id": "pdf-bis-946",
+      "w": 316.5,
+      "h": 316.5,
+      "cardHeight": 496.140625,
+      "fit": "contain",
+      "imageH": 316.5,
+      "actionsVisible": true
+    },
+    {
+      "id": "pdf-bis-936",
+      "w": 316.5,
+      "h": 316.5,
+      "cardHeight": 496.140625,
+      "fit": "contain",
+      "imageH": 316.5,
+      "actionsVisible": true
+    },
+    {
+      "id": "pdf-bis-942",
+      "w": 316.5,
+      "h": 316.5,
+      "cardHeight": 496.140625,
+      "fit": "contain",
+      "imageH": 316.5,
+      "actionsVisible": true
+    },
+    {
+      "id": "pdf-bis-945",
+      "w": 316.5,
+      "h": 316.5,
+      "cardHeight": 496.140625,
+      "fit": "contain",
+      "imageH": 316.5,
+      "actionsVisible": true
+    },
+    {
+      "id": "pdf-bis-944",
+      "w": 316.5,
+      "h": 316.5,
+      "cardHeight": 496.140625,
+      "fit": "contain",
+      "imageH": 316.5,
+      "actionsVisible": true
+    },
+    {
+      "id": "pdf-bis-941",
+      "w": 316.5,
+      "h": 316.5,
+      "cardHeight": 496.140625,
+      "fit": "contain",
+      "imageH": 316.5,
+      "actionsVisible": true
+    },
+    {
+      "id": "pdf-bis-939",
+      "w": 316.5,
+      "h": 316.5,
+      "cardHeight": 496.140625,
+      "fit": "contain",
+      "imageH": 316.5,
+      "actionsVisible": true
+    },
+    {
+      "id": "pdf-bis-940",
+      "w": 316.5,
+      "h": 316.5,
+      "cardHeight": 496.140625,
+      "fit": "contain",
+      "imageH": 316.5,
+      "actionsVisible": true
+    },
+    {
+      "id": "pdf-bis-947",
+      "w": 316.5,
+      "h": 316.5,
+      "cardHeight": 496.140625,
+      "fit": "contain",
+      "imageH": 316.5,
+      "actionsVisible": true
+    }
+  ]
+}

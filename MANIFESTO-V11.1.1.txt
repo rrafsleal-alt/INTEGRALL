@@ -1,0 +1,42 @@
+INTEGRALL Online — Manifesto v11.1.1
+Data: 2026-09-02
+
+Projeto auditado a partir da v11.1.0.
+Versão final do código: 11.1.1
+
+Instalação:
+  npm ci
+
+Desenvolvimento:
+  npm run dev
+
+Verificação independente:
+  npm run verify:v11.1.1
+
+Suíte total:
+  npm test
+
+Loja no Chromium:
+  npm run test:browser
+
+Admin no Chromium:
+  npm run test:browser:admin
+
+Build de produção:
+  npm run build:production
+
+Smoke do build servido via HTTP:
+  npm run test:browser:production
+
+Resultados certificados neste ambiente:
+  - verify:v11.1.1: 132/132 aprovados
+  - npm test: 132 aprovados, 15 SKIP, 0 falhas
+  - loja Chromium: 18/18 larguras aprovadas
+  - Admin Chromium: 18/18 larguras aprovadas
+  - build de produção: aprovado, 292 arquivos, 16.689.955 bytes
+  - npm ci limpo: NÃO EXECUTADO com sucesso por indisponibilidade/timeout do registry/npm
+  - smoke HTTP do build: APROVADO (8 cenários; 291 hashes)
+  - build em Chromium: 18/18 larguras aprovadas
+  - npm audit offline: 0 vulnerabilidades
+
+Status: APROVADO COM LIMITAÇÕES DE AMBIENTE DOCUMENTADAS

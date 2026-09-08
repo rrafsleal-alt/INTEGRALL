@@ -1,0 +1,102 @@
+/* INTEGRALL checkout layer */
+.integrall-skip-link{position:fixed;left:12px;top:12px;z-index:10000;padding:10px 14px;background:#fff;color:#211e1c;border:2px solid currentColor;transform:translateY(-160%);transition:transform .15s}
+.integrall-skip-link:focus{transform:none}
+.checkout-options{margin:14px 0;padding:12px;border:1px solid var(--line);background:var(--sand);display:grid;gap:8px}
+.checkout-options strong{color:var(--wine);font:400 1rem var(--serif)}
+.payment-methods{display:grid;gap:7px}
+.payment-methods label{display:flex;align-items:flex-start;gap:9px;padding:9px 10px;border:1px solid var(--line);background:#fff;font-size:.72rem;cursor:pointer}
+.payment-methods input{margin-top:3px;accent-color:var(--wine)}
+.legal-links{display:flex;justify-content:center;gap:10px 18px;flex-wrap:wrap;margin:14px 0 0;font-size:.65rem}
+.legal-links button{border:0;background:none;color:inherit;text-decoration:underline;text-underline-offset:3px}
+.legal-copy{white-space:pre-line;color:var(--muted);font-size:.8rem;line-height:1.7}
+.legal-copy h3{color:var(--wine);font:400 1.25rem var(--serif);margin:18px 0 7px}
+.legal-meta{padding:10px 12px;border:1px solid var(--line);background:var(--sand);font-size:.7rem;color:var(--muted);margin-bottom:14px}
+.checkout-note{font-size:.67rem;color:var(--muted);line-height:1.55}
+.pix-box{padding:15px;border:1px solid var(--line);background:var(--sand);margin:12px 0;word-break:break-all}
+.pix-box code{font-size:.84rem;color:var(--wine)}
+.checkout-action-row{display:flex;gap:8px;flex-wrap:wrap}
+@media(max-width:790px){
+  #catalogSurface .btn,#catalogSurface .icon-btn,#catalogSurface .close-btn,#catalogSurface .nav button,#catalogSurface .cart-btn,#catalogSurface .menu-btn{min-height:44px}
+}
+@media(prefers-reduced-motion:reduce){.integrall-skip-link{transition:none}}
+.delivery-address{display:grid;gap:10px;padding:12px;border:1px solid var(--line);background:#fff}
+.delivery-address[hidden]{display:none}
+.delivery-address>.two,.checkout-options>.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.order-status-hero{padding:16px;border:1px solid var(--line);background:var(--sand);display:grid;gap:7px;margin-bottom:12px}
+.order-status-hero>strong{font:400 1.05rem var(--serif);color:var(--wine);word-break:break-word}
+.order-status-hero>p{margin:0;color:var(--muted);font-size:.78rem;line-height:1.55}
+.order-status-badge{width:max-content;padding:5px 8px;border:1px solid var(--line);font-size:.68rem;color:var(--wine)}
+.order-status-badge.paid,.order-status-badge.preparing,.order-status-badge.ready,.order-status-badge.completed{color:var(--ok)}
+.order-status-badge.payment_failed,.order-status-badge.payment_expired,.order-status-badge.cancelled,.order-status-badge.refunded,.order-status-badge.chargeback{color:var(--danger)}
+.detail-order-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 12px;margin:12px 0}
+.detail-order-grid>div{padding:9px 10px;border:1px solid var(--line);background:#fff}
+.detail-order-grid span{display:block;color:var(--muted);font-size:.62rem;margin-bottom:2px}.detail-order-grid b{font-size:.76rem;color:var(--wine)}
+.order-timeline{margin:14px 0}.order-timeline h3{font:400 1rem var(--serif);color:var(--wine);margin:0 0 8px}.timeline-row{display:grid;grid-template-columns:12px 1fr;gap:8px;padding:7px 0}.timeline-dot{width:8px;height:8px;border-radius:50%;background:var(--gold);margin-top:5px}.timeline-row b{display:block;font-size:.73rem}.timeline-row small{display:block;color:var(--muted);font-size:.62rem;line-height:1.45;margin-top:2px}
+@media(max-width:620px){.delivery-address>.two,.checkout-options>.two,.detail-order-grid{grid-template-columns:1fr}}
+
+/* ===== Verificação de idade (18+) — minimalista ===== */
+html.age-locked{overflow:hidden}
+.age-gate{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(23,8,12,.88);backdrop-filter:blur(8px)}
+.age-gate-card{max-width:340px;width:100%;background:#fff;padding:42px 34px;text-align:center;display:grid;gap:20px}
+.age-gate-brand{margin:0;font-size:.62rem;letter-spacing:.3em;text-transform:uppercase;color:var(--gold)}
+.age-gate-title{margin:0;font:400 1.35rem var(--serif);color:var(--wine)}
+.age-gate-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:2px}
+.age-gate-denied{margin:0;color:var(--danger);font-size:.7rem;line-height:1.5}
+.age-gate-denied[hidden]{display:none}
+.age-gate-footnote{margin:0;font-size:.54rem;letter-spacing:.06em;color:var(--muted);line-height:1.6}
+.age-gate-leaving{opacity:0;transition:opacity .25s ease}
+@media(prefers-reduced-motion:reduce){.age-gate-leaving{transition:none}}
+
+/* ===== Confirmação 18+ no checkout ===== */
+.age-confirm{display:flex;gap:9px;align-items:flex-start;padding:10px 12px;border:1px solid var(--line);background:var(--sand);font-size:.7rem;line-height:1.5;cursor:pointer}
+.age-confirm input{margin-top:2px;accent-color:var(--wine)}
+.age-confirm[hidden]{display:none}
+
+/* ===== Cupom de desconto ===== */
+.coupon-row{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end}
+.coupon-row .group{margin:0}
+.coupon-feedback{font-size:.66rem;line-height:1.5;color:var(--muted)}
+.coupon-feedback.ok{color:var(--ok)}
+.coupon-feedback.bad{color:var(--danger)}
+.sum-line.discount b{color:var(--ok)}
+.sum-line.discount[hidden]{display:none}
+
+/* ===== Rastreio no acompanhamento ===== */
+.order-tracking-box{margin:12px 0;padding:12px;border:1px solid var(--line);background:var(--sand);display:grid;gap:6px}
+.order-tracking-box[hidden]{display:none}
+.order-tracking-box span{font-size:.62rem;color:var(--muted)}
+.order-tracking-box b{font-size:.8rem;color:var(--wine);word-break:break-all}
+.order-tracking-box a{font-size:.7rem;color:var(--wine);text-decoration:underline;text-underline-offset:3px}
+
+/* ===== Opções de frete Correios ===== */
+.correios-options{display:grid;gap:8px;padding:12px;border:1px solid var(--line);background:var(--sand)}
+.correios-options[hidden]{display:none}
+.correios-options>strong{font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--wine)}
+.correios-option{display:flex;gap:9px;align-items:center;padding:8px 10px;border:1px solid var(--line);background:#fff;font-size:.72rem;cursor:pointer}
+.correios-option input{accent-color:var(--wine)}
+.correios-option small{color:var(--muted)}
+.correios-note{margin:0;font-size:.68rem;color:var(--muted);line-height:1.5}
+
+/* ===== Linha do tempo de rastreamento ===== */
+.tracking-events{display:grid;gap:7px;margin:6px 0}
+.tracking-eta{padding:8px 10px;background:#fff;border:1px solid var(--line);font-size:.7rem;color:var(--wine);font-weight:600}
+.tracking-event{display:grid;grid-template-columns:14px 1fr;gap:8px;align-items:start;padding:5px 0;opacity:.75}
+.tracking-event.latest{opacity:1}
+.tracking-event.latest b{color:var(--wine)}
+.tracking-dot{width:8px;height:8px;border-radius:50%;background:var(--line);margin-top:4px}
+.tracking-event.latest .tracking-dot{background:var(--ok)}
+.tracking-event b{display:block;font-size:.72rem}
+.tracking-event small{display:block;color:var(--muted);font-size:.6rem;margin-top:1px}
+.tracking-note{font-size:.66rem;color:var(--muted);line-height:1.5}
+
+/* ===== Camadas autônomas (termos e acompanhamento) =====
+ * Mantêm backdrop, bloqueio de scroll e ordem visual coerentes mesmo quando
+ * abertas fora do popup de produto/sacola. O JS garante exclusividade entre
+ * as camadas; o backdrop não aplica blur para evitar sensação de travamento.
+ */
+.standalone-modal-backdrop{position:fixed;inset:0;z-index:115;background:rgba(31,25,23,.18);opacity:0;visibility:hidden;transition:opacity .18s ease,visibility .18s ease;backdrop-filter:none;-webkit-backdrop-filter:none}
+.standalone-modal-backdrop.open{opacity:1;visibility:visible}
+#legalModal{width:min(760px,calc(100% - 28px))}
+@media(prefers-reduced-motion:reduce){.standalone-modal-backdrop{transition:none}}
+
+.correios-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.correios-actions button{max-width:100%;white-space:normal}.correios-option span{min-width:0;overflow-wrap:anywhere}.correios-option small{display:block;line-height:1.5}.correios-note{overflow-wrap:anywhere}

@@ -1,0 +1,48 @@
+{
+  "version": "11.1.8",
+  "buildProfile": "offline",
+  "offlineTests": {
+    "passed": 212,
+    "failed": 0,
+    "skipped": 0
+  },
+  "httpIntegration": {
+    "status": "not-executed",
+    "reason": "Dependency installation did not complete; HTTP suite setup failed with express ERR_MODULE_NOT_FOUND."
+  },
+  "browserStoreFixture": {
+    "widths": 18,
+    "status": "passed"
+  },
+  "browserActualMediaFixture": {
+    "cases": 10,
+    "status": "passed",
+    "limits": "Content injected in memory; CSP removed only in test fixture. No HTTP backend or network validation."
+  },
+  "browserAdminFixture": {
+    "widths": [
+      320,
+      390,
+      768,
+      1440
+    ],
+    "status": "passed",
+    "businessFormTestWidths": [
+      390,
+      1440
+    ],
+    "limits": "Simulated API, not Express."
+  },
+  "media": {
+    "originalFilesPreserved": 43,
+    "uniquePublicImages": 33,
+    "legacyIdsAvailable": 43,
+    "referencedPathsVerified": 237
+  },
+  "externalServices": "not-validated",
+  "commercialDataMissing": [
+    "taxId",
+    "businessAddress"
+  ],
+  "originalArchiveSha256": "07ea1d840ea16287982ecce998bcca39afe36c0f1ac576fee6c360526d38c6b4"
+}

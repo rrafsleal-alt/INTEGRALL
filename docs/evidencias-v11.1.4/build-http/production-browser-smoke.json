@@ -1,0 +1,13 @@
+{
+  "status": "NÃO EXECUTADO",
+  "scope": "build estático servido por HTTP em Chromium",
+  "reason": "Page.goto: net::ERR_BLOCKED_BY_ADMINISTRATOR at http://127.0.0.1:43923/produto/suco-integral-de-uva-bordo\nCall log:\n  - navigating to \"http://127.0.0.1:43923/produto/suco-integral-de-uva-bordo\", waiting until \"networkidle\"\n",
+  "risk": "A navegação HTTP local do build não pôde ser exercitada pelo navegador deste ambiente.",
+  "howToRun": "npm run build:production && npm run test:browser:production",
+  "widths": [
+    320,
+    768,
+    1440
+  ],
+  "results": []
+}

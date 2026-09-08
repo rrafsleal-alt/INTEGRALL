@@ -1,0 +1,21 @@
+INTEGRALL v10.2 — EDITOR VISUAL
+
+PRINCIPAIS MUDANÇAS
+- Editor visual lado a lado no Admin: propriedades à esquerda e a loja real à direita.
+- Clique diretamente em cabeçalho, apresentação, busca/filtros, produto ou rodapé para editar.
+- Controles para mover antes/depois, ocultar/restaurar e excluir produtos.
+- Prévia em computador, tablet e celular.
+- Edição aparece na prévia antes de salvar, sem pop-ups cobrindo o conteúdo.
+- Editor de produto incorporado ao painel lateral.
+- Fotos do computador com enquadramento visual: arrastar, zoom, formatos e reenquadrar foto atual.
+- Upload da foto continua persistente em data/local-state/ no modo local.
+- Produtos podem ser ocultados sem serem apagados e restaurados depois.
+- Segurança de iframe ajustada para permitir somente a prévia do próprio site (same-origin).
+- Admin continua sem token e abre com 3 cliques na logo inferior.
+
+COMO USAR
+1. npm install
+2. npm run dev
+3. Abra http://localhost:3000
+4. Clique 3 vezes na logo INTEGRALL do rodapé.
+5. No Editor visual, clique no elemento da loja que deseja alterar.

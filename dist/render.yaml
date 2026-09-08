@@ -1,0 +1,106 @@
+services:
+  - type: web
+    name: integrall-online
+    runtime: node
+    plan: starter
+    region: oregon
+    buildCommand: npm ci --omit=dev --no-audit --no-fund
+    startCommand: npm start
+    healthCheckPath: /api/health
+    autoDeployTrigger: commit
+    maxShutdownDelaySeconds: 30
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: TRUST_PROXY
+        value: "true"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: integrall-db
+          property: connectionString
+      - key: PUBLIC_URL
+        sync: false
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD_HASH
+        sync: false
+      - key: ADMIN_DEFAULT_LOGIN_ENABLED
+        value: "false"
+      - key: ADMIN_ROLE
+        value: admin
+      - key: ADMIN_SESSION_SECRET
+        generateValue: true
+      - key: CUSTOMER_AUTH_SECRET
+        generateValue: true
+      - key: MERCADO_PAGO_ACCESS_TOKEN
+        sync: false
+      - key: MERCADO_PAGO_WEBHOOK_SECRET
+        sync: false
+      - key: WHATSAPP_NUMBER
+        sync: false
+      - key: MERCADO_PAGO_USE_SANDBOX
+        value: "false"
+      - key: MERCADO_PAGO_PAYMENT_EXPIRATION_DAYS
+        value: "3"
+      - key: SHIPPING_MODE
+        value: correios
+      - key: ALLOW_PAYMENT_WITH_QUOTED_SHIPPING
+        value: "false"
+      - key: CORREIOS_USER
+        sync: false
+      - key: CORREIOS_ACCESS_CODE
+        sync: false
+      - key: CORREIOS_POSTAGE_CARD
+        sync: false
+      - key: CORREIOS_CONTRACT
+        sync: false
+      - key: CORREIOS_ORIGIN_CEP
+        sync: false
+      - key: CORREIOS_AUTH_TYPE
+        value: auto
+      - key: CORREIOS_API_VERSION
+        value: v1
+      - key: CORREIOS_QUOTE_METHOD
+        value: GET
+      - key: CORREIOS_HOMOLOG
+        value: "false"
+      - key: CORREIOS_DECLARED_VALUE
+        value: "false"
+      - key: SHIPPING_QUOTE_SECRET
+        generateValue: true
+      - key: CORREIOS_SERVICES
+        value: "03298:PAC,03220:SEDEX"
+      - key: JADLOG_TOKEN
+        sync: false
+      - key: JADLOG_CNPJ
+        sync: false
+      - key: JADLOG_CONTA
+        sync: false
+      - key: JADLOG_CONTRATO
+        sync: false
+      - key: JADLOG_MODALIDADE
+        value: "3"
+      - key: CARRIER_SPLIT_UNITS
+        value: "12"
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        value: "587"
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASSWORD
+        sync: false
+      - key: SMTP_FROM
+        sync: false
+      - key: SMTP_FROM_NAME
+        value: INTEGRALL
+      - key: ORDER_EXPIRE_DAYS
+        value: "7"
+
+databases:
+  - name: integrall-db
+    plan: basic-256mb
+    region: oregon
+    databaseName: integrall
+    user: integrall
+    ipAllowList: []

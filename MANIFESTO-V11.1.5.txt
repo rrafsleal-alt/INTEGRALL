@@ -1,0 +1,21 @@
+INTEGRALL v11.1.5 — MANIFESTO DE ENTREGA
+Data: 2026-09-02 (America/Sao_Paulo)
+
+Instalação: npm ci
+Desenvolvimento: npm run dev
+Verificação principal: npm run verify:v11.1.5
+Suíte completa: npm test
+Loja Chromium: npm run test:browser
+Admin Chromium: npm run test:browser:admin
+Build: npm run build:production
+Smoke HTTP: npm run test:production:http
+Auditoria catálogo: python3 tools/audit_products.py
+
+Resultado de código/build antes do empacotamento: APROVADO.
+- Suíte independente: 147/147
+- Suíte completa: 162 cenários; 147 aprovados; 15 SKIP; 0 falhas
+- Loja Chromium: 18/18 larguras
+- Admin Chromium: 18/18 larguras
+- Build: 292 arquivos; smoke HTTP 8/8; browser do dist 18/18
+- npm audit --offline: 0 vulnerabilidades registradas
+Limitações de ambiente: npm ci não concluiu por acesso/cache do registry; testes dependentes permanecem SKIP/NÃO EXECUTADOS. PDFs-fonte não acompanham o pacote.

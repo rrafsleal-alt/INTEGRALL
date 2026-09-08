@@ -1,0 +1,321 @@
+TAP version 13
+# Subtest: cliente: código com letras é recusado sem consumir o código válido
+ok 1 - cliente: código com letras é recusado sem consumir o código válido
+  ---
+  duration_ms: 11.807124
+  type: 'test'
+  ...
+# Subtest: cliente: código com dígitos excedentes é recusado sem consumir o código válido
+ok 2 - cliente: código com dígitos excedentes é recusado sem consumir o código válido
+  ---
+  duration_ms: 0.705125
+  type: 'test'
+  ...
+# Subtest: cliente: código com separadores internos é recusado sem consumir o código válido
+ok 3 - cliente: código com separadores internos é recusado sem consumir o código válido
+  ---
+  duration_ms: 0.890822
+  type: 'test'
+  ...
+# Subtest: cliente: e-mail acima de 254 caracteres não vira outro identificador truncado
+ok 4 - cliente: e-mail acima de 254 caracteres não vira outro identificador truncado
+  ---
+  duration_ms: 0.307994
+  type: 'test'
+  ...
+# Subtest: cliente: sessão com expiração inválido é revogada
+ok 5 - cliente: sessão com expiração inválido é revogada
+  ---
+  duration_ms: 1.28854
+  type: 'test'
+  ...
+# Subtest: cliente: sessão com expiração  é revogada
+ok 6 - cliente: sessão com expiração  é revogada
+  ---
+  duration_ms: 0.634104
+  type: 'test'
+  ...
+# Subtest: cliente: sessão com expiração undefined é revogada
+ok 7 - cliente: sessão com expiração undefined é revogada
+  ---
+  duration_ms: 0.544946
+  type: 'test'
+  ...
+# Subtest: cliente: sessão válida continua aceita e cookie malformado é recusado
+ok 8 - cliente: sessão válida continua aceita e cookie malformado é recusado
+  ---
+  duration_ms: 0.91587
+  type: 'test'
+  ...
+# Subtest: API: erro HTTP preserva status, código e requestId para expiração da sessão
+ok 9 - API: erro HTTP preserva status, código e requestId para expiração da sessão
+  ---
+  duration_ms: 68.666396
+  type: 'test'
+  ...
+# Subtest: API: resposta 200 contendo HTML não é apresentada como sucesso vazio
+ok 10 - API: resposta 200 contendo HTML não é apresentada como sucesso vazio
+  ---
+  duration_ms: 7.414506
+  type: 'test'
+  ...
+# Subtest: API: resposta HTTP 503 sem JSON preserva o status
+ok 11 - API: resposta HTTP 503 sem JSON preserva o status
+  ---
+  duration_ms: 4.012951
+  type: 'test'
+  ...
+# Subtest: API: HTTP 204 sem corpo continua compatível
+ok 12 - API: HTTP 204 sem corpo continua compatível
+  ---
+  duration_ms: 4.079509
+  type: 'test'
+  ...
+# Subtest: API: requisição já cancelada não inicia acesso à rede
+ok 13 - API: requisição já cancelada não inicia acesso à rede
+  ---
+  duration_ms: 3.541115
+  type: 'test'
+  ...
+# Subtest: API: cancelamento externo durante a resposta é propagado
+ok 14 - API: cancelamento externo durante a resposta é propagado
+  ---
+  duration_ms: 3.590286
+  type: 'test'
+  ...
+# Subtest: API: FormData mantém cabeçalho multipart gerado pelo navegador
+ok 15 - API: FormData mantém cabeçalho multipart gerado pelo navegador
+  ---
+  duration_ms: 7.513347
+  type: 'test'
+  ...
+# Subtest: mídia local: ordena por data antes de limitar, não pelo nome aleatório
+ok 16 - mídia local: ordena por data antes de limitar, não pelo nome aleatório
+  ---
+  duration_ms: 27.394971
+  type: 'test'
+  ...
+# Subtest: upload: WebP apenas com cabeçalho de canvas, sem imagem, é recusado
+ok 17 - upload: WebP apenas com cabeçalho de canvas, sem imagem, é recusado
+  ---
+  duration_ms: 2.691898
+  type: 'test'
+  ...
+# Subtest: upload: dimensões de VP8 ocultas por um VP8X pequeno não burlam o limite
+ok 18 - upload: dimensões de VP8 ocultas por um VP8X pequeno não burlam o limite
+  ---
+  duration_ms: 25.97723
+  type: 'test'
+  ...
+# Subtest: upload: cabeçalho VP8L sem dados de pixels é recusado
+ok 19 - upload: cabeçalho VP8L sem dados de pixels é recusado
+  ---
+  duration_ms: 0.604557
+  type: 'test'
+  ...
+# Subtest: perfil: CEP ausente retorna erro em vez de descartar ou truncar dados
+not ok 20 - perfil: CEP ausente retorna erro em vez de descartar ou truncar dados
+  ---
+  duration_ms: 1.653538
+  type: 'test'
+  location: '/mnt/data/revisao-cliente/projeto/tests/client-readiness.test.js:165:4'
+  failureType: 'testCodeFailure'
+  error: 'Missing expected exception.'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  stack: |-
+    TestContext.<anonymous> (file:///mnt/data/revisao-cliente/projeto/tests/client-readiness.test.js:166:10)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: perfil: CEP excedente retorna erro em vez de descartar ou truncar dados
+not ok 21 - perfil: CEP excedente retorna erro em vez de descartar ou truncar dados
+  ---
+  duration_ms: 0.265668
+  type: 'test'
+  location: '/mnt/data/revisao-cliente/projeto/tests/client-readiness.test.js:165:4'
+  failureType: 'testCodeFailure'
+  error: 'Missing expected exception.'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  stack: |-
+    TestContext.<anonymous> (file:///mnt/data/revisao-cliente/projeto/tests/client-readiness.test.js:166:10)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: perfil: sexto endereço retorna erro em vez de descartar ou truncar dados
+not ok 22 - perfil: sexto endereço retorna erro em vez de descartar ou truncar dados
+  ---
+  duration_ms: 0.193495
+  type: 'test'
+  location: '/mnt/data/revisao-cliente/projeto/tests/client-readiness.test.js:165:4'
+  failureType: 'testCodeFailure'
+  error: 'Missing expected exception.'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  stack: |-
+    TestContext.<anonymous> (file:///mnt/data/revisao-cliente/projeto/tests/client-readiness.test.js:166:10)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: perfil: endereço incompleto retorna erro em vez de descartar ou truncar dados
+not ok 23 - perfil: endereço incompleto retorna erro em vez de descartar ou truncar dados
+  ---
+  duration_ms: 0.133024
+  type: 'test'
+  location: '/mnt/data/revisao-cliente/projeto/tests/client-readiness.test.js:165:4'
+  failureType: 'testCodeFailure'
+  error: 'Missing expected exception.'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  stack: |-
+    TestContext.<anonymous> (file:///mnt/data/revisao-cliente/projeto/tests/client-readiness.test.js:166:10)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: perfil: tipo incorreto retorna erro em vez de descartar ou truncar dados
+not ok 24 - perfil: tipo incorreto retorna erro em vez de descartar ou truncar dados
+  ---
+  duration_ms: 0.290227
+  type: 'test'
+  location: '/mnt/data/revisao-cliente/projeto/tests/client-readiness.test.js:165:4'
+  failureType: 'testCodeFailure'
+  error: 'Missing expected exception.'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  stack: |-
+    TestContext.<anonymous> (file:///mnt/data/revisao-cliente/projeto/tests/client-readiness.test.js:166:10)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: perfil: editar nome preserva endereços legados, sem migração destrutiva
+not ok 25 - perfil: editar nome preserva endereços legados, sem migração destrutiva
+  ---
+  duration_ms: 2.789695
+  type: 'test'
+  location: '/mnt/data/revisao-cliente/projeto/tests/client-readiness.test.js:169:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly deep-equal:
+    + actual - expected
+    
+      [
+        {
+          cep: '',
+          city: 'Campinas',
+    +     complement: '',
+          id: 'endereco-1',
+          label: 'Casa',
+    +     neighborhood: '',
+          number: '10',
+    +     state: 'SP',
+    -     state: 'sp',
+          street: 'Rua teste'
+        }
+      ]
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected:
+    0:
+      id: 'endereco-1'
+      label: 'Casa'
+      cep: ''
+      street: 'Rua teste'
+      number: '10'
+      city: 'Campinas'
+      state: 'sp'
+  actual:
+    0:
+      id: 'endereco-1'
+      label: 'Casa'
+      cep: ''
+      street: 'Rua teste'
+      number: '10'
+      complement: ''
+      neighborhood: ''
+      city: 'Campinas'
+      state: 'SP'
+  operator: 'deepStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///mnt/data/revisao-cliente/projeto/tests/client-readiness.test.js:172:48)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: perfil: endereço completo normaliza CEP e UF, exclusão explícita funciona
+ok 26 - perfil: endereço completo normaliza CEP e UF, exclusão explícita funciona
+  ---
+  duration_ms: 0.250476
+  type: 'test'
+  ...
+# Subtest: perfil: validação falha dentro do lock sem apagar os dados anteriores
+not ok 27 - perfil: validação falha dentro do lock sem apagar os dados anteriores
+  ---
+  duration_ms: 2.485529
+  type: 'test'
+  location: '/mnt/data/revisao-cliente/projeto/tests/client-readiness.test.js:181:1'
+  failureType: 'testCodeFailure'
+  error: 'Missing expected rejection.'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  operator: 'rejects'
+  stack: |-
+    async TestContext.<anonymous> (file:///mnt/data/revisao-cliente/projeto/tests/client-readiness.test.js:186:3)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: repositório: expiração ou tentativas inválidas não validam código temporário
+not ok 28 - repositório: expiração ou tentativas inválidas não validam código temporário
+  ---
+  duration_ms: 0.770559
+  type: 'test'
+  location: '/mnt/data/revisao-cliente/projeto/tests/client-readiness.test.js:190:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    true !== false
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: false
+  actual: true
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///mnt/data/revisao-cliente/projeto/tests/client-readiness.test.js:194:12)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+1..28
+# tests 28
+# suites 0
+# pass 20
+# fail 8
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 446.03582

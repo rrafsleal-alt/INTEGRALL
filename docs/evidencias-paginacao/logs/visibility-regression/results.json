@@ -1,0 +1,169 @@
+{
+  "status": "APROVADO",
+  "scope": "Chromium / about:blank / HTML, CSS, JS e bytes reais de imagens; sem servidor Express ou CSP de produção",
+  "results": [
+    {
+      "name": "227 produtos alcançáveis por páginas, sem botão Ver mais",
+      "status": "APROVADO",
+      "details": {
+        "products": 227,
+        "cards": 227,
+        "hidden": 0,
+        "zero": 0,
+        "quote": 222,
+        "disabled": 222,
+        "lazy": true,
+        "more": false
+      }
+    },
+    {
+      "name": "222 itens sob consulta, sem preço zero nem botão de compra ativo",
+      "status": "APROVADO",
+      "details": null
+    },
+    {
+      "name": "Detalhes dos 227 produtos e das 52 variações (48 sem preço)",
+      "status": "APROVADO",
+      "details": {
+        "failures": [],
+        "variations": 52,
+        "unpricedOptions": 48
+      }
+    },
+    {
+      "name": "Categorias mostram todos os seus produtos",
+      "status": "APROVADO",
+      "details": [
+        {
+          "department": "vinhos",
+          "expected": 129,
+          "rendered": 129
+        },
+        {
+          "department": "cafes",
+          "expected": 7,
+          "rendered": 7
+        },
+        {
+          "department": "sucos",
+          "expected": 9,
+          "rendered": 9
+        },
+        {
+          "department": "petit-four",
+          "expected": 82,
+          "rendered": 82
+        }
+      ]
+    },
+    {
+      "name": "Busca encontra produto antes oculto e não anuncia preço zero",
+      "status": "APROVADO",
+      "details": {
+        "cards": 1,
+        "card": "Sob consultaAmanteigadosRosca de CocoPreço sob consultaCaixa 2 kgConhecer＋",
+        "suggestions": "Rosca de CocoJurerêPreço sob consulta"
+      }
+    },
+    {
+      "name": "Filtro de preço não classifica produtos sem preço como ofertas de R$ 0",
+      "status": "APROVADO",
+      "details": null
+    },
+    {
+      "name": "Limpar o filtro restaura a primeira página dos 227 produtos",
+      "status": "APROVADO",
+      "details": null
+    },
+    {
+      "name": "Catálogo sem transbordamento em 320px",
+      "status": "APROVADO",
+      "details": {
+        "width": 320,
+        "doc": 305,
+        "count": 12
+      }
+    },
+    {
+      "name": "Produto restaurado: foto original, detalhes e compra protegida em 320px",
+      "status": "APROVADO",
+      "details": {
+        "width": 320,
+        "doc": 305,
+        "below": true,
+        "loaded": true,
+        "name": "Rosca de Coco",
+        "price": "Preço sob consulta",
+        "disabled": true
+      }
+    },
+    {
+      "name": "Catálogo sem transbordamento em 768px",
+      "status": "APROVADO",
+      "details": {
+        "width": 768,
+        "doc": 753,
+        "count": 12
+      }
+    },
+    {
+      "name": "Produto restaurado: foto original, detalhes e compra protegida em 768px",
+      "status": "APROVADO",
+      "details": {
+        "width": 768,
+        "doc": 753,
+        "below": true,
+        "loaded": true,
+        "name": "Rosca de Coco",
+        "price": "Preço sob consulta",
+        "disabled": true
+      }
+    },
+    {
+      "name": "Catálogo sem transbordamento em 1440px",
+      "status": "APROVADO",
+      "details": {
+        "width": 1440,
+        "doc": 1425,
+        "count": 12
+      }
+    },
+    {
+      "name": "Produto restaurado: foto original, detalhes e compra protegida em 1440px",
+      "status": "APROVADO",
+      "details": {
+        "width": 1440,
+        "doc": 1425,
+        "below": true,
+        "loaded": true,
+        "name": "Rosca de Coco",
+        "price": "Preço sob consulta",
+        "disabled": true
+      }
+    },
+    {
+      "name": "Reativar botão pelo DOM não adiciona item sem preço à sacola",
+      "status": "APROVADO",
+      "details": {
+        "before": 0,
+        "after": 0,
+        "error": "Este produto ou opção está indisponível."
+      }
+    },
+    {
+      "name": "Oferta já existente continua adicionando à sacola por valor positivo",
+      "status": "APROVADO",
+      "details": {
+        "price": "R$ 11,50",
+        "enabled": true,
+        "lines": 1,
+        "total": 1150
+      }
+    },
+    {
+      "name": "Sem exceções JavaScript",
+      "status": "APROVADO",
+      "details": []
+    }
+  ]
+}

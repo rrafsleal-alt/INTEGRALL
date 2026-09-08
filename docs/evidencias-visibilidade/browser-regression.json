@@ -1,0 +1,273 @@
+[
+  {
+    "width": 320,
+    "status": "APROVADO",
+    "checks": {
+      "opening_scrolls_to_details": true,
+      "single_region": true,
+      "normal_flow": true,
+      "inside_viewport_width": true,
+      "semantic_main_below_gallery": true,
+      "one_column_all_widths": true,
+      "no_global_overflow": true,
+      "card_gallery_without_open": true,
+      "card_square_smart_fill": true,
+      "modal_gallery_controls": true,
+      "document_scroll": true,
+      "no_backdrop_blur": true,
+      "no_nested_scroll": true,
+      "variant_image_switch": true,
+      "variant_keeps_modal_open": true,
+      "switch_clears_state": true,
+      "close_clears_and_restores_focus": true,
+      "escape_closes": true,
+      "broken_image_fallback": true,
+      "details_image_contains": true,
+      "catalog_initial_all": true,
+      "catalog_no_load_more_needed": true,
+      "search_keeps_all_matches": true,
+      "no_console_errors": true
+    },
+    "metrics": {
+      "belowGallery": true,
+      "detailsExists": true,
+      "detailsCount": 1,
+      "hidden": false,
+      "ariaHidden": "false",
+      "ariaModal": null,
+      "role": "region",
+      "position": "relative",
+      "display": "block",
+      "gridColumns": "255px",
+      "top": 90.453125,
+      "bottom": 3255.3125,
+      "left": 10,
+      "right": 295,
+      "centerX": 152.5,
+      "centerY": 1672.8828125,
+      "viewportW": 320,
+      "viewportH": 900,
+      "parentId": "siteMain",
+      "bodyLocked": false,
+      "overlayOpen": false,
+      "horizontalOverflow": false,
+      "activeName": "Produto de auditoria com nome suficientemente longo para validar quebra responsiva",
+      "activeId": "audit-product-a",
+      "imgObjectFit": "contain",
+      "overlayBackdrop": "none",
+      "popupOverflowY": "visible"
+    },
+    "consoleErrors": []
+  },
+  {
+    "width": 768,
+    "status": "APROVADO",
+    "checks": {
+      "opening_scrolls_to_details": true,
+      "single_region": true,
+      "normal_flow": true,
+      "inside_viewport_width": true,
+      "semantic_main_below_gallery": true,
+      "one_column_all_widths": true,
+      "no_global_overflow": true,
+      "card_gallery_without_open": true,
+      "card_square_smart_fill": true,
+      "modal_gallery_controls": true,
+      "document_scroll": true,
+      "no_backdrop_blur": true,
+      "no_nested_scroll": true,
+      "variant_image_switch": true,
+      "variant_keeps_modal_open": true,
+      "switch_clears_state": true,
+      "close_clears_and_restores_focus": true,
+      "escape_closes": true,
+      "broken_image_fallback": true,
+      "details_image_contains": true,
+      "catalog_initial_all": true,
+      "catalog_no_load_more_needed": true,
+      "search_keeps_all_matches": true,
+      "no_console_errors": true
+    },
+    "metrics": {
+      "belowGallery": true,
+      "detailsExists": true,
+      "detailsCount": 1,
+      "hidden": false,
+      "ariaHidden": "false",
+      "ariaModal": null,
+      "role": "region",
+      "position": "relative",
+      "display": "block",
+      "gridColumns": "690.156px",
+      "top": 100.03125,
+      "bottom": 2318.78125,
+      "left": 12,
+      "right": 741,
+      "centerX": 376.5,
+      "centerY": 1209.40625,
+      "viewportW": 768,
+      "viewportH": 900,
+      "parentId": "siteMain",
+      "bodyLocked": false,
+      "overlayOpen": false,
+      "horizontalOverflow": false,
+      "activeName": "Produto de auditoria com nome suficientemente longo para validar quebra responsiva",
+      "activeId": "audit-product-a",
+      "imgObjectFit": "contain",
+      "overlayBackdrop": "none",
+      "popupOverflowY": "visible"
+    },
+    "consoleErrors": []
+  },
+  {
+    "width": 1440,
+    "status": "APROVADO",
+    "checks": {
+      "opening_scrolls_to_details": true,
+      "single_region": true,
+      "normal_flow": true,
+      "inside_viewport_width": true,
+      "semantic_main_below_gallery": true,
+      "one_column_all_widths": true,
+      "no_global_overflow": true,
+      "card_gallery_without_open": true,
+      "card_square_smart_fill": true,
+      "modal_gallery_controls": true,
+      "document_scroll": true,
+      "no_backdrop_blur": true,
+      "no_nested_scroll": true,
+      "variant_image_switch": true,
+      "variant_keeps_modal_open": true,
+      "switch_clears_state": true,
+      "close_clears_and_restores_focus": true,
+      "escape_closes": true,
+      "broken_image_fallback": true,
+      "details_image_contains": true,
+      "catalog_initial_all": true,
+      "catalog_no_load_more_needed": true,
+      "search_keeps_all_matches": true,
+      "no_console_errors": true
+    },
+    "metrics": {
+      "belowGallery": true,
+      "detailsExists": true,
+      "detailsCount": 1,
+      "hidden": false,
+      "ariaHidden": "false",
+      "ariaModal": null,
+      "role": "region",
+      "position": "relative",
+      "display": "block",
+      "gridColumns": "1058px",
+      "top": 100.46875,
+      "bottom": 2473.734375,
+      "left": 152.5,
+      "right": 1272.5,
+      "centerX": 712.5,
+      "centerY": 1287.1015625,
+      "viewportW": 1440,
+      "viewportH": 900,
+      "parentId": "siteMain",
+      "bodyLocked": false,
+      "overlayOpen": false,
+      "horizontalOverflow": false,
+      "activeName": "Produto de auditoria com nome suficientemente longo para validar quebra responsiva",
+      "activeId": "audit-product-a",
+      "imgObjectFit": "contain",
+      "overlayBackdrop": "none",
+      "popupOverflowY": "visible"
+    },
+    "consoleErrors": []
+  },
+  {
+    "scenario": "async-reviews-after-close",
+    "status": "APROVADO",
+    "state": {
+      "count": 0,
+      "summary": ""
+    }
+  },
+  {
+    "scenario": "account-layering",
+    "status": "APROVADO",
+    "open": {
+      "productHidden": true,
+      "accountOpen": true,
+      "overlayOpen": false,
+      "bodyLocked": true
+    },
+    "tabInside": true,
+    "closed": {
+      "accountOpen": false,
+      "bodyLocked": false
+    }
+  },
+  {
+    "scenario": "search-keyboard",
+    "status": "APROVADO",
+    "focus": {
+      "option": true,
+      "activeDesc": "searchSuggestion-0"
+    },
+    "closed": {
+      "hidden": true,
+      "focused": true,
+      "expanded": "false"
+    }
+  },
+  {
+    "scenario": "legal-layering-and-multiline",
+    "status": "APROVADO",
+    "open": {
+      "productHidden": true,
+      "legalOpen": true,
+      "backdropOpen": true,
+      "backdropHidden": false,
+      "backdropFilter": "none",
+      "overlayOpen": false,
+      "bodyLocked": true,
+      "copy": "PRIVACIDADE\n\nLinha 1\nLinha 2"
+    },
+    "closed": {
+      "open": false,
+      "bodyLocked": false,
+      "backdropHidden": true
+    }
+  },
+  {
+    "scenario": "direct-variant-image",
+    "status": "APROVADO"
+  },
+  {
+    "scenario": "arrows-in-text-do-not-change-gallery",
+    "status": "APROVADO"
+  },
+  {
+    "scenario": "review-async-form-reset",
+    "status": "APROVADO"
+  },
+  {
+    "scenario": "review-stale-post-reopen",
+    "status": "APROVADO"
+  },
+  {
+    "scenario": "layout-simulation-812x375-csszoom-1",
+    "status": "APROVADO",
+    "metrics": {
+      "overflow": false,
+      "below": true
+    }
+  },
+  {
+    "scenario": "layout-simulation-1024x400-csszoom-1",
+    "status": "APROVADO",
+    "metrics": {
+      "overflow": false,
+      "below": true
+    }
+  },
+  {
+    "scenario": "customer-logout-failure-and-retry",
+    "status": "APROVADO"
+  }
+]

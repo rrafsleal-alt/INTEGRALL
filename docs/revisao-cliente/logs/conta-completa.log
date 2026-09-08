@@ -1,0 +1,34 @@
+Logout disponível com pedidos ainda carregando APROVADO {'ok': True, 'logoutWhileOrdersPending': True, 'pageErrors': []}
+Resposta de sessão anterior não desfaz logout APROVADO {'ok': True, 'resurrectedSession': False, 'pageErrors': []}
+Pedidos atrasados não acrescentam ações privadas na tela de login APROVADO {'ok': True, 'privateActionsOnLogin': 0, 'pageErrors': []}
+Solicitação antiga de código não substitui tela reaberta APROVADO {'ok': True, 'oldCodeViewReappeared': False, 'pageErrors': []}
+Comprar novamente preserva trava de rolagem da sacola APROVADO {'locked': True, 'cartOpen': True, 'accountOpen': False, 'ok': True, 'pageErrors': []}
+Logout com sessão expirada volta ao login APROVADO {'ok': True, 'loginVisible': True, 'pageErrors': []}
+Falha de logout não simula sucesso; nova tentativa funciona APROVADO {'ok': True, 'keptOnFailure': True, 'retryWorks': True, 'pageErrors': []}
+Endereço incompleto não é enviado como cadastro válido APROVADO {'ok': True, 'invalidAddressSubmitted': False, 'pageErrors': []}
+Consultar o e-mail em outra aba não apaga a etapa do código APROVADO {'ok': True, 'codeViewPreserved': True, 'pageErrors': []}
+Fechar e reabrir durante login não prende a conta em carregamento APROVADO {'ok': True, 'stillChecking': False, 'pageErrors': []}
+Gravação antiga de perfil não substitui a nova conta APROVADO {'ok': True, 'currentAccountTitle': 'Minha conta — nova@example.com', 'pageErrors': []}
+Notificação de outra aba revalida sessão revogada APROVADO {'ok': True, 'privateActions': 0, 'pageErrors': []}
+Endereço completo continua sendo enviado e exibido APROVADO {'ok': True, 'submitted': 1, 'pageErrors': []}
+Produto: atualização silenciosa respeita scroll false APROVADO {'ok': True, 'scrollY': 0, 'pageErrors': []}
+Produto: abertura agendada é descartada ao mudar de rota APROVADO {'ok': True, 'oldProductReopened': False, 'pageErrors': []}
+Conta: diálogo nomeado e foco inicial em controle útil APROVADO {'ok': True, 'namedDialog': 1, 'focusedId': 'closeAccount', 'pageErrors': []}
+Conta com textos longos em 280px APROVADO {'globalOverflow': False, 'contentOverflow': False, 'panelWidth': 265, 'viewport': 280, 'ok': True, 'pageErrors': []}
+Conta com textos longos em 320px APROVADO {'globalOverflow': False, 'contentOverflow': False, 'panelWidth': 305, 'viewport': 320, 'ok': True, 'pageErrors': []}
+Conta com textos longos em 360px APROVADO {'globalOverflow': False, 'contentOverflow': False, 'panelWidth': 345, 'viewport': 360, 'ok': True, 'pageErrors': []}
+Conta com textos longos em 375px APROVADO {'globalOverflow': False, 'contentOverflow': False, 'panelWidth': 360, 'viewport': 375, 'ok': True, 'pageErrors': []}
+Conta com textos longos em 390px APROVADO {'globalOverflow': False, 'contentOverflow': False, 'panelWidth': 375, 'viewport': 390, 'ok': True, 'pageErrors': []}
+Conta com textos longos em 412px APROVADO {'globalOverflow': False, 'contentOverflow': False, 'panelWidth': 397, 'viewport': 412, 'ok': True, 'pageErrors': []}
+Conta com textos longos em 430px APROVADO {'globalOverflow': False, 'contentOverflow': False, 'panelWidth': 415, 'viewport': 430, 'ok': True, 'pageErrors': []}
+Conta com textos longos em 480px APROVADO {'globalOverflow': False, 'contentOverflow': False, 'panelWidth': 465, 'viewport': 480, 'ok': True, 'pageErrors': []}
+Conta com textos longos em 600px APROVADO {'globalOverflow': False, 'contentOverflow': False, 'panelWidth': 560, 'viewport': 600, 'ok': True, 'pageErrors': []}
+Conta com textos longos em 768px APROVADO {'globalOverflow': False, 'contentOverflow': False, 'panelWidth': 560, 'viewport': 768, 'ok': True, 'pageErrors': []}
+Conta com textos longos em 820px APROVADO {'globalOverflow': False, 'contentOverflow': False, 'panelWidth': 560, 'viewport': 820, 'ok': True, 'pageErrors': []}
+Conta com textos longos em 1024px APROVADO {'globalOverflow': False, 'contentOverflow': False, 'panelWidth': 560, 'viewport': 1024, 'ok': True, 'pageErrors': []}
+Conta com textos longos em 1280px APROVADO {'globalOverflow': False, 'contentOverflow': False, 'panelWidth': 560, 'viewport': 1280, 'ok': True, 'pageErrors': []}
+Conta com textos longos em 1366px APROVADO {'globalOverflow': False, 'contentOverflow': False, 'panelWidth': 560, 'viewport': 1366, 'ok': True, 'pageErrors': []}
+Conta com textos longos em 1440px APROVADO {'globalOverflow': False, 'contentOverflow': False, 'panelWidth': 560, 'viewport': 1440, 'ok': True, 'pageErrors': []}
+Conta com textos longos em 1600px APROVADO {'globalOverflow': False, 'contentOverflow': False, 'panelWidth': 560, 'viewport': 1600, 'ok': True, 'pageErrors': []}
+Conta com textos longos em 1920px APROVADO {'globalOverflow': False, 'contentOverflow': False, 'panelWidth': 560, 'viewport': 1920, 'ok': True, 'pageErrors': []}
+Conta com textos longos em 2560px APROVADO {'globalOverflow': False, 'contentOverflow': False, 'panelWidth': 560, 'viewport': 2560, 'ok': True, 'pageErrors': []}

@@ -1,0 +1,10 @@
+{
+  "status": "APROVADO",
+  "widths": 3,
+  "testedWidths": [
+    320,
+    768,
+    1440
+  ],
+  "failures": []
+}

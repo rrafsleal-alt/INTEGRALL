@@ -1,0 +1,200 @@
+[
+  {
+    "test": "Conta com textos longos em 280px",
+    "status": "APROVADO",
+    "observed": {
+      "globalOverflow": false,
+      "contentOverflow": false,
+      "panelWidth": 265,
+      "viewport": 280,
+      "ok": true
+    }
+  },
+  {
+    "test": "Conta com textos longos em 320px",
+    "status": "APROVADO",
+    "observed": {
+      "globalOverflow": false,
+      "contentOverflow": false,
+      "panelWidth": 305,
+      "viewport": 320,
+      "ok": true
+    }
+  },
+  {
+    "test": "Conta com textos longos em 360px",
+    "status": "APROVADO",
+    "observed": {
+      "globalOverflow": false,
+      "contentOverflow": false,
+      "panelWidth": 345,
+      "viewport": 360,
+      "ok": true
+    }
+  },
+  {
+    "test": "Conta com textos longos em 375px",
+    "status": "APROVADO",
+    "observed": {
+      "globalOverflow": false,
+      "contentOverflow": false,
+      "panelWidth": 360,
+      "viewport": 375,
+      "ok": true
+    }
+  },
+  {
+    "test": "Conta com textos longos em 390px",
+    "status": "APROVADO",
+    "observed": {
+      "globalOverflow": false,
+      "contentOverflow": false,
+      "panelWidth": 375,
+      "viewport": 390,
+      "ok": true
+    }
+  },
+  {
+    "test": "Conta com textos longos em 412px",
+    "status": "APROVADO",
+    "observed": {
+      "globalOverflow": false,
+      "contentOverflow": false,
+      "panelWidth": 397,
+      "viewport": 412,
+      "ok": true
+    }
+  },
+  {
+    "test": "Conta com textos longos em 430px",
+    "status": "APROVADO",
+    "observed": {
+      "globalOverflow": false,
+      "contentOverflow": false,
+      "panelWidth": 415,
+      "viewport": 430,
+      "ok": true
+    }
+  },
+  {
+    "test": "Conta com textos longos em 480px",
+    "status": "APROVADO",
+    "observed": {
+      "globalOverflow": false,
+      "contentOverflow": false,
+      "panelWidth": 465,
+      "viewport": 480,
+      "ok": true
+    }
+  },
+  {
+    "test": "Conta com textos longos em 600px",
+    "status": "APROVADO",
+    "observed": {
+      "globalOverflow": false,
+      "contentOverflow": false,
+      "panelWidth": 560,
+      "viewport": 600,
+      "ok": true
+    }
+  },
+  {
+    "test": "Conta com textos longos em 768px",
+    "status": "APROVADO",
+    "observed": {
+      "globalOverflow": false,
+      "contentOverflow": false,
+      "panelWidth": 560,
+      "viewport": 768,
+      "ok": true
+    }
+  },
+  {
+    "test": "Conta com textos longos em 820px",
+    "status": "APROVADO",
+    "observed": {
+      "globalOverflow": false,
+      "contentOverflow": false,
+      "panelWidth": 560,
+      "viewport": 820,
+      "ok": true
+    }
+  },
+  {
+    "test": "Conta com textos longos em 1024px",
+    "status": "APROVADO",
+    "observed": {
+      "globalOverflow": false,
+      "contentOverflow": false,
+      "panelWidth": 560,
+      "viewport": 1024,
+      "ok": true
+    }
+  },
+  {
+    "test": "Conta com textos longos em 1280px",
+    "status": "APROVADO",
+    "observed": {
+      "globalOverflow": false,
+      "contentOverflow": false,
+      "panelWidth": 560,
+      "viewport": 1280,
+      "ok": true
+    }
+  },
+  {
+    "test": "Conta com textos longos em 1366px",
+    "status": "APROVADO",
+    "observed": {
+      "globalOverflow": false,
+      "contentOverflow": false,
+      "panelWidth": 560,
+      "viewport": 1366,
+      "ok": true
+    }
+  },
+  {
+    "test": "Conta com textos longos em 1440px",
+    "status": "APROVADO",
+    "observed": {
+      "globalOverflow": false,
+      "contentOverflow": false,
+      "panelWidth": 560,
+      "viewport": 1440,
+      "ok": true
+    }
+  },
+  {
+    "test": "Conta com textos longos em 1600px",
+    "status": "APROVADO",
+    "observed": {
+      "globalOverflow": false,
+      "contentOverflow": false,
+      "panelWidth": 560,
+      "viewport": 1600,
+      "ok": true
+    }
+  },
+  {
+    "test": "Conta com textos longos em 1920px",
+    "status": "APROVADO",
+    "observed": {
+      "globalOverflow": false,
+      "contentOverflow": false,
+      "panelWidth": 560,
+      "viewport": 1920,
+      "ok": true
+    }
+  },
+  {
+    "test": "Conta com textos longos em 2560px",
+    "status": "APROVADO",
+    "observed": {
+      "globalOverflow": false,
+      "contentOverflow": false,
+      "panelWidth": 560,
+      "viewport": 2560,
+      "ok": true
+    }
+  }
+]

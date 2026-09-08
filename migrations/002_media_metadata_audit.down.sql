@@ -1,0 +1,14 @@
+DROP TABLE IF EXISTS integrall_audit_log;
+DROP INDEX IF EXISTS integrall_media_checksum_idx;
+DROP INDEX IF EXISTS integrall_media_created_idx;
+ALTER TABLE integrall_media DROP COLUMN IF EXISTS updated_at;
+ALTER TABLE integrall_media DROP COLUMN IF EXISTS processing_status;
+ALTER TABLE integrall_media DROP COLUMN IF EXISTS purpose;
+ALTER TABLE integrall_media DROP COLUMN IF EXISTS uploaded_by;
+ALTER TABLE integrall_media DROP COLUMN IF EXISTS checksum_sha256;
+ALTER TABLE integrall_media DROP COLUMN IF EXISTS alt_text;
+ALTER TABLE integrall_media DROP COLUMN IF EXISTS height;
+ALTER TABLE integrall_media DROP COLUMN IF EXISTS width;
+ALTER TABLE integrall_media DROP COLUMN IF EXISTS size_bytes;
+ALTER TABLE integrall_media DROP COLUMN IF EXISTS original_name;
+ALTER TABLE integrall_media DROP COLUMN IF EXISTS storage_key;

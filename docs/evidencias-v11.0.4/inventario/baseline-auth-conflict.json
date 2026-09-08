@@ -1,0 +1,7 @@
+{
+  "scope": "Original11.1.8; conflito com hash legado simulado; somente backend sem Express",
+  "requestedDefaultAccepted": false,
+  "legacyHashPasswordAccepted": true,
+  "unknownRoleGrantsWrite": true,
+  "oldTokenSurvivesRoleReduction": true
+}

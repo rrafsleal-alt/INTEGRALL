@@ -1,0 +1,822 @@
+--- a/server.js
++++ b/server.js
+@@ -23,7 +23,7 @@
+ import {assertOrderTransition} from './src/order-state.js';
+ import {CustomerAuth} from './src/customer-auth.js';
+ import {toPublicOrder} from './src/public-order.js';
+-import {applyQuotedShipping} from './src/order-financials.js';
++import {applyQuotedShipping, assertShippingEditable} from './src/order-financials.js';
+ import {hashClientOrderKey, hashOrderIntent, hashOrderRequestIntent, idempotencyOwnership} from './src/order-idempotency.js';
+ import {assertCatalogRevision, assertProductRevision, assertSectionRevision, catalogRevision, productRevision, sectionRevision} from './src/catalog-revision.js';
+ 
+@@ -982,13 +982,9 @@
+   let updated;
+   try {
+     updated = await repo.updateOrder(orderId, current => {
+-      if (current.shipping?.choice !== 'delivery') throw Object.assign(new Error('Este pedido é para retirada e não precisa de cotação de frete.'), {code:'ORDER_SHIPPING_NOT_DELIVERY'});
+-      if (['paid','preparing','ready','completed','refunded','chargeback'].includes(current.status)) throw Object.assign(new Error('O frete não pode ser alterado depois da confirmação financeira/operacional.'), {code:'ORDER_SHIPPING_LOCKED'});
+-      // Uma preferência pode continuar reutilizável mesmo após uma tentativa
+-      // rejeitada. Alterar o total enquanto ela existe abre risco de o cliente
+-      // pagar a URL antiga. O ajuste financeiro só é permitido antes da criação
+-      // da preferência de pagamento.
+-      if (current.payment?.preferenceId) throw Object.assign(new Error('Já existe uma preferência de pagamento para o total atual. Não altere o frete deste pedido; recrie o pedido se o valor precisar mudar.'), {code:'ORDER_PAYMENT_TOTAL_LOCKED'});
++      // Avaliado no mesmo lock que aplica o frete: bloqueia inclusive a janela
++      // entre claimCheckout e o retorno do provedor, sem reduzir a proteção CSRF.
++      assertShippingEditable(current);
+ 
+       const recalculated = applyQuotedShipping(current, {shippingCents, label});
+       financial = recalculated.financial;
+--- a/src/order-financials.js
++++ b/src/order-financials.js
+@@ -1,3 +1,29 @@
++/**
++ * Execute dentro de repo.updateOrder, sobre o pedido sob lock.
++ * Um checkout pode estar no provedor ANTES de termos preferenceId. Mesmo um
++ * timeout não prova que a preferência não foi criada: pendingAttempt conserva
++ * a identidade usada no retry. Alterar o total nessa janela não é seguro.
++ */
++export function assertShippingEditable(order) {
++  const fail = (code, message) => { throw Object.assign(new Error(message), {code}); };
++  if (order?.shipping?.choice !== 'delivery') {
++    fail('ORDER_SHIPPING_NOT_DELIVERY', 'Este pedido é para retirada e não precisa de cotação de frete.');
++  }
++  if (['awaiting_payment', 'payment_review'].includes(order.status)) {
++    fail('ORDER_PAYMENT_TOTAL_LOCKED', 'Há um pagamento em andamento ou em análise. O frete e o total deste pedido não podem ser alterados.');
++  }
++  if (!['received', 'payment_failed'].includes(order.status) || order.inventoryCommittedAt || order.inventoryReservationReleasedAt) {
++    fail('ORDER_SHIPPING_LOCKED', 'O frete não pode ser alterado depois da confirmação financeira/operacional ou do encerramento da reserva.');
++  }
++  const payment = order.payment || {};
++  const nonzeroAttempt = value => value !== undefined && value !== null && value !== '' && value !== 0 && value !== '0';
++  if (payment.preferenceId || payment.checkoutClaimId || payment.checkoutInProgressAt ||
++      nonzeroAttempt(payment.checkoutPendingAttempt) || nonzeroAttempt(payment.attempt)) {
++    fail('ORDER_PAYMENT_TOTAL_LOCKED', 'Já existe uma tentativa de pagamento em andamento ou uma preferência vinculada ao total atual. Recrie o pedido se o valor precisar mudar.');
++  }
++  return true;
++}
++
+ function cents(value) {
+   const number = Number(value);
+   return Number.isSafeInteger(number) && number >= 0 ? number : null;
+--- a/tests/http.test.js
++++ b/tests/http.test.js
+@@ -9,10 +9,11 @@
+ import {fileURLToPath} from 'node:url';
+ import path from 'node:path';
+ import {hashPassword} from '../src/auth.js';
++import {isolatedHttpEnvironment} from './fixtures/http-environment.mjs';
+ 
+ /**
+  * Testes de integração HTTP: sobem o servidor REAL (node server.js) em uma
+- * porta efêmera, em modo memória, e exercitam as rotas como um cliente faria.
++ * porta efêmera e diretório temporário exclusivo por teste, e exercitam as rotas como um cliente faria.
+  */
+ 
+ const root = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
+@@ -26,7 +27,7 @@
+ 
+ // Missing integration dependencies are an error, never a green skipped suite.
+ await import('express');
+-const httpTest = (name, fn) => test(name, fn);
++const httpTest = (name, fn) => test(name, {timeout: 30_000, concurrency: false}, fn);
+ 
+ let child;
+ let childOutput = '';
+@@ -41,13 +42,15 @@
+     requestHeaders.set('Content-Type', 'application/json');
+     requestBody = JSON.stringify(body);
+   }
+-  const response = await fetch(`${BASE}${pathName}`, {method, headers: requestHeaders, body: requestBody});
++  const response = await fetch(`${BASE}${pathName}`, {method, headers: requestHeaders, body: requestBody, signal: AbortSignal.timeout(10_000)});
+   let data = null;
+   try { data = await response.json(); } catch { data = null; }
+   return {status: response.status, data, headers: response.headers};
+ }
+ 
+-test.before(async () => {
++test.beforeEach(async () => {
++  childOutput = '';
++  for (const key of Object.keys(ADMIN)) delete ADMIN[key];
+ 
+   testDataDir = await mkdtemp(path.join(os.tmpdir(), 'integrall-http-'));
+   const portProbe = createServer();
+@@ -59,7 +62,7 @@
+   child = spawn(process.execPath, ['server.js'], {
+     cwd: root,
+     env: {
+-      ...process.env,
++      ...isolatedHttpEnvironment(process.env),
+       NODE_ENV: 'test',
+       ADMIN_DEFAULT_LOGIN_ENABLED: 'false',
+       LOCAL_DATA_DIR: testDataDir,
+@@ -73,6 +76,7 @@
+       DATABASE_URL: '',
+       SHIPPING_MODE: 'fixed',
+       SHIPPING_FIXED_CENTS: '1500',
++      FREE_SHIPPING_CENTS: '0',
+       ORDER_EXPIRE_DAYS: '0',
+       ADMIN_EMAIL,
+       ADMIN_PASSWORD_HASH: passwordHash,
+@@ -81,8 +85,8 @@
+     },
+     stdio: ['ignore', 'pipe', 'pipe']
+   });
+-  child.stdout.on('data', chunk => { childOutput += chunk.toString(); });
+-  child.stderr.on('data', chunk => { childOutput += chunk.toString(); });
++  child.stdout.on('data', chunk => { childOutput = (childOutput + chunk.toString()).slice(-16000); });
++  child.stderr.on('data', chunk => { childOutput = (childOutput + chunk.toString()).slice(-16000); });
+   // Aguarda o servidor aceitar conexões (até ~10s)
+   for (let attempt = 0; attempt < 50; attempt += 1) {
+     try {
+@@ -104,13 +108,16 @@
+   throw new Error(`Servidor de teste não subiu.\n${childOutput.slice(-4000)}`);
+ });
+ 
+-test.after(async () => {
+-  if (child && child.exitCode === null) {
++test.afterEach(async () => {
++  if (child && child.exitCode === null && child.signalCode === null) {
+     const stopped = once(child, 'exit');
+     child.kill('SIGTERM');
+-    await stopped;
++    const forceStop = setTimeout(() => child.kill('SIGKILL'), 5_000);
++    try { await stopped; } finally { clearTimeout(forceStop); }
+   }
+-  if (testDataDir) await rm(testDataDir, {recursive: true, force: true});
++  if (testDataDir) await rm(testDataDir, {recursive: true, force: true, maxRetries: 5, retryDelay: 100});
++  child = null;
++  testDataDir = null;
+ });
+ 
+ httpTest('GET /api/health responde com recursos e versão', async () => {
+@@ -174,6 +181,8 @@
+   const order = created.data.order;
+   assert.equal(order.shippingCents, 1500); // modo fixed
+   assert.ok(order.checkoutToken);
++  const stock = async () => (await api('/api/catalog')).data.products.find(p => p.id === wine.id).variants.find(v => v.id === variant.id).stock;
++  assert.equal(await stock(), stockBefore - 2, 'a criação reserva as duas unidades antes do pagamento');
+ 
+   // idempotência
+   const repeat = await api('/api/orders', {method: 'POST', body: {
+@@ -185,6 +194,7 @@
+   assert.equal(repeat.status, 200);
+   assert.equal(repeat.data.idempotent, true);
+   assert.equal(repeat.data.order.id, order.id);
++  assert.equal(await stock(), stockBefore - 2, 'repetir a mesma criação não reserva de novo');
+ 
+   // colisão de clientOrderId sem a capability correta nunca revela pedido/token
+   const collision = await api('/api/orders', {method: 'POST', body: {
+@@ -204,7 +214,15 @@
+     items: [{productId: wine.id, variantId: variant.id, qty: 1, unitPriceCents: 1}],
+     shipping: {choice: 'pickup'}, customer: {name: 'H', email: 'h@example.com'}
+   }});
++  assert.equal(hacked.status, 201);
+   assert.equal(hacked.data.order.totalCents, variant.price);
++  assert.equal(await stock(), stockBefore - 3, 'o segundo pedido reserva mais uma unidade');
++  const cancelled = await api(`/api/admin/orders/${hacked.data.order.id}`, {method: 'PATCH', headers: ADMIN, body: {status: 'cancelled'}});
++  assert.equal(cancelled.status, 200);
++  assert.ok(cancelled.data.order.inventoryReservationReleasedAt);
++  assert.equal(await stock(), stockBefore - 2, 'cancelar o segundo pedido repõe somente a sua unidade');
++  assert.equal((await api(`/api/admin/orders/${hacked.data.order.id}`, {method: 'PATCH', headers: ADMIN, body: {status: 'cancelled'}})).status, 200);
++  assert.equal(await stock(), stockBefore - 2, 'cancelamento repetido não repõe estoque duas vezes');
+ 
+   // status com token errado → 404
+   const wrong = await api('/api/orders/status', {method: 'POST', body: {orderId: order.id, checkoutToken: 'x'.repeat(48)}});
+@@ -219,12 +237,14 @@
+   assert.equal((await api('/api/admin/orders')).status, 401);
+   assert.equal((await api('/api/admin/orders', {headers: ADMIN})).status, 200);
+ 
+-  // admin marca pago → estoque baixa
++  // admin marca pago → reserva é comprometida, sem uma segunda baixa
+   const paid = await api(`/api/admin/orders/${order.id}`, {method: 'PATCH', headers: ADMIN, body: {status: 'paid'}});
+   assert.equal(paid.status, 200);
+   assert.ok(paid.data.order.inventoryCommittedAt);
+   const after = (await api('/api/catalog')).data.products.find(p => p.id === wine.id).variants.find(v => v.id === variant.id);
+   assert.equal(after.stock, stockBefore - 2);
++  assert.equal((await api(`/api/admin/orders/${order.id}`, {method: 'PATCH', headers: ADMIN, body: {status: 'paid'}})).status, 200);
++  assert.equal(await stock(), stockBefore - 2, 'confirmação de pagamento repetida não baixa novamente');
+ 
+   // rastreio: salvar e ver como cliente
+   const tracked = await api(`/api/admin/orders/${order.id}/tracking`, {method: 'PATCH', headers: ADMIN, body: {trackingCode: 'aa 123456789 br', trackingCarrier: 'Correios'}});
+@@ -235,11 +255,20 @@
+ });
+ 
+ httpTest('cupons: admin cria, público valida, pedido aplica e catálogo não vaza', async () => {
+-  const saved = await api('/api/admin/coupons', {method: 'PUT', headers: ADMIN, body: {coupons: [
++  const before = await api('/api/admin/coupons', {headers: ADMIN});
++  assert.equal(before.status, 200);
++  const missingRevision = await api('/api/admin/coupons', {method: 'PUT', headers: ADMIN, body: {coupons: []}});
++  assert.equal(missingRevision.status, 409);
++  assert.equal(missingRevision.data.code, 'SECTION_REVISION_CONFLICT');
++  const saved = await api('/api/admin/coupons', {method: 'PUT', headers: ADMIN, body: {revision: before.data.revision, coupons: [
+     {code: 'HTTP10', type: 'percent', value: 10},
+     {code: 'MINIMO', type: 'fixed', value: 500, minSubtotalCents: 100000}
+   ]}});
+   assert.equal(saved.status, 200);
++  assert.ok(saved.data.revision && saved.data.revision !== before.data.revision);
++  const stale = await api('/api/admin/coupons', {method: 'PUT', headers: ADMIN, body: {revision: before.data.revision, coupons: []}});
++  assert.equal(stale.status, 409);
++  assert.equal(stale.data.code, 'SECTION_REVISION_CONFLICT');
+ 
+   const valid = await api('/api/coupons/validate', {method: 'POST', body: {code: 'http10', subtotalCents: 10000}});
+   assert.equal(valid.status, 200);
+@@ -259,18 +288,24 @@
+   }});
+   assert.equal(order.status, 201);
+   assert.equal(order.data.order.discountCents, Math.floor(jv.price * 2 * 0.1));
++  assert.equal((await api('/api/catalog')).data.coupons, undefined);
+ });
+ 
+ httpTest('cotação manual de frete recalcula desconto de cupom free_shipping', async () => {
+-  await api('/api/admin/coupons', {method: 'PUT', headers: ADMIN, body: {coupons: [{code: 'FRETEZERO', type: 'free_shipping'}]}});
++  const before = await api('/api/admin/coupons', {headers: ADMIN});
++  assert.equal(before.status, 200);
++  const saved = await api('/api/admin/coupons', {method: 'PUT', headers: ADMIN, body: {revision: before.data.revision, coupons: [{code: 'FRETEZERO', type: 'free_shipping'}]}});
++  assert.equal(saved.status, 200);
+   const catalog = (await api('/api/catalog')).data;
+   const juice = catalog.products.find(p => p.department === 'sucos');
+-  const order = (await api('/api/orders', {method: 'POST', body: {
++  const created = await api('/api/orders', {method: 'POST', body: {
+     clientOrderId: 'HTTP-FREESHIP', couponCode: 'FRETEZERO',
+     items: [{productId: juice.id, variantId: juice.variants[0].id, qty: 1}],
+     shipping: {choice: 'delivery', cep: '01310930', street: 'R', number: '1', neighborhood: 'B', city: 'SP', state: 'SP'},
+     customer: {name: 'F', email: 'f@example.com'}
+-  }})).data.order;
++  }});
++  assert.equal(created.status, 201);
++  const order = created.data.order;
+   assert.equal(order.discountCents, 1500); // frete fixo 1500 zerado pelo cupom
+ 
+   // Admin redefine o frete para 5000 → desconto deve acompanhar (bug C2 corrigido)
+@@ -290,14 +325,25 @@
+   assert.equal(below.status, 400);
+   assert.match(below.data.error, /mínima/);
+ 
+-  // editor de produtos: preço inválido rejeitado, válido aplicado
+-  const badPrice = await api(`/api/admin/products/${mentirinha.id}`, {method: 'PATCH', headers: ADMIN, body: {price: -5}});
++  // editor de produtos: a revisão vem do catálogo administrativo, não do público.
++  const adminProducts = await api('/api/admin/products', {headers: ADMIN});
++  assert.equal(adminProducts.status, 200);
++  const editable = adminProducts.data.products.find(p => p.id === mentirinha.id);
++  assert.ok(editable._revision);
++  const noRevision = await api(`/api/admin/products/${mentirinha.id}`, {method: 'PATCH', headers: ADMIN, body: {price: 5590}});
++  assert.equal(noRevision.status, 409);
++  assert.equal(noRevision.data.code, 'PRODUCT_REVISION_CONFLICT');
++  const badPrice = await api(`/api/admin/products/${mentirinha.id}`, {method: 'PATCH', headers: ADMIN, body: {expectedRevision: editable._revision, price: -5}});
+   assert.equal(badPrice.status, 400);
+   const notFound = await api('/api/admin/products/nao-existe', {method: 'PATCH', headers: ADMIN, body: {price: 1000}});
+   assert.equal(notFound.status, 404);
+-  const okPrice = await api(`/api/admin/products/${mentirinha.id}`, {method: 'PATCH', headers: ADMIN, body: {price: 5590}});
++  const okPrice = await api(`/api/admin/products/${mentirinha.id}`, {method: 'PATCH', headers: ADMIN, body: {expectedRevision: editable._revision, price: 5590}});
+   assert.equal(okPrice.status, 200);
+   assert.equal(okPrice.data.product.price, 5590);
++  const stalePrice = await api(`/api/admin/products/${mentirinha.id}`, {method: 'PATCH', headers: ADMIN, body: {expectedRevision: editable._revision, price: 1234}});
++  assert.equal(stalePrice.status, 409);
++  assert.equal(stalePrice.data.code, 'PRODUCT_REVISION_CONFLICT');
++  assert.equal((await api('/api/catalog')).data.products.find(p => p.id === mentirinha.id).price, 5590);
+ });
+ 
+ httpTest('rotas de pagamento/frete indisponíveis degradam com clareza', async () => {
+@@ -351,7 +397,7 @@
+   assert.match(text, /Disallow: \/(?:\n|$)/);
+ });
+ 
+-httpTest('frete não pode mudar com pagamento em andamento (preferência MP ativa)', async () => {
++httpTest('frete não pode mudar no status aguardando pagamento, mesmo sem preferência registrada', async () => {
+   const catalog = (await api('/api/catalog')).data;
+   const juice = catalog.products.find(p => p.department === 'sucos');
+   const order = (await api('/api/orders', {method: 'POST', body: {
+@@ -360,10 +406,16 @@
+     shipping: {choice: 'delivery', cep: '01310930', street: 'R', number: '1', neighborhood: 'B', city: 'SP', state: 'SP'},
+     customer: {name: 'A', email: 'a@example.com'}
+   }})).data.order;
+-  await api(`/api/admin/orders/${order.id}`, {method: 'PATCH', headers: ADMIN, body: {status: 'awaiting_payment'}});
++  const waiting = await api(`/api/admin/orders/${order.id}`, {method: 'PATCH', headers: ADMIN, body: {status: 'awaiting_payment'}});
++  assert.equal(waiting.status, 200);
++  const totalBefore = waiting.data.order.totalCents;
+   const blocked = await api(`/api/admin/orders/${order.id}/shipping`, {method: 'PATCH', headers: ADMIN, body: {shippingCents: 9999}});
+   assert.equal(blocked.status, 409);
++  assert.equal(blocked.data.code, 'ORDER_PAYMENT_TOTAL_LOCKED');
+   assert.match(blocked.data.error, /pagamento em andamento/i);
++  const unchanged = await api(`/api/admin/orders/${order.id}`, {headers: ADMIN});
++  assert.equal(unchanged.data.order.totalCents, totalBefore);
++  assert.equal(unchanged.data.order.shippingCents, 1500);
+ });
+ 
+ httpTest('admin envia foto do computador e a mídia fica disponível', async () => {
+@@ -406,15 +458,29 @@
+   assert.equal(removed.status, 200);
+   const after = (await api('/api/catalog')).data;
+   assert.ok(!after.products.some(p => p.id === product.id), 'produto excluído sai da loja');
+-  // excluir de novo → 404
++  // Exclusão lógica é idempotente: repetir confirma 200 e conserva a âncora de estoque.
+   const again = await api(`/api/admin/products/${product.id}`, {method: 'DELETE', headers: ADMIN});
+-  assert.equal(again.status, 404);
++  assert.equal(again.status, 200);
++  const archivedCatalog = await api('/api/admin/catalog', {headers: ADMIN});
++  const archived = archivedCatalog.data.catalog.products.find(p => p.id === product.id);
++  assert.ok(archived.deletedAt);
++  assert.equal(archived.hidden, true);
++  assert.equal(archived.available, false);
++  assert.equal(archived.variants.length, 2);
++  assert.equal((await api('/api/catalog')).data.products.some(p => p.id === product.id), false);
++  assert.equal((await api('/api/admin/products', {headers: ADMIN})).data.products.some(p => p.id === product.id), false);
++  assert.equal((await api('/api/admin/products/inexistente', {method: 'DELETE', headers: ADMIN})).status, 404);
+ });
+ 
+ httpTest('admin salva personalização (settings + visual) e a loja pública reflete', async () => {
+-  const before = (await api('/api/admin/settings', {headers: ADMIN})).data.settings;
++  const snapshot = await api('/api/admin/settings', {headers: ADMIN});
++  assert.equal(snapshot.status, 200);
++  const before = snapshot.data.settings;
+   assert.ok(before && typeof before === 'object');
+-  const saved = await api('/api/admin/settings', {method: 'PUT', headers: ADMIN, body: {settings: {
++  const withoutRevision = await api('/api/admin/settings', {method: 'PUT', headers: ADMIN, body: {settings: {...before, brand: 'Sem revisão'}}});
++  assert.equal(withoutRevision.status, 409);
++  assert.equal(withoutRevision.data.code, 'SECTION_REVISION_CONFLICT');
++  const saved = await api('/api/admin/settings', {method: 'PUT', headers: ADMIN, body: {revision: snapshot.data.revision, settings: {
+     ...before,
+     brand: 'INTEGRALL TESTE',
+     catalogTitle: 'Título Personalizado',
+@@ -427,15 +493,19 @@
+   assert.equal(saved.data.settings.visual.colors.primary, '#123456');
+   assert.equal(saved.data.settings.visual.typography.headingFont, 'classic');
+   assert.equal(saved.data.settings.visual.layout.gridColumnsDesktop, 4);
++  const stale = await api('/api/admin/settings', {method: 'PUT', headers: ADMIN, body: {revision: snapshot.data.revision, settings: before}});
++  assert.equal(stale.status, 409);
++  assert.equal(stale.data.code, 'SECTION_REVISION_CONFLICT');
+   // catálogo público reflete
+   const pub = (await api('/api/catalog')).data;
+   assert.equal(pub.settings.brand, 'INTEGRALL TESTE');
+   assert.equal(pub.settings.visual.colors.primary, '#123456');
+   // valores fora do limite são normalizados, não rejeitados
+-  const clamped = await api('/api/admin/settings', {method: 'PUT', headers: ADMIN, body: {settings: {
++  const clamped = await api('/api/admin/settings', {method: 'PUT', headers: ADMIN, body: {revision: saved.data.revision, settings: {
+     ...saved.data.settings, visual: {...saved.data.settings.visual, layout: {...saved.data.settings.visual.layout, gridColumnsDesktop: 99}}
+   }}});
+   assert.equal(clamped.status, 200);
+   // restaura marca original para não interferir em outros testes
+-  await api('/api/admin/settings', {method: 'PUT', headers: ADMIN, body: {settings: before}});
+-});
++  const restored = await api('/api/admin/settings', {method: 'PUT', headers: ADMIN, body: {revision: clamped.data.revision, settings: before}});
++  assert.equal(restored.status, 200);
++});
+--- /dev/null
++++ b/tests/http-fix-regression.test.js
+@@ -0,0 +1,222 @@
++import test from 'node:test';
++import assert from 'node:assert/strict';
++import {mkdtemp, rm, readFile} from 'node:fs/promises';
++import os from 'node:os';
++import path from 'node:path';
++import {Repository} from '../src/repository.js';
++import {normalizeCatalog, publicCatalog, buildOrder} from '../src/catalog.js';
++import {sectionRevision, productRevision} from '../src/catalog-revision.js';
++import {assertShippingEditable} from '../src/order-financials.js';
++import {claimCheckout, clearCheckoutClaimPatch, completeCheckoutPatch} from '../src/payment-checkout-guard.js';
++import {isolatedHttpEnvironment} from './fixtures/http-environment.mjs';
++import {createRouteInvoker} from './fixtures/server-route-handler.mjs';
++
++// Estoque e valores exclusivamente sintéticos. Não alteram o catálogo da loja.
++const seed = () => normalizeCatalog({settings: {brand: 'Fixture HTTP', free: 0}, commerce: {}, products: [
++  {id: 'P1', name: 'Produto de teste', department: 'outros', price: 1000, stock: 20, available: true,
++    variants: [{id: 'V1', name: 'Unidade', price: 1000, stock: 20}], images: []}
++]});
++const shipping = {choice: 'delivery', cep: '01001000', street: 'Rua Teste', number: '1', neighborhood: 'Centro', city: 'São Paulo', state: 'SP'};
++async function fixture(fn) {
++  const dir = await mkdtemp(path.join(os.tmpdir(), 'integrall-handler-regression-'));
++  const repo = new Repository({databaseUrl: '', initialCatalog: seed(), localDataDir: dir});
++  try {
++    await repo.init();
++    const invoke = await createRouteInvoker(repo);
++    const createOrder = async (clientOrderId, qty = 1, extra = {}) => {
++      const order = buildOrder({clientOrderId, items: [{productId: 'P1', variantId: 'V1', qty}], shipping,
++        customer: {name: 'Cliente Teste', email: 'fixture@example.invalid'}, ...extra}, await repo.getCatalog(),
++        {shippingMode: 'fixed', shippingFixedCents: 1500, freeShippingCents: 0});
++      return (await repo.createOrder(order)).order;
++    };
++    await fn({repo, invoke, createOrder});
++  } finally { await repo.close(); await rm(dir, {recursive: true, force: true, maxRetries: 3, retryDelay: 100}); }
++}
++const updateShipping = (invoke, id, amount = 9999) => invoke('PATCH', '/api/admin/orders/:id/shipping', {params: {id}, body: {shippingCents: amount}});
++const productStock = async repo => (await repo.getCatalog()).products[0].variants[0].stock;
++
++// Este arquivo verifica callbacks reais sem Express. Não é uma suíte HTTP substituta.
++test('HTTPFIX-STOCK: duas reservas, cancelamento e pagamento não duplicam a baixa', () => fixture(async ({repo, invoke, createOrder}) => {
++  const first = await createOrder('stock-first', 2);
++  assert.equal(await productStock(repo), 18);
++  const repeat = await repo.createOrder(first);
++  assert.equal(repeat.created, false);
++  assert.equal(await productStock(repo), 18);
++  const second = await createOrder('stock-second', 1);
++  assert.equal(await productStock(repo), 17);
++  const cancel = () => invoke('PATCH', '/api/admin/orders/:id', {params: {id: second.id}, body: {status: 'cancelled'}});
++  assert.equal((await cancel()).status, 200);
++  assert.equal(await productStock(repo), 18);
++  assert.equal((await cancel()).status, 200);
++  assert.equal(await productStock(repo), 18);
++  const pay = () => invoke('PATCH', '/api/admin/orders/:id', {params: {id: first.id}, body: {status: 'paid'}});
++  const paid = await pay(); assert.equal(paid.status, 200); assert.ok(paid.data.order.inventoryCommittedAt);
++  assert.equal((await pay()).status, 200);
++  assert.equal(await productStock(repo), 18);
++}));
++
++test('HTTPFIX-COUPON: revisão obrigatória; gravação válida; revisão antiga não sobrescreve', () => fixture(async ({repo, invoke}) => {
++  const before = await invoke('GET', '/api/admin/coupons');
++  const coupons = [{code: 'FIX10', type: 'percent', value: 10}];
++  const missing = await invoke('PUT', '/api/admin/coupons', {body: {coupons}});
++  assert.equal(missing.status, 409); assert.equal(missing.data.code, 'SECTION_REVISION_CONFLICT');
++  assert.equal(sectionRevision((await repo.getCatalog()).coupons), before.data.revision);
++  const good = await invoke('PUT', '/api/admin/coupons', {body: {revision: before.data.revision, coupons}});
++  assert.equal(good.status, 200);
++  const stale = await invoke('PUT', '/api/admin/coupons', {body: {revision: before.data.revision, coupons: []}});
++  assert.equal(stale.status, 409);
++  assert.equal((await repo.getCatalog()).coupons[0].code, 'FIX10');
++  assert.equal(publicCatalog(await repo.getCatalog(), {}).coupons, undefined);
++}));
++
++test('HTTPFIX-COUPON: frete grátis acompanha cotação manual após salvar cupom com revisão', () => fixture(async ({repo, invoke, createOrder}) => {
++  const before = await invoke('GET', '/api/admin/coupons');
++  const saved = await invoke('PUT', '/api/admin/coupons', {body: {revision: before.data.revision, coupons: [{code: 'FRETEZERO', type: 'free_shipping'}]}});
++  assert.equal(saved.status, 200);
++  const order = await createOrder('coupon-order', 1, {couponCode: 'FRETEZERO'});
++  assert.equal(order.discountCents, 1500);
++  const changed = await updateShipping(invoke, order.id, 5000);
++  assert.equal(changed.status, 200); assert.equal(changed.data.order.discountCents, 5000);
++  assert.equal(changed.data.order.totalCents, changed.data.order.subtotalCents);
++  assert.equal((await repo.getOrder(order.id)).totalCents, 1000);
++}));
++
++test('HTTPFIX-PRODUCT: preço inválido com revisão retorna 400; sem revisão retorna 409', () => fixture(async ({repo, invoke}) => {
++  const read = await invoke('GET', '/api/admin/products'); const before = read.data.products[0];
++  assert.equal((await invoke('PATCH', '/api/admin/products/:id', {params: {id: 'P1'}, body: {price: -1}})).status, 409);
++  const invalid = await invoke('PATCH', '/api/admin/products/:id', {params: {id: 'P1'}, body: {expectedRevision: before._revision, price: -1}});
++  assert.equal(invalid.status, 400);
++  assert.equal(productRevision((await repo.getCatalog()).products[0]), before._revision);
++  const good = await invoke('PATCH', '/api/admin/products/:id', {params: {id: 'P1'}, body: {expectedRevision: before._revision, price: 5590}});
++  assert.equal(good.status, 200); assert.equal(good.data.product.price, 5590);
++  assert.equal((await invoke('PATCH', '/api/admin/products/:id', {params: {id: 'P1'}, body: {expectedRevision: before._revision, price: 1234}})).status, 409);
++  assert.equal((await repo.getCatalog()).products[0].price, 5590);
++}));
++
++test('HTTPFIX-PRODUCT: reserva concorrente invalida revisão sem permitir sobrescrever estoque', () => fixture(async ({repo, invoke, createOrder}) => {
++  const before = (await invoke('GET', '/api/admin/products')).data.products[0];
++  await createOrder('stock-revision', 2);
++  const stale = await invoke('PATCH', '/api/admin/products/:id', {params: {id: 'P1'}, body: {expectedRevision: before._revision, variants: before.variants}});
++  assert.equal(stale.status, 409); assert.equal(stale.data.code, 'PRODUCT_REVISION_CONFLICT');
++  assert.equal(await productStock(repo), 18);
++}));
++
++test('HTTPFIX-SETTINGS: personalização usa revisão e preserva gravação recente', () => fixture(async ({repo, invoke}) => {
++  const before = await invoke('GET', '/api/admin/settings');
++  const settings = {...before.data.settings, brand: 'Marca de teste', visual: {colors: {primary: '#123456'}}};
++  assert.equal((await invoke('PUT', '/api/admin/settings', {body: {settings}})).status, 409);
++  const good = await invoke('PUT', '/api/admin/settings', {body: {revision: before.data.revision, settings}});
++  assert.equal(good.status, 200); assert.equal(good.data.settings.visual.colors.primary, '#123456');
++  const stale = await invoke('PUT', '/api/admin/settings', {body: {revision: before.data.revision, settings: before.data.settings}});
++  assert.equal(stale.status, 409);
++  assert.equal((await repo.getCatalog()).settings.brand, 'Marca de teste');
++  const restored = await invoke('PUT', '/api/admin/settings', {body: {revision: good.data.revision, settings: before.data.settings}});
++  assert.equal(restored.status, 200); assert.equal((await repo.getCatalog()).settings.brand, before.data.settings.brand);
++}));
++
++test('HTTPFIX-SETTINGS: duas gravações na mesma revisão permitem exatamente uma', () => fixture(async ({repo, invoke}) => {
++  const before = await invoke('GET', '/api/admin/settings');
++  const results = await Promise.all(['A', 'B'].map(brand => invoke('PUT', '/api/admin/settings', {body: {revision: before.data.revision, settings: {...before.data.settings, brand}}})));
++  assert.deepEqual(results.map(r => r.status).sort(), [200, 409]);
++  assert.equal((await repo.getCatalog()).settings.brand, results.find(r => r.status === 200).data.settings.brand);
++}));
++
++test('HTTPFIX-DELETE: excluir duas vezes mantém tombstone e cancelamento restitui reserva', () => fixture(async ({repo, invoke, createOrder}) => {
++  const order = await createOrder('deleted-order', 2);
++  const remove = () => invoke('DELETE', '/api/admin/products/:id', {params: {id: 'P1'}});
++  assert.equal((await remove()).status, 200);
++  const first = (await repo.getCatalog()).products[0]; assert.ok(first.deletedAt);
++  assert.equal((await remove()).status, 200);
++  const again = (await repo.getCatalog()).products[0]; assert.equal(again.deletedAt, first.deletedAt);
++  assert.equal(again.variants[0].stock, 18);
++  assert.equal(publicCatalog(await repo.getCatalog(), {}).products.length, 0);
++  assert.equal((await invoke('GET', '/api/admin/products')).data.products.length, 0);
++  assert.equal((await invoke('PATCH', '/api/admin/orders/:id', {params: {id: order.id}, body: {status: 'cancelled'}})).status, 200);
++  assert.equal(await productStock(repo), 20);
++  assert.equal(publicCatalog(await repo.getCatalog(), {}).products.length, 0);
++  assert.equal((await invoke('DELETE', '/api/admin/products/:id', {params: {id: 'absent'}})).status, 404);
++}));
++
++for (const status of ['awaiting_payment', 'payment_review']) {
++  test(`HTTPFIX-SHIPPING: handler recusa ${status} sem alterar total ou histórico`, () => fixture(async ({repo, invoke, createOrder}) => {
++    const order = await createOrder(`locked-${status}`);
++    await repo.updateOrder(order.id, {status}); const before = await repo.getOrder(order.id);
++    const result = await updateShipping(invoke, order.id);
++    assert.equal(result.status, 409); assert.equal(result.data.code, 'ORDER_PAYMENT_TOTAL_LOCKED');
++    assert.deepEqual(await repo.getOrder(order.id), before);
++  }));
++}
++for (const state of [
++  {name: 'preferência ativa', payment: {preferenceId: 'FIXTURE-PREFERENCE'}},
++  {name: 'claim ainda sem preferência', payment: {checkoutClaimId: 'fixture-claim', checkoutInProgressAt: new Date().toISOString(), checkoutPendingAttempt: 1}},
++  {name: 'timeout com tentativa pendente', payment: {checkoutClaimId: '', checkoutInProgressAt: '', checkoutPendingAttempt: 1}},
++  {name: 'claim antigo não prova ausência de cobrança', payment: {checkoutClaimId: 'old-claim', checkoutInProgressAt: '2000-01-01T00:00:00.000Z'}},
++  {name: 'tentativa malformada falha fechada', payment: {checkoutPendingAttempt: 'not-a-number'}}
++]) {
++  test(`HTTPFIX-SHIPPING: ${state.name} bloqueia ajuste financeiro`, () => fixture(async ({repo, invoke, createOrder}) => {
++    const order = await createOrder('provider-marker');
++    await repo.updateOrder(order.id, {payment: state.payment}); const before = await repo.getOrder(order.id);
++    const result = await updateShipping(invoke, order.id);
++    assert.equal(result.status, 409); assert.equal(result.data.code, 'ORDER_PAYMENT_TOTAL_LOCKED');
++    assert.deepEqual(await repo.getOrder(order.id), before);
++  }));
++}
++
++test('HTTPFIX-SHIPPING: tentativa no provedor bloqueia mesmo sem preferenceId e após timeout', () => fixture(async ({repo, invoke, createOrder}) => {
++  const order = await createOrder('race-order');
++  await repo.updateOrder(order.id, current => ({payment: claimCheckout(current, {claimId: 'checkout-test'}).payment}));
++  assert.equal((await repo.getOrder(order.id)).payment.preferenceId, '');
++  assert.equal((await updateShipping(invoke, order.id)).status, 409);
++  await repo.updateOrder(order.id, current => clearCheckoutClaimPatch(current, 'checkout-test'));
++  assert.equal((await updateShipping(invoke, order.id)).status, 409);
++  await repo.updateOrder(order.id, current => ({payment: claimCheckout(current, {claimId: 'retry'}).payment}));
++  await repo.updateOrder(order.id, current => completeCheckoutPatch(current, {claimId: 'retry', attempt: 1, checkout: {id: 'fixture-pref', url: 'https://example.invalid/fixture'}}));
++  assert.equal((await updateShipping(invoke, order.id)).status, 409);
++  assert.equal((await repo.getOrder(order.id)).totalCents, order.totalCents);
++}));
++
++test('HTTPFIX-SHIPPING: erro de persistência não muda total apenas em memória', () => fixture(async ({repo, invoke, createOrder}) => {
++  const order = await createOrder('disk-error'); const before = await repo.getOrder(order.id);
++  const persist = repo.persistLocalState;
++  repo.persistLocalState = async () => { throw new Error('fixture-disk-error'); };
++  try { await assert.rejects(updateShipping(invoke, order.id), /fixture-disk-error/); }
++  finally { repo.persistLocalState = persist; }
++  assert.deepEqual(await repo.getOrder(order.id), before);
++}));
++
++test('HTTPFIX-SHIPPING: valores inválidos, retirada e pedido inexistente continuam recusados', () => fixture(async ({invoke, createOrder}) => {
++  const pickup = await createOrder('pickup', 1, {shipping: {choice: 'pickup'}});
++  assert.equal((await updateShipping(invoke, pickup.id)).status, 409);
++  const delivery = await createOrder('bad-amount');
++  for (const amount of [-1, 1.2, 'invalid']) assert.equal((await updateShipping(invoke, delivery.id, amount)).status, 400);
++  assert.equal((await updateShipping(invoke, 'absent')).status, 404);
++}));
++
++test('HTTPFIX-SHIPPING: apenas estado aberto sem tentativa aceita cotação; finais falham fechados', () => {
++  const order = {shipping: {choice: 'delivery'}, status: 'received', payment: {}};
++  assert.equal(assertShippingEditable(order), true);
++  assert.equal(assertShippingEditable({...order, status: 'payment_failed'}), true);
++  for (const status of ['paid', 'preparing', 'ready', 'completed', 'refunded', 'chargeback', 'cancelled', 'payment_expired', '', 'unknown']) {
++    assert.throws(() => assertShippingEditable({...order, status}), {code: 'ORDER_SHIPPING_LOCKED'});
++  }
++  assert.throws(() => assertShippingEditable({...order, inventoryCommittedAt: 'fixture'}), {code: 'ORDER_SHIPPING_LOCKED'});
++  assert.throws(() => assertShippingEditable({...order, inventoryReservationReleasedAt: 'fixture'}), {code: 'ORDER_SHIPPING_LOCKED'});
++});
++
++test('HTTPFIX-ISOLATION: filho HTTP não herda credenciais, flags Node ou conexão real', () => {
++  const source = {Path: 'fixture-path', SystemRoot: 'fixture-system', TEMP: 'fixture-temp', HOME: 'fixture-home',
++    DATABASE_URL: 'private', CORREIOS_USER: 'private', CORREIOS_ACCESS_CODE: 'private', MERCADO_PAGO_ACCESS_TOKEN: 'private',
++    SMTP_HOST: 'private', CUSTOMER_AUTH_SECRET: 'private', FREE_SHIPPING_CENTS: '1', NODE_OPTIONS: '--env-file=.env', LOCAL_DATA_DIR: 'private'};
++  assert.deepEqual(isolatedHttpEnvironment(source), {Path: 'fixture-path', SystemRoot: 'fixture-system', TEMP: 'fixture-temp', HOME: 'fixture-home'});
++  assert.equal(source.DATABASE_URL, 'private', 'não modifica o ambiente do processo chamador');
++});
++
++test('HTTPFIX-ISOLATION: suíte Express é obrigatória, isolada por teste e mantém validações negativas', async () => {
++  const text = await readFile(new URL('./http.test.js', import.meta.url), 'utf8');
++  assert.match(text, /await import\('express'\)/);
++  assert.match(text, /test\.beforeEach\(/); assert.match(text, /test\.afterEach\(/);
++  assert.match(text, /isolatedHttpEnvironment\(process\.env\)/);
++  assert.match(text, /LOCAL_DATA_DIR: testDataDir/);
++  assert.doesNotMatch(text, /\.skip\(|skip:\s*true/);
++  assert.match(text, /ADMIN_CSRF_INVALID/); assert.match(text, /IDEMPOTENCY_CONFLICT/);
++});
+--- /dev/null
++++ b/tests/fixtures/http-environment.mjs
+@@ -0,0 +1,5 @@
++/** Somente variáveis do sistema operacional; nunca herdar credenciais de produção. */
++export function isolatedHttpEnvironment(source = process.env) {
++  const allowed = new Set(['PATH', 'SYSTEMROOT', 'WINDIR', 'COMSPEC', 'PATHEXT', 'TMP', 'TEMP', 'TMPDIR', 'HOME', 'USERPROFILE', 'APPDATA', 'LOCALAPPDATA', 'LANG', 'LC_ALL', 'TZ']);
++  return Object.fromEntries(Object.entries(source).filter(([key]) => allowed.has(key.toUpperCase())));
++}
+--- /dev/null
++++ b/tests/fixtures/server-route-handler.mjs
+@@ -0,0 +1,50 @@
++/**
++ * TESTE APENAS. Carrega callbacks literais de server.js sem substituí-los por
++ * cópias. Invoca o handler com req/res mínimos e repositório real; NÃO executa
++ * Express, roteamento, parsers, limites, autenticação ou transporte HTTP.
++ * A suíte tests/http.test.js continua obrigatória no build completo.
++ */
++import vm from 'node:vm';
++import {readFile} from 'node:fs/promises';
++import {randomUUID} from 'node:crypto';
++import * as catalog from '../../src/catalog.js';
++import * as revisions from '../../src/catalog-revision.js';
++import {applyQuotedShipping, assertShippingEditable} from '../../src/order-financials.js';
++import {assertOrderTransition} from '../../src/order-state.js';
++import {validateShippingBoxes} from '../../src/shipping-packages.js';
++
++export async function createRouteInvoker(repo, {sourceUrl = new URL('../../server.js', import.meta.url)} = {}) {
++  const source = await readFile(sourceUrl, 'utf8');
++  const httpErrorCode = source.match(/class HttpError extends Error \{[\s\S]*?\n\}/)?.[0];
++  if (!httpErrorCode) throw new Error('Classe HttpError não encontrada na fonte.');
++  const HttpError = vm.runInNewContext(`(${httpErrorCode})`);
++  const centsCode = source.match(/function centsFromBody\(value\) \{[\s\S]*?\n\}/)?.[0];
++  if (!centsCode) throw new Error('Validador de centavos não encontrado na fonte.');
++  const centsFromBody = vm.runInNewContext(`(${centsCode})`);
++  const bindings = {
++    ...catalog, ...revisions, repo, HttpError, centsFromBody,
++    applyQuotedShipping, assertShippingEditable, assertOrderTransition,
++    validateShippingBoxes, newId: prefix => `${prefix}-${randomUUID()}`,
++    auditAdmin: async () => {}, processRestockAlerts: async () => {},
++    EMAIL_STATUS_EVENTS: new Set(), sendOrderEmail: () => {}, console
++  };
++  return async (method, route, {body = {}, params = {}} = {}) => {
++    const marker = `app.${method.toLowerCase()}('${route}'`;
++    const at = source.indexOf(marker);
++    if (at < 0 || source.indexOf(marker, at + marker.length) >= 0) throw new Error(`Rota ausente ou ambígua: ${route}`);
++    const start = source.indexOf('asyncRoute(', at) + 'asyncRoute('.length;
++    const end = source.indexOf('\n}));', start);
++    if (start < at || end < start) throw new Error(`Formato inesperado de handler: ${route}`);
++    const handler = vm.runInNewContext(`(${source.slice(start, end + 2)})`, bindings);
++    let sent = false;
++    const response = {
++      statusCode: 200, data: null,
++      setHeader() {},
++      status(code) { this.statusCode = code; return this; },
++      json(value) { this.data = JSON.parse(JSON.stringify(value)); sent = true; return this; }
++    };
++    await handler({body, params, headers: {}, method: method.toUpperCase()}, response);
++    if (!sent) throw new Error(`Handler não concluiu resposta: ${route}`);
++    return {status: response.statusCode, data: response.data};
++  };
++}
+--- a/package.json
++++ b/package.json
+@@ -21,9 +21,9 @@
+     "build": "node scripts/build.mjs",
+     "verify": "npm run build",
+     "admin:check-default": "node scripts/check-default-admin.mjs",
+-    "test:dependency-free": "node --test --test-concurrency=1 tests/auth.test.js tests/carrier-split.test.js tests/catalog.test.js tests/correios.test.js tests/customer-auth-hardening.test.js tests/default-admin.test.js tests/image-upload.test.js tests/jadlog.test.js tests/mailer.test.js tests/order-state.test.js tests/payment-state.test.js tests/payments-checkout.test.js tests/providers.test.js tests/public-order.test.js tests/repository.test.js tests/v11.1-commerce.test.js tests/v11.1.2-ux.test.js tests/v11.1.3-ux.test.js tests/variant-images.test.js tests/visual-editor.test.js tests/v11.1.4-ux.test.js tests/v11.1.5-ux.test.js tests/v11.1.6-expert.test.js tests/release-v11.1.8.test.js tests/audit-regression.test.js tests/client-readiness.test.js tests/correios-integration.test.js",
++    "test:dependency-free": "node --test --test-concurrency=1 tests/auth.test.js tests/carrier-split.test.js tests/catalog.test.js tests/correios.test.js tests/customer-auth-hardening.test.js tests/default-admin.test.js tests/image-upload.test.js tests/jadlog.test.js tests/mailer.test.js tests/order-state.test.js tests/payment-state.test.js tests/payments-checkout.test.js tests/providers.test.js tests/public-order.test.js tests/repository.test.js tests/v11.1-commerce.test.js tests/v11.1.2-ux.test.js tests/v11.1.3-ux.test.js tests/variant-images.test.js tests/visual-editor.test.js tests/v11.1.4-ux.test.js tests/v11.1.5-ux.test.js tests/v11.1.6-expert.test.js tests/release-v11.1.8.test.js tests/audit-regression.test.js tests/client-readiness.test.js tests/correios-integration.test.js tests/http-fix-regression.test.js",
+     "test:http": "node --test --test-concurrency=1 tests/http.test.js",
+-    "test:offline": "node --test --test-concurrency=1 tests/auth.test.js tests/carrier-split.test.js tests/catalog.test.js tests/correios.test.js tests/customer-auth-hardening.test.js tests/default-admin.test.js tests/image-upload.test.js tests/jadlog.test.js tests/mailer.test.js tests/order-state.test.js tests/payment-state.test.js tests/payments-checkout.test.js tests/providers.test.js tests/public-order.test.js tests/repository.test.js tests/v11.1-commerce.test.js tests/v11.1.2-ux.test.js tests/v11.1.3-ux.test.js tests/variant-images.test.js tests/visual-editor.test.js tests/v11.1.4-ux.test.js tests/v11.1.5-ux.test.js tests/v11.1.6-expert.test.js tests/release-v11.1.8.test.js tests/audit-regression.test.js tests/client-readiness.test.js tests/correios-integration.test.js",
++    "test:offline": "node --test --test-concurrency=1 tests/auth.test.js tests/carrier-split.test.js tests/catalog.test.js tests/correios.test.js tests/customer-auth-hardening.test.js tests/default-admin.test.js tests/image-upload.test.js tests/jadlog.test.js tests/mailer.test.js tests/order-state.test.js tests/payment-state.test.js tests/payments-checkout.test.js tests/providers.test.js tests/public-order.test.js tests/repository.test.js tests/v11.1-commerce.test.js tests/v11.1.2-ux.test.js tests/v11.1.3-ux.test.js tests/variant-images.test.js tests/visual-editor.test.js tests/v11.1.4-ux.test.js tests/v11.1.5-ux.test.js tests/v11.1.6-expert.test.js tests/release-v11.1.8.test.js tests/audit-regression.test.js tests/client-readiness.test.js tests/correios-integration.test.js tests/http-fix-regression.test.js",
+     "test:browser": "python3 scripts/browser-regression.py --root . --out docs/evidencias-v11.1.8/loja",
+     "build:production": "npm run build",
+     "test:browser:admin": "python3 scripts/admin-browser-regression.py . docs/evidencias-v11.1.8/admin",
+@@ -54,7 +54,8 @@
+     "test:browser:correios": "python3 scripts/correios-browser-regression.py --root . --out docs/evidencias-correios/checkout",
+     "correios:check": "node scripts/check-correios.mjs",
+     "start:local": "node --env-file=.env server.js",
+-    "correios:check:local": "node --env-file=.env scripts/check-correios.mjs"
++    "correios:check:local": "node --env-file=.env scripts/check-correios.mjs",
++    "test:http:fix": "node --test tests/http-fix-regression.test.js"
+   },
+   "dependencies": {
+     "express": "5.1.0",
+--- a/scripts/build-production.mjs
++++ b/scripts/build-production.mjs
+@@ -92,6 +92,8 @@
+   'CONFIGURAR-CORREIOS.md',
+   'INTEGRACAO-CORREIOS.md',
+   'TESTES-CORREIOS.md',
++  'CORRECAO-HTTP-R1.md',
++  'TESTES-HTTP-R1.md',
+   'scripts/verify-release.mjs',
+   'migrations',
+   'scripts/migrate.mjs',
+--- a/README.md
++++ b/README.md
+@@ -1,3 +1,5 @@
++> **Revisão HTTP-R1 (07/09/2026):** correção da suíte HTTP e bloqueio de alteração do frete durante tentativa de pagamento. Consulte [CORRECAO-HTTP-R1.md](CORRECAO-HTTP-R1.md) e [TESTES-HTTP-R1.md](TESTES-HTTP-R1.md). As dependências e a versão 11.1.8 foram preservadas. O build incluso é offline; a aprovação do perfil completo continua exigindo Express e todos os testes HTTP.
++
+ > **Integração Correios desta entrega:** leia `CONFIGURAR-CORREIOS.md` antes de ativar o frete e `INTEGRACAO-CORREIOS.md` para o escopo e limitações. As novas orientações de contrato/cartão, caixas reais e revalidação substituem instruções antigas de frete neste histórico.
+ 
+ # INTEGRALL 11.1.8 — revisão de autenticação e produto
+--- a/LEIA-ME-PRIMEIRO.txt
++++ b/LEIA-ME-PRIMEIRO.txt
+@@ -1,3 +1,10 @@
++REVISÃO HTTP-R1 — 07/09/2026
++Correção das causas das 7 falhas HTTP relatadas e proteção financeira de frete.
++Leia CORRECAO-HTTP-R1.md e TESTES-HTTP-R1.md antes dos relatórios históricos.
++Após aplicar: npm run test:http e npm run verify. O build incluído permanece offline;
++a suíte Express completa precisa ser executada com as dependências instaladas.
++Não substitua configurações privadas nem dados locais por uma cópia antiga.
++
+ ATUALIZAÇÃO: CORREIOS INTEGRADO À SACOLA E AO PEDIDO
+ Leia CONFIGURAR-CORREIOS.md. Credenciais privadas e caixas reais precisam ser configuradas; nenhum token real foi incluído.
+ O build desta entrega é offline; homologação completa de produção não foi concluída neste ambiente.
+--- /dev/null
++++ b/CORRECAO-HTTP-R1.md
+@@ -0,0 +1,64 @@
++# INTEGRALL — correção HTTP-R1
++
++Data: 07/09/2026. Versão interna preservada: 11.1.8.
++Base: última entrega com a integração Correios Preço/Prazo, não a versão anterior sem essa integração.
++
++## Problema recebido
++
++O log do usuário executou o perfil completo (`npm run verify` → `npm run build`) e registrou 316 testes: 309 aprovados e 7 reprovados em `tests/http.test.js`. Sintaxe, lint, auditoria e mídia chegaram a passar naquele log. Os avisos de `console.log` e de TLS não eram as sete asserções que interromperam o build.
++
++O log é uma execução na máquina do usuário. Os resultados deste pacote são discriminados em `TESTES-HTTP-R1.md`; não se confunde a execução do usuário com a validação realizada nesta revisão.
++
++## Diagnóstico e correção por falha
++
++| Falha do log | Causa confirmada na fonte | Alteração |
++| --- | --- | --- |
++| Fluxo de pedido: estoque 45 em vez de 46 | O teste criava o pedido principal de duas unidades e outro pedido de uma unidade, usado para provar que o navegador não altera o preço. As três unidades estavam reservadas, mas a expectativa considerava só duas. | Verifica a reserva imediatamente, mantém a validação de preço adulterado, cancela o segundo pedido e prova restituição/idempotência antes de confirmar o primeiro pagamento. O algoritmo de estoque não foi relaxado. |
++| Salvar cupons: 409 em vez de 200 | O PUT não enviava `revision`, exigida pelo controle de concorrência por seção. | Lê a revisão na rota administrativa e a envia. Também testa 409 para revisão ausente e antiga e confirma que não houve sobrescrita. |
++| Cupom de frete: `discountCents` de undefined | A gravação de cupom anterior retornava 409 e o teste prosseguia sem conferir o resultado; a criação de pedido falhava e não existia `order`. | Corrige a revisão e verifica o status de cada etapa antes de acessar o pedido. Continua exigindo desconto e total exatos após a cotação manual. |
++| Preço de produto: 409 em vez de 400 | O PATCH não enviava `expectedRevision`; o conflito vinha antes da validação do preço. | Obtém `_revision` no catálogo administrativo. Preço inválido com revisão válida continua exigindo 400; ausência/revisão antiga continua exigindo 409; ID inexistente continua exigindo 404. |
++| Frete durante pagamento: 200 em vez de 409 | O teste só mudava o status para `awaiting_payment`; não criava uma preferência, apesar do nome antigo. A rota bloqueava preferência conhecida, mas não esse estado nem a janela de criação do checkout. | Corrige a rota e descreve o teste com precisão. A validação financeira ocorre dentro do lock do pedido e cobre pagamento em andamento/análise, tentativa no provedor e resultado incerto após timeout. |
++| Excluir novamente: 200 em vez de 404 | O backend usa exclusão lógica idempotente. Preserva o registro para liberar reservas de pedidos já existentes. | Mantém esse contrato. O teste prova ausência nas listagens, preservação da âncora de estoque, 200 na repetição e 404 para ID realmente inexistente. Não troca exclusão lógica por exclusão física. |
++| Personalização: 409 em vez de 200 | Os PUTs de configurações não enviavam a revisão da seção, inclusive no salvamento posterior e na restauração. | Envia a revisão mais recente em cada escrita, testa conflitos e mantém a verificação do reflexo no catálogo público. |
++
++## Proteção financeira acrescentada
++
++`assertShippingEditable` em `src/order-financials.js` é chamada dentro de `repo.updateOrder` na rota de cotação administrativa, imediatamente antes do recálculo. A operação é recusada quando:
++
++- o pedido aguarda pagamento ou está em análise;
++- já há preferência, claim de checkout ou tentativa pendente/registrada;
++- a reserva já foi liberada, o estoque já foi comprometido ou o estado foi encerrado;
++- o pedido é de retirada, e não de entrega.
++
++O status `received` ou `payment_failed`, sem tentativa e sem reserva encerrada, continua permitindo ajuste. Uma falha de rede na criação do checkout não prova que o provedor deixou de criar a preferência. Por isso o total permanece protegido mesmo após limpar o claim quando existe uma tentativa pendente; o retry preserva seu total. Não remova marcadores de pagamento manualmente. Se o valor precisar mudar após uma tentativa, reconcilie o pagamento no fluxo operacional e crie outro pedido.
++
++Foram comparados os callbacks literais da rota anterior e da corrigida, usando repositório real em diretório temporário. Em quatro cenários inseguros o original alterava o total sintético de 2.500 para 10.999 centavos; o corrigido retornou 409 e preservou 2.500. Quando já existia preferência, ambos bloquearam corretamente. Esse ensaio é de handler; não é um teste do Express nem do Mercado Pago real.
++
++## Isolamento da suíte HTTP
++
++Cada caso da suíte Express agora cria seu próprio processo de servidor e diretório temporário. O filho herda apenas variáveis operacionais do sistema, sem credenciais, `NODE_OPTIONS`, banco de dados, SMTP, transportadoras ou configuração de frete do ambiente principal. Os testes encerram o processo e removem apenas o diretório temporário que criaram.
++
++A suíte continua importando Express obrigatoriamente. Não foram introduzidos `skip`, modo de aprovação automática ou desvio de `npm run verify` para o build offline.
++
++## Como atualizar a cópia que já está configurada
++
++Use o pacote pequeno de correção HTTP-R1 quando sua base for a entrega anterior com Correios. Ele contém só arquivos de código, testes, scripts e documentação; não contém nem substitui dados, imagens, credenciais ou dependências instaladas.
++
++1. Pare o servidor local e faça backup da pasta do projeto, inclusive do estado local e das configurações privadas.
++2. Extraia o pacote pequeno em uma pasta separada. No Windows, abra `APLICAR-CORRECAO.cmd` e informe a pasta do projeto que contém `package.json` e `server.js` (por exemplo, a pasta interna `INTEGRALL-v11.1.8`).
++3. O aplicador confere os hashes esperados antes de escrever. Se detectar edição local em um arquivo que precisa corrigir, interrompe sem sobrescrever essa edição. Não force a aplicação nem restaure o catálogo para contornar o aviso.
++4. Os arquivos de código substituídos são preservados em um backup dentro do projeto. O aplicador não executa instalação, não inicia servidor e não faz chamadas aos Correios ou a pagamentos.
++5. No terminal da pasta do projeto, execute `npm run test:http` e, depois, `npm run verify`. Não use `build:offline` para considerar resolvida uma falha da suíte HTTP.
++6. Se os dois comandos concluírem sem falhas, inicie sua configuração local com `npm run start:local`. Não sirva uma pasta `dist` antiga antes de um novo build completo bem-sucedido.
++
++As dependências não mudaram; não há necessidade de reinstalar somente por causa deste patch. Para uma cópia nova do ZIP completo, use `npm ci` antes dos testes. O log anterior do usuário já mostra que Express estava disponível naquela execução.
++
++Os manifestos de uma entrega descrevem os bytes daquele pacote. Um novo build altera os arquivos gerados. A revisão deve ser validada pelos testes, pelo manifesto do patch e pelo backup, e não pela restauração de dados antigos para tentar fazer um hash coincidir.
++
++## Preservação e limites
++
++O catálogo, preços, estoques, mídias, identidade visual e configuração Correios da entrega foram preservados. Nenhum token compartilhado na conversa foi usado ou incluído. `package-lock.json` e as versões das dependências não mudaram.
++
++Esta revisão não acrescenta pré-postagem, etiquetas nem altera o cálculo de preço/prazo dos Correios. O foco é o build relatado e a integridade financeira da cotação administrativa. As condições de ativação de credenciais e embalagens reais continuam descritas em `CONFIGURAR-CORREIOS.md`.
++
++Consulte `TESTES-HTTP-R1.md` para os testes realmente executados e as limitações. Os relatórios antigos permanecem como histórico; suas contagens não são o resultado desta revisão.
+--- /dev/null
++++ b/TESTES-HTTP-R1.md
+@@ -0,0 +1,47 @@
++# INTEGRALL — testes da correção HTTP-R1
++
++Data: 07/09/2026. Ambiente de execução desta revisão: Linux x86_64, Node.js 22.16.0, npm 10.9.2. Não houve execução em Windows nesta revisão.
++
++## Matriz efetivamente executada
++
++| Ensaio/comando | Resultado | Escopo |
++| --- | --- | --- |
++| `node --check server.js` e `node --check tests/http.test.js` | APROVADO | Sintaxe dos arquivos modificados. |
++| `npm run test:http:fix` | APROVADO — 21 testes | Módulos reais e callbacks literais de rotas, com repositório real temporário; sem Express. |
++| `npm run build:offline` | APROVADO — 322 testes, zero falhas e zero pulados | Inclui os 301 testes anteriores sem dependências externas e os 21 novos, além de sintaxe, lint, auditoria, mídia, empacotamento e manifesto. |
++| Comparação de handler anterior/corrigido | APROVADO — 5 cenários comparados | Reproduz quatro alterações financeiras inseguras no handler original, bloqueadas na correção, e preserva o bloqueio de preferência já existente. Sem middleware/HTTP Express. |
++| `npm run test:production:http` | APROVADO — 10 verificações | Servidor HTTP estático sobre os arquivos de `dist/public`; não é o servidor Express. |
++| Aplicador do patch HTTP-R1 | APROVADO — 10 testes | Caminhos com espaços, preflight sem escrita, preservação de dados/configuração, backup, idempotência, recusa de edições locais/links/payload inválido e rollback após falha de escrita simulada. Aplicador Node em Linux; wrapper CMD não executado. |
++| `npm ci` | NÃO CONCLUÍDO | O ambiente não resolveu/acessou registry.npmjs.org; ocorreram falhas EAI_AGAIN e timeout. O lockfile não foi apagado nem atualizado. |
++| `npm run test:http` | REPROVADO NA CARGA DA DEPENDÊNCIA | Express não instalado neste ambiente; ERR_MODULE_NOT_FOUND antes de executar os 15 casos HTTP. |
++| `npm run verify` (perfil completo) | NÃO APROVADO | A suíte HTTP obrigatória não pode carregar Express neste ambiente. Não declarar os 337 testes previstos para a suíte completa como aprovados. |
++| Windows, navegador ligado ao servidor Express, HTTPS real, PostgreSQL e serviços externos | NÃO EXECUTADO | Necessitam ambiente com dependências e, quando aplicável, credenciais privadas/configuração de homologação. |
++
++Os testes locais sem dependências externas não significam ausência de HTTP em todos os testes antigos: algumas fixtures usam Node HTTP e transportadoras simuladas. Significam que não dependem dos pacotes externos da aplicação. O arquivo novo `tests/http-fix-regression.test.js` extrai e invoca os callbacks reais de `server.js`; ele não cria um Express substituto e não está qualificado como aprovação de roteamento, middleware, cookie, parser ou TLS.
++
++## Os 21 testes novos
++
++O arquivo `tests/http-fix-regression.test.js` cobre: reserva, cancelamento e pagamento sem dupla baixa; revisão de cupons; frete grátis após confirmação manual; validação de preço de produto com revisão; estoque concorrente invalidando revisão; personalização com revisão; duas escritas simultâneas; exclusão lógica repetida com restituição de reserva; estados aguardando pagamento e em análise; preferência conhecida; claim antes da preferência; timeout; claim antigo; tentativa malformada; ciclo claim/timeout/retry; falha de persistência; valor inválido/retirada/ID ausente; estados finais; isolamento das variáveis do subprocesso; e presença das proteções na suíte Express obrigatória.
++
++## Alteração dos testes HTTP existentes
++
++Os 15 casos existentes foram mantidos, com expectativas alinhadas às regras já implementadas e verificações negativas adicionais. Não se mudou um resultado esperado apenas para aceitar o comportamento observado: o estoque é verificado em cada etapa, a rejeição de revisões ausentes/antigas continua obrigatória, o preço inválido continua rejeitado, a exclusão é verificada como lógica e o bloqueio financeiro foi corrigido no backend.
++
++O caso antes chamado de “preferência MP ativa” apenas mudava o status administrativamente. Seu nome agora expressa isso. As situações com preferência e claim efetivos no estado do pedido são cobertas adicionalmente no repositório e handler, sem cobrança real.
++
++## O que permanece para aprovação na máquina do usuário
++
++Na pasta que contém `package.json` e `server.js`, com as dependências já instaladas, execute:
++
++```sh
++npm run test:http
++npm run verify
++```
++
++Em instalação nova, execute antes `npm ci`. A documentação oficial do npm confirma que esse comando usa o lockfile e não o reescreve: https://docs.npmjs.com/cli/v10/commands/npm-ci/ . A documentação do runner Node descreve os hooks por teste: https://nodejs.org/api/test.html . Essas referências apoiam o procedimento; os resultados acima vêm de execução local, não das documentações.
++
++Critério: os comandos precisam terminar com exit code 0 e sem falhas/pulados. A suíte completa é composta pelos 322 testes sem dependências externas e 15 HTTP, totalizando 337; essa quantidade é um inventário, não uma alegação de execução completa aqui.
++
++Depois, confirme manualmente criação de pedido, reserva/cancelamento, cupons, edição administrativa com conflito entre abas, cotação PAC/SEDEX com suas credenciais e impossibilidade de alterar o total quando existe tentativa de pagamento. Não use tokens já compartilhados na conversa. Não altere banco, catálogo ou stock para forçar aprovação de asserção.
++
++Os logs desta revisão e o comprovante do reteste do ZIP são entregues separadamente. O build incluído no ZIP está identificado como `offline` em `dist/BUILD-INFO.json`, sem declaração de homologação completa de produção.

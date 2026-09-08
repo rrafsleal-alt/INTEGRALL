@@ -1,0 +1,13 @@
+[browser] 320px
+[browser] 768px
+[browser] 1440px
+{
+  "status": "APROVADO",
+  "widths": 3,
+  "testedWidths": [
+    320,
+    768,
+    1440
+  ],
+  "failures": []
+}

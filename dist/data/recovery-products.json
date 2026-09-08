@@ -1,0 +1,318 @@
+[
+  {
+    "id": "product-1786125594468-rlk598",
+    "name": "Mentirinha",
+    "before": [
+      "/media/products/media-001dbbde-e3ad-4274-9980-7669ae7cace1",
+      "/media/products/media-91730744-cd31-4760-b873-e2bd8f190835"
+    ],
+    "after": [
+      "/assets/recovered/1c10f7ef32d7e3a6e870cffa90741b4c496e512e3b37f667dd9edf331473a71f.webp"
+    ]
+  },
+  {
+    "id": "product-1786125689329-bqbvu9",
+    "name": "Vó Damazia",
+    "before": [
+      "/media/products/media-5e529f94-9422-4086-9752-3fc53f568901",
+      "/media/products/media-e8be8cc5-4596-4ede-84cb-0da2292648ce"
+    ],
+    "after": [
+      "/assets/recovered/2ea21276cf85af8a2db2ce2a5e707f79503db89ad49cab194ea01f652a1a865a.webp"
+    ]
+  },
+  {
+    "id": "pdf-bis-972",
+    "name": "Rosca de Coco",
+    "before": [
+      "/media/products/media-7257f917-daa1-45df-a7b3-dc573ebcf93e"
+    ],
+    "after": [
+      "/assets/recovered/f267f0242b0f9a2aa568717c3fc8c36d01779655822b2e7c460286d0a05198aa.webp"
+    ]
+  },
+  {
+    "id": "pdf-bis-973",
+    "name": "Rosca de Flocos",
+    "before": [
+      "/media/products/media-06328139-6e85-4a8f-a601-999c48720781",
+      "/media/products/media-521937be-3fb7-461a-a06b-43cc52fee270"
+    ],
+    "after": [
+      "/assets/recovered/192f2a56ea4123b5eff75dc7b615cc0e2e2ff6e41336d49a6b37d20f50776aa3.webp"
+    ]
+  },
+  {
+    "id": "pdf-bis-974",
+    "name": "Rosca de Leite",
+    "before": [
+      "/media/products/media-e591c4c5-c8b1-4bab-a51a-b6b41e4ba2d5",
+      "/media/products/media-7d730907-8467-4c59-bf89-75ee7f997d9c"
+    ],
+    "after": [
+      "/assets/recovered/9e4c4aeff004c9cd160cb0fddae9944dfcbb3efa2a7236f0099901af9afdf54b.webp"
+    ]
+  },
+  {
+    "id": "pdf-bis-976",
+    "name": "Rosca Nata",
+    "before": [
+      "/media/products/media-f174b144-8e8f-41b3-985b-d3ae5bf55740",
+      "/media/products/media-ba6c0e92-400b-42a4-a153-0e51c4c01e81"
+    ],
+    "after": [
+      "/assets/recovered/d5d597883be71044a4d887d023177ff4551692f43d8ba01fd3b40dbc84106108.webp"
+    ]
+  },
+  {
+    "id": "pdf-bis-975",
+    "name": "Rosca de Milho com Erva Doce",
+    "before": [
+      "/media/products/media-0b37d38a-ef6f-43ed-ab0e-8ec61b835665",
+      "/media/products/media-f2e19660-5bc4-4421-a4c7-d0edc8b2c438"
+    ],
+    "after": [
+      "/assets/recovered/405d24e7a8110831c873df65ffd412ff142c9114e51e0eb6f662b2dd97ad0f1a.webp"
+    ]
+  },
+  {
+    "id": "pdf-bis-924",
+    "name": "Colorado",
+    "before": [
+      "/media/products/media-b513608e-f89e-4a5d-aba9-6b9675ef67b4",
+      "/media/products/media-94bc3d8f-a3a9-45ac-b80b-66ae337c8b70"
+    ],
+    "after": [
+      "/assets/recovered/76f1def8ceb0b7e830bb8b3fd6d71250b07e42f25eb1fdafdc99ecc7e620365c.webp"
+    ]
+  },
+  {
+    "id": "pdf-bis-903",
+    "name": "Bambolê",
+    "before": [
+      "/media/products/media-9441437a-612e-49d5-aaf5-8bcfabe66056",
+      "/media/products/media-bf99d894-6215-437b-8387-f4482021c52e",
+      "/media/products/media-2f1aa4b3-9ffb-4235-9b3f-f76bc480fbfd"
+    ],
+    "after": [
+      "/assets/recovered/f792df908b38874e395727d72cfe42003644acb4f8e52cde1c4028dcf99e09ed.webp",
+      "/assets/recovered/eaaef7f18cbe6218356ee04c84bb4348eb8c6c77cfc45c401c0e73e78a083589.webp"
+    ]
+  },
+  {
+    "id": "pdf-bis-901",
+    "name": "Girassol",
+    "before": [
+      "/media/products/media-e11fb59d-efa5-4bc9-9087-3803941592e4",
+      "/media/products/media-52df3a50-c7b6-4883-af6d-97cb242a3a03"
+    ],
+    "after": [
+      "/assets/recovered/09aa4ec58cf15050b7d7e866e981dbaf0398ffb3550d74acca5300a6f7291a64.webp"
+    ]
+  },
+  {
+    "id": "pdf-bis-926",
+    "name": "Cookies de Chocolate com Linhaça",
+    "before": [
+      "/media/products/media-2fcf8e48-af8c-41d9-9ec5-c4057e30cb58",
+      "/media/products/media-75695f4c-af96-4940-959c-3b7b2c0e060c"
+    ],
+    "after": [
+      "/assets/recovered/787f53501c53e2466b006a0f7bb13e0b2b905fc1ff10b7dd5d31586753924ed2.webp",
+      "/assets/recovered/b338c3699b37bf6783a789ef5010bf99bf2cf184ef1b1352eefb44b4850d3c5f.webp"
+    ]
+  },
+  {
+    "id": "pdf-bis-925",
+    "name": "Cookies de Castanha de Caju com Linhaça",
+    "before": [
+      "/media/products/media-f4b15f41-dfd5-4256-a6f0-288de706e908"
+    ],
+    "after": [
+      "/assets/recovered/030ab827aa6576f7511bdf3b59822e6b275186c9578ffbda40afc54210a4087b.webp"
+    ]
+  },
+  {
+    "id": "pdf-bis-955",
+    "name": "Palmier",
+    "before": [
+      "/media/products/media-4d6b4e3b-b812-421c-81fb-fda3f18bd6f3",
+      "/media/products/media-9b1a2f9a-6450-4180-8f8e-1a7f85843da7"
+    ],
+    "after": [
+      "/assets/recovered/9fb930ee567fbed1dbfbacb5c7cfe8f953cab7d23fa924852a86f8f669eab504.webp"
+    ]
+  },
+  {
+    "id": "pdf-bis-920",
+    "name": "Champanhota de Canela",
+    "before": [
+      "/media/products/media-9bebc56c-907f-4916-9018-1be3f5d1762a",
+      "/media/products/media-7e5731e0-cad6-4ac0-be05-85e90d8d3454"
+    ],
+    "after": [
+      "/assets/recovered/5b927435ae8b1f7775b73501e97b4fee90c827b7de98a34d185a937fa6653209.webp",
+      "/assets/recovered/f9f5a437a474b16f4e692a39997716e529663661848f56d347e79fabb2215215.webp"
+    ]
+  },
+  {
+    "id": "pdf-bis-910",
+    "name": "Beliscão",
+    "before": [
+      "/media/products/media-2448a622-1099-4c0a-9205-c5372a5c9dcc"
+    ],
+    "after": [
+      "/assets/recovered/f3a424b8beaa0630d8af0aa65b4889b74d70fa4ff15d70f7820d2ab780d327d7.webp"
+    ]
+  },
+  {
+    "id": "pdf-bis-932",
+    "name": "Gravatinha",
+    "before": [
+      "/media/products/media-c67cfeb3-0f21-47cf-9713-dc8be4defb60"
+    ],
+    "after": [
+      "/assets/recovered/04ebffc4f043cd5625f0745224d3ecfae414fe960e1e0414b86260d3e959bb54.webp"
+    ]
+  },
+  {
+    "id": "pdf-bis-993",
+    "name": "Uga-uga",
+    "before": [
+      "/media/products/media-47f17e3f-157d-4ceb-82bb-e4c9fffc58e4"
+    ],
+    "after": [
+      "/assets/recovered/5e26e47a1e1b77f2e7c112d786ec60bdbd1198a9d99e0982079f010dbab38637.webp"
+    ]
+  },
+  {
+    "id": "pdf-bis-931",
+    "name": "Florzinha Goiabinha",
+    "before": [
+      "/media/products/media-88b9a7d5-f359-4b5b-8e59-05c0bb2449fb"
+    ],
+    "after": [
+      "/assets/recovered/0577ef2b326282307ab499876b43904d21322805e16a5c6b6ffb8b75d1eafb27.webp"
+    ]
+  },
+  {
+    "id": "pdf-bis-909",
+    "name": "Beijinho de Freira",
+    "before": [
+      "/media/products/media-4bd723be-dfe5-47dc-b36a-bbbab4d2ad01"
+    ],
+    "after": [
+      "/assets/recovered/0ed4a84b4944c4795464d3ce48d1e0559be6e835b32995329a5a93d030e8321e.webp"
+    ]
+  },
+  {
+    "id": "pdf-bis-917",
+    "name": "Casadinho",
+    "before": [
+      "/media/products/media-aa31ada0-3d65-4ed7-aaf9-b7e68fad89c0"
+    ],
+    "after": [
+      "/assets/recovered/2933485a6d86d393485f81c6a75932da4aca1e225829f081185479576c8f956d.webp"
+    ]
+  },
+  {
+    "id": "pdf-bis-927",
+    "name": "Coração",
+    "before": [
+      "/media/products/media-1256515f-c871-4668-874a-46d5d67a6266"
+    ],
+    "after": [
+      "/assets/recovered/a86ca372380f3ca37ba2809cfd25e1dc05a15ac1688c236a277945076bcf70dd.webp"
+    ]
+  },
+  {
+    "id": "pdf-bis-923",
+    "name": "Choconata",
+    "before": [
+      "/media/products/media-db25fe19-a8a2-4f47-b4c8-11bf0ba39608"
+    ],
+    "after": [
+      "/assets/recovered/bd517d72d1bf9a81a10fdd6fc53f185f2d1511ff10017e8b6f58747f612974ea.webp"
+    ]
+  },
+  {
+    "id": "pdf-bis-970",
+    "name": "Romeu e Julieta",
+    "before": [
+      "/media/products/media-49262222-f14b-45fb-a22b-b87116491abc"
+    ],
+    "after": [
+      "/assets/recovered/e2aa39a7452db3d61336bbc05571179db714350b0799da8b0ff0c07d9c47c34f.webp"
+    ]
+  },
+  {
+    "id": "pdf-bis-959-965",
+    "name": "Biscoito de Polvilho",
+    "before": [
+      "/media/products/media-374e8bd1-4978-49c2-89f3-292744888a68"
+    ],
+    "after": [
+      "/assets/recovered/965f097692260bdc6b844890033d619bcb01d36d02fbdaa793870d1694fe94f7.webp"
+    ]
+  },
+  {
+    "id": "pdf-bis-962-966",
+    "name": "Biscoito de Polvilho Palito — Tradicional e Queijo",
+    "before": [
+      "/media/products/media-d53b5566-9db9-445b-b60c-1331af2962bc"
+    ],
+    "after": [
+      "/assets/recovered/d954b410338d325097cdbf664b02da1a90bed3c2ce3e182c6991a63a6ddc0be2.webp"
+    ]
+  },
+  {
+    "id": "pdf-bis-958",
+    "name": "Biscoito Papa Ovo",
+    "before": [
+      "/media/products/media-0b6517a8-22e1-4a41-8d3b-d3f84cbe0acd"
+    ],
+    "after": [
+      "/assets/recovered/c9bf3fcfdeb370b02310a4fda00fdc02186d73308ba01fcaeea6bef30272687f.webp"
+    ]
+  },
+  {
+    "id": "pdf-bis-990",
+    "name": "Torradinha de Queijo",
+    "before": [
+      "/media/products/media-046510cb-329a-4872-8a3d-d739f96998e5"
+    ],
+    "after": [
+      "/assets/recovered/a80b8c097bab7effc42cfcdfdc17dc089a5ddba0f877d332af6655029d718981.webp"
+    ]
+  },
+  {
+    "id": "pdf-bis-988",
+    "name": "Torradinha de Alho",
+    "before": [
+      "/media/products/media-46c7cf75-158b-44bd-b7f0-37dfdad597c6"
+    ],
+    "after": [
+      "/assets/recovered/40d6f94b6624cd71a77a78a1abef5cd2c31b4fbc814b4d7a1cad303d3618bc1d.webp"
+    ]
+  },
+  {
+    "id": "pdf-bis-989",
+    "name": "Torradinha de Cebola",
+    "before": [
+      "/media/products/media-aa5a44a2-a049-4537-9287-af1fa2325579"
+    ],
+    "after": [
+      "/assets/recovered/ae756b7ddd84dc5873a2316b54495147fdc570452050afe896d1c46668b08a07.webp"
+    ]
+  },
+  {
+    "id": "pdf-bis-991",
+    "name": "Torradinha de Parmesão",
+    "before": [
+      "/media/products/media-0c88471b-ea11-4adb-b56d-264da33448aa"
+    ],
+    "after": [
+      "/assets/recovered/13eef5f08f83597c9b2fc380ff28a0b0380778d5c16e40adc8cc9a982d85f109.webp"
+    ]
+  }
+]

@@ -1,0 +1,32 @@
+INTEGRALL v11.1.4 — MANIFESTO DE ENTREGA
+Data: 02/09/2026
+
+Instalação: npm ci
+Desenvolvimento: npm run dev
+Verificação principal: npm run verify:v11.1.4
+Suíte completa: npm test
+Loja navegador: npm run test:browser
+Admin navegador: npm run test:browser:admin
+Build: npm run build:production
+Smoke do build: npm run test:production:http
+Auditoria do catálogo entregue: python3 tools/audit_products.py
+
+Resultados da revisão:
+- 143/143 testes independentes aprovados;
+- suíte completa: 143 aprovados, 15 SKIP, 0 falhas;
+- loja Chromium: 18/18 larguras;
+- Admin Chromium: 18/18 larguras;
+- galeria múltipla: aprovada;
+- build de produção: 292 arquivos, manifesto verificado;
+- smoke HTTP do build: 8/8;
+- browser regression sobre dist: 18/18;
+- security scan: aprovado;
+- npm audit offline: 0 vulnerabilidades registradas.
+
+Limitações:
+- npm ci limpo não concluído por indisponibilidade/intermitência do registry neste ambiente;
+- 15 testes dependentes de pacotes externos ficaram SKIP;
+- smoke Chromium via 127.0.0.1 ficou NÃO EXECUTADO por bloqueio administrativo do navegador;
+- integrações externas reais exigem credenciais do ambiente de produção.
+
+A lista criptográfica completa de arquivos está em MANIFEST.sha256.

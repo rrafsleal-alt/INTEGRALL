@@ -1,0 +1,6 @@
+{
+  "scope": "Tentativa de navegação HTTP nativa, sem simulação e sem alterar políticas do navegador",
+  "browser": "144.0.7559.96",
+  "status": "NÃO EXECUTADO",
+  "reason": "Page.goto: net::ERR_BLOCKED_BY_ADMINISTRATOR at http://127.0.0.1:40943/\nCall log:\n  - navigating to \"http://127.0.0.1:40943/\", waiting until \"load\"\n"
+}

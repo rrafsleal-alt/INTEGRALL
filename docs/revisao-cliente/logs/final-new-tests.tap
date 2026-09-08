@@ -1,0 +1,227 @@
+TAP version 13
+# Subtest: cliente: código com letras é recusado sem consumir o código válido
+ok 1 - cliente: código com letras é recusado sem consumir o código válido
+  ---
+  duration_ms: 13.152102
+  type: 'test'
+  ...
+# Subtest: cliente: código com dígitos excedentes é recusado sem consumir o código válido
+ok 2 - cliente: código com dígitos excedentes é recusado sem consumir o código válido
+  ---
+  duration_ms: 1.055974
+  type: 'test'
+  ...
+# Subtest: cliente: código com separadores internos é recusado sem consumir o código válido
+ok 3 - cliente: código com separadores internos é recusado sem consumir o código válido
+  ---
+  duration_ms: 1.102089
+  type: 'test'
+  ...
+# Subtest: cliente: e-mail acima de 254 caracteres não vira outro identificador truncado
+ok 4 - cliente: e-mail acima de 254 caracteres não vira outro identificador truncado
+  ---
+  duration_ms: 0.562147
+  type: 'test'
+  ...
+# Subtest: cliente: sessão com expiração inválido é revogada
+ok 5 - cliente: sessão com expiração inválido é revogada
+  ---
+  duration_ms: 1.745324
+  type: 'test'
+  ...
+# Subtest: cliente: sessão com expiração  é revogada
+ok 6 - cliente: sessão com expiração  é revogada
+  ---
+  duration_ms: 1.106409
+  type: 'test'
+  ...
+# Subtest: cliente: sessão com expiração undefined é revogada
+ok 7 - cliente: sessão com expiração undefined é revogada
+  ---
+  duration_ms: 0.847009
+  type: 'test'
+  ...
+# Subtest: cliente: sessão válida continua aceita e cookie malformado é recusado
+ok 8 - cliente: sessão válida continua aceita e cookie malformado é recusado
+  ---
+  duration_ms: 1.480886
+  type: 'test'
+  ...
+# Subtest: API: erro HTTP preserva status, código e requestId para expiração da sessão
+ok 9 - API: erro HTTP preserva status, código e requestId para expiração da sessão
+  ---
+  duration_ms: 147.587085
+  type: 'test'
+  ...
+# Subtest: API: resposta 200 contendo HTML não é apresentada como sucesso vazio
+ok 10 - API: resposta 200 contendo HTML não é apresentada como sucesso vazio
+  ---
+  duration_ms: 12.259086
+  type: 'test'
+  ...
+# Subtest: API: resposta HTTP 503 sem JSON preserva o status
+ok 11 - API: resposta HTTP 503 sem JSON preserva o status
+  ---
+  duration_ms: 20.65365
+  type: 'test'
+  ...
+# Subtest: API: HTTP 204 sem corpo continua compatível
+ok 12 - API: HTTP 204 sem corpo continua compatível
+  ---
+  duration_ms: 10.321116
+  type: 'test'
+  ...
+# Subtest: API: requisição já cancelada não inicia acesso à rede
+ok 13 - API: requisição já cancelada não inicia acesso à rede
+  ---
+  duration_ms: 9.041409
+  type: 'test'
+  ...
+# Subtest: API: cancelamento externo durante a resposta é propagado
+ok 14 - API: cancelamento externo durante a resposta é propagado
+  ---
+  duration_ms: 10.57871
+  type: 'test'
+  ...
+# Subtest: API: FormData mantém cabeçalho multipart gerado pelo navegador
+ok 15 - API: FormData mantém cabeçalho multipart gerado pelo navegador
+  ---
+  duration_ms: 7.017759
+  type: 'test'
+  ...
+# Subtest: mídia local: ordena por data antes de limitar, não pelo nome aleatório
+ok 16 - mídia local: ordena por data antes de limitar, não pelo nome aleatório
+  ---
+  duration_ms: 41.60233
+  type: 'test'
+  ...
+# Subtest: upload: WebP apenas com cabeçalho de canvas, sem imagem, é recusado
+ok 17 - upload: WebP apenas com cabeçalho de canvas, sem imagem, é recusado
+  ---
+  duration_ms: 1.960471
+  type: 'test'
+  ...
+# Subtest: upload: dimensões de VP8 ocultas por um VP8X pequeno não burlam o limite
+ok 18 - upload: dimensões de VP8 ocultas por um VP8X pequeno não burlam o limite
+  ---
+  duration_ms: 41.019392
+  type: 'test'
+  ...
+# Subtest: upload: cabeçalho VP8L sem dados de pixels é recusado
+ok 19 - upload: cabeçalho VP8L sem dados de pixels é recusado
+  ---
+  duration_ms: 1.195405
+  type: 'test'
+  ...
+# Subtest: perfil: CEP ausente retorna erro em vez de descartar ou truncar dados
+ok 20 - perfil: CEP ausente retorna erro em vez de descartar ou truncar dados
+  ---
+  duration_ms: 0.94688
+  type: 'test'
+  ...
+# Subtest: perfil: CEP excedente retorna erro em vez de descartar ou truncar dados
+ok 21 - perfil: CEP excedente retorna erro em vez de descartar ou truncar dados
+  ---
+  duration_ms: 0.233422
+  type: 'test'
+  ...
+# Subtest: perfil: sexto endereço retorna erro em vez de descartar ou truncar dados
+ok 22 - perfil: sexto endereço retorna erro em vez de descartar ou truncar dados
+  ---
+  duration_ms: 0.098588
+  type: 'test'
+  ...
+# Subtest: perfil: endereço incompleto retorna erro em vez de descartar ou truncar dados
+ok 23 - perfil: endereço incompleto retorna erro em vez de descartar ou truncar dados
+  ---
+  duration_ms: 0.268323
+  type: 'test'
+  ...
+# Subtest: perfil: tipo incorreto retorna erro em vez de descartar ou truncar dados
+ok 24 - perfil: tipo incorreto retorna erro em vez de descartar ou truncar dados
+  ---
+  duration_ms: 0.181771
+  type: 'test'
+  ...
+# Subtest: perfil: editar nome preserva endereços legados, sem migração destrutiva
+ok 25 - perfil: editar nome preserva endereços legados, sem migração destrutiva
+  ---
+  duration_ms: 1.431519
+  type: 'test'
+  ...
+# Subtest: perfil: endereço completo normaliza CEP e UF, exclusão explícita funciona
+ok 26 - perfil: endereço completo normaliza CEP e UF, exclusão explícita funciona
+  ---
+  duration_ms: 0.329742
+  type: 'test'
+  ...
+# Subtest: perfil: validação falha dentro do lock sem apagar os dados anteriores
+ok 27 - perfil: validação falha dentro do lock sem apagar os dados anteriores
+  ---
+  duration_ms: 2.774447
+  type: 'test'
+  ...
+# Subtest: repositório: expiração ou tentativas inválidas não validam código temporário
+ok 28 - repositório: expiração ou tentativas inválidas não validam código temporário
+  ---
+  duration_ms: 0.674822
+  type: 'test'
+  ...
+# Subtest: upload: WebP válido lossy.webp permanece aceito
+ok 29 - upload: WebP válido lossy.webp permanece aceito
+  ---
+  duration_ms: 18.690247
+  type: 'test'
+  ...
+# Subtest: upload: WebP válido lossless.webp permanece aceito
+ok 30 - upload: WebP válido lossless.webp permanece aceito
+  ---
+  duration_ms: 2.565203
+  type: 'test'
+  ...
+# Subtest: upload: WebP válido alpha.webp permanece aceito
+ok 31 - upload: WebP válido alpha.webp permanece aceito
+  ---
+  duration_ms: 2.091229
+  type: 'test'
+  ...
+# Subtest: upload: WebP válido animated.webp permanece aceito
+ok 32 - upload: WebP válido animated.webp permanece aceito
+  ---
+  duration_ms: 2.170243
+  type: 'test'
+  ...
+# Subtest: upload: WebP válido metadata.webp permanece aceito
+ok 33 - upload: WebP válido metadata.webp permanece aceito
+  ---
+  duration_ms: 1.769907
+  type: 'test'
+  ...
+# Subtest: API: cancelamento durante leitura do JSON não vira erro de formato
+ok 34 - API: cancelamento durante leitura do JSON não vira erro de formato
+  ---
+  duration_ms: 5.291646
+  type: 'test'
+  ...
+# Subtest: API: timeout tem código próprio, distinto de cancelamento do usuário
+ok 35 - API: timeout tem código próprio, distinto de cancelamento do usuário
+  ---
+  duration_ms: 10.323873
+  type: 'test'
+  ...
+# {"level":"warn","event":"media_metadata_invalid","file":"invalid-file-0001.json","message":"Metadados de mídia inválidos."}
+# Subtest: mídia local: sidecar nulo não derruba a listagem de arquivos válidos
+ok 36 - mídia local: sidecar nulo não derruba a listagem de arquivos válidos
+  ---
+  duration_ms: 27.692575
+  type: 'test'
+  ...
+1..36
+# tests 36
+# suites 0
+# pass 36
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 877.526466

@@ -1,0 +1,11 @@
+[
+  {
+    "test": "Endereço incompleto não é enviado como cadastro válido",
+    "status": "APROVADO",
+    "observed": {
+      "ok": true,
+      "invalidAddressSubmitted": false,
+      "pageErrors": []
+    }
+  }
+]

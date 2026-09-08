@@ -1,0 +1,14 @@
+{
+  "project": "integrall-online",
+  "version": "11.1.8",
+  "generatedAt": "2026-09-08T14:00:02.970Z",
+  "node": "v24.14.0",
+  "sourceRevision": null,
+  "model": "Node.js/Express com arquivos estáticos; pacote de implantação",
+  "validation": {
+    "profile": "full",
+    "integrationTests": "passed",
+    "externalServices": "not-validated",
+    "note": "Integração HTTP local aprovada; serviços externos requerem homologação separada."
+  }
+}

@@ -1,0 +1,39 @@
+MANIFESTO INTEGRALL V11.1.0
+Gerado em: 2026-09-02
+Versão: 11.1.0
+Arquivos (exceto MANIFEST.sha256): 387
+Tamanho lógico (exceto MANIFEST.sha256): 21586277 bytes
+Instalação: npm ci
+Banco: npm run db:migrate
+Desenvolvimento: npm run dev
+Produção: npm start
+Validação principal: npm run verify:v11.1.0
+Resultado verify:v11.1.0: APROVADO — 45/45 testes integrados
+Resultado suíte local independente: APROVADO — 93/93 testes
+Resultado sintaxe: APROVADO — 53 arquivos JavaScript
+Resultado security scan: APROVADO
+Resultado auditoria catálogo: APROVADO — 227 produtos e assets presentes
+
+RECURSOS PRINCIPAIS V11.1.0
+- URLs e SEO individuais por produto
+- busca inteligente e filtros avançados
+- promoções automáticas recalculadas no servidor
+- barra de frete grátis
+- conta do cliente sem senha + favoritos/endereço/histórico
+- comprar novamente
+- avaliações verificadas com moderação
+- reserva atômica de estoque por 15 minutos
+- estoque crítico e avise-me quando voltar
+- múltiplas fotos + foto por variação preservadas da versão anterior
+
+ARQUIVOS DE REFERÊNCIA
+- ENTREGA-V11.1.0.md
+- RECURSOS-V11.1.0.md
+- ARQUIVOS-ALTERADOS-V11.1.0.md
+- migrations/003_customer_commerce.up.sql
+- tests/v11.1-commerce.test.js
+- package.json
+- package-lock.json
+
+OBSERVAÇÃO DE AMBIENTE
+A suíte HTTP/provedores/PostgreSQL que requer dependências externas instaladas não foi reinstalada durante o empacotamento porque o registry npm apresentou EAI_AGAIN (DNS). O pacote não contém node_modules e deve usar npm ci em ambiente com acesso ao registry.

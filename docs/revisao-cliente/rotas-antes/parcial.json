@@ -1,0 +1,20 @@
+[
+  {
+    "test": "Produto: atualização silenciosa respeita scroll false",
+    "status": "REPROVADO",
+    "observed": {
+      "ok": false,
+      "scrollY": 4615,
+      "pageErrors": []
+    }
+  },
+  {
+    "test": "Produto: abertura agendada é descartada ao mudar de rota",
+    "status": "REPROVADO",
+    "observed": {
+      "ok": false,
+      "oldProductReopened": true,
+      "pageErrors": []
+    }
+  }
+]

@@ -1,0 +1,1518 @@
+--- /dev/null
++++ b/APRESENTACAO-AO-CLIENTE.md
+@@ -0,0 +1,71 @@
++# INTEGRALL — preparação da demonstração ao cliente
++
++## O que a versão contém
++
++O projeto completo, não um protótipo substituto. A revisão R2 corrige novos defeitos da conta, mídia, navegação e validações, mantendo a identidade visual e os dados. A documentação técnica atual é `REVISAO-CLIENTE-R2.md`; os documentos antigos permanecem como histórico.
++
++**Não apresentar esta versão como loja comercial integralmente homologada enquanto instalação, servidor e integrações não forem validados no ambiente da apresentação.** O build offline não substitui o servidor. Abrir o HTML com duplo clique não habilita administração, conta, pedidos ou pagamento.
++
++## Preparar uma cópia isolada
++
++Descompacte o novo ZIP em outra pasta. Não sobrescreva uma loja que já recebeu pedidos. Confira a entrega antes de alterar configurações:
++
++```sh
++npm run source:verify
++npm ci
++cp .env.example .env
++```
++
++Os comandos acima pressupõem terminal com Node/npm. No Windows, copie `.env.example` para `.env` pelo Explorador ou comando equivalente. Use um runtime aceito por `engines` e pelo provedor; o ensaio desta revisão foi feito com Node 22.16.0, não é uma recomendação para manter uma versão antiga sem atualizações de segurança.
++
++Na cópia local da demonstração, configure `LOCAL_DATA_DIR=.demo-state` para não reutilizar o estado operacional recebido. Mantenha `NODE_ENV=development` somente em ambiente local privado. Não exponha esse modo à internet: ele permite código de acesso de desenvolvimento quando SMTP não está configurado e pode usar a credencial administrativa inicial do briefing. Não grave credenciais reais no Git, no ZIP ou em capturas.
++
++A credencial administrativa inicial continua a do briefing, respeitando maiúsculas e minúsculas. Para configurar uma credencial própria, use `npm run admin:hash`, salve o hash em `ADMIN_PASSWORD_HASH` e ajuste `ADMIN_DEFAULT_LOGIN_ENABLED=false`. Segredos de sessão persistentes devem ser gerados e guardados localmente pelo responsável. Não há segredos novos prontos para produção nesta entrega.
++
++Depois de instalar e configurar:
++
++```sh
++npm run build
++npm run dev
++```
++
++Acesse a loja e a administração no endereço local indicado pelo servidor, normalmente `http://localhost:3000/` e `http://localhost:3000/admin`. `npm run dev` carrega o arquivo `.env`. `npm start` não equivale a carregar automaticamente o arquivo de ambiente; na implantação, o provedor deve fornecer as variáveis.
++
++## Roteiro de aceitação no computador da apresentação
++
++Faça uma passada contínua: abrir a home, navegar nas categorias, buscar, abrir produto, mudar variação, adicionar à sacola e voltar. Repetir em celular ou viewport estreita. Os detalhes devem permanecer abaixo da galeria, sem salto indevido durante atualização e sem produto antigo reaparecendo.
++
++Na administração, testar senha errada e correta, atualização da página, edição de um produto na cópia de demonstração, salvar/reabrir, upload de imagem real e logout. Reabrir uma rota protegida para confirmar a recusa após sair. Confirmar que a imagem enviada aparece entre as mais recentes e persiste após recarregar.
++
++Na conta, testar código inválido e válido, e-mail em outra aba, perfil, endereço completo, histórico e saída. Repetir com a rede lenta: o botão Sair deve permanecer alcançável; uma resposta antiga não deve substituir a conta nova. Recompra deve abrir a sacola mantendo a rolagem do fundo bloqueada.
++
++Use somente dados fictícios na cópia de demonstração, identificando-os como teste. Não mostrar códigos locais, senhas, tokens, dados de clientes reais ou painéis de configuração com segredos durante gravações/apresentações.
++
++## Decisões comerciais necessárias
++
++Há 227 cadastros, mas 222 estão ocultos e sem preço. Não foram publicados artificialmente. Defina quais itens realmente devem estar à venda, seus preços, variantes e estoque. Os cinco itens atualmente vendáveis já existentes podem demonstrar os fluxos visuais, sem simular uma curadoria maior que a efetivamente configurada.
++
++Preencha identificação do fornecedor e endereço físico no administrador. Revise informações comerciais, condições e textos institucionais com o responsável. A auditoria de software não aprova textos jurídicos nem substitui a homologação fiscal/comercial.
++
++## Integrações e publicação
++
++Pagamento: usar a conta e o ambiente de teste do provedor, confirmar o retorno, webhook, valor, idempotência, status, cancelamento e restituição pertinentes. Não testar cobrança de cliente real durante uma demonstração técnica.
++
++E-mail: configurar SMTP de homologação e conferir entrega do código, expiração e mensagens; o código mostrado pelo modo local não comprova envio de e-mail.
++
++Frete: validar contrato, CEP, peso, dimensões e preço/prazo com o provedor escolhido. PostgreSQL: aplicar migrações em base temporária e exercitar persistência/concorrência antes de apontar para dados reais.
++
++Publicação exige configuração de produção, HTTPS, credencial própria, segredos persistentes, backup e verificação de cookies/cabeçalhos no navegador real. Nunca substituir o banco publicado pelo catálogo inicial do ZIP para “corrigir” uma divergência.
++
++## Comandos úteis
++
++```sh
++npm run test:client
++npm run test:offline
++npm run test:browser:client
++npm run deployment:check -- --strict
++npm run build
++npm run release:verify
++```
++
++Os testes de navegador adicionais exigem Python/Playwright e um Chromium instalado; esses componentes não foram adicionados como dependências da aplicação. A variante offline continua disponível para diagnóstico, mas seu relatório deve ser apresentado como **validação parcial**, nunca como produção homologada.
+--- a/CORRECOES-V11.0.4.md
++++ b/CORRECOES-V11.0.4.md
+@@ -1,3 +1,5 @@
++> HISTÓRICO DA PRIMEIRA AUDITORIA. A revisão vigente desta entrega é R2; consulte REVISAO-CLIENTE-R2.md e TESTES-CLIENTE-R2.md. Resultados antigos abaixo não certificam a revisão atual.
++
+ # INTEGRALL — correções e auditoria de 6 de setembro de 2026
+ 
+ ## Resultado executivo
+--- a/LEIA-ME-PRIMEIRO.txt
++++ b/LEIA-ME-PRIMEIRO.txt
+@@ -1,3 +1,7 @@
++REVISÃO ATUAL: CLIENTE R2 — base 11.1.8 preservada.
++Leia REVISAO-CLIENTE-R2.md, TESTES-CLIENTE-R2.md e APRESENTACAO-AO-CLIENTE.md antes de demonstrar/publicar.
++Validação local não equivale a homologação completa de produção.
++
+ INTEGRALL — REVISÃO DE 6 DE SETEMBRO DE 2026
+ Base interna: 11.1.8. Nome externo V11.0.4 mantido conforme solicitado.
+ 
+--- a/MANIFESTO-V11.0.4.txt
++++ b/MANIFESTO-V11.0.4.txt
+@@ -1,3 +1,5 @@
++> HISTÓRICO DA PRIMEIRA AUDITORIA. A revisão vigente desta entrega é R2; consulte REVISAO-CLIENTE-R2.md e TESTES-CLIENTE-R2.md. Resultados antigos abaixo não certificam a revisão atual.
++
+ INTEGRALL — MANIFESTO DE ENTREGA
+ Data: 2026-09-06
+ Entrada: INTEGRALL-v11.1.8-COMPLETO-CORRIGIDO(1).zip
+--- /dev/null
++++ b/REVISAO-CLIENTE-R2.md
+@@ -0,0 +1,56 @@
++# INTEGRALL — segunda auditoria, preparação para apresentação ao cliente
++
++**Data:** 6 de setembro de 2026. **Revisão:** R2 sobre a entrega auditada anterior. **Base preservada:** 11.1.8. O nome externo 11.0.4 do ZIP segue o briefing e não indica retorno a uma versão antiga.
++
++## Resultado executivo
++
++Foram encontradas e corrigidas falhas adicionais de autenticação do cliente, sessão na interface, tratamento de respostas da API, endereços, biblioteca de mídia, validação WebP, navegação de produtos e responsividade da conta. As correções estão no código, não apenas neste relatório. Os testes novos reproduziram defeitos antes da alteração e passaram depois dela.
++
++**Aprovado no escopo local testado; não homologado integralmente para produção.** O ambiente não concluiu a instalação npm por indisponibilidade do registro, e a suíte HTTP completa não consegue importar Express. O Chromium gerenciado também bloqueia a navegação HTTP nativa, inclusive loopback. As interfaces foram verificadas com código/DOM/CSS reais em páginas isoladas. Isso não equivale a validar o servidor Express, cookies nativos, HTTPS ou serviços externos.
++
++O catálogo contém **227 cadastros e 52 variações**, mas **222 cadastros permanecem como rascunhos ocultos sem preço**. O fallback público contém os cinco itens vendáveis existentes. Não foram inventados preços nem publicados produtos sem decisão comercial. Também faltam CPF/CNPJ do fornecedor e endereço físico no cadastro comercial. Esses pontos precisam de preenchimento pelo responsável antes de uma apresentação que prometa operação comercial completa.
++
++## Problemas e correções
++
++| ID | Prioridade | Defeito confirmado e causa | Correção e evidência |
++|---|---|---|---|
++| CLI-01 | P2 | O servidor retirava caracteres e cortava o código de acesso nos primeiros seis dígitos. Um código conhecido continuava aceito com letras, separadores ou dígitos excedentes. Não foi demonstrado acesso sem conhecer o código. | Exatamente seis dígitos, aceitando apenas espaços externos. Entradas malformadas não consomem o código válido. E-mails acima do limite são recusados em vez de truncados. `client-readiness.test.js`. |
++| CLI-02 | P2 | Datas de expiração inválidas resultavam em `NaN`, que não satisfazia a comparação de expiração. Havia o mesmo problema em códigos temporários do repositório local e valores inválidos de tentativas. | Datas finitas, contagem inteira válida, cookie no formato esperado e sessão com identidade/CSRF válidos. Registros de sessão inválidos são removidos. Testes diretos de autenticação e repositório; PostgreSQL real não executado. |
++| CLI-03 | P1 | A API descartava `status` e `code` ao criar erros. Assim, o tratamento de logout expirado que dependia de `error.status === 401` não funcionava com o cliente HTTP real. HTML com status 200 virava `{}`, aparentando sucesso. | Erros preservam status/código/requestId. Resposta JSON inválida falha explicitamente. 204 continua aceito. Testes executam o arquivo real da API em VM, não uma reimplementação. |
++| CLI-04 | P2 | O cliente HTTP substituía o AbortSignal do chamador; cancelamentos podiam continuar e ser confundidos com timeout. FormData recebia Content-Type de JSON. | Cancelamento antes, durante a requisição e durante leitura do corpo; remoção do listener ao terminar; timeout com código próprio; cabeçalho multipart delegado ao navegador. Testes positivos e negativos. |
++| CLI-05 | P2 | Respostas antigas de sessão podiam fazer a interface parecer autenticada após sair. Uma gravação de perfil antiga podia substituir os dados visuais de uma nova conta. | Geração de sessão, ordenação das leituras e controle das gravações. Revalidação em foco/visibilidade e sinal entre abas sem dados pessoais ou tokens. Evidências com respostas atrasadas. A API protegida não foi demonstrada como burlada por essas falhas de interface. |
++| CLI-06 | P2 | A tela aguardava os pedidos antes de criar o botão Sair. Respostas atrasadas podiam inserir ações privadas na tela de login ou reabrir a etapa de um código antigo. | Pedidos carregam sem bloquear os demais controles; operações vinculadas à tela e à sessão. Fechar/reabrir durante verificação não deixa carregamento permanente. Voltar da aba de e-mail preserva a etapa do código. |
++| CLI-07 | P2 | Endereços inválidos eram filtrados e o sexto endereço era descartado silenciosamente. CEP ausente ou longo era aceito/truncado. Alterar outro campo podia modificar endereços legados sem intenção. | Validação explícita no servidor e na interface; erro 400 para dados inválidos, limite informado e CEP completo. Patch de nome/telefone não migra endereços antigos. Teste no lock do Repository comprova que falha não apaga o estado anterior. |
++| CLI-08 | P2 | Comprar novamente abria a sacola e, depois, fechar a conta removia a trava de rolagem da sacola ainda aberta. | O fechamento só libera o body quando não resta outra camada bloqueadora ativa. Teste usa a função real de recompra/carrinho. |
++| CLI-09 | P2 | E-mail ou nome comprido fazia o conteúdo da conta ultrapassar seu painel, mesmo quando a página não apresentava overflow global. | Quebra de palavras, dimensões mínimas fluidas e campos/botões limitados à área disponível, sem esconder conteúdo. Dezoito larguras verificadas com textos longos. |
++| CLI-10 | P2 | A biblioteca local limitava a lista após ordenar nomes aleatórios de arquivos. Uma imagem recém-enviada podia ficar fora da primeira página. | Ordenação por data antes do limite, consistente com os outros provedores. Sidecar JSON nulo é ignorado com aviso em vez de derrubar a listagem. Gravações temporárias passam pelo mesmo bloco de limpeza. |
++| CLI-11 | P2 | Um WebP contendo apenas o cabeçalho de canvas era aceito como imagem. Um canvas pequeno mascarava dimensões excessivas do conteúdo VP8. | Exigência de conteúdo de imagem, validação individual de dimensões e consistência com canvas/quadro. Mantido suporte a WebP com perda, sem perda, transparência, animação e remoção de EXIF/XMP. |
++| CLI-12 | P2 | Um timer podia reabrir o produto anterior após mudar de categoria. A opção já utilizada `scroll:false` era ignorada e provocava salto de rolagem. | Abertura agendada cancelável e vinculada à localização atual; rolagem opcional respeitada; callbacks de foco/rolagem vinculados à versão do produto. Testes antes/depois reproduzem o salto de 4.615px e a reabertura indevida. |
++| CLI-13 | P3 | O elemento que realmente tinha papel de diálogo não tinha nome acessível, e o primeiro foco da conta podia ir ao backdrop. | `aria-labelledby` no diálogo e foco dentro do painel, mantendo Escape, clique no fundo e botão Fechar. Teste de nome acessível e foco. |
++| CLI-14 | P3 | Nem todas as respostas de conta tinham `no-store`; os arquivos públicos alterados reutilizavam URLs da revisão anterior. | Middleware de não-cache para toda a rota de conta e identificador `11.1.8-cliente-r2` nos assets modificados. Não houve desativação de CSP ou autenticação na aplicação. |
++
++P1/P2 indicam impacto relevante no fluxo; não são uma classificação CVSS nem uma afirmação de exploração externa. As correções de limpeza de temporários e cabeçalhos receberam revisão de código; não foram convertidas em alegação de falha de disco injetada ou homologação Express.
++
++## Testes e limites da evidência
++
++- **260 testes locais aprovados**, zero falhas e zero pulados na suíte offline completa, incluindo **36 testes novos**. Os 19 testes iniciais de caracterização tiveram 17 falhas antes das correções; a etapa seguinte acrescentou testes de perfil e repositório, também com falhas reproduzidas antes de corrigir.
++- **29 cenários da loja aprovados**, incluindo suas 18 larguras, galeria, variação, teclado, troca de produto, camadas e respostas atrasadas.
++- **34 cenários adicionais de navegador aprovados:** 16 fluxos/semântica/navegação e 18 larguras da conta. O nome de cada caso, resultado e erros de página estão nos JSON.
++- **304 arquivos de imagem operacionais + 5 fixtures** passaram pelo validador. **223 conteúdos sanitizados únicos** foram decodificados independentemente com Pillow sem falha. As cinco fixtures estão somente nos testes, nunca no catálogo.
++- **445 arquivos protegidos de dados, assets e backups** comparados por SHA-256: nenhum alterado. Não foram apagados produtos, imagens, estoque, configurações nem backups recebidos nesta revisão.
++
++As aprovações de navegador usam Chromium 144.0.7559.96, DOM/CSS/JS reais e respostas de API controladas. O relatório da administração distingue a ponte para controladores reais de uma implantação Express. Consulte `TESTES-CLIENTE-R2.md` e as evidências para o resultado final do build e os retestes.
++
++## Integridade, arquitetura e compatibilidade
++
++A arquitetura permanece JavaScript modular, HTML/CSS próprios, Express, Repository local/JSON ou PostgreSQL e as integrações já existentes. Nenhuma dependência foi adicionada/atualizada e o lockfile foi preservado. A função de validação do perfil foi extraída de `server.js` para `src/customer-profile.js` para permitir testar a regra real sem depender de Express. Esse módulo é incluído automaticamente na cópia de `src` para o build.
++
++Os detalhes do produto continuam em fluxo normal, em uma coluna e abaixo da galeria. Não houve redesign, ocultação de funcionalidades ou duplicação de componentes. A versão base continua 11.1.8; os rótulos de revisão e os arquivos de evidência identificam a R2.
++
++A validação WebP no servidor verifica estrutura e cabeçalhos, não toda a decodificação de entropia. A decodificação independente foi feita nos arquivos desta entrega, não é um serviço novo no backend e não comprova que todo arquivo futuro será válido. Referência técnica consultada: Google for Developers, *WebP Container Specification*, https://developers.google.com/speed/webp/docs/riff_container (6/9/2026).
++
++## Antes de apresentar
++
++Não anunciar pagamentos, e-mails, frete automático ou persistência em PostgreSQL como homologados. É necessário concluir uma instalação limpa com acesso ao registro, gerar o build completo e executar a navegação real no ambiente de demonstração. Para publicação, ainda se exigem credenciais próprias, HTTPS, dados comerciais e homologação das integrações.
++
++Use `APRESENTACAO-AO-CLIENTE.md` como roteiro. Os relatórios de versões anteriores são históricos, não aprovações automáticas desta revisão. O arquivo de reteste entregue fora do ZIP vincula os resultados ao SHA-256 do pacote efetivamente extraído.
+--- /dev/null
++++ b/TESTES-CLIENTE-R2.md
+@@ -0,0 +1,89 @@
++# INTEGRALL — testes da revisão R2 para apresentação ao cliente
++
++**Data:** 6 de setembro de 2026. **Base:** entrega auditada anterior, versão interna 11.1.8. **Critério:** APROVADO vale somente para o escopo descrito; REPROVADO e NÃO EXECUTADO não se convertem em aprovação por testes de outro tipo.
++
++## Ambiente
++
++Linux, Node 22.16.0, npm 10.9.2, Python 3.13, Playwright Python, Chromium 144.0.7559.96 e Pillow. Sem instalação bem-sucedida de Express, pg e Mercado Pago. O projeto não usa TypeScript; a verificação sintática não é type-check. Lint e segurança locais são verificadores próprios, não ESLint completo nem pentest.
++
++## Resultados consolidados desta revisão
++
++| Ensaio | Resultado | Escopo e evidência |
++|---|---|---|
++| Testes offline completos | **APROVADO** | 260 testes, 0 falhas, 0 pulados. `logs/testes-finais.log`. |
++| Testes novos de regressão | **APROVADO** | 36 testes em `tests/client-readiness.test.js`; estão incluídos nos 260, não são adicionais à contagem. `logs/final-new-tests.tap`. |
++| Loja no navegador | **APROVADO** | 29 casos, incluindo 18 larguras. `loja-regressao/browser-regression.json`. |
++| Conta e novos fluxos no navegador | **APROVADO** | 16 casos funcionais e 18 larguras, total 34; arquivos `conta-funcional/resultado.json` e `conta-responsiva/resultado.json`. |
++| Administração | **APROVADO no adaptador** | 13 cenários, 63 requisições: UI real, controladores reais por ponte HTTP, cookie jar do executor, dados auxiliares simulados. `admin/results.json`. Não é E2E Express nativo. |
++| Produto com imagens reais | **APROVADO** | 18 larguras; ordem do DOM, detalhes abaixo e medidas de overflow. `produtos-reais/results.json`. |
++| Validador de imagens | **APROVADO para os arquivos examinados** | 304 arquivos operacionais + 5 fixtures de teste, 0 rejeições inesperadas. `midias/compatibilidade.json`. |
++| Decodificação independente | **APROVADO** | Pillow decodificou todos os quadros de 223 conteúdos sanitizados únicos, sem falha. `midias/decodificacao.json`. Não é decodificador adicionado ao servidor. |
++| Integridade de dados e assets | **APROVADO** | 445 arquivos protegidos idênticos à entrada por SHA-256. 227 produtos e 52 variações preservados. `integridade-dados.json`. |
++| Instalação limpa npm | **REPROVADO** | Registro npm indisponível por DNS EAI_AGAIN; tentativa limitada interrompida sem concluir. `logs/clean-install-final.log`. |
++| Consulta npm audit | **REPROVADO / consulta indisponível** | Sem acesso ao registro. Não há conclusão de ausência de vulnerabilidades. `logs/npm-audit-final.log`. |
++| Build completo | **REPROVADO** | 260 testes passaram; o arquivo de testes HTTP falhou por Express ausente. Processo encerrou com código 1. `logs/build-completo.log`. |
++| Build offline R2 | **APROVADO, perfil offline** | 260 testes e geração de dist concluídos; 435 hashes verificados. Não instala nem substitui Express. `logs/build-offline-r2.log`. |
++| Pacote estático de produção por HTTP | **APROVADO, pacote estático** | 10 cenários e 435 hashes conferidos; API do servidor de teste responde 503 por definição. Não valida Express nem integrações. `logs/build-offline-r2.log`. |
++| Navegação HTTP nativa Chromium | **NÃO EXECUTADO: tentativa bloqueada** | ERR_BLOCKED_BY_ADMINISTRATOR, inclusive loopback. `navegacao-nativa.json`. Não houve remoção da política. |
++| Configuração comercial estrita | **REPROVADO** | Identificação fiscal e endereço físico do fornecedor não preenchidos. `logs/readiness-business.log`. Os 222 rascunhos ocultos sem preço não foram publicados artificialmente. |
++
++Todos os caminhos de evidência da tabela são relativos a `docs/revisao-cliente/`. O ZIP contém também documentação histórica de versões anteriores; suas contagens não são revalidações automáticas da R2.
++
++## Reprodução antes/depois
++
++Os primeiros 19 testes de caracterização tiveram **17 falhas e 2 aprovações** antes das correções: `logs/client-readiness-before.tap`. Após as correções iniciais, os mesmos 19 passaram. A etapa de perfil teve 28 testes, sendo **8 falhas e 20 aprovações**, antes de corrigir a função extraída; `logs/client-profile-before.tap`. A suíte expandida final tem 36 aprovações.
++
++A primeira bateria de oito testes de navegador teve **6 falhas e 2 aprovações** na base de entrada (`antes-browser/resultado.json`). Os dois cenários de rotas falharam antes (`rotas-antes/resultado.json`) e passaram depois: produto reabria fora da rota solicitada e atualização silenciosa deslocava a página em 4.615px. O nome/e-mail longo estourou o painel em 280px (`layout-antes/resultado.json`); as 18 larguras finais passaram sem esconder o texto.
++
++Execuções intermediárias estão em `historico-execucoes/` quando existentes. Algumas execuções em primeiro plano foram interrompidas pelo limite da ferramenta: arquivos parciais não foram contados como aprovações completas. As execuções finais acima terminaram e possuem resultados completos. O arquivo `.done.json` correspondente registra o código real de encerramento do processo.
++
++## Conteúdo dos 36 testes novos
++
++Cobrem código de acesso com letras/dígitos excedentes, e-mail longo, sessão/código com expiração inválida, tentativas inválidas, biblioteca local ordenada antes do limite e metadados nulos; erros/status/JSON/204/cancelamento/timeout/FormData da API; perfil com estrutura inválida, CEP ausente/longo, mais de cinco endereços, duplicação de ID, preservação de endereços legados em patch não relacionado e rollback após erro; WebP sem imagem, dimensões excessivas/inconsistentes, fixtures positivas com e sem perda, transparência, animação e remoção de metadados.
++
++Os testes de API executam o módulo real em VM com fetch controlado. Os de autenticação, perfil, repositório e armazenamento local executam seus módulos reais em diretórios temporários. Não usam os dados operacionais como base mutável de teste. Não comprovam todas as rotas, todos os provedores nem comportamento sob carga.
++
++## Navegador e responsividade
++
++Larguras examinadas: **280, 320, 360, 375, 390, 412, 430, 480, 600, 768, 820, 1024, 1280, 1366, 1440, 1600, 1920 e 2560px**. Há capturas selecionadas, não uma promessa de ensaio em dispositivos físicos.
++
++As páginas são carregadas em contexto isolado com HTML, CSS e JS reais. CSP é retirada somente na fixture, não no código publicado; requisições externas são controladas. As imagens dos ensaios de produto usam bytes reais. Os testes adicionais verificam saída com pedidos lentos, 401 e 503, respostas antigas de sessão e perfil, login com fechamento/reabertura, retorno da aba de e-mail, endereço inválido/válido, troca de conta, recompra, foco/nome do diálogo, cancelamento de abertura agendada e preservação da rolagem.
++
++Os sinais entre abas e eventos de foco são exercitados em contexto de teste; não são homologação de armazenamento, cookies e navegação nativos. A suíte administrativa usa adaptador Node HTTP para controladores reais, não o servidor Express. Não substitui o teste ponta a ponta da implantação.
++
++## Testes não executados e risco residual
++
++**Express/HTTPS/cookies nativos/rotas de produção:** bloqueados pelas dependências ausentes e pela política do navegador. Risco: falhas de middleware, cabeçalhos, cookie, redirect ou integração não detectadas. Repetir no ambiente de homologação, com instalação limpa, servidor real e navegador normal.
++
++**PostgreSQL, SMTP, pagamentos e transportadoras reais:** sem ambiente/credenciais de homologação; nenhuma cobrança nem envio real foi realizado. Risco: divergências de configuração, persistência e fluxos externos. Usar base temporária e credenciais sandbox, confirmar retornos, webhook, idempotência e falhas antes de produção.
++
++**Firefox, WebKit/Safari, Chrome/Edge independentes, dispositivos físicos, zoom nativo, leitor de tela e teclado virtual:** não executados. Chromium isolado não certifica compatibilidade universal ou WCAG. Repetir a matriz essencial com os equipamentos da apresentação.
++
++**Falha de disco injetada, carga, Web Vitals e vazamentos prolongados:** não executados. A limpeza de temporários e o middleware no-store receberam revisão, não uma alegação de homologação desses cenários. O validador WebP estrutural não garante a decodificação integral de qualquer upload futuro.
++
++## Comandos de reprodução
++
++```sh
++npm ci
++npm run check
++npm run lint
++npm run security:scan
++npm run audit
++npm run test:client
++npm run test:offline
++npm run build
++npm run build:offline
++npm run release:verify
++npm run test:production:http
++node scripts/client-media-audit.mjs
++python3 scripts/client-browser-regression.py --root . --out resultados-conta
++python3 scripts/browser-regression.py --root . --out resultados-loja
++python3 scripts/audit-admin-browser.py --root . --out resultados-admin
++python3 scripts/audit-real-layout.py --root . --out resultados-produtos
++```
++
++Python/Playwright/Pillow e Chromium são ferramentas dos ensaios; não foram adicionados como dependências da aplicação. `npm run build:offline` é uma alternativa de diagnóstico, não aprovação do comando completo que falhou.
++
++## Reteste do ZIP entregue
++
++O comprovante externo `RETESTE-ZIP-CLIENTE-R2.txt` registra a validação efetivamente executada após empacotar e extrair a entrega, com SHA-256, comandos, códigos de saída e escopos. Não confundir os resultados da pasta de trabalho com esse reteste. O hash do próprio ZIP não é colocado dentro dele, evitando autorreferência impossível.
+--- a/TESTES-V11.0.4.md
++++ b/TESTES-V11.0.4.md
+@@ -1,3 +1,5 @@
++> HISTÓRICO DA PRIMEIRA AUDITORIA. A revisão vigente desta entrega é R2; consulte REVISAO-CLIENTE-R2.md e TESTES-CLIENTE-R2.md. Resultados antigos abaixo não certificam a revisão atual.
++
+ # Testes — auditoria da base INTEGRALL 11.1.8
+ Data: 6 de setembro de 2026. Sufixo V11.0.4 mantido pelo nome solicitado da entrega.
+ 
+--- a/package.json
++++ b/package.json
+@@ -21,9 +21,9 @@
+     "build": "node scripts/build.mjs",
+     "verify": "npm run build",
+     "admin:check-default": "node scripts/check-default-admin.mjs",
+-    "test:dependency-free": "node --test --test-concurrency=1 tests/auth.test.js tests/carrier-split.test.js tests/catalog.test.js tests/correios.test.js tests/customer-auth-hardening.test.js tests/default-admin.test.js tests/image-upload.test.js tests/jadlog.test.js tests/mailer.test.js tests/order-state.test.js tests/payment-state.test.js tests/payments-checkout.test.js tests/providers.test.js tests/public-order.test.js tests/repository.test.js tests/v11.1-commerce.test.js tests/v11.1.2-ux.test.js tests/v11.1.3-ux.test.js tests/variant-images.test.js tests/visual-editor.test.js tests/v11.1.4-ux.test.js tests/v11.1.5-ux.test.js tests/v11.1.6-expert.test.js tests/release-v11.1.8.test.js tests/audit-regression.test.js",
++    "test:dependency-free": "node --test --test-concurrency=1 tests/auth.test.js tests/carrier-split.test.js tests/catalog.test.js tests/correios.test.js tests/customer-auth-hardening.test.js tests/default-admin.test.js tests/image-upload.test.js tests/jadlog.test.js tests/mailer.test.js tests/order-state.test.js tests/payment-state.test.js tests/payments-checkout.test.js tests/providers.test.js tests/public-order.test.js tests/repository.test.js tests/v11.1-commerce.test.js tests/v11.1.2-ux.test.js tests/v11.1.3-ux.test.js tests/variant-images.test.js tests/visual-editor.test.js tests/v11.1.4-ux.test.js tests/v11.1.5-ux.test.js tests/v11.1.6-expert.test.js tests/release-v11.1.8.test.js tests/audit-regression.test.js tests/client-readiness.test.js",
+     "test:http": "node --test --test-concurrency=1 tests/http.test.js",
+-    "test:offline": "node --test --test-concurrency=1 tests/auth.test.js tests/carrier-split.test.js tests/catalog.test.js tests/correios.test.js tests/customer-auth-hardening.test.js tests/default-admin.test.js tests/image-upload.test.js tests/jadlog.test.js tests/mailer.test.js tests/order-state.test.js tests/payment-state.test.js tests/payments-checkout.test.js tests/providers.test.js tests/public-order.test.js tests/repository.test.js tests/v11.1-commerce.test.js tests/v11.1.2-ux.test.js tests/v11.1.3-ux.test.js tests/variant-images.test.js tests/visual-editor.test.js tests/v11.1.4-ux.test.js tests/v11.1.5-ux.test.js tests/v11.1.6-expert.test.js tests/release-v11.1.8.test.js tests/audit-regression.test.js",
++    "test:offline": "node --test --test-concurrency=1 tests/auth.test.js tests/carrier-split.test.js tests/catalog.test.js tests/correios.test.js tests/customer-auth-hardening.test.js tests/default-admin.test.js tests/image-upload.test.js tests/jadlog.test.js tests/mailer.test.js tests/order-state.test.js tests/payment-state.test.js tests/payments-checkout.test.js tests/providers.test.js tests/public-order.test.js tests/repository.test.js tests/v11.1-commerce.test.js tests/v11.1.2-ux.test.js tests/v11.1.3-ux.test.js tests/variant-images.test.js tests/visual-editor.test.js tests/v11.1.4-ux.test.js tests/v11.1.5-ux.test.js tests/v11.1.6-expert.test.js tests/release-v11.1.8.test.js tests/audit-regression.test.js tests/client-readiness.test.js",
+     "test:browser": "python3 scripts/browser-regression.py --root . --out docs/evidencias-v11.1.8/loja",
+     "build:production": "npm run build",
+     "test:browser:admin": "python3 scripts/admin-browser-regression.py . docs/evidencias-v11.1.8/admin",
+@@ -47,7 +47,9 @@
+     "test:audit": "node --test tests/audit-regression.test.js",
+     "test:browser:audit": "python3 scripts/browser-regression.py --root . --out docs/evidencias-v11.0.4/fixture",
+     "test:browser:audit:real": "python3 scripts/audit-real-layout.py --root . --out docs/evidencias-v11.0.4/produtos-reais",
+-    "test:browser:audit:admin": "python3 scripts/audit-admin-browser.py --root . --out docs/evidencias-v11.0.4/admin-controladores"
++    "test:browser:audit:admin": "python3 scripts/audit-admin-browser.py --root . --out docs/evidencias-v11.0.4/admin-controladores",
++    "test:client": "node --test tests/client-readiness.test.js",
++    "test:browser:client": "python3 scripts/client-browser-regression.py --root . --out docs/revisao-cliente/validacao-conta"
+   },
+   "dependencies": {
+     "express": "5.1.0",
+--- a/public/css/commerce-v111.css
++++ b/public/css/commerce-v111.css
+@@ -1,3 +1,18 @@
+ /* INTEGRALL v11.1 — conta, busca avançada, promoções, avaliações e alertas */
+ .search-smart-wrap{position:relative;min-width:0}.search-suggestions{position:absolute;z-index:45;left:0;right:0;top:calc(100% + 6px);background:#fff;border:1px solid var(--line,#e8e1d8);box-shadow:0 18px 45px rgba(42,22,19,.14);max-height:390px;overflow:auto}.search-suggestion{width:100%;border:0;background:#fff;display:grid;grid-template-columns:52px 1fr auto;align-items:center;gap:12px;text-align:left;padding:10px 12px;color:inherit;cursor:pointer}.search-suggestion:hover,.search-suggestion:focus{background:#faf7f2}.search-suggestion img{width:52px;height:58px;object-fit:cover}.search-suggestion strong{display:block;font-size:.93rem}.search-suggestion small{display:block;color:#756a62;margin-top:2px}.search-suggestion-price{font-weight:700;white-space:nowrap}.advanced-filter-box{margin-top:12px;border:1px solid #e8e1d8;background:#fff}.advanced-filter-box summary{padding:12px 14px;cursor:pointer;font-weight:700;letter-spacing:.02em}.advanced-filter-box summary span{font-size:.75rem;font-weight:600;color:#711827;margin-left:7px}.advanced-filter-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;padding:0 14px 14px}.advanced-filter-grid label{font-size:.78rem;font-weight:700;color:#4f4741;display:grid;gap:6px}.filter-check{display:flex!important;align-items:center;gap:8px;align-self:end;min-height:46px}.filter-check input{width:auto}.promotion-badge{display:inline-flex;align-items:center;background:#520f1a;color:#fff;padding:5px 9px;font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;margin:0 6px 6px 0}.card-rating{font-size:.77rem;color:#765e3b;margin-top:5px}.price-stack{display:grid;gap:2px}.price-old{text-decoration:line-through;color:#8a827b;font-size:.78rem}.modal-commerce-heading{display:flex;align-items:center;gap:12px}.favorite-btn{border:1px solid #d7ccc0;background:#fff;color:#520f1a;width:40px;height:40px;font-size:1.55rem;cursor:pointer;line-height:1}.favorite-btn.is-favorite{background:#520f1a;color:#fff}.product-promotion-badges{margin:5px 0 4px}.review-summary-button{border:0;background:none;color:#6e5535;padding:3px 0 8px;font-weight:700;cursor:pointer}.free-shipping-progress{border:1px solid #ddcfbe;background:#fcf8f1;padding:12px;margin-bottom:12px}.free-shipping-copy{display:flex;justify-content:space-between;gap:12px;font-size:.78rem}.free-shipping-track{height:6px;background:#eadfce;margin-top:9px;overflow:hidden}.free-shipping-track i{display:block;height:100%;width:0;background:#520f1a;transition:width .2s}.restock-alert-box{border:1px solid #ddcfbe;background:#fcf8f1;padding:14px;margin:16px 0}.restock-alert-box p{margin:5px 0 10px;font-size:.86rem}.restock-alert-box form{display:grid;grid-template-columns:1fr auto;gap:8px}.commerce-feedback{min-height:1.2em;margin:8px 0 0!important;font-size:.78rem}.product-reviews{border-top:1px solid #e8e1d8;margin-top:28px;padding-top:24px}.reviews-head{display:flex;align-items:end;justify-content:space-between;gap:20px}.reviews-head h3{margin:3px 0 0}.reviews-list{display:grid;gap:10px;margin-top:15px}.review-item{border:1px solid #e8e1d8;padding:14px}.review-item-head{display:flex;justify-content:space-between;gap:12px}.review-stars{color:#8b682f;letter-spacing:.08em}.review-item p{margin:8px 0 0;color:#574f49}.review-form{border-top:1px dashed #d9cfc2;margin-top:18px;padding-top:16px;display:grid;gap:10px}.review-form-grid{display:grid;grid-template-columns:160px 1fr;gap:10px}.review-form label{display:grid;gap:5px;font-size:.8rem;font-weight:700}.review-login-note{font-size:.84rem;color:#756a62}.account-shell{position:fixed;inset:0;z-index:1200;display:none}.account-shell.open{display:block}.account-backdrop{position:absolute;inset:0;border:0;background:rgba(25,14,12,.58);width:100%}.account-panel{position:absolute;right:0;top:0;bottom:0;width:min(560px,100%);background:#fff;overflow:auto;padding:24px;box-shadow:-20px 0 60px rgba(20,10,8,.18)}.account-panel-head{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #e8e1d8;padding-bottom:16px;margin-bottom:18px}.account-panel-head h2{margin:0}.account-login-form,.account-code-form,.account-profile-form{display:grid;gap:12px}.account-section{border-top:1px solid #e8e1d8;margin-top:22px;padding-top:18px}.account-order{border:1px solid #e8e1d8;padding:13px;margin-top:9px;display:grid;gap:8px}.account-order-head{display:flex;justify-content:space-between;gap:12px}.account-order-lines{font-size:.83rem;color:#655d57}.account-address{border:1px solid #e8e1d8;padding:10px;margin-top:8px}.account-actions{display:flex;flex-wrap:wrap;gap:8px}.account-favorites{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.account-favorite{border:1px solid #e8e1d8;padding:10px;background:#fff;text-align:left;cursor:pointer}.reservation-notice{font-size:.78rem;color:#6f604e;margin-top:8px}.account-header-btn svg{fill:none;stroke:currentColor;stroke-width:1.5}.account-header-btn.has-session{box-shadow:inset 0 0 0 1px currentColor}.promo-admin-note{font-size:.78rem;color:#6e625a}
+ @media(max-width:900px){.advanced-filter-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:620px){.advanced-filter-grid{grid-template-columns:1fr}.restock-alert-box form,.review-form-grid{grid-template-columns:1fr}.account-panel{padding:18px}.account-favorites{grid-template-columns:1fr}.commerce-toolbar{grid-template-columns:1fr!important}}
++
++/* Conta: textos longos e controles preservam a largura disponível, sem esconder dados. */
++.account-panel { min-width:0; overflow-wrap:anywhere; }
++#accountContent,
++.account-login-form > *,
++.account-code-form > *,
++.account-profile-form > *,
++.account-order-head > * { min-width:0; max-width:100%; }
++.account-panel input,
++.account-panel select,
++.account-panel textarea { min-width:0; width:100%; max-width:100%; box-sizing:border-box; }
++.account-panel .btn { white-space:normal; overflow-wrap:anywhere; }
++.account-order-head { flex-wrap:wrap; }
++.account-panel-head { gap:12px; }
++.account-panel-head .close-btn { flex-shrink:0; }
+--- a/public/index.html
++++ b/public/index.html
+@@ -31,7 +31,7 @@
+ <link rel="stylesheet" href="/css/store.css?v=11.1.8-audit-20260906"/>
+ <link rel="stylesheet" href="/css/checkout.css?v=11.1.8"/>
+ <link rel="stylesheet" href="/css/premium-v104.css?v=11.1.8"/>
+-<link rel="stylesheet" href="/css/commerce-v111.css?v=11.1.8"/>
++<link rel="stylesheet" href="/css/commerce-v111.css?v=11.1.8-cliente-r2"/>
+ </head>
+ <body>
+ <noscript><div style="padding:16px;background:#fff3cd;color:#4a0a1a;text-align:center;font-family:Arial,sans-serif"><strong>INTEGRALL</strong><br/>O catálogo interativo precisa de JavaScript. Use os canais de atendimento informados no rodapé.</div></noscript>
+@@ -367,12 +367,12 @@
+ 
+ </div>
+ <section class="account-shell" id="accountModal" aria-hidden="true" aria-labelledby="accountTitle">
+-  <button class="account-backdrop" id="accountBackdrop" aria-label="Fechar minha conta" type="button"></button>
+-  <div class="account-panel" role="dialog" aria-modal="true">
++  <button class="account-backdrop" id="accountBackdrop" tabindex="-1" aria-label="Fechar minha conta" type="button"></button>
++  <div class="account-panel" role="dialog" aria-modal="true" aria-labelledby="accountTitle">
+     <div class="account-panel-head"><div><p class="category">INTEGRALL</p><h2 id="accountTitle">Minha conta</h2></div><button class="close-btn" id="closeAccount" type="button" aria-label="Fechar">✕</button></div>
+     <div id="accountContent"></div>
+   </div>
+ </section>
+ <div aria-live="polite" class="toast-stack" id="toasts"></div><script id="buildData" type="application/json">{"publicBuild":true,"appVersion":"11.1.8","version":10,"settings":{"catalogId":"catalog-1786110588222-8uuux6","brand":"INTEGRALL","subtitle":"Wine","catalogTitle":"Nossa seleção","catalogText":"Explore uma curadoria de vinhos, cafés, sucos e sabores especiais.","whatsapp":"","email":"integrallwine@gmail.com","instagram":"@integrallwine","address":"Retirada e entrega combinadas no atendimento.","footerDescription":"","shipMode":"quote","fixed":0,"free":0,"zoneFallback":"quote","pickup":"Retirada disponível mediante confirmação no atendimento.","zones":[],"visual":{"version":1,"preset":"editorial","assets":{"headerLogo":"","footerLogo":"","favicon":"","heroBackground":"/assets/brand/integrall-hero-cover.webp","headerBackground":"","footerBackground":"","pageBackground":""},"colors":{"page":"#ffffff","surface":"#ffffff","surfaceAlt":"#faf9f7","surfaceMuted":"#f4f1ec","primary":"#520f1a","primaryHover":"#711827","accent":"#b58a50","text":"#241c18","muted":"#756a62","line":"#dfd4c6","danger":"#a02c35","success":"#276447","buttonText":"#ffffff","headerBackground":"#24090d","footerBackground":"#35080e","cardBackground":"#ffffff","inputBackground":"#ffffff","heroText":"#fff7ec","heroOverlay":"rgba(0,0,0,.28)","headerText":"#f7ecdc","headerMuted":"#e5d7c5","footerText":"#e8d9c9","footerMuted":"#bdab9a","footerHeading":"#f6e9d7","footerAccent":"#c69b5a","price":"#302c29","badgeBackground":"rgba(255,255,255,.94)","badgeText":"#4a0a1a","outOfStockBackground":"rgba(74,10,26,.9)","outOfStockText":"#ffffff","overlay":"rgba(31,25,23,.18)"},"typography":{"bodyFont":"modern","headingFont":"classic","customBody":"","customHeading":"","baseSize":16,"bodyWeight":400,"headingWeight":400,"lineHeight":1.55,"headingScale":1.05,"navSize":10,"navSpacing":0.13,"brandSpacing":0.28,"navTransform":"uppercase"},"layout":{"maxWidth":1360,"gutterDesktop":64,"gutterMobile":20,"headerLayout":"inline","headerSticky":true,"headerPadding":20,"navGap":28,"headerOrder":["brand","nav","actions"],"catalogAlign":"left","catalogTop":80,"catalogBottom":100,"introMaxWidth":710,"blocks":["intro","filters","products"],"toolbarLayout":"columns","gridColumnsDesktop":4,"gridColumnsTablet":2,"gridColumnsMobile":1,"gridGapX":18,"gridGapY":46,"cardStyle":"minimal","cardAlign":"left","cardPadding":0,"imageRatio":"square","imageFit":"contain","radius":0,"buttonRadius":0,"inputRadius":0,"shadow":"none","footerAlign":"center","footerOrder":["description","contact","logo"],"headerLogoMode":"text","footerLogoMode":"text","headerLogoWidth":220,"footerLogoWidth":170,"heroMode":"plain","heroPadding":0,"heroRadius":0,"animations":true},"visibility":{"category":true,"unit":true,"stock":true,"quickAdd":true,"search":true,"filters":true,"resultCount":true,"footerDescription":true,"footerContact":true,"headerBrand":true,"headerNav":true,"headerActions":true,"intro":true,"filterBlock":true,"products":true,"footerLogo":true},"customCss":""}},"products":[{"id":"product-1786125158091-2hwfps","name":"Suco Integral de Uva bordô","slug":"suco-integral-de-uva-bordo","department":"sucos","subcategory":"Uva Bordô","brand":"Marqués de Mendonça","sku":"","imported":false,"country":"","region":"","price":2390,"unit":"Garrafa de 1L e 300ml","description":"Suco 100% integral de uva bordô, sem adição de açúcar, água ou conservantes. Pasteurizado para preservar o sabor intenso e os antioxidantes naturais da fruta. Produzido pela Marqués de Mendonça, é o suco de quem leva uva a sério: encorpado, de cor profunda e doçura natural da própria fruta. Disponível em garrafas de 300ml e 1 litro.","images":["/assets/products/01-suco-integral-de-uva-bord.webp"],"variants":[{"id":"variant-1786125213057-vsk38j","name":"300ml","price":1150,"stock":60,"unit":"","weightGrams":520,"image":"","position":1,"deletedAt":null},{"id":"variant-1786125277805-0nrmsu","name":"1L","price":2390,"stock":60,"unit":"","weightGrams":1500,"image":"","position":2,"deletedAt":null}],"attributes":{"volume":"1L e 300ml","flavor":"Uva Bordô","kind":"100% Integral","sugar":"Sem adição de açucar e adoçantes","storage":"Pasteurizado"},"stock":null,"stockMin":3,"maxPerOrder":null,"minPerOrder":null,"weightGrams":null,"lengthCm":9,"widthCm":9,"heightCm":32,"boxes":[{"variantId":"variant-1786125213057-vsk38j","units":12,"lengthCm":23,"widthCm":18,"heightCm":19,"weightGrams":6200},{"variantId":"variant-1786125277805-0nrmsu","units":12,"lengthCm":37,"widthCm":27,"heightCm":29,"weightGrams":18000}],"restockDate":"","preparation":"","available":true,"hidden":false,"featured":false,"madeToOrder":false,"seasonal":false,"giftEnabled":true,"position":1,"created":1786125158091,"updated":1786125308896,"deletedAt":null},{"id":"product-1786125523055-ivln6v","name":"Vinho Tinto Seco","slug":"vinho-tinto-seco","department":"vinhos","subcategory":"Vinho Tinto Seco","brand":"Marqués de Mendonça","sku":"332","imported":false,"country":"Brasil","region":"Serra Gaúcha","price":2699,"unit":"750ml","description":"Vinho tinto seco varietal de uva bordô, produzido pela Marqués de Mendonça na Serra Gaúcha. Aromas de frutas vermelhas maduras, corpo leve e taninos macios — um tinto honesto e fácil de gostar, ideal para o dia a dia. Harmoniza com massas ao molho vermelho, queijos e churrasco. Sirva entre 12° e 14°C. Teor alcoólico: 10,9%. Garrafas de 750ml e 375ml. Códigos do catálogo PDF: 332. Formatos: 750ml.","images":["/assets/products/02-vinho-tinto-seco.webp"],"variants":[{"id":"variant-1786125472992-y1279u","name":"750ml","price":2699,"stock":48,"unit":"","weightGrams":1300,"image":"","position":1,"deletedAt":null},{"id":"variant-1786125496593-h1h204","name":"375ml","price":2150,"stock":24,"unit":"","weightGrams":750,"image":"","position":2,"deletedAt":null}],"attributes":{"wineType":"Tinto","grape":"Bordô","alcohol":"10,9","volume":"750ml","serving":"12° a 14°"},"stock":null,"stockMin":3,"maxPerOrder":null,"minPerOrder":null,"weightGrams":null,"lengthCm":9,"widthCm":9,"heightCm":31,"boxes":[{"variantId":"variant-1786125472992-y1279u","units":12,"lengthCm":30,"widthCm":30,"heightCm":24,"weightGrams":14000},{"variantId":"variant-1786125472992-y1279u","units":6,"lengthCm":30,"widthCm":25,"heightCm":17,"weightGrams":7250}],"restockDate":"","preparation":"","available":true,"hidden":false,"featured":false,"madeToOrder":false,"seasonal":false,"giftEnabled":true,"position":2,"created":1786125523055,"updated":1786125523055,"deletedAt":null},{"id":"product-1786125594468-rlk598","name":"Mentirinha","slug":"mentirinha","department":"petit-four","subcategory":"Biscoito Folheado","brand":"Jurerê","sku":"948","imported":false,"country":"","region":"","price":5490,"unit":"Caixa com 2kg","description":"Biscoito folheado tradicional, crocante e delicado, feito em fornadas artesanais. A caixa de 2kg rende bem e é perfeita para servir com café, chá ou vinho de sobremesa. Validade de 6 meses. Pedido mínimo de 2 caixas. Códigos do catálogo PDF: 948. Formatos: Caixa 2 kg.","images":["/assets/recovered/1c10f7ef32d7e3a6e870cffa90741b4c496e512e3b37f667dd9edf331473a71f.webp"],"variants":[],"attributes":{"weight":"2kg","quantity":"caixa 2 kg","shelfLife":"6 meses","minOrder":"2 caixas"},"stock":30,"stockMin":3,"maxPerOrder":null,"minPerOrder":2,"weightGrams":2200,"lengthCm":35,"widthCm":25,"heightCm":12,"boxes":[],"restockDate":"","preparation":"","available":true,"hidden":false,"featured":false,"madeToOrder":false,"seasonal":false,"giftEnabled":true,"position":3,"created":1786125594468,"updated":1786125594468,"deletedAt":null},{"id":"product-1786125689329-bqbvu9","name":"Vó Damazia","slug":"vo-damazia","department":"cafes","subcategory":"Café Gerações","brand":"Gerações","sku":"","imported":false,"country":"","region":"","price":3990,"unit":"250g","description":"Café Gerações Vó Damazia: grãos 100% arábica cultivados na Serra Gaúcha, torra média que revela notas de chocolate e caramelo com acidez equilibrada. Uma homenagem de família em cada xícara. Embalagem de 250g.","images":["/assets/recovered/2ea21276cf85af8a2db2ce2a5e707f79503db89ad49cab194ea01f652a1a865a.webp"],"variants":[],"attributes":{"origin":"Serra Gaúcha","bean":"Arabica","roast":"Média","weight":"250g","method":"Torrado e moído","kind":"100% Arábica"},"stock":40,"stockMin":3,"maxPerOrder":null,"minPerOrder":null,"weightGrams":300,"lengthCm":18,"widthCm":8,"heightCm":26,"boxes":[],"restockDate":"","preparation":"","available":true,"hidden":false,"featured":false,"madeToOrder":false,"seasonal":false,"giftEnabled":true,"position":4,"created":1786125689329,"updated":1786125689329,"deletedAt":null},{"id":"product-1786125745701-ydcfi8","name":"Vinho verde Pescada","slug":"vinho-verde-pescada","department":"vinhos","subcategory":"Vinho Verde","brand":"Pescada","sku":"","imported":true,"country":"Portugal","region":"","price":6500,"unit":"750ml","description":"Vinho verde branco Pescada, importado de Portugal. Leve, fresco e levemente frisante, com notas cítricas e finalização limpa — o companheiro ideal de peixes, frutos do mar e tardes quentes. Sirva bem gelado. Garrafa de 750ml.","images":["/assets/products/05-vinho-verde-pescada.webp"],"variants":[],"attributes":{"wineType":"Branco","volume":"750ml"},"stock":24,"stockMin":3,"maxPerOrder":null,"minPerOrder":null,"weightGrams":1300,"lengthCm":9,"widthCm":9,"heightCm":31,"boxes":[{"variantId":"","units":12,"lengthCm":30,"widthCm":30,"heightCm":24,"weightGrams":14000},{"variantId":"","units":6,"lengthCm":30,"widthCm":25,"heightCm":17,"weightGrams":7250}],"restockDate":"","preparation":"","available":true,"hidden":false,"featured":false,"madeToOrder":false,"seasonal":false,"giftEnabled":true,"position":5,"created":1786125745701,"updated":1786125745701,"deletedAt":null}],"promotions":[],"commerce":{"businessName":"INTEGRALL | Boutique Gourmet","siteUrl":"","taxId":"","businessAddress":"","supportEmail":"integrallwine@gmail.com","supportPhone":"","privacyText":"POLÍTICA DE PRIVACIDADE\n\nA INTEGRALL coleta apenas os dados necessários para processar o seu pedido: nome, contato (e-mail ou telefone) e, quando houver entrega, o endereço. Esses dados são usados exclusivamente para: registrar e entregar o pedido, emitir comunicações sobre o próprio pedido e cumprir obrigações fiscais.\n\nNão vendemos nem compartilhamos seus dados com terceiros para fins de marketing. Os dados de pagamento são processados diretamente pelo provedor de pagamento (Mercado Pago) em ambiente próprio — a INTEGRALL não armazena números de cartão.\n\nConforme a Lei Geral de Proteção de Dados (Lei nº 13.709/2018), você pode solicitar a qualquer momento acesso, correção ou exclusão dos seus dados pelo nosso canal de atendimento. Os registros de pedidos são retidos pelo prazo necessário ao cumprimento de obrigações legais e fiscais.","termsText":"TERMOS DE USO\n\n1. Os preços, promoções, disponibilidade de estoque e prazos exibidos na loja podem ser atualizados sem aviso prévio; o valor válido é o confirmado no fechamento do pedido.\n\n2. A venda de bebidas alcoólicas é proibida para menores de 18 anos (Lei nº 13.106/2015). Ao comprar produtos alcoólicos, o cliente declara ser maior de idade, e a idade poderá ser conferida na entrega ou retirada mediante documento.\n\n3. O pedido é confirmado após o registro no sistema; o pagamento online, quando disponível, é processado pelo Mercado Pago em ambiente seguro.\n\n4. Para entregas via Correios, o prazo informado é uma estimativa da transportadora e começa a contar após a confirmação do pagamento e a postagem do pedido.\n\n5. Casos omissos serão tratados pelo canal de atendimento da loja.","returnsText":"TROCAS, DEVOLUÇÕES E CANCELAMENTOS\n\nArrependimento: nas compras realizadas fora do estabelecimento comercial, você pode exercer o direito de arrependimento no prazo legal de 7 dias, contado da assinatura ou do recebimento do produto, conforme o caso. Entre em contato pelo atendimento e informe o pedido. Os valores pagos serão restituídos na forma da legislação, sem transferir ao consumidor os custos necessários ao exercício desse direito.\n\nAvarias, produto incorreto e problemas de qualidade: comunique o ocorrido ao atendimento assim que possível. O número do pedido, uma descrição e fotos, quando disponíveis, ajudam na análise, mas a falta de fotos não impede a solicitação. Os prazos legais para reclamar de vícios não se confundem com os 7 dias de arrependimento. Para produtos não duráveis, o CDC prevê 30 dias para vícios aparentes ou de fácil constatação; nos vícios ocultos, a contagem se inicia quando o problema fica evidenciado.\n\nAlimentos e bebidas: preserve, quando possível, embalagem, lote e informações de validade e observe as condições de armazenamento. Não consuma produtos que apresentem sinais de deterioração ou risco. A abertura da embalagem não implica recusa automática da análise nem supressão dos direitos legais. O caso concreto será tratado conforme a legislação aplicável.\n\nCancelamento: solicite pelo atendimento, indicando o pedido. Antes do envio, o cancelamento será processado com restituição dos valores pagos. Após o envio, orientaremos o procedimento aplicável, sem afastar os direitos do consumidor.\n\nAtendimento: integrallwine@gmail.com.","retentionDays":90,"pixKey":"","paymentLink":"","paymentMethods":{"whatsapp":false,"pix":false,"card":false},"apiBaseUrl":"","apiMode":"required","lastUpdated":"2026-09-05T00:00:00.000Z"}}</script>
+ 
+-<script defer src="/js/store/age-gate.js?v=11.1.8"></script><script defer src="/js/store/catalog.js?v=11.1.8-audit-20260906"></script><script defer src="/js/store/cart.js?v=11.1.8"></script><script defer src="/js/store/shipping.js?v=11.1.8"></script><script defer src="/js/store/api.js?v=11.1.8"></script><script defer src="/js/store/checkout.js?v=11.1.8"></script><script defer src="/js/store/app.js?v=11.1.8"></script><script defer src="/js/store/commerce-v111.js?v=11.1.8-audit-20260906"></script><script defer src="/js/store/premium-v104.js?v=11.1.8"></script></body></html>+<script defer src="/js/store/age-gate.js?v=11.1.8"></script><script defer src="/js/store/catalog.js?v=11.1.8-cliente-r2"></script><script defer src="/js/store/cart.js?v=11.1.8"></script><script defer src="/js/store/shipping.js?v=11.1.8"></script><script defer src="/js/store/api.js?v=11.1.8-cliente-r2"></script><script defer src="/js/store/checkout.js?v=11.1.8"></script><script defer src="/js/store/app.js?v=11.1.8"></script><script defer src="/js/store/commerce-v111.js?v=11.1.8-cliente-r2"></script><script defer src="/js/store/premium-v104.js?v=11.1.8"></script></body></html>--- a/public/js/store/api.js
++++ b/public/js/store/api.js
+@@ -8,24 +8,51 @@
+     return location.origin;
+   }
+ 
++  function apiError(message, {status = 0, code = '', requestId = ''} = {}) {
++    return Object.assign(new Error(message), {status, code, requestId});
++  }
++
+   async function request(path, options = {}) {
+     const base = apiBase();
+-    if (!base) throw new Error('API indisponível fora de HTTP/HTTPS.');
++    if (!base) throw apiError('API indisponível fora de HTTP/HTTPS.', {code: 'API_ORIGIN_INVALID'});
+     const controller = new AbortController();
+-    const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
++    const externalSignal = options.signal;
++    // A caller cancelling navigation must not be converted into a timeout.
++    const abortFromCaller = () => controller.abort();
++    if (externalSignal?.aborted) throw new DOMException('Requisição cancelada.', 'AbortError');
++    externalSignal?.addEventListener('abort', abortFromCaller, {once: true});
++    let timedOut = false;
++    const timer = setTimeout(() => {timedOut = true; controller.abort();}, TIMEOUT_MS);
+     try {
+       const headers = new Headers(options.headers || {});
+       headers.set('Accept', 'application/json');
+-      if (options.body && !headers.has('Content-Type')) headers.set('Content-Type', 'application/json');
++      const multipart = typeof FormData !== 'undefined' && options.body instanceof FormData;
++      if (options.body && !multipart && !headers.has('Content-Type')) headers.set('Content-Type', 'application/json');
+       const response = await fetch(`${base}${path}`, {...options, headers, signal: controller.signal});
+-      const data = await response.json().catch(() => ({}));
+-      if (!response.ok) throw new Error(data.error || `Falha na API (HTTP ${response.status}).`);
++      let data = {};
++      let invalidJson = false;
++      if (response.status !== 204) {
++        try {data = await response.json();} catch (error) {if(controller.signal.aborted)throw error;invalidJson = true;}
++      }
++      if(controller.signal.aborted)throw new DOMException('Requisição cancelada.', 'AbortError');
++      const requestId = String(data?.requestId || response.headers?.get('x-request-id') || '');
++      if (!response.ok) {
++        throw apiError(typeof data?.error === 'string' ? data.error : `Falha na API (HTTP ${response.status}).`, {
++          status: response.status, code: String(data?.code || 'API_HTTP_ERROR'), requestId
++        });
++      }
++      if (invalidJson || !data || typeof data !== 'object') {
++        throw apiError('O servidor enviou uma resposta inválida. Tente novamente.', {
++          status: response.status, code: 'API_RESPONSE_INVALID', requestId
++        });
++      }
+       return data;
+     } catch (error) {
+-      if (error?.name === 'AbortError') throw new Error('A API demorou demais para responder.');
++      if (timedOut) throw apiError('A API demorou demais para responder.', {code: 'API_TIMEOUT'});
+       throw error;
+     } finally {
+       clearTimeout(timer);
++      externalSignal?.removeEventListener('abort', abortFromCaller);
+     }
+   }
+ 
+--- a/public/js/store/catalog.js
++++ b/public/js/store/catalog.js
+@@ -707,6 +707,18 @@
+   })();
+ 
+   let productOpener = null;
++  let productViewVersion = 0;
++  let pendingRouteProduct = null;
++  function cancelScheduledProduct() {clearTimeout(pendingRouteProduct);pendingRouteProduct=null;}
++  function scheduleRouteProduct(id, options={}, delay=20) {
++    cancelScheduledProduct();
++    const expectedLocation=`${location.pathname}${location.search}${location.hash}`;
++    pendingRouteProduct=setTimeout(()=>{
++      pendingRouteProduct=null;
++      if(expectedLocation!==`${location.pathname}${location.search}${location.hash}`||routeFromLocation().productId!==id)return;
++      openProduct(id,options);
++    },delay);
++  }
+ 
+   function productDetailsIsOpen() {
+     const details = $('#productDetails');
+@@ -745,6 +757,7 @@
+   }
+ 
+   function closeProductDetails({returnFocus = true, updateHistory = true} = {}) {
++    cancelScheduledProduct();const view=++productViewVersion;
+     const details = $('#productDetails');
+     if (!details || details.hidden) return false;
+     const productId = state.activeId;
+@@ -759,7 +772,7 @@
+     const previous = productOpener;
+     productOpener = null;
+     if (returnFocus && previous instanceof HTMLElement && previous.isConnected) {
+-      setTimeout(() => previous.focus(), 20);
++      setTimeout(() => {if(view===productViewVersion&&!productDetailsIsOpen())previous.focus()}, 20);
+     }
+     document.dispatchEvent(new CustomEvent('integrall:product-closed', {detail: {productId}}));
+     return true;
+@@ -774,18 +787,19 @@
+     });
+   }
+ 
+-  function revealProductDetails({focus = true} = {}) {
++  function revealProductDetails({focus = true, scroll = true} = {}) {
+     const details = $('#productDetails');
+     if (!details) return;
+     details.hidden = false;
+     details.setAttribute('aria-hidden', 'false');
+     details.classList.add('open');
+     updateProductTriggers();
++    const view=productViewVersion;
+     requestAnimationFrame(() => {
+       // One normal-flow region. Only opening/switching scrolls; field edits never do.
+-      if (details.hidden) return;
++      if (details.hidden||view!==productViewVersion) return;
+       const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+-      details.scrollIntoView({block:'start', behavior:focus && !reducedMotion ? 'smooth' : 'auto'});
++      if(scroll)details.scrollIntoView({block:'start', behavior:focus && !reducedMotion ? 'smooth' : 'auto'});
+       if (focus) details.focus({preventScroll:true});
+     });
+   }
+@@ -875,7 +889,8 @@
+     });
+   }
+ 
+-  function openProduct(id, {updateHash = false, focus = true, variantId = ''} = {}) {
++  function openProduct(id, {updateHash = false, focus = true, variantId = '', scroll = true} = {}) {
++    cancelScheduledProduct();productViewVersion++;
+     const product = getProduct(id); if (!product) return;
+     const details = $('#productDetails');
+     if (details?.hidden && document.activeElement instanceof HTMLElement) productOpener = document.activeElement;
+@@ -893,7 +908,7 @@
+     updateModalDeliveryOptions();
+     $$('input[name="shippingChoice"]').forEach(radio => radio.checked = radio.value === state.checkout.choice);
+     updateShippingChoiceClasses();
+-    revealProductDetails({focus});
++    revealProductDetails({focus,scroll});
+     if (updateHash && publicMode) {
+       const target = product.slug ? `/produto/${encodeURIComponent(product.slug)}` : `/#product=${encodeURIComponent(id)}`;
+       if (`${location.pathname}${location.search}${location.hash}` !== target) history.pushState({product: id}, '', target);
+@@ -1183,7 +1198,7 @@
+     $('#year').textContent = new Date().getFullYear();
+     $('#menuBtn').addEventListener('click', () => { const open = $('#nav').classList.toggle('open'); $('#menuBtn').setAttribute('aria-expanded', String(open)); $('#menuBtn').setAttribute('aria-label', open ? 'Fechar menu' : 'Abrir menu'); });
+     $$('[data-page]').forEach(button => button.addEventListener('click', event => { event.preventDefault(); navigate(button.dataset.page); }));
+-    window.addEventListener('popstate', () => { if (layers.current()) layers.close(false); closeProductDetails({returnFocus:false, updateHistory:false}); const route = routeFromLocation(); applyPage(route.page); if (route.productId) setTimeout(() => openProduct(route.productId, {focus:false}), 40); });
++    window.addEventListener('popstate', () => { if (layers.current()) layers.close(false); closeProductDetails({returnFocus:false, updateHistory:false}); const route = routeFromLocation(); applyPage(route.page); if (route.productId) scheduleRouteProduct(route.productId, {focus:false}, 40); });
+     $('#search').addEventListener('input', event => { state.search = event.target.value; resetProductWindow(); renderProducts(); updateSearchSuggestions(); });
+     $('#search').addEventListener('keydown', event => { if((event.key==='ArrowDown'||event.key==='ArrowUp')&&moveSearchSuggestion(event.key==='ArrowDown'?1:-1)){event.preventDefault();return;} if(event.key==='Escape'&&!$('#searchSuggestions')?.hidden){event.preventDefault();closeSearchSuggestions();} });
+     $('#category').addEventListener('change', event => { state.category = event.target.value; resetProductWindow(); renderProducts(); });
+@@ -1283,7 +1298,7 @@
+   }
+   function setProducts(products) {
+     state.products = Array.isArray(products) ? clone(products) : []; resetProductWindow();
+-    state.catalogReady = true; cleanCart(); renderCategories(); renderAdvancedFilters(); renderProducts(); renderCart(); document.dispatchEvent(new Event('integrall:catalog-updated')); const route=routeFromLocation(); if(route.productId)setTimeout(()=>openProduct(route.productId,{scroll:false,focus:false}),20);
++    state.catalogReady = true; cleanCart(); renderCategories(); renderAdvancedFilters(); renderProducts(); renderCart(); document.dispatchEvent(new Event('integrall:catalog-updated')); const route=routeFromLocation(); if(route.productId)scheduleRouteProduct(route.productId,{scroll:false,focus:false},20);else cancelScheduledProduct();
+   }
+   function setPromotions(promotions){state.promotions=Array.isArray(promotions)?clone(promotions):[];renderProducts();renderCart();if(state.activeId)updateModalSelection();document.dispatchEvent(new Event('integrall:catalog-updated'));}
+   function setSettings(nextSettings) {
+@@ -1301,7 +1316,7 @@
+ 
+   applySettings(); bindPublicEvents(); if (state.catalogReady) cleanCart();
+   const initialRoute = routeFromLocation(); applyPage(initialRoute.page); renderAdvancedFilters(); renderCart();
+-  if (initialRoute.productId) setTimeout(() => openProduct(initialRoute.productId), 60);
++  if (initialRoute.productId) scheduleRouteProduct(initialRoute.productId, {}, 60);
+ 
+   return {state, setProducts, setPromotions, setSettings, renderProducts, renderCart, renderCategories, renderAdvancedFilters, renderGallery, renderCardGalleryStage, changeCardGallery, changeModalGallery, openProduct, closeProductDetails, openCart, closeCart, navigate, notify, calculateShipping, getState, getProduct, productImages, basePrice, regularBasePrice, linePrice, regularLinePrice, productVariants, selectedVariant, variantDisplayImage, productAvailable, stockLimit, money, norm, digits, cepMask, placeholderImage, normalizeVisual, buildVisualCss, scopeVisualCss, visualDefaults: visualClone(VISUAL_DEFAULTS), applyVisualTheme, checkoutValidation, checkoutMessage, cartDetails, cartSubtotal, openWhatsApp, whatsappUrl, saveCart, cleanCart, addReorderItems, effectiveFreeShippingThreshold, activeProductPromotions, automaticPromotionPreview};
+ })({embedded:__integrallData,publicMode:true});--- a/public/js/store/commerce-v111.js
++++ b/public/js/store/commerce-v111.js
+@@ -5,7 +5,8 @@
+   const api = globalThis.IntegrallApi;
+   if (!app || !api) return;
+ 
+-  const state = {authenticated:false, account:null, csrfToken:'', orders:[], pendingEmail:'', activeProductId:'', reviewRequest:0, accountOpener:null, pendingFavoriteId:''};
++  const state = {authenticated:false, account:null, csrfToken:'', orders:[], pendingEmail:'', activeProductId:'', reviewRequest:0, accountOpener:null, pendingFavoriteId:'', sessionEpoch:0, sessionRead:0, accountView:0, authBusy:false, profileBusy:false, profileWrite:0, favoriteBusy:false, waitingForAuth:false};
++  const sessionNoticeKey = 'integrall-customer-session-change';
+   const create = (tag, cls='', text='') => { const node=document.createElement(tag); if(cls)node.className=cls; if(text!==undefined&&text!=='')node.textContent=text; return node; };
+   const money = value => app.money(Number(value)||0);
+   const statusLabels = {received:'Recebido',awaiting_payment:'Aguardando pagamento',paid:'Pago',payment_failed:'Falha no pagamento',payment_expired:'Pagamento expirado',payment_review:'Em revisão',preparing:'Preparando',ready:'Pronto',completed:'Concluído',refunded:'Reembolsado',chargeback:'Contestação',cancelled:'Cancelado'};
+@@ -16,65 +17,162 @@
+     return api.request(path,{...options,headers});
+   }
+   function setFeedback(selector,message,type=''){const node=$(selector);if(!node)return;node.textContent=message||'';node.className=`commerce-feedback${type?` ${type}`:''}`;}
+-  function accountFocusables(){const modal=$('#accountModal');if(!modal)return[];return[...modal.querySelectorAll('button:not([disabled]),[href],input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])')].filter(node=>!node.hidden&&node.offsetParent!==null)}
+-  function accountOpen(open=true,{restoreFocus=true}={}){const modal=$('#accountModal');if(!modal)return;if(open){state.accountOpener=document.activeElement instanceof HTMLElement?document.activeElement:null;app.closeProductDetails?.({returnFocus:false,updateHistory:true});app.closeCart?.({returnFocus:false});modal.classList.add('open');modal.setAttribute('aria-hidden','false');document.body.classList.add('lock');$('#openAccount')?.setAttribute('aria-expanded','true');setTimeout(()=>accountFocusables()[0]?.focus({preventScroll:true}),30);return}modal.classList.remove('open');modal.setAttribute('aria-hidden','true');document.body.classList.remove('lock');$('#openAccount')?.setAttribute('aria-expanded','false');state.pendingFavoriteId='';const previous=state.accountOpener;state.accountOpener=null;if(restoreFocus){const target=previous?.isConnected&&previous.offsetParent!==null?previous:$('#openAccount');setTimeout(()=>target?.focus?.({preventScroll:true}),20)}}
++  function accountFocusables(){const modal=$('#accountModal .account-panel');if(!modal)return[];return[...modal.querySelectorAll('button:not([disabled]),[href],input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])')].filter(node=>!node.hidden&&node.offsetParent!==null)}
++  function accountOpen(open=true,{restoreFocus=true}={}) {
++    const modal=$('#accountModal'); if(!modal)return;
++    state.accountView++;state.waitingForAuth=false;
++    if(open) {
++      state.accountOpener=document.activeElement instanceof HTMLElement?document.activeElement:null;
++      app.closeProductDetails?.({returnFocus:false,updateHistory:true});app.closeCart?.({returnFocus:false});
++      modal.classList.add('open');modal.setAttribute('aria-hidden','false');document.body.classList.add('lock');
++      $('#openAccount')?.setAttribute('aria-expanded','true');
++      setTimeout(()=>{if(modal.classList.contains('open'))accountFocusables()[0]?.focus({preventScroll:true})},30);
++      return;
++    }
++    modal.classList.remove('open');modal.setAttribute('aria-hidden','true');
++    if(!$('#cartDrawer')?.classList.contains('open')&&!$('#overlay')?.classList.contains('open'))document.body.classList.remove('lock');
++    $('#openAccount')?.setAttribute('aria-expanded','false');state.pendingFavoriteId='';
++    const previous=state.accountOpener;state.accountOpener=null;
++    if(restoreFocus){const target=previous?.isConnected&&previous.offsetParent!==null?previous:$('#openAccount');
++      setTimeout(()=>{if(!modal.classList.contains('open')&&!$('#cartDrawer')?.classList.contains('open'))target?.focus?.({preventScroll:true})},20)}
++  }
+   function accountButton(){const button=$('#openAccount');if(button){button.classList.toggle('has-session',state.authenticated);button.title=state.authenticated?`Minha conta — ${state.account?.email||''}`:'Entrar na minha conta';button.setAttribute('aria-expanded',String($('#accountModal')?.classList.contains('open')||false));}}
+   function syncCheckoutFromAccount(){if(!state.authenticated||!state.account)return;const name=$('#customerName'),email=$('#customerEmail'),phone=$('#customerPhone');if(name&&!name.value&&state.account.name){name.value=state.account.name;name.dispatchEvent(new Event('input',{bubbles:true}))}if(email&&!email.value)email.value=state.account.email||'';if(phone&&!phone.value)phone.value=state.account.phone||'';const address=(state.account.addresses||[])[0];if(address&&app.getState().checkout.choice==='delivery'){const map={deliveryStreet:'street',deliveryNumber:'number',deliveryNeighborhood:'neighborhood',deliveryComplement:'complement',deliveryCity:'city',deliveryState:'state'};for(const[id,key]of Object.entries(map)){const input=$('#'+id);if(input&&!input.value)input.value=address[key]||''}const cep=$('#modalCep');if(cep&&!cep.value&&address.cep)cep.value=app.cepMask(address.cep)}}
+ 
++  function syncAccountState(){accountButton();syncFavoriteButton();syncReviewForm();syncRestockBox()}
++  function clearSession(){
++    state.sessionEpoch++;state.sessionRead++;state.profileWrite++;state.profileBusy=false;
++    state.authenticated=false;state.account=null;state.csrfToken='';state.orders=[];
++    syncAccountState();
++  }
++  function settleAccountWait(){if(state.waitingForAuth&&!state.authBusy&&$('#accountModal')?.classList.contains('open')){state.waitingForAuth=false;void openAccount()}}
++  function notifySessionChange(){
++    // Cross-tab signal contains no email, password, session token or CSRF token.
++    try{localStorage.setItem(sessionNoticeKey,`${Date.now()}-${Math.random()}`)}catch{}
++  }
+   async function loadSession(){
+-    try{const data=await request('/api/account/session');state.authenticated=data.authenticated===true;state.account=data.account||null;state.csrfToken=data.csrfToken||'';if(state.authenticated)syncCheckoutFromAccount();}
+-    catch{state.authenticated=false;state.account=null;state.csrfToken='';}
+-    accountButton();syncFavoriteButton();syncReviewForm();syncRestockBox();return state.authenticated;
++    if(state.authBusy)return false;
++    const epoch=state.sessionEpoch,read=++state.sessionRead;
++    try{
++      const data=await request('/api/account/session');
++      if(epoch!==state.sessionEpoch||read!==state.sessionRead||state.authBusy)return false;
++      const authenticated=data.authenticated===true&&typeof data.account?.email==='string'&&Boolean(data.csrfToken);
++      if(!authenticated){if(state.authenticated||state.account||state.csrfToken)clearSession();else syncAccountState();return true}
++      if(!state.authenticated||state.account?.email!==data.account.email||state.csrfToken!==data.csrfToken){
++        state.sessionEpoch++;state.profileWrite++;state.profileBusy=false;state.orders=[];
++      }
++      state.authenticated=true;state.account=data.account;state.csrfToken=data.csrfToken;
++      syncCheckoutFromAccount();syncAccountState();return true;
++    }catch{
++      if(epoch!==state.sessionEpoch||read!==state.sessionRead||state.authBusy)return false;
++      if(state.authenticated||state.account||state.csrfToken)clearSession();else syncAccountState();return true;
++    }
+   }
+ 
+   function inputLabel(label,type='text',value='',attrs={}){const wrap=create('label');wrap.textContent=label;const input=create('input','field');input.type=type;input.value=value||'';Object.entries(attrs).forEach(([key,val])=>input.setAttribute(key,val));wrap.append(input);return{wrap,input};}
+ 
+   function renderLogin(){
+-    const root=$('#accountContent');root.replaceChildren();const intro=create('p','', 'Acesse sem senha. Enviaremos um código de 6 dígitos para o seu e-mail.');root.append(intro);
+-    const form=create('form','account-login-form');form.id='accountLoginForm';const email=inputLabel('E-mail','email',state.pendingEmail,{autocomplete:'email',maxlength:'254',required:''});email.input.id='accountLoginEmail';const button=create('button','btn primary','Enviar código');button.type='submit';const feedback=create('p','commerce-feedback');feedback.id='accountLoginFeedback';form.append(email.wrap,button,feedback);root.append(form);
+-    form.addEventListener('submit',async event=>{event.preventDefault();button.disabled=true;setFeedback('#accountLoginFeedback','Enviando…');try{state.pendingEmail=email.input.value.trim();const data=await request('/api/account/login/request',{method:'POST',body:JSON.stringify({email:state.pendingEmail})});renderCode(data.developmentCode||'');}catch(error){setFeedback('#accountLoginFeedback',error.message,'bad')}finally{button.disabled=false}});
++    const view=++state.accountView,root=$('#accountContent');root.replaceChildren();
++    root.append(create('p','', 'Acesse sem senha. Enviaremos um código de 6 dígitos para o seu e-mail.'));
++    const form=create('form','account-login-form');form.id='accountLoginForm';
++    const email=inputLabel('E-mail','email',state.pendingEmail,{autocomplete:'email',maxlength:'254',required:''});email.input.id='accountLoginEmail';
++    const button=create('button','btn primary','Enviar código');button.type='submit';
++    const feedback=create('p','commerce-feedback');feedback.id='accountLoginFeedback';feedback.setAttribute('role','status');
++    form.append(email.wrap,button,feedback);root.append(form);
++    const current=()=>view===state.accountView&&form.isConnected;
++    form.addEventListener('submit',async event=>{
++      event.preventDefault();if(button.disabled||!current())return;button.disabled=true;
++      setFeedback('#accountLoginFeedback','Enviando…');const submittedEmail=email.input.value.trim();
++      try{
++        const data=await request('/api/account/login/request',{method:'POST',body:JSON.stringify({email:submittedEmail})});
++        if(!current())return;state.pendingEmail=submittedEmail;renderCode(data.developmentCode||'');
++      }catch(error){if(current())setFeedback('#accountLoginFeedback',error.message,'bad')}
++      finally{if(current())button.disabled=false}
++    });
+   }
+ 
+   async function applyPendingFavorite(){const id=state.pendingFavoriteId;if(!id||!state.authenticated||!state.account)return false;state.pendingFavoriteId='';const favorites=new Set(state.account.favorites||[]);if(favorites.has(id))return true;favorites.add(id);try{await saveProfile({favorites:[...favorites]});app.notify('Produto salvo nos favoritos.','ok');return true}catch(error){app.notify(error.message,'bad');return false}}
+ 
+   function renderCode(developmentCode=''){
+-    const root=$('#accountContent');root.replaceChildren();root.append(create('p','',`Digite o código enviado para ${state.pendingEmail}.`));const form=create('form','account-code-form');const code=inputLabel('Código de 6 dígitos','text','',{inputmode:'numeric',autocomplete:'one-time-code',maxlength:'6',required:''});code.input.id='accountCode';const button=create('button','btn primary','Entrar');button.type='submit';const back=create('button','btn ghost small','Usar outro e-mail');back.type='button';const feedback=create('p','commerce-feedback');feedback.id='accountCodeFeedback';form.append(code.wrap,button,back,feedback);root.append(form);if(developmentCode){const dev=create('p','reservation-notice',`Ambiente local: código ${developmentCode}`);root.append(dev);code.input.value=developmentCode}
+-    back.addEventListener('click',renderLogin);form.addEventListener('submit',async event=>{event.preventDefault();button.disabled=true;try{const data=await request('/api/account/login/verify',{method:'POST',body:JSON.stringify({email:state.pendingEmail,code:code.input.value})});state.authenticated=true;state.account=data.account;state.csrfToken=data.csrfToken;accountButton();syncCheckoutFromAccount();await applyPendingFavorite();await renderAccount();syncFavoriteButton();syncReviewForm();}catch(error){setFeedback('#accountCodeFeedback',error.message,'bad')}finally{button.disabled=false}});
+-  }
+-
+-  async function saveProfile(patch){const data=await request('/api/account/profile',{method:'PATCH',csrf:true,body:JSON.stringify(patch)});state.account=data.account;accountButton();syncCheckoutFromAccount();return data.account;}
++    const view=++state.accountView,email=state.pendingEmail,root=$('#accountContent');root.replaceChildren();
++    root.append(create('p','',`Digite o código enviado para ${email}.`));
++    const form=create('form','account-code-form');
++    const code=inputLabel('Código de 6 dígitos','text','',{inputmode:'numeric',autocomplete:'one-time-code',maxlength:'6',pattern:'[0-9]{6}',required:''});code.input.id='accountCode';
++    const button=create('button','btn primary','Entrar');button.type='submit';
++    const back=create('button','btn ghost small','Usar outro e-mail');back.type='button';
++    const feedback=create('p','commerce-feedback');feedback.id='accountCodeFeedback';feedback.setAttribute('role','status');
++    form.append(code.wrap,button,back,feedback);root.append(form);
++    if(developmentCode){root.append(create('p','reservation-notice',`Ambiente local: código ${developmentCode}`));code.input.value=developmentCode}
++    const current=()=>view===state.accountView&&form.isConnected;
++    back.addEventListener('click',()=>{if(!state.authBusy)renderLogin()});
++    form.addEventListener('submit',async event=>{
++      event.preventDefault();if(button.disabled||state.authBusy||!current())return;
++      if(!/^[0-9]{6}$/.test(code.input.value)){setFeedback('#accountCodeFeedback','Informe os 6 dígitos do código.','bad');return}
++      button.disabled=true;back.disabled=true;state.authBusy=true;
++      const epoch=++state.sessionEpoch;state.sessionRead++;
++      try{
++        const data=await request('/api/account/login/verify',{method:'POST',body:JSON.stringify({email,code:code.input.value})});
++        if(epoch!==state.sessionEpoch||!current())return;
++        if(data.authenticated!==true||typeof data.account?.email!=='string'||!data.csrfToken)throw new Error('Resposta de acesso inválida. Tente novamente.');
++        state.authenticated=true;state.account=data.account;state.csrfToken=data.csrfToken;state.authBusy=false;
++        syncAccountState();syncCheckoutFromAccount();notifySessionChange();await applyPendingFavorite();
++        if(epoch===state.sessionEpoch&&current())renderAccount();
++      }catch(error){if(epoch===state.sessionEpoch&&current())setFeedback('#accountCodeFeedback',error.message,'bad')}
++      finally{if(epoch===state.sessionEpoch)state.authBusy=false;if(current()){button.disabled=false;back.disabled=false}settleAccountWait()}
++    });
++  }
++
++  async function saveProfile(patch){
++    if(!state.authenticated||state.authBusy)throw new Error('Entre na sua conta para continuar.');
++    if(state.profileBusy)throw new Error('Aguarde a conclusão da alteração anterior.');
++    const epoch=state.sessionEpoch,email=state.account.email,write=++state.profileWrite;
++    state.profileBusy=true;
++    try{
++      const data=await request('/api/account/profile',{method:'PATCH',csrf:true,body:JSON.stringify(patch)});
++      if(epoch!==state.sessionEpoch||!state.authenticated||write!==state.profileWrite)throw new Error('A sessão mudou. Reabra sua conta para conferir os dados.');
++      if(data.account?.email!==email)throw new Error('Resposta de perfil inválida. Atualize sua conta.');
++      state.account=data.account;accountButton();syncCheckoutFromAccount();return data.account;
++    }catch(error){
++      if(error.status===401&&epoch===state.sessionEpoch){clearSession();renderLogin()}
++      throw error;
++    }finally{if(write===state.profileWrite)state.profileBusy=false}
++  }
+ 
+   function appendAccountSection(root,title){const section=create('section','account-section');section.append(create('h3','',title));root.append(section);return section;}
+ 
+   async function renderAccount(){
+     if(!state.authenticated){renderLogin();return}
++    const view=++state.accountView,epoch=state.sessionEpoch;
+     const root=$('#accountContent');root.replaceChildren();const hello=create('p','',state.account?.name?`Olá, ${state.account.name}.`:`Conectado como ${state.account?.email||''}.`);root.append(hello);
+     const profile=appendAccountSection(root,'Dados pessoais');const form=create('form','account-profile-form');const name=inputLabel('Nome','text',state.account?.name||'',{maxlength:'80',autocomplete:'name'});const phone=inputLabel('Telefone','tel',state.account?.phone||'',{maxlength:'30',autocomplete:'tel'});const email=create('p','reservation-notice',`E-mail: ${state.account?.email||''}`);const save=create('button','btn primary','Salvar dados');save.type='submit';const feedback=create('p','commerce-feedback');feedback.id='accountProfileFeedback';form.append(name.wrap,phone.wrap,email,save,feedback);profile.append(form);
+-    form.addEventListener('submit',async event=>{event.preventDefault();save.disabled=true;try{await saveProfile({name:name.input.value,phone:phone.input.value});setFeedback('#accountProfileFeedback','Dados salvos.','ok')}catch(error){setFeedback('#accountProfileFeedback',error.message,'bad')}finally{save.disabled=false}});
++    form.addEventListener('submit',async event=>{event.preventDefault();if(save.disabled)return;save.disabled=true;try{await saveProfile({name:name.input.value,phone:phone.input.value});if(view!==state.accountView||epoch!==state.sessionEpoch)return;setFeedback('#accountProfileFeedback','Dados salvos.','ok')}catch(error){if(view===state.accountView&&epoch===state.sessionEpoch)setFeedback('#accountProfileFeedback',error.message,'bad')}finally{save.disabled=false}});
+ 
+     renderAddresses(root);
+-    await renderOrders(root);
++    void renderOrders(root,view,epoch);
+     renderFavorites(root);
+-    const actions=appendAccountSection(root,'Sessão');const logout=create('button','btn ghost small','Sair desta conta');logout.type='button';actions.append(logout);logout.addEventListener('click',async()=>{
+-      if(logout.disabled)return;logout.disabled=true;
+-      try {
++    const actions=appendAccountSection(root,'Sessão');const logout=create('button','btn ghost small','Sair desta conta');logout.type='button';actions.append(logout);
++    logout.addEventListener('click',async()=>{
++      if(logout.disabled||state.authBusy)return;logout.disabled=true;state.authBusy=true;
++      const operation=++state.sessionEpoch;state.sessionRead++;
++      try{
+         await request('/api/account/logout',{method:'POST',csrf:true});
+-        state.authenticated=false;state.account=null;state.csrfToken='';state.orders=[];
+-        accountButton();renderLogin();syncFavoriteButton();syncReviewForm();
+-      } catch(error) {
+-        if(error.status===401){state.authenticated=false;state.account=null;state.csrfToken='';state.orders=[];accountButton();renderLogin();syncFavoriteButton();syncReviewForm();}
+-        else app.notify('Não foi possível sair da conta. Verifique a conexão e tente novamente.','bad');
+-      } finally {logout.disabled=false;}
++        if(operation!==state.sessionEpoch)return;
++        clearSession();state.authBusy=false;renderLogin();notifySessionChange();
++      }catch(error){
++        if(operation!==state.sessionEpoch)return;
++        if(error.status===401){clearSession();state.authBusy=false;renderLogin();notifySessionChange()}
++        else {state.authBusy=false;app.notify('Não foi possível sair da conta. Verifique a conexão e tente novamente.','bad');if(view===state.accountView)renderAccount()}
++      }finally{if(operation===state.sessionEpoch)state.authBusy=false;logout.disabled=false;settleAccountWait()}
+     });
+   }
+ 
+   function renderAddresses(root){
+     const section=appendAccountSection(root,'Endereços');const list=create('div');(state.account?.addresses||[]).forEach(address=>{const card=create('div','account-address');card.append(create('strong','',address.label||'Endereço'),create('p','',`${address.street}, ${address.number}${address.complement?` — ${address.complement}`:''}`),create('p','',`${address.neighborhood?`${address.neighborhood} — `:''}${address.city}/${address.state} · ${app.cepMask(address.cep||'')}`));const remove=create('button','btn ghost small','Remover');remove.type='button';remove.addEventListener('click',async()=>{const addresses=(state.account.addresses||[]).filter(item=>item.id!==address.id);try{await saveProfile({addresses});await renderAccount()}catch(error){app.notify(error.message,'bad')}});card.append(remove);list.append(card)});section.append(list);
+-    const details=create('details');const summary=create('summary','', 'Adicionar endereço');details.append(summary);const form=create('form','account-profile-form');const fields=[['Identificação','label','Casa'],['CEP','cep',''],['Rua / avenida','street',''],['Número','number',''],['Complemento','complement',''],['Bairro','neighborhood',''],['Cidade','city',''],['UF','state','']];const refs={};fields.forEach(([label,key,value])=>{const item=inputLabel(label,'text',value,{maxlength:key==='state'?'2':key==='cep'?'9':'180'});refs[key]=item.input;form.append(item.wrap)});const add=create('button','btn outline small','Adicionar endereço');add.type='submit';const feedback=create('p','commerce-feedback');form.append(add,feedback);details.append(form);section.append(details);form.addEventListener('submit',async event=>{event.preventDefault();const address=Object.fromEntries(Object.entries(refs).map(([key,input])=>[key,input.value.trim()]));address.id=`addr-${Date.now()}`;address.cep=app.digits(address.cep);address.state=address.state.toUpperCase();if(!address.street||!address.number||!address.city||!/^[A-Z]{2}$/.test(address.state)){feedback.textContent='Preencha rua, número, cidade e UF.';return}try{await saveProfile({addresses:[...(state.account.addresses||[]),address]});await renderAccount()}catch(error){feedback.textContent=error.message}});
+-  }
+-
+-  async function renderOrders(root){
+-    const section=appendAccountSection(root,'Meus pedidos');const loading=create('p','reservation-notice','Carregando pedidos…');section.append(loading);try{const data=await request('/api/account/orders');state.orders=Array.isArray(data.orders)?data.orders:[];loading.remove();if(!state.orders.length){section.append(create('p','reservation-notice','Você ainda não possui pedidos vinculados a este e-mail.'));return}state.orders.forEach(order=>{const card=create('article','account-order');const head=create('div','account-order-head');head.append(create('strong','',order.id),create('span','',statusLabels[order.status]||order.status));card.append(head,create('span','',`${new Date(order.createdAt).toLocaleDateString('pt-BR')} · ${money(order.totalCents)}`));const lines=create('div','account-order-lines',(order.items||[]).map(item=>`${item.qty}× ${item.name}${item.variant?` — ${item.variant}`:''}`).join(' · '));card.append(lines);if(order.canReorder){const again=create('button','btn outline small','Comprar novamente');again.type='button';again.addEventListener('click',async()=>{again.disabled=true;try{const result=await request('/api/account/reorder',{method:'POST',csrf:true,body:JSON.stringify({orderId:order.id})});const added=app.addReorderItems(result.items);if(added.added)accountOpen(false,{restoreFocus:false})}catch(error){app.notify(error.message,'bad')}finally{again.disabled=false}});card.append(again)}section.append(card)})}catch(error){loading.textContent=error.message;}
++    const details=create('details');const summary=create('summary','', 'Adicionar endereço');details.append(summary);const form=create('form','account-profile-form');const fields=[['Identificação','label','Casa'],['CEP','cep',''],['Rua / avenida','street',''],['Número','number',''],['Complemento','complement',''],['Bairro','neighborhood',''],['Cidade','city',''],['UF','state','']];const refs={};fields.forEach(([label,key,value])=>{const item=inputLabel(label,'text',value,{maxlength:key==='state'?'2':key==='cep'?'9':'180'});refs[key]=item.input;form.append(item.wrap)});const add=create('button','btn outline small','Adicionar endereço');add.type='submit';const feedback=create('p','commerce-feedback');form.append(add,feedback);details.append(form);section.append(details);form.addEventListener('submit',async event=>{event.preventDefault();const address=Object.fromEntries(Object.entries(refs).map(([key,input])=>[key,input.value.trim()]));address.id=`addr-${Date.now()}`;address.cep=app.digits(address.cep);address.state=address.state.toUpperCase();if(!/^[0-9]{8}$/.test(address.cep)||!address.street||!address.number||!address.city||!/^[A-Z]{2}$/.test(address.state)){feedback.textContent='Preencha CEP com 8 dígitos, rua, número, cidade e UF.';return}if((state.account.addresses||[]).length>=5){feedback.textContent='Você pode salvar até 5 endereços. Remova um antes de adicionar outro.';return}if(add.disabled)return;add.disabled=true;try{await saveProfile({addresses:[...(state.account.addresses||[]),address]});await renderAccount()}catch(error){feedback.textContent=error.message}finally{add.disabled=false}});
++  }
++
++  async function renderOrders(root,view,epoch){
++    const section=appendAccountSection(root,'Meus pedidos');const current=()=>section.isConnected&&view===state.accountView&&epoch===state.sessionEpoch&&state.authenticated;const loading=create('p','reservation-notice','Carregando pedidos…');section.append(loading);try{const data=await request('/api/account/orders');if(!current())return;state.orders=Array.isArray(data.orders)?data.orders:[];loading.remove();if(!state.orders.length){section.append(create('p','reservation-notice','Você ainda não possui pedidos vinculados a este e-mail.'));return}state.orders.forEach(order=>{const card=create('article','account-order');const head=create('div','account-order-head');head.append(create('strong','',order.id),create('span','',statusLabels[order.status]||order.status));card.append(head,create('span','',`${new Date(order.createdAt).toLocaleDateString('pt-BR')} · ${money(order.totalCents)}`));const lines=create('div','account-order-lines',(order.items||[]).map(item=>`${item.qty}× ${item.name}${item.variant?` — ${item.variant}`:''}`).join(' · '));card.append(lines);if(order.canReorder){const again=create('button','btn outline small','Comprar novamente');again.type='button';again.addEventListener('click',async()=>{again.disabled=true;try{const result=await request('/api/account/reorder',{method:'POST',csrf:true,body:JSON.stringify({orderId:order.id})});if(!current())return;const added=app.addReorderItems(result.items);if(added.added)accountOpen(false,{restoreFocus:false})}catch(error){app.notify(error.message,'bad')}finally{again.disabled=false}});card.append(again)}section.append(card)})}catch(error){if(!current())return;if(error.status===401){clearSession();renderLogin()}else loading.textContent=error.message;}
+   }
+ 
+   function renderFavorites(root){
+@@ -127,7 +225,25 @@
+     finally{if(sameView())button.disabled=false;}
+   }
+ 
+-  async function openAccount(){state.pendingFavoriteId='';accountOpen(true);await loadSession();await renderAccount()}
++  async function openAccount(){
++    state.pendingFavoriteId='';accountOpen(true);
++    const view=state.accountView;
++    $('#accountContent').replaceChildren(create('p','reservation-notice','Verificando sua conta…'));
++    if(state.authBusy){state.waitingForAuth=true;return}
++    const applied=await loadSession();
++    if(applied&&view===state.accountView&&$('#accountModal')?.classList.contains('open'))renderAccount();
++  }
++  let lastRevalidation=0;
++  async function revalidateAccount(){
++    if(document.hidden||state.authBusy||Date.now()-lastRevalidation<750)return;
++    lastRevalidation=Date.now();const epoch=state.sessionEpoch,view=state.accountView;
++    const applied=await loadSession();
++    if(applied&&epoch!==state.sessionEpoch&&view===state.accountView&&$('#accountModal')?.classList.contains('open'))renderAccount();
++  }
++  window.addEventListener('focus',revalidateAccount);
++  window.addEventListener('pageshow',event=>{if(event.persisted)void revalidateAccount()});
++  document.addEventListener('visibilitychange',revalidateAccount);
++  window.addEventListener('storage',event=>{if(event.key===sessionNoticeKey){lastRevalidation=0;void revalidateAccount()}});
+   $('#openAccount')?.addEventListener('click',openAccount);$('#closeAccount')?.addEventListener('click',()=>accountOpen(false));$('#accountBackdrop')?.addEventListener('click',()=>accountOpen(false));$('#modalFavorite')?.addEventListener('click',toggleFavorite);$('#reviewForm')?.addEventListener('submit',submitReview);$('#restockAlertForm')?.addEventListener('submit',submitRestock);
+   document.addEventListener('integrall:close-account',event=>{if($('#accountModal')?.classList.contains('open'))accountOpen(false,{restoreFocus:event.detail?.restoreFocus!==false})});
+   document.addEventListener('keydown',event=>{if(!$('#accountModal')?.classList.contains('open'))return;if(event.key==='Escape'){event.preventDefault();accountOpen(false);return}if(event.key!=='Tab')return;const items=accountFocusables();if(!items.length){event.preventDefault();return}const first=items[0],last=items[items.length-1];if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus()}else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus()}});
+--- a/scripts/browser-regression.py
++++ b/scripts/browser-regression.py
+@@ -86,8 +86,11 @@
+     parser.add_argument("--root", type=Path, default=Path.cwd())
+     parser.add_argument("--out", type=Path, required=True)
+     parser.add_argument("--chromium", default="/usr/bin/chromium")
++    parser.add_argument("--widths", default="", help="Subconjunto explícito para reteste, ex.: 320,768,1440. O padrão mantém as 18 larguras.")
+     parser.add_argument("--experimental-css-zoom", action="store_true", help="Experimento de CSS zoom; não equivale ao zoom nativo do navegador.")
+     args = parser.parse_args()
++    widths = [int(x.strip()) for x in args.widths.split(",")] if args.widths else WIDTHS
++    if not widths or any(w < 200 or w > 4096 for w in widths):parser.error("Larguras devem estar entre 200 e 4096px.")
+ 
+     root = args.root.resolve(); out = args.out.resolve(); out.mkdir(parents=True, exist_ok=True)
+     html = prepare_html(root)
+@@ -105,7 +108,7 @@
+         context = browser.new_context(viewport={"width": WIDTHS[0], "height": 900}, device_scale_factor=1, bypass_csp=True, reduced_motion="reduce")
+         transparent_png = bytes.fromhex('89504e470d0a1a0a0000000d49484452000000010000000108060000001f15c4890000000d49444154789c6360000000020001e221bc330000000049454e44ae426082')
+ 
+-        for width in WIDTHS:
++        for width in widths:
+             print(f"[browser] {width}px", flush=True)
+             page = context.new_page(); page.set_viewport_size({"width": width, "height": 900})
+             page.route('https://integrall.test/**', lambda route: route.fulfill(status=200, content_type='image/png', body=transparent_png))
+@@ -355,7 +358,7 @@
+         context.close(); browser.close()
+ 
+     (out / "browser-regression.json").write_text(json.dumps(results, ensure_ascii=False, indent=2), encoding="utf-8")
+-    summary = {"status": "APROVADO" if not failures else "REPROVADO", "widths": len(WIDTHS), "failures": failures}
++    summary = {"status": "APROVADO" if not failures else "REPROVADO", "widths": len(widths), "testedWidths": widths, "failures": failures}
+     (out / "browser-regression-summary.json").write_text(json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8")
+     print(json.dumps(summary, ensure_ascii=False, indent=2))
+     return 0 if not failures else 1
+--- a/scripts/build-production.mjs
++++ b/scripts/build-production.mjs
+@@ -97,6 +97,9 @@
+   'render-free-test.yaml',
+   'docker-compose.yml',
+   'README.md',
++  'REVISAO-CLIENTE-R2.md',
++  'TESTES-CLIENTE-R2.md',
++  'APRESENTACAO-AO-CLIENTE.md',
+   'CORRECOES-V11.1.8.md',
+   'CORRECOES-V11.0.4.md',
+   'TESTES-V11.0.4.md',
+--- /dev/null
++++ b/scripts/client-browser-regression.py
+@@ -0,0 +1,175 @@
++#!/usr/bin/env python3
++"""Account regression against real DOM/CSS/JS with explicitly simulated API.
++Uses about:blank: does not certify native navigation, cookies, TLS or Express.
++"""
++import argparse, json
++from pathlib import Path
++from playwright.sync_api import sync_playwright
++import importlib.util
++spec = importlib.util.spec_from_file_location('integrall_browser_fixture', Path(__file__).with_name('browser-regression.py'))
++fixture = importlib.util.module_from_spec(spec); spec.loader.exec_module(fixture)
++prepare_html, build_products, STYLE_FILES = fixture.prepare_html, fixture.build_products, fixture.STYLE_FILES
++
++MOCK = r'''() => {
++ window.__queue = {}; window.__held = {}; window.__calls=[];
++ window.__account = {email:'cliente@example.com',name:'Cliente de teste',phone:'',addresses:[],favorites:[]};
++ window.__auth = true;
++ window.__session = () => ({authenticated:window.__auth,account:window.__auth?window.__account:null,csrfToken:window.__auth?'fixture-csrf':''});
++ window.__hold = (path,id) => {(__queue[path] ||= []).push({id});};
++ window.__respond = (id,value) => {const pending=__held[id]; if(!pending)throw Error('Resposta não pendente: '+id); delete __held[id]; pending.resolve(value);};
++ window.IntegrallApi={request:async(path,options={})=>{
++   __calls.push({path,method:options.method||'GET'});
++   const item=__queue[path]?.shift();
++   if(item?.id)return new Promise((resolve,reject)=>{__held[item.id]={resolve,reject};});
++   if(path==='/api/account/session')return __session();
++   if(path==='/api/account/logout'){__auth=false;return {ok:true};}
++   if(path==='/api/account/login/request')return {ok:true,developmentCode:'123456'};
++   if(path==='/api/account/login/verify'){__auth=true;__account={...__account,email:JSON.parse(options.body).email};return __session();}
++   if(path==='/api/account/profile')return {account:{...__account,...JSON.parse(options.body)}};
++   if(path==='/api/account/orders')return {orders:window.__orders||[]};
++   if(path==='/api/account/reorder')return {items:[{productId:'audit-product-b',variantId:'',qty:1}]};
++   if(path.includes('/reviews'))return {reviews:[],summary:{count:0,average:0}};
++   return {};
++ }};
++}'''
++
++def main():
++    parser=argparse.ArgumentParser(); parser.add_argument('--root',type=Path,default=Path.cwd());parser.add_argument('--out',type=Path,required=True);parser.add_argument('--only',default='');parser.add_argument('--group',choices=['all','functional','responsive'],default='all')
++    args=parser.parse_args();root=args.root.resolve();out=args.out.resolve();out.mkdir(parents=True,exist_ok=True)
++    results=[]
++    with sync_playwright() as pw:
++        browser=pw.chromium.launch(executable_path='/usr/bin/chromium',headless=True,args=['--no-sandbox','--disable-dev-shm-usage'])
++        contexts=[]
++        def setup(initial=''):
++            context=browser.new_context(viewport={'width':1280,'height':900},reduced_motion='reduce',bypass_csp=True);contexts.append(context)
++            page=context.new_page(); page.set_default_timeout(3000)
++            page.audit_page_errors=[];page.on('pageerror',lambda error:page.audit_page_errors.append(str(error)))
++            page.route('https://integrall.test/**',lambda route:route.abort())
++            page.set_content(prepare_html(root),wait_until='domcontentloaded')
++            for css in STYLE_FILES:page.add_style_tag(content=(root/'public'/css).read_text())
++            page.add_script_tag(content=(root/'public/js/store/catalog.js').read_text())
++            page.evaluate('p=>__integrallApp.setProducts(p)',build_products()[0]);page.wait_for_timeout(80)
++            page.evaluate(MOCK)
++            if initial:page.evaluate(initial)
++            page.add_script_tag(content=(root/'public/js/store/commerce-v111.js').read_text()); page.wait_for_timeout(50)
++            return page
++        def check(label,fn):
++            if args.only and args.only not in label:return
++            is_responsive=label.startswith('Conta com textos')
++            if args.group=='functional' and is_responsive:return
++            if args.group=='responsive' and not is_responsive:return
++            page=None
++            try:
++                page,detail=fn();detail['pageErrors']=page.audit_page_errors;detail['ok']=detail['ok'] and not page.audit_page_errors;results.append({'test':label,'status':'APROVADO' if detail['ok'] else 'REPROVADO','observed':detail})
++            except Exception as exc:results.append({'test':label,'status':'REPROVADO','error':str(exc)})
++            finally:
++                for context in contexts:context.close()
++                contexts.clear()
++            print(label,results[-1]['status'],results[-1].get('observed',results[-1].get('error')),flush=True)
++            (out/'parcial.json').write_text(json.dumps(results,ensure_ascii=False,indent=2))
++        def slow_orders():
++            p=setup();p.evaluate("__hold('/api/account/orders','orders')");p.locator('#openAccount').click();p.wait_for_timeout(120)
++            visible=p.get_by_role('button',name='Sair desta conta',exact=True).count()==1
++            p.locator('#accountModal').screenshot(path=str(out/'conta-pedidos-lentos.png'))
++            return p,{'ok':visible,'logoutWhileOrdersPending':visible}
++        check('Logout disponível com pedidos ainda carregando',slow_orders)
++        def stale_session():
++            p=setup("__hold('/api/account/session','initial')")
++            p.locator('#openAccount').click();p.get_by_role('button',name='Sair desta conta',exact=True).click();p.wait_for_timeout(50)
++            p.evaluate("__respond('initial',{authenticated:true,account:__account,csrfToken:'old-token'})");p.wait_for_timeout(60)
++            has=p.locator('#openAccount').evaluate("n=>n.classList.contains('has-session')")
++            return p,{'ok':not has and p.locator('#accountLoginEmail').count()==1,'resurrectedSession':has}
++        check('Resposta de sessão anterior não desfaz logout',stale_session)
++        def stale_orders():
++            p=setup();p.evaluate("__hold('/api/account/orders','oldOrders')");p.locator('#openAccount').click();p.wait_for_timeout(80);p.locator('#closeAccount').click();p.evaluate('__auth=false');p.locator('#openAccount').click();p.wait_for_timeout(80)
++            p.evaluate("__respond('oldOrders',{orders:[{id:'PEDIDO-ANTIGO',status:'paid',totalCents:100,items:[],createdAt:'2026-01-01'}]})");p.wait_for_timeout(80)
++            stale=p.get_by_role('button',name='Sair desta conta',exact=True).count()
++            return p,{'ok':p.locator('#accountLoginEmail').count()==1 and stale==0,'privateActionsOnLogin':stale}
++        check('Pedidos atrasados não acrescentam ações privadas na tela de login',stale_orders)
++        def stale_code():
++            p=setup('__auth=false');p.locator('#openAccount').click();p.locator('#accountLoginEmail').fill('primeiro@example.com');p.evaluate("__hold('/api/account/login/request','oldCode')");p.get_by_role('button',name='Enviar código',exact=True).click();p.wait_for_timeout(50);p.locator('#closeAccount').click();p.locator('#openAccount').click();p.wait_for_timeout(60)
++            p.evaluate("__respond('oldCode',{ok:true,developmentCode:'123456'})");p.wait_for_timeout(80)
++            return p,{'ok':p.locator('#accountLoginEmail').count()==1,'oldCodeViewReappeared':p.locator('#accountCode').count()==1}
++        check('Solicitação antiga de código não substitui tela reaberta',stale_code)
++        def reorder():
++            p=setup("__orders=[{id:'PEDIDO-TESTE',status:'paid',totalCents:4590,items:[],createdAt:'2026-01-01',canReorder:true}]")
++            p.locator('#openAccount').click();p.get_by_role('button',name='Comprar novamente',exact=True).click();p.wait_for_timeout(80)
++            detail=p.evaluate("() => ({locked:document.body.classList.contains('lock'),cartOpen:document.querySelector('#cartDrawer')?.classList.contains('open'),accountOpen:document.querySelector('#accountModal').classList.contains('open')})")
++            detail['ok']=detail['locked'] and detail['cartOpen'] and not detail['accountOpen'];return p,detail
++        check('Comprar novamente preserva trava de rolagem da sacola',reorder)
++        def expired_logout():
++            p=setup();p.locator('#openAccount').click();p.evaluate("__hold('/api/account/logout','logout')");p.get_by_role('button',name='Sair desta conta',exact=True).click();p.wait_for_timeout(40)
++            p.evaluate("__held.logout.reject(Object.assign(new Error('Sessão expirada'),{status:401,code:'ACCOUNT_AUTH_REQUIRED'}))");p.wait_for_timeout(60)
++            return p,{'ok':p.locator('#accountLoginEmail').count()==1,'loginVisible':p.locator('#accountLoginEmail').count()==1}
++        check('Logout com sessão expirada volta ao login',expired_logout)
++        def failed_logout():
++            p=setup();p.locator('#openAccount').click();p.evaluate("__hold('/api/account/logout','logout')");p.get_by_role('button',name='Sair desta conta',exact=True).click();p.wait_for_timeout(40)
++            p.evaluate("__held.logout.reject(Object.assign(new Error('Indisponível'),{status:503}))");p.wait_for_timeout(60)
++            kept=p.locator('#openAccount').evaluate("n=>n.classList.contains('has-session')")
++            p.get_by_role('button',name='Sair desta conta',exact=True).click();p.wait_for_timeout(60)
++            return p,{'ok':kept and p.locator('#accountLoginEmail').count()==1,'keptOnFailure':kept,'retryWorks':p.locator('#accountLoginEmail').count()==1}
++        check('Falha de logout não simula sucesso; nova tentativa funciona',failed_logout)
++        def bad_cep():
++            p=setup();p.locator('#openAccount').click();p.locator('#accountContent summary').click();
++            for name,value in [('Rua / avenida','Rua teste'),('Número','10'),('Cidade','Campinas'),('UF','SP')]:p.get_by_label(name,exact=True).fill(value)
++            p.get_by_role('button',name='Adicionar endereço',exact=True).click();p.wait_for_timeout(60)
++            count=p.evaluate("__calls.filter(x=>x.path==='/api/account/profile').length")
++            return p,{'ok':count==0,'invalidAddressSubmitted':count>0}
++        check('Endereço incompleto não é enviado como cadastro válido',bad_cep)
++        def code_focus():
++            p=setup('__auth=false');p.locator('#openAccount').click();p.locator('#accountLoginEmail').fill('cliente@example.com');p.get_by_role('button',name='Enviar código',exact=True).click();p.locator('#accountCode').wait_for()
++            p.evaluate("window.dispatchEvent(new StorageEvent('storage',{key:'integrall-customer-session-change'}))");p.wait_for_timeout(100)
++            return p,{'ok':p.locator('#accountCode').count()==1,'codeViewPreserved':p.locator('#accountCode').count()==1}
++        check('Consultar o e-mail em outra aba não apaga a etapa do código',code_focus)
++        def reopen_verify():
++            p=setup('__auth=false');p.locator('#openAccount').click();p.locator('#accountLoginEmail').fill('cliente@example.com');p.get_by_role('button',name='Enviar código',exact=True).click();p.locator('#accountCode').wait_for()
++            p.evaluate("__hold('/api/account/login/verify','verify')");p.get_by_role('button',name='Entrar',exact=True).click();p.wait_for_timeout(40);p.locator('#closeAccount').click();p.locator('#openAccount').click();p.wait_for_timeout(40)
++            p.evaluate("__auth=true;__respond('verify',__session())");p.wait_for_timeout(150)
++            return p,{'ok':p.get_by_role('button',name='Sair desta conta',exact=True).count()==1,'stillChecking':'Verificando sua conta' in p.locator('#accountContent').inner_text()}
++        check('Fechar e reabrir durante login não prende a conta em carregamento',reopen_verify)
++        def stale_profile():
++            p=setup();p.locator('#openAccount').click();p.evaluate("__hold('/api/account/profile','profile')");p.get_by_role('button',name='Salvar dados',exact=True).click();p.wait_for_timeout(40)
++            p.get_by_role('button',name='Sair desta conta',exact=True).click();p.locator('#accountLoginEmail').fill('nova@example.com');p.get_by_role('button',name='Enviar código',exact=True).click();p.get_by_role('button',name='Entrar',exact=True).click();p.wait_for_timeout(60)
++            p.evaluate("__respond('profile',{account:{email:'cliente@example.com',name:'ANTERIOR',addresses:[],favorites:[]}})");p.wait_for_timeout(80)
++            title=p.locator('#openAccount').get_attribute('title')
++            return p,{'ok':'nova@example.com' in title,'currentAccountTitle':title}
++        check('Gravação antiga de perfil não substitui a nova conta',stale_profile)
++        def revoked_session():
++            p=setup();p.locator('#openAccount').click();p.wait_for_timeout(50)
++            p.evaluate("__auth=false;window.dispatchEvent(new StorageEvent('storage',{key:'integrall-customer-session-change'}))");p.wait_for_timeout(100)
++            return p,{'ok':p.locator('#accountLoginEmail').count()==1,'privateActions':p.get_by_role('button',name='Sair desta conta',exact=True).count()}
++        check('Notificação de outra aba revalida sessão revogada',revoked_session)
++        def valid_address():
++            p=setup();p.locator('#openAccount').click();p.locator('#accountContent summary').click()
++            for name,value in [('CEP','13000-000'),('Rua / avenida','Rua teste'),('Número','10'),('Cidade','Campinas'),('UF','SP')]:p.get_by_label(name,exact=True).fill(value)
++            p.get_by_role('button',name='Adicionar endereço',exact=True).click();p.wait_for_timeout(80)
++            count=p.evaluate("__calls.filter(x=>x.path==='/api/account/profile').length")
++            return p,{'ok':count==1 and p.locator('.account-address').count()==1,'submitted':count}
++        check('Endereço completo continua sendo enviado e exibido',valid_address)
++        def product_no_scroll():
++            p=setup();p.evaluate("window.scrollTo(0,0);__integrallApp.openProduct('audit-product-a',{focus:false,scroll:false})");p.wait_for_timeout(100)
++            y=p.evaluate('window.scrollY');return p,{'ok':y<=1,'scrollY':y}
++        check('Produto: atualização silenciosa respeita scroll false',product_no_scroll)
++        def stale_product_route():
++            p=setup();p.evaluate("location.hash='product=audit-product-a';__integrallApp.setProducts(__integrallApp.getState().products);location.hash='page=cafes'");p.wait_for_timeout(140)
++            opened=p.locator('#productDetails').evaluate('n=>!n.hidden');return p,{'ok':not opened,'oldProductReopened':opened}
++        check('Produto: abertura agendada é descartada ao mudar de rota',stale_product_route)
++        def accessible_account():
++            p=setup();p.locator('#openAccount').click();p.wait_for_timeout(80)
++            count=p.get_by_role('dialog',name='Minha conta',exact=True).count();focused=p.evaluate('document.activeElement.id')
++            return p,{'ok':count==1 and focused!='accountBackdrop','namedDialog':count,'focusedId':focused}
++        check('Conta: diálogo nomeado e foco inicial em controle útil',accessible_account)
++        for width in [280,320,360,375,390,412,430,480,600,768,820,1024,1280,1366,1440,1600,1920,2560]:
++            def responsive(width=width):
++                p=setup("__account.email='a'.repeat(230)+'@example.com';__account.name='NomeMuitoLongoSemEspacos'.repeat(4)")
++                p.set_viewport_size({'width':width,'height':800});p.locator('#openAccount').click();p.wait_for_timeout(80)
++                detail=p.evaluate("""() => {const root=document.querySelector('.account-panel');const content=document.querySelector('#accountContent');const r=root?.getBoundingClientRect();return {globalOverflow:document.documentElement.scrollWidth>innerWidth+1,contentOverflow:content.scrollWidth>content.clientWidth+1,panelWidth:r?.width,viewport:innerWidth}}""")
++                detail['ok']=not detail['globalOverflow'] and not detail['contentOverflow']
++                if width in [320,768,1440]:p.screenshot(path=str(out/f'conta-{width}.png'),timeout=5000)
++                return p,detail
++            check(f'Conta com textos longos em {width}px',responsive)
++        browser.close()
++    report={'scope':'Chromium com DOM/CSS/JS reais e API simulada; about:blank, sem certificação HTTP/cookies/Express','results':results}
++    (out/'resultado.json').write_text(json.dumps(report,ensure_ascii=False,indent=2))
++    return int(any(x['status']!='APROVADO' for x in results))
++if __name__=='__main__':raise SystemExit(main())
+--- /dev/null
++++ b/scripts/client-media-audit.mjs
+@@ -0,0 +1,29 @@
++/** Read-only compatibility check of the image validator against shipped media. */
++import {readFile, readdir, mkdir, writeFile} from 'node:fs/promises';
++import path from 'node:path';
++import {createHash} from 'node:crypto';
++import {validateAndSanitizeImage} from '../src/image-upload.js';
++const root=process.cwd();
++const out=path.resolve(process.argv[2]||'docs/revisao-cliente/midias');
++await mkdir(out,{recursive:true});
++const results=[];
++async function walk(dir){
++ for(const entry of await readdir(path.join(root,dir),{withFileTypes:true})){
++  const rel=path.join(dir,entry.name);
++  if(entry.isDirectory()){await walk(rel);continue}
++  if(!/\.(png|jpe?g|webp)$/i.test(rel))continue;
++  const data=await readFile(path.join(root,rel));
++  try{
++   const parsed=validateAndSanitizeImage({data,filename:entry.name});
++   const hash=createHash('sha256').update(parsed.data).digest('hex');
++   // Only optional temporary copies are decoded by a second independent tool.
++   if(process.env.INTEGRALL_DECODE_DIR){await mkdir(process.env.INTEGRALL_DECODE_DIR,{recursive:true});await writeFile(path.join(process.env.INTEGRALL_DECODE_DIR,hash+'.'+(parsed.mimeType.split('/')[1])),parsed.data)}
++   results.push({file:rel,status:'APROVADO',width:parsed.width,height:parsed.height,sha256:hash});
++  }catch(error){results.push({file:rel,status:'REPROVADO',code:error.code,message:error.message})}
++ }
++}
++for(const dir of ['public/assets','data/media-seed','tests/fixtures/client-images'])await walk(dir);
++const report={scope:'Validação estrutural em leitura; não modifica mídia operacional',total:results.length,failures:results.filter(x=>x.status!=='APROVADO'),results};
++await writeFile(path.join(out,'compatibilidade.json'),JSON.stringify(report,null,2)+'\n');
++console.log(JSON.stringify({total:report.total,failures:report.failures}));
++process.exitCode=report.failures.length?1:0;
+--- a/server.js
++++ b/server.js
+@@ -1,3 +1,4 @@
++import {sanitizeAccountPatch} from './src/customer-profile.js';
+ import express from 'express';
+ import process from 'node:process';
+ import {randomUUID} from 'node:crypto';
+@@ -340,23 +341,6 @@
+   finally { restockRunPromise = null; }
+ }
+ 
+-function sanitizeAccountPatch(body = {}, current = {}) {
+-  const addresses = (Array.isArray(body.addresses) ? body.addresses : current.addresses || []).slice(0, 5).map(address => ({
+-    id: cleanText(address?.id, 80) || randomUUID(),
+-    label: cleanText(address?.label, 80),
+-    cep: cleanText(address?.cep, 10).replace(/\D/g, '').slice(0, 8),
+-    street: cleanText(address?.street, 180), number: cleanText(address?.number, 40), complement: cleanText(address?.complement, 120),
+-    neighborhood: cleanText(address?.neighborhood, 120), city: cleanText(address?.city, 120), state: cleanText(address?.state, 2).toUpperCase()
+-  })).filter(address => address.street && address.number && address.city && /^[A-Z]{2}$/.test(address.state));
+-  const favorites = (Array.isArray(body.favorites) ? body.favorites : current.favorites || []).slice(0, 500).map(id => cleanText(id, 120)).filter(Boolean);
+-  return {
+-    ...current,
+-    name: 'name' in body ? cleanText(body.name, 80) : cleanText(current.name, 80),
+-    phone: 'phone' in body ? cleanText(body.phone, 30) : cleanText(current.phone, 30),
+-    addresses,
+-    favorites: [...new Set(favorites)]
+-  };
+-}
+ 
+ function maskedReviewer(email) {
+   const local = String(email || '').split('@')[0];
+@@ -425,6 +409,7 @@
+ 
+ 
+ // ===== Conta do cliente (login sem senha por código) =====
++app.use('/api/account', (_req, res, next) => {res.setHeader('Cache-Control', 'no-store');next();});
+ app.get('/api/account/session', readLimiter, asyncRoute(async (req, res) => {
+   res.setHeader('Cache-Control', 'no-store');
+   const session = await customerAuth.readSession(req);
+--- a/src/customer-auth.js
++++ b/src/customer-auth.js
+@@ -43,8 +43,8 @@
+   }
+ 
+   normalizeEmail(value) {
+-    const email = String(value || '').trim().toLowerCase().slice(0, 254);
+-    return emailPattern.test(email) ? email : '';
++    const email = String(value || '').trim().toLowerCase();
++    return email.length <= 254 && emailPattern.test(email) ? email : '';
+   }
+ 
+   async createLoginCode(email) {
+@@ -58,8 +58,9 @@
+ 
+   async verifyLoginCode(email, code) {
+     const normalized = this.normalizeEmail(email);
+-    const safeCode = String(code || '').replace(/\D/g, '').slice(0, 6);
+-    if (!normalized || safeCode.length !== 6) return null;
++    const safeCode = String(code ?? '').trim();
++    // Never turn malformed input into a different, valid one-time code.
++    if (!normalized || !/^[0-9]{6}$/.test(safeCode)) return null;
+     const consumed = await this.repository.consumeCustomerLoginCode(
+       normalized,
+       loginCodeHash(this.codeSecret, normalized, safeCode)
+@@ -85,9 +86,11 @@
+ 
+   async readSession(req) {
+     const token = cookieValue(req, COOKIE);
+-    if (!token) return null;
++    if (!/^[A-Za-z0-9_-]{43}$/.test(token)) return null;
+     const session = await this.repository.getCustomerSession(hash(token));
+-    if (!session || Date.parse(session.expiresAt) <= Date.now()) {
++    const expiresAt = Date.parse(session?.expiresAt);
++    if (!session || !Number.isFinite(expiresAt) || expiresAt <= Date.now()
++      || !this.normalizeEmail(session.email) || !session.csrfToken) {
+       if (session) await this.repository.deleteCustomerSession(hash(token)).catch(() => {});
+       return null;
+     }
+--- /dev/null
++++ b/src/customer-profile.js
+@@ -0,0 +1,44 @@
++import {randomUUID} from 'node:crypto';
++import {cleanText} from './catalog.js';
++
++function invalid(message, code = 'ACCOUNT_PROFILE_INVALID') {
++  throw Object.assign(new Error(message), {status: 400, code});
++}
++
++/** Validate only explicitly edited fields. Old addresses are not silently migrated. */
++export function sanitizeAccountPatch(body = {}, current = {}) {
++  if (!body || typeof body !== 'object' || Array.isArray(body)) invalid('Informe os dados da conta em um objeto válido.');
++  for (const field of ['name', 'phone']) {
++    if (Object.hasOwn(body, field) && typeof body[field] !== 'string') invalid('Nome e telefone devem ser textos.');
++  }
++  let addresses = current.addresses || [];
++  if (Object.hasOwn(body, 'addresses')) {
++    if (!Array.isArray(body.addresses)) invalid('Informe uma lista de endereços válida.', 'ACCOUNT_ADDRESS_INVALID');
++    if (body.addresses.length > 5) invalid('Você pode salvar até 5 endereços. Remova um antes de adicionar outro.', 'ACCOUNT_ADDRESS_LIMIT');
++    addresses = body.addresses.map(address => {
++      if (!address || typeof address !== 'object' || Array.isArray(address)) invalid('Endereço inválido.', 'ACCOUNT_ADDRESS_INVALID');
++      const cep = String(address.cep || '').trim();
++      if (!/^[0-9]{5}-?[0-9]{3}$/.test(cep)) invalid('Informe um CEP com 8 dígitos.', 'ACCOUNT_ADDRESS_INVALID');
++      const rawState = String(address.state || '').trim().toUpperCase();
++      const item = {
++        id: cleanText(address.id, 80) || randomUUID(), label: cleanText(address.label, 80),
++        cep: cep.replace('-', ''), street: cleanText(address.street, 180), number: cleanText(address.number, 40),
++        complement: cleanText(address.complement, 120), neighborhood: cleanText(address.neighborhood, 120),
++        city: cleanText(address.city, 120), state: rawState
++      };
++      if (!item.street || !item.number || !item.city || !/^[A-Z]{2}$/.test(rawState)) {
++        invalid('Preencha rua, número, cidade e UF do endereço.', 'ACCOUNT_ADDRESS_INVALID');
++      }
++      return item;
++    });
++    if (new Set(addresses.map(item => item.id)).size !== addresses.length) invalid('Os endereços devem possuir identificadores distintos.', 'ACCOUNT_ADDRESS_INVALID');
++  }
++  if (Object.hasOwn(body, 'favorites') && !Array.isArray(body.favorites)) invalid('Informe uma lista de favoritos válida.');
++  const favorites = (Object.hasOwn(body, 'favorites') ? body.favorites : current.favorites || []).slice(0, 500).map(id => cleanText(id, 120)).filter(Boolean);
++  return {
++    ...current,
++    name: Object.hasOwn(body, 'name') ? cleanText(body.name, 80) : cleanText(current.name, 80),
++    phone: Object.hasOwn(body, 'phone') ? cleanText(body.phone, 30) : cleanText(current.phone, 30),
++    addresses, favorites: [...new Set(favorites)]
++  };
++}
+--- a/src/image-upload.js
++++ b/src/image-upload.js
+@@ -163,14 +163,52 @@
+   return null;
+ }
+ 
++// Structural validation of the RIFF container and every image/frame header.
++// This is not a full VP8 entropy decoder. See docs/revisao-cliente for scope.
++function webpBitstreamDimensions(type, payload) {
++  const dimensions = webpDimensions(type, payload);
++  if (!dimensions || (type === 'VP8L' && (payload.length <= 5 || (payload[4] & 0xe0)))
++    || (type === 'VP8 ' && (payload.length <= 10 || (payload[0] & 1)))) {
++    invalid('IMAGE_CORRUPTED', 'O WebP contém dados de imagem incompletos ou inválidos.');
++  }
++  validateDimensions(dimensions.width, dimensions.height);
++  return dimensions;
++}
++
++function validateWebpFrame(payload, canvas) {
++  if (!canvas || payload.length < 24) invalid('IMAGE_CORRUPTED', 'O quadro WebP está incompleto.');
++  const x = readUInt24LE(payload, 0) * 2;
++  const y = readUInt24LE(payload, 3) * 2;
++  const width = readUInt24LE(payload, 6) + 1;
++  const height = readUInt24LE(payload, 9) + 1;
++  validateDimensions(width, height);
++  if (x + width > canvas.width || y + height > canvas.height) invalid('IMAGE_CORRUPTED', 'O quadro WebP excede o canvas.');
++  let offset = 16, images = 0;
++  while (offset < payload.length) {
++    if (offset + 8 > payload.length) invalid('IMAGE_CORRUPTED', 'O quadro WebP está truncado.');
++    const type = payload.toString('ascii', offset, offset + 4);
++    const size = payload.readUInt32LE(offset + 4);
++    const end = offset + 8 + size;
++    const paddedEnd = end + (size & 1);
++    if (paddedEnd > payload.length) invalid('IMAGE_CORRUPTED', 'O quadro WebP contém um bloco inválido.');
++    if (type === 'VP8 ' || type === 'VP8L') {
++      const dimensions = webpBitstreamDimensions(type, payload.subarray(offset + 8, end));
++      if (++images > 1 || dimensions.width !== width || dimensions.height !== height) {
++        invalid('IMAGE_CORRUPTED', 'As dimensões do quadro WebP não correspondem à imagem.');
++      }
++    }
++    offset = paddedEnd;
++  }
++  if (images !== 1) invalid('IMAGE_CORRUPTED', 'O quadro WebP não contém uma imagem.');
++}
++
+ function sanitizeWebp(input) {
+   if (input.length < 20 || input.toString('ascii', 0, 4) !== 'RIFF' || input.toString('ascii', 8, 12) !== 'WEBP') {
+     invalid('IMAGE_SIGNATURE_MISMATCH', 'O conteúdo não é um WebP válido.');
+   }
+-  const declaredLength = input.readUInt32LE(4) + 8;
+-  if (declaredLength !== input.length) invalid('IMAGE_CORRUPTED', 'O WebP possui tamanho RIFF inconsistente.');
+-  let offset = 12;
+-  let dimensions = null;
++  if (input.readUInt32LE(4) + 8 !== input.length) invalid('IMAGE_CORRUPTED', 'O WebP possui tamanho RIFF inconsistente.');
++  let offset = 12, dimensions = null, bitstream = null;
++  let animation = false, sawAnim = false, frames = 0;
+   const chunks = [];
+   while (offset < input.length) {
+     if (offset + 8 > input.length) invalid('IMAGE_CORRUPTED', 'O WebP está truncado.');
+@@ -180,24 +218,40 @@
+     const dataEnd = dataStart + size;
+     const paddedEnd = dataEnd + (size & 1);
+     if (size > IMAGE_UPLOAD_LIMIT_BYTES || paddedEnd > input.length) invalid('IMAGE_CORRUPTED', 'O WebP contém um bloco inválido.');
+-    let payload = Buffer.from(input.subarray(dataStart, dataEnd));
+-    dimensions ||= webpDimensions(type, payload);
+-    if (type === 'VP8X' && payload.length >= 1) payload[0] &= ~0x0c; // remove flags EXIF e XMP
++    const payload = Buffer.from(input.subarray(dataStart, dataEnd));
++    if (type === 'VP8X') {
++      if (offset !== 12 || payload.length !== 10) invalid('IMAGE_CORRUPTED', 'O cabeçalho WebP estendido é inválido.');
++      dimensions = webpDimensions(type, payload);
++      validateDimensions(dimensions.width, dimensions.height);
++      animation = Boolean(payload[0] & 0x02);
++      payload[0] &= ~0x0c; // EXIF/XMP chunks are removed below.
++    } else if (type === 'VP8 ' || type === 'VP8L') {
++      if (bitstream || animation) invalid('IMAGE_CORRUPTED', 'O WebP contém imagens incompatíveis com o container.');
++      bitstream = webpBitstreamDimensions(type, payload);
++      if (dimensions && (dimensions.width !== bitstream.width || dimensions.height !== bitstream.height)) {
++        invalid('IMAGE_CORRUPTED', 'As dimensões WebP não correspondem ao canvas.');
++      }
++    } else if (type === 'ANIM') {
++      if (!animation || sawAnim || payload.length !== 6) invalid('IMAGE_CORRUPTED', 'O cabeçalho de animação WebP é inválido.');
++      sawAnim = true;
++    } else if (type === 'ANMF') {
++      if (!animation || !sawAnim) invalid('IMAGE_CORRUPTED', 'O quadro WebP não possui cabeçalho de animação.');
++      validateWebpFrame(payload, dimensions); frames += 1;
++    }
+     if (type !== 'EXIF' && type !== 'XMP ') {
+       const header = Buffer.alloc(8);
+-      header.write(type, 0, 4, 'ascii');
+-      header.writeUInt32LE(payload.length, 4);
++      header.write(type, 0, 4, 'ascii'); header.writeUInt32LE(payload.length, 4);
+       chunks.push(header, payload);
+       if (payload.length & 1) chunks.push(Buffer.from([0]));
+     }
+     offset = paddedEnd;
+   }
+-  if (offset !== input.length || !dimensions) invalid('IMAGE_CORRUPTED', 'O WebP não contém uma imagem válida.');
+-  validateDimensions(dimensions.width, dimensions.height);
++  dimensions ||= bitstream;
++  if (offset !== input.length || !dimensions || (animation ? !sawAnim || !frames : !bitstream)) {
++    invalid('IMAGE_CORRUPTED', 'O WebP não contém uma imagem válida.');
++  }
+   const body = Buffer.concat([Buffer.from('WEBP'), ...chunks]);
+-  const header = Buffer.alloc(8);
+-  header.write('RIFF', 0, 4, 'ascii');
+-  header.writeUInt32LE(body.length, 4);
++  const header = Buffer.alloc(8); header.write('RIFF', 0, 4, 'ascii'); header.writeUInt32LE(body.length, 4);
+   return {mimeType: 'image/webp', ...dimensions, data: Buffer.concat([header, body])};
+ }
+ 
+--- a/src/media-storage.js
++++ b/src/media-storage.js
+@@ -90,9 +90,9 @@
+     const dataPath = this.dataPath(key, media.mimeType);
+     const metadataPath = this.metadataPath(key);
+     const tempSuffix = `.tmp-${process.pid}-${randomUUID()}`;
+-    await writeFile(`${dataPath}${tempSuffix}`, Buffer.from(media.data), {flag: 'wx'});
+-    await writeFile(`${metadataPath}${tempSuffix}`, `${JSON.stringify(metadata, null, 2)}\n`, {encoding: 'utf8', flag: 'wx'});
+     try {
++      await writeFile(`${dataPath}${tempSuffix}`, Buffer.from(media.data), {flag: 'wx'});
++      await writeFile(`${metadataPath}${tempSuffix}`, `${JSON.stringify(metadata, null, 2)}\n`, {encoding: 'utf8', flag: 'wx'});
+       await rename(`${dataPath}${tempSuffix}`, dataPath);
+       await rename(`${metadataPath}${tempSuffix}`, metadataPath);
+     } catch (error) {
+@@ -146,13 +146,19 @@
+     for (const name of names) {
+       try {
+         const metadata = JSON.parse(await readFile(path.join(this.rootDir, name), 'utf8'));
++        if (!metadata || typeof metadata !== 'object' || Array.isArray(metadata) || !STORAGE_KEY_PATTERN.test(String(metadata.id || ''))) {
++          throw new Error('Metadados de mídia inválidos.');
++        }
+         output.push(metadata);
+       } catch (error) {
+         console.warn(JSON.stringify({level: 'warn', event: 'media_metadata_invalid', file: name, message: String(error?.message || error).slice(0, 300)}));
+       }
+-      if (output.length >= Math.max(1, Math.min(500, Number(limit) || 100))) break;
+-    }
+-    return output;
++    }
++    // IDs are random. Apply chronological ordering before pagination, as in
++    // the memory and PostgreSQL providers, so recent uploads remain visible.
++    return output
++      .sort((a, b) => String(b.createdAt || '').localeCompare(String(a.createdAt || '')) || String(a.id || '').localeCompare(String(b.id || '')))
++      .slice(0, Math.max(1, Math.min(500, Number(limit) || 100)));
+   }
+ 
+   async delete(id) {
+--- a/src/repository.js
++++ b/src/repository.js
+@@ -787,7 +787,8 @@
+       // Não há await entre a leitura e a mutação: no repositório em memória,
+       // o consumo é atômico dentro do event loop e um código só autentica uma vez.
+       const record = this.memoryLoginCodes.get(key);
+-      if (!record || Date.parse(record.expiresAt) <= Date.now() || Number(record.attempts) >= 5) return false;
++      const expiresAt = Date.parse(record?.expiresAt), attempts = Number(record?.attempts);
++      if (!record || !Number.isFinite(expiresAt) || expiresAt <= Date.now() || !Number.isInteger(attempts) || attempts < 0 || attempts >= 5) return false;
+       if (!constantTimeStringEqual(record.codeHash, candidate)) {
+         record.attempts = Number(record.attempts || 0) + 1;
+         return false;
+@@ -804,7 +805,8 @@
+         [key]
+       );
+       const record = rows[0];
+-      if (!record || new Date(record.expires_at).getTime() <= Date.now() || Number(record.attempts) >= 5) {
++      const expiresAt = new Date(record?.expires_at).getTime(), attempts = Number(record?.attempts);
++      if (!record || !Number.isFinite(expiresAt) || expiresAt <= Date.now() || !Number.isInteger(attempts) || attempts < 0 || attempts >= 5) {
+         await client.query('COMMIT');
+         return false;
+       }
+@@ -833,7 +835,7 @@
+     const item={tokenHash,email,csrfToken,expiresAt};
+     if(!this.pool){
+       const now=Date.now();
+-      for(const [key,session] of this.memoryCustomerSessions){if(Date.parse(session.expiresAt)<=now)this.memoryCustomerSessions.delete(key);}
++      for(const [key,session] of this.memoryCustomerSessions){if(!Number.isFinite(Date.parse(session.expiresAt))||Date.parse(session.expiresAt)<=now)this.memoryCustomerSessions.delete(key);}
+       this.memoryCustomerSessions.set(tokenHash,item);return clone(item);
+     }
+     await this.pool.query('DELETE FROM integrall_customer_sessions WHERE expires_at <= NOW()');
+--- /dev/null
++++ b/tests/client-readiness.test.js
+@@ -0,0 +1,231 @@
++import test from 'node:test';
++import assert from 'node:assert/strict';
++import {readFile, writeFile, mkdtemp, rm} from 'node:fs/promises';
++import {tmpdir} from 'node:os';
++import path from 'node:path';
++import vm from 'node:vm';
++import {CustomerAuth} from '../src/customer-auth.js';
++import {LocalMediaStorage} from '../src/media-storage.js';
++import {validateAndSanitizeImage} from '../src/image-upload.js';
++
++function authFixture() {
++  const codes = new Map(), sessions = new Map();
++  const repository = {
++    async saveCustomerLoginCode(record) { codes.set(record.email, record); },
++    async consumeCustomerLoginCode(email, candidate) {
++      if (codes.get(email)?.codeHash !== candidate) return false;
++      codes.delete(email); return true;
++    },
++    async ensureCustomerAccount(email) { return {email, addresses: [], favorites: []}; },
++    async saveCustomerSession(record) { sessions.set(record.tokenHash, record); },
++    async getCustomerSession(key) { return sessions.get(key) || null; },
++    async deleteCustomerSession(key) { sessions.delete(key); }
++  };
++  return {auth: new CustomerAuth({repository, codeSecret: 'isolated-customer-regression-secret-not-for-deployment'}), sessions};
++}
++
++for (const [label, alter] of [
++  ['letras', code => `abc${code}`],
++  ['dígitos excedentes', code => `${code}99`],
++  ['separadores internos', code => `${code.slice(0,3)}-${code.slice(3)}`]
++]) test(`cliente: código com ${label} é recusado sem consumir o código válido`, async () => {
++  const {auth} = authFixture();
++  const issued = await auth.createLoginCode('cliente@example.com');
++  assert.equal(Boolean(await auth.verifyLoginCode(issued.email, alter(issued.code))), false);
++  assert.ok(await auth.verifyLoginCode(issued.email, issued.code));
++  assert.equal(await auth.verifyLoginCode(issued.email, issued.code), null);
++});
++
++test('cliente: e-mail acima de 254 caracteres não vira outro identificador truncado', () => {
++  const {auth} = authFixture();
++  assert.equal(auth.normalizeEmail(`${'a'.repeat(240)}@example.com.zz`), '');
++  assert.equal(auth.normalizeEmail(' Cliente@Example.com '), 'cliente@example.com');
++});
++
++for (const expiresAt of ['inválido', '', undefined]) test(`cliente: sessão com expiração ${String(expiresAt)} é revogada`, async () => {
++  const {auth, sessions} = authFixture();
++  const issued = await auth.createLoginCode('cliente@example.com');
++  const verified = await auth.verifyLoginCode(issued.email, issued.code);
++  const saved = [...sessions.values()][0]; saved.expiresAt = expiresAt;
++  assert.equal(Boolean(await auth.readSession({headers: {cookie: auth.cookie(verified.token, verified.expiresAt)}})), false);
++  assert.equal(sessions.size, 0);
++});
++
++test('cliente: sessão válida continua aceita e cookie malformado é recusado', async () => {
++  const {auth} = authFixture();
++  const issued = await auth.createLoginCode('cliente@example.com');
++  const verified = await auth.verifyLoginCode(issued.email, issued.code);
++  assert.equal((await auth.readSession({headers: {cookie: auth.cookie(verified.token, verified.expiresAt)}})).email, issued.email);
++  assert.equal(await auth.readSession({headers: {cookie: 'integrall_customer_session=%GG'}}), null);
++});
++
++async function loadApi(fetchFn, timers = {}) {
++  const source = await readFile(new URL('../public/js/store/api.js', import.meta.url), 'utf8');
++  const context = vm.createContext({location: {protocol: 'https:', origin: 'https://loja.test'}, fetch: fetchFn, Headers, FormData, AbortController, DOMException, setTimeout, clearTimeout, ...timers});
++  vm.runInContext(source, context);
++  return context.IntegrallApi;
++}
++
++test('API: erro HTTP preserva status, código e requestId para expiração da sessão', async () => {
++  const api = await loadApi(async () => new Response(JSON.stringify({error: 'Entre novamente.', code: 'ACCOUNT_AUTH_REQUIRED', requestId: 'req-fixture'}), {status: 401}));
++  await assert.rejects(api.request('/api/account/logout', {method: 'POST'}), error => error.status === 401 && error.code === 'ACCOUNT_AUTH_REQUIRED' && error.requestId === 'req-fixture');
++});
++
++test('API: resposta 200 contendo HTML não é apresentada como sucesso vazio', async () => {
++  const api = await loadApi(async () => new Response('<html>Erro do proxy</html>', {status: 200}));
++  await assert.rejects(api.request('/api/account/profile'), error => error.code === 'API_RESPONSE_INVALID');
++});
++
++test('API: resposta HTTP 503 sem JSON preserva o status', async () => {
++  const api = await loadApi(async () => new Response('Temporariamente indisponível', {status: 503}));
++  await assert.rejects(api.request('/api/catalog'), error => error.status === 503);
++});
++
++test('API: HTTP 204 sem corpo continua compatível', async () => {
++  const api = await loadApi(async () => new Response(null, {status: 204}));
++  assert.equal(JSON.stringify(await api.request('/api/account/logout')), '{}');
++});
++
++test('API: requisição já cancelada não inicia acesso à rede', async () => {
++  let called = 0;
++  const api = await loadApi(async () => {called++; return new Response('{}');});
++  const controller = new AbortController(); controller.abort();
++  await assert.rejects(api.request('/api/catalog', {signal: controller.signal}), error => error.name === 'AbortError');
++  assert.equal(called, 0);
++});
++
++test('API: cancelamento externo durante a resposta é propagado', async () => {
++  let started;
++  const ready = new Promise(resolve => {started = resolve;});
++  const api = await loadApi((_url, options) => new Promise((_resolve, reject) => {
++    options.signal.addEventListener('abort', () => reject(new DOMException('Cancelado', 'AbortError')), {once: true}); started();
++  }));
++  const controller = new AbortController();
++  const result = api.request('/api/catalog', {signal: controller.signal});
++  const rejection = assert.rejects(result, error => error.name === 'AbortError');
++  await ready; controller.abort(); await rejection;
++});
++
++test('API: FormData mantém cabeçalho multipart gerado pelo navegador', async () => {
++  let headers;
++  const api = await loadApi(async (_url, options) => {headers = options.headers; return new Response('{}');});
++  const form = new FormData(); form.append('label', 'imagem');
++  await api.request('/api/upload', {method: 'POST', body: form});
++  assert.equal(headers.has('Content-Type'), false);
++});
++
++test('mídia local: ordena por data antes de limitar, não pelo nome aleatório', async () => {
++  const dir = await mkdtemp(path.join(tmpdir(), 'integrall-media-order-'));
++  try {
++    const store = new LocalMediaStorage(dir); await store.init();
++    for (const [id, date] of [['zzzzzzzzzz-old', '2025-01-01T00:00:00.000Z'], ['aaaaaaaaaa-new', '2026-01-01T00:00:00.000Z']]) {
++      await store.save({id, mimeType: 'image/png', createdAt: date, data: Buffer.from('isolated-test')});
++    }
++    assert.equal((await store.list({limit: 1}))[0].id, 'aaaaaaaaaa-new');
++  } finally {await rm(dir, {recursive: true, force: true});}
++});
++
++function webpChunk(type, payload) {
++  const head = Buffer.alloc(8); head.write(type); head.writeUInt32LE(payload.length, 4);
++  return Buffer.concat([head, payload, ...(payload.length % 2 ? [Buffer.alloc(1)] : [])]);
++}
++function webp(chunks) {
++  const body = Buffer.concat([Buffer.from('WEBP'), ...chunks]);
++  const head = Buffer.alloc(8); head.write('RIFF'); head.writeUInt32LE(body.length, 4);
++  return Buffer.concat([head, body]);
++}
++function vp8x(w=1, h=1, flags=0) {
++  const payload = Buffer.alloc(10); payload[0] = flags;
++  payload.writeUIntLE(w-1, 4, 3); payload.writeUIntLE(h-1, 7, 3); return payload;
++}
++
++test('upload: WebP apenas com cabeçalho de canvas, sem imagem, é recusado', () => {
++  assert.throws(() => validateAndSanitizeImage({data: webp([webpChunk('VP8X', vp8x())])}), error => error.code === 'IMAGE_CORRUPTED');
++});
++
++test('upload: dimensões de VP8 ocultas por um VP8X pequeno não burlam o limite', () => {
++  const fake = Buffer.alloc(11); fake[3]=0x9d; fake[4]=0x01; fake[5]=0x2a;
++  fake.writeUInt16LE(9000, 6); fake.writeUInt16LE(2, 8);
++  assert.throws(() => validateAndSanitizeImage({data: webp([webpChunk('VP8X', vp8x()), webpChunk('VP8 ', fake)])}), error => error.status === 413 || error.code === 'IMAGE_CORRUPTED');
++});
++
++test('upload: cabeçalho VP8L sem dados de pixels é recusado', () => {
++  assert.throws(() => validateAndSanitizeImage({data: webp([webpChunk('VP8L', Buffer.from([0x2f,0,0,0,0]))])}), error => error.code === 'IMAGE_CORRUPTED');
++});
++
++import {sanitizeAccountPatch} from '../src/customer-profile.js';
++import {Repository} from '../src/repository.js';
++const address = {id: 'endereco-1',label:'Casa',cep:'13000-000',street:'Rua teste',number:'10',city:'Campinas',state:'sp'};
++for(const [label, patch] of [
++  ['CEP ausente', {addresses:[{...address,cep:''}]}],
++  ['CEP excedente', {addresses:[{...address,cep:'130000000'}]}],
++  ['sexto endereço', {addresses:Array.from({length:6},(_,i)=>({...address,id:`endereco-${i}`}))}],
++  ['endereço incompleto', {addresses:[{...address,street:''}]}],
++  ['tipo incorreto', {addresses:'apagar-sem-querer'}]
++]) test(`perfil: ${label} retorna erro em vez de descartar ou truncar dados`, () => {
++  assert.throws(()=>sanitizeAccountPatch(patch, {email:'cliente@example.com',addresses:[address]}), error=>error.status===400);
++});
++
++test('perfil: editar nome preserva endereços legados, sem migração destrutiva', () => {
++  const current={email:'cliente@example.com',addresses:[{...address,cep:''}],favorites:['produto-1']};
++  const edited=sanitizeAccountPatch({name:' Novo nome '},current);
++  assert.equal(edited.name,'Novo nome');assert.deepEqual(edited.addresses,current.addresses);assert.deepEqual(edited.favorites,current.favorites);
++});
++
++test('perfil: endereço completo normaliza CEP e UF, exclusão explícita funciona', () => {
++  const edited=sanitizeAccountPatch({addresses:[address]},{});
++  assert.equal(edited.addresses[0].cep,'13000000');assert.equal(edited.addresses[0].state,'SP');
++  assert.deepEqual(sanitizeAccountPatch({addresses:[]},edited).addresses,[]);
++});
++
++test('perfil: validação falha dentro do lock sem apagar os dados anteriores', async()=>{
++  const repo=new Repository({databaseUrl:'',initialCatalog:{version:9,settings:{},commerce:{},products:[]},production:false});
++  await repo.init();await repo.ensureCustomerAccount('cliente@example.com');
++  await repo.updateCustomerAccount('cliente@example.com',current=>sanitizeAccountPatch({addresses:[address]},current));
++  const before=await repo.getCustomerAccount('cliente@example.com');
++  await assert.rejects(repo.updateCustomerAccount('cliente@example.com',current=>sanitizeAccountPatch({addresses:[{...address,city:''}]},current)));
++  assert.deepEqual(await repo.getCustomerAccount('cliente@example.com'),before);
++});
++
++test('repositório: expiração ou tentativas inválidas não validam código temporário',async()=>{
++  const repo=new Repository({databaseUrl:'',initialCatalog:{version:9,settings:{},commerce:{},products:[]},production:false});await repo.init();
++  for(const values of [{expiresAt:'inválido',attempts:0},{expiresAt:new Date(Date.now()+600000).toISOString(),attempts:NaN}]){
++    repo.memoryLoginCodes.set('cliente@example.com',{email:'cliente@example.com',codeHash:'fixture-hash',...values});
++    assert.equal(await repo.consumeCustomerLoginCode('cliente@example.com','fixture-hash'),false);
++  }
++});
++
++for (const file of ['lossy.webp','lossless.webp','alpha.webp','animated.webp','metadata.webp']) test(`upload: WebP válido ${file} permanece aceito`,async()=>{
++  const data=await readFile(new URL(`./fixtures/client-images/${file}`,import.meta.url));
++  const result=validateAndSanitizeImage({data,declaredMime:'image/webp',filename:file});
++  assert.equal(result.width,32);assert.equal(result.height,24);
++  assert.equal(result.mimeType,'image/webp');
++  if(file==='metadata.webp')assert.equal(result.data.includes(Buffer.from('TEST-METADATA')),false);
++});
++
++test('API: cancelamento durante leitura do JSON não vira erro de formato',async()=>{
++  const controller=new AbortController();let ready;
++  const started=new Promise(resolve=>{ready=resolve;});
++  const api=await loadApi(async(_url,options)=>({ok:true,status:200,headers:new Headers(),json:()=>new Promise((_resolve,reject)=>{
++    options.signal.addEventListener('abort',()=>reject(new DOMException('Cancelado','AbortError')),{once:true});ready();
++  })}));
++  const pending=api.request('/api/catalog',{signal:controller.signal});
++  const rejected=assert.rejects(pending,error=>error.name==='AbortError');await started;controller.abort();await rejected;
++});
++
++test('API: timeout tem código próprio, distinto de cancelamento do usuário',async()=>{
++  const api=await loadApi((_url,options)=>new Promise((_resolve,reject)=>{
++    options.signal.addEventListener('abort',()=>reject(new DOMException('Abortado','AbortError')),{once:true});
++  }),{setTimeout:fn=>setTimeout(fn,5)});
++  await assert.rejects(api.request('/api/catalog'),error=>error.code==='API_TIMEOUT'&&error.status===0);
++});
++
++test('mídia local: sidecar nulo não derruba a listagem de arquivos válidos',async()=>{
++  const dir=await mkdtemp(path.join(tmpdir(),'integrall-media-invalid-'));
++  try{
++    const store=new LocalMediaStorage(dir);await store.init();
++    await store.save({id:'valid-image-0001',mimeType:'image/png',createdAt:'2026-01-01T00:00:00Z',data:Buffer.from('fixture')});
++    await writeFile(path.join(dir,'invalid-file-0001.json'),'null');
++    assert.equal((await store.list()).length,1);
++  }finally{await rm(dir,{recursive:true,force:true});}
++});

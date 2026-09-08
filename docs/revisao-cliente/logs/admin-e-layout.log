@@ -1,0 +1,20 @@
+{"status": "APROVADO", "tests": 13, "requests": 63}
+actual-media 280
+actual-media 320
+actual-media 360
+actual-media 375
+actual-media 390
+actual-media 412
+actual-media 430
+actual-media 480
+actual-media 600
+actual-media 768
+actual-media 820
+actual-media 1024
+actual-media 1280
+actual-media 1366
+actual-media 1440
+actual-media 1600
+actual-media 1920
+actual-media 2560
+{"status": "APROVADO", "cases": 18, "failures": []}

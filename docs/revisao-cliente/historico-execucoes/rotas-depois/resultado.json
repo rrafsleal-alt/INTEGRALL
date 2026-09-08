@@ -1,0 +1,23 @@
+{
+  "scope": "Chromium com DOM/CSS/JS reais e API simulada; about:blank, sem certificação HTTP/cookies/Express",
+  "results": [
+    {
+      "test": "Produto: atualização silenciosa respeita scroll false",
+      "status": "APROVADO",
+      "observed": {
+        "ok": true,
+        "scrollY": 0,
+        "pageErrors": []
+      }
+    },
+    {
+      "test": "Produto: abertura agendada é descartada ao mudar de rota",
+      "status": "APROVADO",
+      "observed": {
+        "ok": true,
+        "oldProductReopened": false,
+        "pageErrors": []
+      }
+    }
+  ]
+}

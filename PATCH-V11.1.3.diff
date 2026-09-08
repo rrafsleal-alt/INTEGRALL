@@ -1,0 +1,1156 @@
+diff -ruN '--exclude=node_modules' '--exclude=dist' '--exclude=evidencias-v11.1.3' '--exclude=*.pyc' '--exclude=MANIFEST.sha256' /mnt/data/integrall_v113_review/original/ALTERACOES-V11.1.3.md /mnt/data/integrall_v113_review/work/ALTERACOES-V11.1.3.md
+--- /mnt/data/integrall_v113_review/original/ALTERACOES-V11.1.3.md	1970-01-01 00:00:00.000000000 +0000
++++ /mnt/data/integrall_v113_review/work/ALTERACOES-V11.1.3.md	2026-09-02 20:43:10.217606296 +0000
+@@ -0,0 +1,63 @@
++# INTEGRALL v11.1.3 — revisão de UX, imagens e rolagem
++
++## Objetivo
++
++Corrigir atritos pequenos, porém essenciais, relatados após a v11.1.2: sensação de popup travado, desfoque excessivo do fundo, imagens com bordas/áreas vazias, ausência de navegação entre fotos sem abrir o produto e rolagem pouco natural no Admin.
++
++## Correções implementadas
++
++### Popup do produto
++- removido `backdrop-filter: blur(...)`;
++- overlay reduzido para escurecimento leve, sem borrar a loja;
++- o próprio popup é o contêiner de rolagem, eliminando rolagem interna aninhada;
++- roda do mouse sobre o fundo do popup é encaminhada ao conteúdo do produto;
++- abertura continua sem alterar `window.scrollY`;
++- fechamento por X, clique fora e Escape preservado;
++- foco e bloqueio de fundo permanecem acessíveis.
++
++### Imagens dos produtos
++- cards em proporção quadrada;
++- borda removida;
++- camada principal usa `contain`, portanto a foto do produto não é cortada;
++- camada de preenchimento usa a mesma foto com `cover` e baixa opacidade, preenchendo o quadrado sem criar faixas vazias;
++- fallback de imagem quebrada preservado.
++
++### Carrossel
++- setas anterior/próxima diretamente no card;
++- navegação sem abrir o produto;
++- gesto horizontal em dispositivos touch;
++- teclado nas áreas focáveis;
++- contador/indicadores aparecem apenas quando existem 2+ fotos;
++- popup possui os mesmos controles;
++- seleção de variação continua saltando para a foto associada.
++
++### Admin
++- removidas alturas rígidas e rolagens aninhadas do editor visual;
++- painel passa a usar a rolagem normal da página;
++- prévia fica sticky em desktop e volta ao fluxo normal em telas menores;
++- roda do mouse sobre o iframe da prévia é encaminhada ao Admin quando necessário;
++- `Shift + roda` permite rolar somente a prévia;
++- upload múltiplo continua copiando o `FileList` antes de limpar o input.
++
++## Varredura adicional
++- referências públicas atualizadas com cache-busting v11.1.3;
++- auditoria estrutural ajustada para a nova arquitetura de rolagem;
++- build de produção regenerado;
++- scanner de segurança executado;
++- catálogo auditado com 227 produtos e 52 variações;
++- nenhuma função comercial foi removida.
++
++## Validação executada
++- `npm run check`: 60 arquivos JavaScript válidos;
++- `npm run test:dependency-free`: 138/138 aprovados;
++- `npm test`: 153 cenários, 138 aprovados, 15 SKIP dependentes de ambiente/serviços, 0 falhas;
++- `npm audit --offline`: 0 vulnerabilidades conhecidas no lockfile disponível;
++- loja Chromium: 18/18 larguras (280–2560 px);
++- Admin Chromium: 18/18 larguras, login/logout, overflow=0 e console errors=0;
++- galeria Admin: 2 arquivos selecionados juntos, 2 uploads, 3 fotos persistidas e vínculo de variação confirmado;
++- build: 292 arquivos, manifesto verificado;
++- smoke HTTP: 8/8 cenários;
++- build em Chromium: 18/18 larguras.
++
++## Observação do catálogo
++A funcionalidade de foto por variação existe e foi testada, mas o catálogo entregue atualmente possui 0 variações já preenchidas com uma foto específica. A associação precisa ser feita no Admin conforme as fotos reais forem adicionadas a cada produto.
+diff -ruN '--exclude=node_modules' '--exclude=dist' '--exclude=evidencias-v11.1.3' '--exclude=*.pyc' '--exclude=MANIFEST.sha256' /mnt/data/integrall_v113_review/original/ARQUIVOS-ALTERADOS-V11.1.3.md /mnt/data/integrall_v113_review/work/ARQUIVOS-ALTERADOS-V11.1.3.md
+--- /mnt/data/integrall_v113_review/original/ARQUIVOS-ALTERADOS-V11.1.3.md	1970-01-01 00:00:00.000000000 +0000
++++ /mnt/data/integrall_v113_review/work/ARQUIVOS-ALTERADOS-V11.1.3.md	2026-09-02 20:43:10.217675265 +0000
+@@ -0,0 +1,20 @@
++# Arquivos alterados — INTEGRALL v11.1.3
++
++Principais arquivos modificados em relação à v11.1.2:
++
++- `package.json` / `package-lock.json` — versão e scripts de validação v11.1.3.
++- `public/index.html`, `public/admin.html`, `public/404.html`, `public/500.html` — cache-busting da revisão atual.
++- `public/css/store.css` — popup sem blur, rolagem única, smart-fill quadrado e controles de carrossel.
++- `public/css/premium-v104.css` — compatibilidade do tema premium com cards quadrados/smart-fill.
++- `public/css/admin.css` — remoção de rolagens aninhadas e preview sticky responsivo.
++- `public/js/store/catalog.js` — carrossel em cards e popup, swipe, teclado, imagem inteligente, sincronização com variação e encaminhamento de roda no overlay.
++- `public/js/admin.js` — defaults quadrados e handoff da roda do iframe para o Admin.
++- `data/catalog.json` / `data/catalog.seed.json` — defaults visuais normalizados para imagem quadrada sem corte e overlay leve.
++- `tests/v11.1.3-ux.test.js` — regressões específicas da revisão.
++- `tests/v11.1.2-ux.test.js` — contratos herdados ajustados sem exigir arquitetura obsoleta.
++- `scripts/browser-regression.py` — valida carrossel, smart-fill, rolagem no popup/overlay e 18 larguras.
++- `scripts/admin-browser-regression.py` — valida rolagem natural e handoff do iframe.
++- `scripts/gallery-browser-regression.py` — upload múltiplo e vínculo foto-variação.
++- `scripts/audit.mjs` / `scripts/production-http-smoke.mjs` — versão e critérios atuais.
++- `README.md`, `ALTERACOES-V11.1.3.md`, `MANIFESTO-V11.1.3.txt` — documentação da entrega.
++- `docs/evidencias-v11.1.3/` — evidências de navegador da loja, Admin, galeria e build.
+diff -ruN '--exclude=node_modules' '--exclude=dist' '--exclude=evidencias-v11.1.3' '--exclude=*.pyc' '--exclude=MANIFEST.sha256' /mnt/data/integrall_v113_review/original/PATCH-V11.1.3.diff /mnt/data/integrall_v113_review/work/PATCH-V11.1.3.diff
+--- /mnt/data/integrall_v113_review/original/PATCH-V11.1.3.diff	1970-01-01 00:00:00.000000000 +0000
++++ /mnt/data/integrall_v113_review/work/PATCH-V11.1.3.diff	2026-09-02 20:43:36.221989155 +0000
+@@ -0,0 +1,91 @@
++diff -ruN '--exclude=node_modules' '--exclude=dist' '--exclude=evidencias-v11.1.3' '--exclude=*.pyc' '--exclude=MANIFEST.sha256' /mnt/data/integrall_v113_review/original/ALTERACOES-V11.1.3.md /mnt/data/integrall_v113_review/work/ALTERACOES-V11.1.3.md
++--- /mnt/data/integrall_v113_review/original/ALTERACOES-V11.1.3.md	1970-01-01 00:00:00.000000000 +0000
+++++ /mnt/data/integrall_v113_review/work/ALTERACOES-V11.1.3.md	2026-09-02 20:43:10.217606296 +0000
++@@ -0,0 +1,63 @@
+++# INTEGRALL v11.1.3 — revisão de UX, imagens e rolagem
+++
+++## Objetivo
+++
+++Corrigir atritos pequenos, porém essenciais, relatados após a v11.1.2: sensação de popup travado, desfoque excessivo do fundo, imagens com bordas/áreas vazias, ausência de navegação entre fotos sem abrir o produto e rolagem pouco natural no Admin.
+++
+++## Correções implementadas
+++
+++### Popup do produto
+++- removido `backdrop-filter: blur(...)`;
+++- overlay reduzido para escurecimento leve, sem borrar a loja;
+++- o próprio popup é o contêiner de rolagem, eliminando rolagem interna aninhada;
+++- roda do mouse sobre o fundo do popup é encaminhada ao conteúdo do produto;
+++- abertura continua sem alterar `window.scrollY`;
+++- fechamento por X, clique fora e Escape preservado;
+++- foco e bloqueio de fundo permanecem acessíveis.
+++
+++### Imagens dos produtos
+++- cards em proporção quadrada;
+++- borda removida;
+++- camada principal usa `contain`, portanto a foto do produto não é cortada;
+++- camada de preenchimento usa a mesma foto com `cover` e baixa opacidade, preenchendo o quadrado sem criar faixas vazias;
+++- fallback de imagem quebrada preservado.
+++
+++### Carrossel
+++- setas anterior/próxima diretamente no card;
+++- navegação sem abrir o produto;
+++- gesto horizontal em dispositivos touch;
+++- teclado nas áreas focáveis;
+++- contador/indicadores aparecem apenas quando existem 2+ fotos;
+++- popup possui os mesmos controles;
+++- seleção de variação continua saltando para a foto associada.
+++
+++### Admin
+++- removidas alturas rígidas e rolagens aninhadas do editor visual;
+++- painel passa a usar a rolagem normal da página;
+++- prévia fica sticky em desktop e volta ao fluxo normal em telas menores;
+++- roda do mouse sobre o iframe da prévia é encaminhada ao Admin quando necessário;
+++- `Shift + roda` permite rolar somente a prévia;
+++- upload múltiplo continua copiando o `FileList` antes de limpar o input.
+++
+++## Varredura adicional
+++- referências públicas atualizadas com cache-busting v11.1.3;
+++- auditoria estrutural ajustada para a nova arquitetura de rolagem;
+++- build de produção regenerado;
+++- scanner de segurança executado;
+++- catálogo auditado com 227 produtos e 52 variações;
+++- nenhuma função comercial foi removida.
+++
+++## Validação executada
+++- `npm run check`: 60 arquivos JavaScript válidos;
+++- `npm run test:dependency-free`: 138/138 aprovados;
+++- `npm test`: 153 cenários, 138 aprovados, 15 SKIP dependentes de ambiente/serviços, 0 falhas;
+++- `npm audit --offline`: 0 vulnerabilidades conhecidas no lockfile disponível;
+++- loja Chromium: 18/18 larguras (280–2560 px);
+++- Admin Chromium: 18/18 larguras, login/logout, overflow=0 e console errors=0;
+++- galeria Admin: 2 arquivos selecionados juntos, 2 uploads, 3 fotos persistidas e vínculo de variação confirmado;
+++- build: 292 arquivos, manifesto verificado;
+++- smoke HTTP: 8/8 cenários;
+++- build em Chromium: 18/18 larguras.
+++
+++## Observação do catálogo
+++A funcionalidade de foto por variação existe e foi testada, mas o catálogo entregue atualmente possui 0 variações já preenchidas com uma foto específica. A associação precisa ser feita no Admin conforme as fotos reais forem adicionadas a cada produto.
++diff -ruN '--exclude=node_modules' '--exclude=dist' '--exclude=evidencias-v11.1.3' '--exclude=*.pyc' '--exclude=MANIFEST.sha256' /mnt/data/integrall_v113_review/original/ARQUIVOS-ALTERADOS-V11.1.3.md /mnt/data/integrall_v113_review/work/ARQUIVOS-ALTERADOS-V11.1.3.md
++--- /mnt/data/integrall_v113_review/original/ARQUIVOS-ALTERADOS-V11.1.3.md	1970-01-01 00:00:00.000000000 +0000
+++++ /mnt/data/integrall_v113_review/work/ARQUIVOS-ALTERADOS-V11.1.3.md	2026-09-02 20:43:10.217675265 +0000
++@@ -0,0 +1,20 @@
+++# Arquivos alterados — INTEGRALL v11.1.3
+++
+++Principais arquivos modificados em relação à v11.1.2:
+++
+++- `package.json` / `package-lock.json` — versão e scripts de validação v11.1.3.
+++- `public/index.html`, `public/admin.html`, `public/404.html`, `public/500.html` — cache-busting da revisão atual.
+++- `public/css/store.css` — popup sem blur, rolagem única, smart-fill quadrado e controles de carrossel.
+++- `public/css/premium-v104.css` — compatibilidade do tema premium com cards quadrados/smart-fill.
+++- `public/css/admin.css` — remoção de rolagens aninhadas e preview sticky responsivo.
+++- `public/js/store/catalog.js` — carrossel em cards e popup, swipe, teclado, imagem inteligente, sincronização com variação e encaminhamento de roda no overlay.
+++- `public/js/admin.js` — defaults quadrados e handoff da roda do iframe para o Admin.
+++- `data/catalog.json` / `data/catalog.seed.json` — defaults visuais normalizados para imagem quadrada sem corte e overlay leve.
+++- `tests/v11.1.3-ux.test.js` — regressões específicas da revisão.
+++- `tests/v11.1.2-ux.test.js` — contratos herdados ajustados sem exigir arquitetura obsoleta.
+++- `scripts/browser-regression.py` — valida carrossel, smart-fill, rolagem no popup/overlay e 18 larguras.
+++- `scripts/admin-browser-regression.py` — valida rolagem natural e handoff do iframe.
+++- `scripts/gallery-browser-regression.py` — upload múltiplo e vínculo foto-variação.
+++- `scripts/audit.mjs` / `scripts/production-http-smoke.mjs` — versão e critérios atuais.
+++- `README.md`, `ALTERACOES-V11.1.3.md`, `MANIFESTO-V11.1.3.txt` — documentação da entrega.
+++- `docs/evidencias-v11.1.3/` — evidências de navegador da loja, Admin, galeria e build.
+diff -ruN '--exclude=node_modules' '--exclude=dist' '--exclude=evidencias-v11.1.3' '--exclude=*.pyc' '--exclude=MANIFEST.sha256' /mnt/data/integrall_v113_review/original/README.md /mnt/data/integrall_v113_review/work/README.md
+--- /mnt/data/integrall_v113_review/original/README.md	2026-09-02 20:04:58.000000000 +0000
++++ /mnt/data/integrall_v113_review/work/README.md	2026-09-02 20:43:10.217184088 +0000
+@@ -1,4 +1,4 @@
+-# INTEGRALL Online v11.1.2 — Popup de produto, galeria multi-foto e catálogo progressivo
++# INTEGRALL Online v11.1.3 — Popup fluido, carrossel de imagens e rolagem natural
+ 
+ Loja virtual da **INTEGRALL | Boutique Gourmet** — vinhos, sucos, cafés e petit four — com catálogo, carrinho, pedidos server-side, clientes, acompanhamento de pedido, painel administrativo, PostgreSQL, **frete automático (Correios + Jadlog)**, **e-mail transacional**, cupons de desconto, verificação de idade 18+ e integração **Mercado Pago Checkout Pro** pronta para credenciais.
+ 
+@@ -145,7 +145,7 @@
+ 
+ ```bash
+ npm run admin:check-default    # valida a credencial inicial sem imprimi-la
+-npm run verify:v11.1.2         # 121 testes independentes + sintaxe + segurança + auditoria
++npm run verify:v11.1.3         # 138 testes independentes + sintaxe + segurança + auditoria
+ npm test                       # suíte total; HTTP exige dependências instaladas
+ npm run test:browser           # loja em Chromium, 18 larguras
+ npm run test:browser:admin     # login/Admin em Chromium, 18 larguras
+@@ -166,7 +166,7 @@
+ 
+ ```bash
+ npm run admin:check-default      # confirma a credencial inicial local sem imprimi-la
+-npm run verify:v11.1.2          # sintaxe + 128 testes independentes + segurança + auditoria
++npm run verify:v11.1.3          # sintaxe + 138 testes independentes + segurança + auditoria
+ npm test                        # suíte total; exige dependências para os testes HTTP
+ npm run test:browser            # loja em Chromium, 18 larguras
+ npm run test:browser:admin      # Admin/login/logout em Chromium, 18 larguras
+@@ -176,7 +176,7 @@
+ 
+ O gate `npm run verify` permanece como atalho amplo. Em CI com dependências instaladas, execute também `npm run test:http`, `npm run test:smoke` e, quando a política do navegador permitir loopback, `npm run test:browser:production:http`.
+ 
+-A revisão de UX atual está documentada em `ALTERACOES-V11.1.2.md` e nas evidências em `docs/evidencias-v11.1.2/`. Os relatórios da auditoria v11.1.1 continuam no pacote como histórico técnico.
++A revisão de UX atual está documentada em `ALTERACOES-V11.1.3.md` e nas evidências em `docs/evidencias-v11.1.3/`. Os relatórios anteriores permanecem no pacote como histórico técnico.
+ 
+ ## Deploy (Render)
+ 
+@@ -192,7 +192,7 @@
+ - [ ] Access Token + Webhook Secret do Mercado Pago; webhook configurado; compra de teste aprovada
+ - [ ] CNPJ no catálogo; preços, estoques e descrições revisados
+ - [ ] Caixas com colmeia divisória para garrafas (exigência das transportadoras)
+-- [ ] `npm run verify:v11.1.2`, `npm test` e `npm run build:production` aprovados no CI/deploy
++- [ ] `npm run verify:v11.1.3`, `npm test` e `npm run build:production` aprovados no CI/deploy
+ 
+ ## Documentação de referência
+ 
+@@ -203,6 +203,16 @@
+ - Manual Jadlog: https://www.jadlog.com.br/jadlog/arquivos/api_integracao.pdf
+ - Mercado Pago: https://www.mercadopago.com.br/developers/pt/docs/checkout-pro/payment-notifications
+ 
++## Novidades v11.1.3
++
++A v11.1.3 refina a experiência de navegação sem retirar nenhuma função da v11.1.2. O popup do produto não usa mais desfoque no fundo, ganhou escurecimento muito leve e se tornou o próprio contêiner de rolagem. A roda do mouse sobre a área externa do popup também é encaminhada para o produto, evitando a sensação de tela travada.
++
++As imagens dos cards passaram para quadro **quadrado e sem borda**. Para não cortar a foto original, a imagem principal usa `object-fit: contain`; o espaço restante é preenchido por uma segunda camada da própria foto com `cover` e baixa opacidade. Assim o quadro fica completo sem recortar o produto principal.
++
++Produtos com duas ou mais fotos agora possuem **carrossel direto no card**, sem precisar abrir o produto, com setas, teclado e gesto horizontal. O mesmo carrossel existe no popup e continua sincronizado com a foto vinculada à variação.
++
++No Admin, foram removidas rolagens internas desnecessárias do editor visual. A prévia permanece fixa quando útil, e a roda do mouse sobre o `iframe` continua rolando naturalmente o painel administrativo; `Shift + roda` preserva a rolagem dentro da prévia. A seleção de múltiplas fotos e o vínculo foto-variação permanecem validados.
++
+ ## Novidades v11.1.2
+ 
+ A v11.1.2 altera a experiência de produto conforme o uso real da loja: ao selecionar um card, o produto abre em **popup central** sem deslocar a página. O popup usa fundo protegido, foco acessível, fechamento por botão/clique fora/Escape, rolagem interna e layout responsivo.
+diff -ruN '--exclude=node_modules' '--exclude=dist' '--exclude=evidencias-v11.1.3' '--exclude=*.pyc' '--exclude=MANIFEST.sha256' /mnt/data/integrall_v113_review/original/data/catalog.json /mnt/data/integrall_v113_review/work/data/catalog.json
+--- /mnt/data/integrall_v113_review/original/data/catalog.json	2026-09-02 19:21:42.000000000 +0000
++++ /mnt/data/integrall_v113_review/work/data/catalog.json	2026-09-02 20:24:17.841802491 +0000
+@@ -59,7 +59,7 @@
+         "badgeText": "#4a0a1a",
+         "outOfStockBackground": "rgba(74,10,26,.9)",
+         "outOfStockText": "#ffffff",
+-        "overlay": "rgba(31,25,23,.38)"
++        "overlay": "rgba(31,25,23,.18)"
+       },
+       "typography": {
+         "bodyFont": "modern",
+@@ -107,8 +107,8 @@
+         "cardStyle": "minimal",
+         "cardAlign": "left",
+         "cardPadding": 0,
+-        "imageRatio": "portrait",
+-        "imageFit": "cover",
++        "imageRatio": "square",
++        "imageFit": "contain",
+         "radius": 0,
+         "buttonRadius": 0,
+         "inputRadius": 0,
+diff -ruN '--exclude=node_modules' '--exclude=dist' '--exclude=evidencias-v11.1.3' '--exclude=*.pyc' '--exclude=MANIFEST.sha256' /mnt/data/integrall_v113_review/original/data/catalog.seed.json /mnt/data/integrall_v113_review/work/data/catalog.seed.json
+--- /mnt/data/integrall_v113_review/original/data/catalog.seed.json	2026-09-02 19:21:42.000000000 +0000
++++ /mnt/data/integrall_v113_review/work/data/catalog.seed.json	2026-09-02 20:24:17.842306482 +0000
+@@ -59,7 +59,7 @@
+         "badgeText": "#4a0a1a",
+         "outOfStockBackground": "rgba(74,10,26,.9)",
+         "outOfStockText": "#ffffff",
+-        "overlay": "rgba(31,25,23,.38)"
++        "overlay": "rgba(31,25,23,.18)"
+       },
+       "typography": {
+         "bodyFont": "modern",
+@@ -107,8 +107,8 @@
+         "cardStyle": "minimal",
+         "cardAlign": "left",
+         "cardPadding": 0,
+-        "imageRatio": "portrait",
+-        "imageFit": "cover",
++        "imageRatio": "square",
++        "imageFit": "contain",
+         "radius": 0,
+         "buttonRadius": 0,
+         "inputRadius": 0,
+diff -ruN '--exclude=node_modules' '--exclude=dist' '--exclude=evidencias-v11.1.3' '--exclude=*.pyc' '--exclude=MANIFEST.sha256' /mnt/data/integrall_v113_review/original/package-lock.json /mnt/data/integrall_v113_review/work/package-lock.json
+--- /mnt/data/integrall_v113_review/original/package-lock.json	2026-09-02 19:59:20.000000000 +0000
++++ /mnt/data/integrall_v113_review/work/package-lock.json	2026-09-02 20:25:39.281646620 +0000
+@@ -1,12 +1,12 @@
+ {
+   "name": "integrall-online",
+-  "version": "11.1.2",
++  "version": "11.1.3",
+   "lockfileVersion": 3,
+   "requires": true,
+   "packages": {
+     "": {
+       "name": "integrall-online",
+-      "version": "11.1.2",
++      "version": "11.1.3",
+       "dependencies": {
+         "express": "5.1.0",
+         "mercadopago": "3.4.0",
+diff -ruN '--exclude=node_modules' '--exclude=dist' '--exclude=evidencias-v11.1.3' '--exclude=*.pyc' '--exclude=MANIFEST.sha256' /mnt/data/integrall_v113_review/original/package.json /mnt/data/integrall_v113_review/work/package.json
+--- /mnt/data/integrall_v113_review/original/package.json	2026-09-02 19:59:20.000000000 +0000
++++ /mnt/data/integrall_v113_review/work/package.json	2026-09-02 20:25:39.281084651 +0000
+@@ -1,9 +1,9 @@
+ {
+   "name": "integrall-online",
+-  "version": "11.1.2",
++  "version": "11.1.3",
+   "private": true,
+   "type": "module",
+-  "description": "Loja INTEGRALL v11.1.2 com produto em popup, galeria multi-foto corrigida e catálogo progressivo.",
++  "description": "Loja INTEGRALL v11.1.3 com popup fluido, carrossel nos cards e no produto, imagens quadradas sem bordas e rolagem natural no Admin.",
+   "engines": {
+     "node": ">=20.12 <27"
+   },
+@@ -22,18 +22,19 @@
+     "build": "npm run catalog:embed && npm run check && npm run audit && node scripts/build-production.mjs",
+     "verify": "npm run catalog:embed && npm run check && npm run test:offline && npm run security:scan && npm run audit && npm run build:production",
+     "admin:check-default": "node scripts/check-default-admin.mjs",
+-    "test:dependency-free": "node --test --test-concurrency=1 tests/auth.test.js tests/carrier-split.test.js tests/catalog.test.js tests/correios.test.js tests/customer-auth-hardening.test.js tests/default-admin.test.js tests/image-upload.test.js tests/jadlog.test.js tests/mailer.test.js tests/order-state.test.js tests/payment-state.test.js tests/payments-checkout.test.js tests/providers.test.js tests/public-order.test.js tests/repository.test.js tests/v11.1-commerce.test.js tests/v11.1.2-ux.test.js tests/variant-images.test.js tests/visual-editor.test.js",
++    "test:dependency-free": "node --test --test-concurrency=1 tests/auth.test.js tests/carrier-split.test.js tests/catalog.test.js tests/correios.test.js tests/customer-auth-hardening.test.js tests/default-admin.test.js tests/image-upload.test.js tests/jadlog.test.js tests/mailer.test.js tests/order-state.test.js tests/payment-state.test.js tests/payments-checkout.test.js tests/providers.test.js tests/public-order.test.js tests/repository.test.js tests/v11.1-commerce.test.js tests/v11.1.2-ux.test.js tests/v11.1.3-ux.test.js tests/variant-images.test.js tests/visual-editor.test.js",
+     "test:http": "node --test --test-concurrency=1 tests/http.test.js",
+-    "test:offline": "node --test --test-concurrency=1 tests/auth.test.js tests/carrier-split.test.js tests/catalog.test.js tests/correios.test.js tests/customer-auth-hardening.test.js tests/default-admin.test.js tests/image-upload.test.js tests/jadlog.test.js tests/mailer.test.js tests/order-state.test.js tests/payment-state.test.js tests/payments-checkout.test.js tests/providers.test.js tests/public-order.test.js tests/repository.test.js tests/v11.1-commerce.test.js tests/v11.1.2-ux.test.js tests/variant-images.test.js tests/visual-editor.test.js",
+-    "test:browser": "python3 scripts/browser-regression.py --root . --out docs/evidencias-v11.1.2/pos-correcao",
++    "test:offline": "node --test --test-concurrency=1 tests/auth.test.js tests/carrier-split.test.js tests/catalog.test.js tests/correios.test.js tests/customer-auth-hardening.test.js tests/default-admin.test.js tests/image-upload.test.js tests/jadlog.test.js tests/mailer.test.js tests/order-state.test.js tests/payment-state.test.js tests/payments-checkout.test.js tests/providers.test.js tests/public-order.test.js tests/repository.test.js tests/v11.1-commerce.test.js tests/v11.1.2-ux.test.js tests/v11.1.3-ux.test.js tests/variant-images.test.js tests/visual-editor.test.js",
++    "test:browser": "python3 scripts/browser-regression.py --root . --out docs/evidencias-v11.1.3/loja",
+     "build:production": "npm run catalog:embed && node scripts/build-production.mjs",
+-    "test:browser:admin": "python3 scripts/admin-browser-regression.py . docs/evidencias-v11.1.2/pos-correcao",
++    "test:browser:admin": "python3 scripts/admin-browser-regression.py . docs/evidencias-v11.1.3/admin",
+     "catalog:embed": "node scripts/sync-embedded-catalog.mjs",
+-    "test:browser:production": "python3 scripts/browser-regression.py --root dist --out docs/evidencias-v11.1.2/build-producao",
++    "test:browser:production": "python3 scripts/browser-regression.py --root dist --out docs/evidencias-v11.1.3/build-producao",
+     "test:production:http": "node scripts/production-http-smoke.mjs dist/public",
+     "test:production": "npm run build:production && npm run test:production:http && npm run test:browser:production",
+-    "test:browser:production:http": "python3 scripts/production-browser-smoke.py --root dist/public --out docs/evidencias-v11.1.2/build-http",
+-    "verify:v11.1.2": "npm run catalog:embed && npm run check && npm run test:dependency-free && npm run security:scan && npm run audit"
++    "test:browser:production:http": "python3 scripts/production-browser-smoke.py --root dist/public --out docs/evidencias-v11.1.3/build-http",
++    "verify:v11.1.2": "npm run catalog:embed && npm run check && npm run test:dependency-free && npm run security:scan && npm run audit",
++    "verify:v11.1.3": "npm run catalog:embed && npm run check && npm run test:dependency-free && npm run security:scan && npm run audit"
+   },
+   "dependencies": {
+     "express": "5.1.0",
+diff -ruN '--exclude=node_modules' '--exclude=dist' '--exclude=evidencias-v11.1.3' '--exclude=*.pyc' '--exclude=MANIFEST.sha256' /mnt/data/integrall_v113_review/original/public/404.html /mnt/data/integrall_v113_review/work/public/404.html
+--- /mnt/data/integrall_v113_review/original/public/404.html	2026-09-02 19:59:20.000000000 +0000
++++ /mnt/data/integrall_v113_review/work/public/404.html	2026-09-02 20:25:39.897805717 +0000
+@@ -8,7 +8,7 @@
+   <meta name="theme-color" content="#24090d">
+   <title>Página não encontrada | INTEGRALL</title>
+   <link rel="icon" href="/assets/icons/favicon.svg">
+-  <link rel="stylesheet" href="/css/error.css?v=11.1.2">
++  <link rel="stylesheet" href="/css/error.css?v=11.1.3">
+ </head>
+ <body>
+   <main>
+diff -ruN '--exclude=node_modules' '--exclude=dist' '--exclude=evidencias-v11.1.3' '--exclude=*.pyc' '--exclude=MANIFEST.sha256' /mnt/data/integrall_v113_review/original/public/500.html /mnt/data/integrall_v113_review/work/public/500.html
+--- /mnt/data/integrall_v113_review/original/public/500.html	2026-09-02 19:59:20.000000000 +0000
++++ /mnt/data/integrall_v113_review/work/public/500.html	2026-09-02 20:25:39.897847441 +0000
+@@ -8,7 +8,7 @@
+   <meta name="theme-color" content="#24090d">
+   <title>Serviço indisponível | INTEGRALL</title>
+   <link rel="icon" href="/assets/icons/favicon.svg">
+-  <link rel="stylesheet" href="/css/error.css?v=11.1.2">
++  <link rel="stylesheet" href="/css/error.css?v=11.1.3">
+ </head>
+ <body>
+   <main>
+diff -ruN '--exclude=node_modules' '--exclude=dist' '--exclude=evidencias-v11.1.3' '--exclude=*.pyc' '--exclude=MANIFEST.sha256' /mnt/data/integrall_v113_review/original/public/admin.html /mnt/data/integrall_v113_review/work/public/admin.html
+--- /mnt/data/integrall_v113_review/original/public/admin.html	2026-09-02 19:59:20.000000000 +0000
++++ /mnt/data/integrall_v113_review/work/public/admin.html	2026-09-02 20:25:39.897741548 +0000
+@@ -8,8 +8,8 @@
+   <meta name="theme-color" content="#4a0a1a">
+   <title>INTEGRALL | Administração</title>
+   <link rel="icon" href="/assets/icons/favicon.svg">
+-  <link rel="stylesheet" href="/css/admin.css?v=11.1.2">
+-  <script src="/js/admin.js?v=11.1.2" defer></script>
++  <link rel="stylesheet" href="/css/admin.css?v=11.1.3">
++  <script src="/js/admin.js?v=11.1.3" defer></script>
+ </head>
+ <body>
+   <a class="skip-link" href="#main">Ir para o conteúdo</a>
+diff -ruN '--exclude=node_modules' '--exclude=dist' '--exclude=evidencias-v11.1.3' '--exclude=*.pyc' '--exclude=MANIFEST.sha256' /mnt/data/integrall_v113_review/original/public/css/admin.css /mnt/data/integrall_v113_review/work/public/css/admin.css
+--- /mnt/data/integrall_v113_review/original/public/css/admin.css	2026-09-02 19:09:34.000000000 +0000
++++ /mnt/data/integrall_v113_review/work/public/css/admin.css	2026-09-02 20:25:06.036178369 +0000
+@@ -88,16 +88,16 @@
+ .viewport-button{border:0;background:transparent;padding:7px 11px;border-radius:7px;color:var(--muted);cursor:pointer;font-size:12px}
+ .viewport-button.active{background:#fff;color:var(--wine);box-shadow:0 1px 5px rgba(40,30,24,.09)}
+ .visual-editor-status{font-size:12px;color:var(--muted)}.visual-editor-status.ok{color:var(--ok)}.visual-editor-status.bad{color:var(--bad)}
+-.visual-editor-workspace{display:grid;grid-template-columns:minmax(330px,400px) minmax(0,1fr);height:min(800px,78vh);min-height:620px;background:#f0ede8}
++.visual-editor-workspace{display:grid;grid-template-columns:minmax(330px,400px) minmax(0,1fr);height:auto;min-height:620px;align-items:start;background:#f0ede8}
+ .visual-inspector{background:#fff;border-right:1px solid var(--line);min-width:0;overflow:hidden}
+-.visual-inspector-scroll{height:100%;overflow-y:auto;padding:18px;overscroll-behavior:contain}
++.visual-inspector-scroll{height:auto;overflow:visible;padding:18px}
+ .visual-selection-empty{padding:20px;border:1px dashed #cfc6bb;background:#fbfaf8;border-radius:14px}.visual-selection-empty strong{display:block;color:var(--wine);font-size:16px}.visual-selection-empty p{margin:7px 0 0;color:var(--muted);font-size:12px}
+ .visual-selection-editor{padding-bottom:18px;border-bottom:1px solid var(--line);margin-bottom:18px}.inspector-kicker{margin:0 0 5px;color:var(--gold);font-size:10px;text-transform:uppercase;letter-spacing:.15em;font-weight:700}
+ .inspector-title-row,.inline-editor-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.inspector-title-row h3,.inline-editor-head h3{margin:0;color:var(--wine);font:400 22px Georgia,serif}.inspector-title-row p{margin:4px 0 0;color:var(--muted);font-size:11px;line-height:1.45}
+ .visual-quick-fields{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:15px}.quick-field{display:grid;gap:5px;color:var(--wine);font-size:11px}.quick-field span{font-weight:600}.quick-wide{grid-column:1/-1}.quick-field input,.quick-field select,.quick-field textarea{width:100%;padding:9px 10px;border:1px solid var(--line);background:#fff;color:var(--ink);font:inherit;border-radius:7px}.quick-field input[type=color]{height:40px;padding:3px;cursor:pointer}
+ .visual-element-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:14px}.visual-element-actions .button{padding:8px 9px;font-size:11px}.visual-element-actions .danger{grid-column:1/-1}
+-.visual-preview-column{min-width:0;overflow:auto;padding:18px;display:grid;place-items:start center;overscroll-behavior:contain;background:linear-gradient(135deg,#ede9e3,#f8f6f2)}
+-.visual-preview-frame{width:100%;height:100%;min-height:580px;margin:auto;background:#fff;border:1px solid #cfc8bf;box-shadow:0 14px 42px rgba(29,22,19,.14);transition:width .2s ease;border-radius:10px;overflow:hidden}
++.visual-preview-column{min-width:0;overflow:visible;padding:18px;display:grid;place-items:start center;align-self:start;background:linear-gradient(135deg,#ede9e3,#f8f6f2)}
++.visual-preview-frame{width:100%;height:min(760px,74vh);min-height:580px;margin:auto;background:#fff;border:1px solid #cfc8bf;box-shadow:0 14px 42px rgba(29,22,19,.14);transition:width .2s ease;border-radius:10px;overflow:hidden;position:sticky;top:88px}
+ .visual-preview-frame[data-device="tablet"]{width:min(820px,100%)}.visual-preview-frame[data-device="mobile"]{width:min(390px,100%)}
+ .visual-preview-frame iframe{display:block;width:100%;height:100%;border:0;background:#fff}
+ .product-editor-inline{display:grid;gap:13px;padding:2px 0 18px;border-bottom:1px solid var(--line);margin-bottom:18px}
+@@ -109,7 +109,7 @@
+ /* O antigo dialog de produto não é mais modal; estes seletores neutralizam regras herdadas. */
+ .product-editor-dialog{position:static;width:auto;max-height:none;border:0;border-radius:0;overflow:visible}.product-editor-dialog .dialog-head{position:static}.product-editor{max-height:none}
+ @media(max-width:1150px){.visual-editor-workspace{grid-template-columns:minmax(300px,350px) minmax(0,1fr)}.visual-preview-column{padding:12px}.visual-quick-fields{grid-template-columns:1fr}.quick-wide{grid-column:auto}}
+-@media(max-width:880px){main{padding-top:22px}.visual-editor-head{display:grid}.visual-editor-toolbar{align-items:flex-start;flex-direction:column}.visual-editor-workspace{height:auto;min-height:0;grid-template-columns:1fr}.visual-inspector{border-right:0;border-bottom:1px solid var(--line)}.visual-inspector-scroll{height:auto;max-height:none}.visual-preview-column{height:70vh;min-height:560px}.visual-preview-frame{min-height:520px}.product-editor-inline .product-core-fields{grid-template-columns:1fr 1fr}}
++@media(max-width:880px){main{padding-top:22px}.visual-editor-head{display:grid}.visual-editor-toolbar{align-items:flex-start;flex-direction:column}.visual-editor-workspace{height:auto;min-height:0;grid-template-columns:1fr}.visual-inspector{border-right:0;border-bottom:1px solid var(--line)}.visual-inspector-scroll{height:auto;max-height:none}.visual-preview-column{height:auto;min-height:0}.visual-preview-frame{position:static;height:70vh;min-height:520px}.product-editor-inline .product-core-fields{grid-template-columns:1fr 1fr}}
+ @media(max-width:560px){.visual-editor-head{padding:18px}.visual-editor-actions{display:grid;grid-template-columns:1fr 1fr}.visual-editor-actions .button{width:100%}.viewport-switcher{width:100%}.viewport-button{flex:1}.visual-preview-column{padding:8px}.visual-inspector-scroll{padding:14px}.visual-element-actions,.product-editor-inline .product-core-fields,.crop-controls{grid-template-columns:1fr}.visual-element-actions .danger,.product-photo-actions .product-photo-button,.crop-controls .button{grid-column:auto}.product-photo-actions{grid-template-columns:1fr}.product-editor-inline .editor-details-grid{grid-template-columns:1fr}}
+ 
+ /* v10.2 — detalhes administrativos em linha; nenhuma janela cobre o conteúdo */
+@@ -136,7 +136,7 @@
+ .gallery-admin-head{display:grid;gap:3px}.gallery-admin-head strong{color:var(--wine);font-size:13px}.gallery-admin-head span{color:var(--muted);font-size:10px;line-height:1.45}
+ .gallery-admin-list{display:grid;gap:8px}
+ .gallery-admin-item{display:grid;grid-template-columns:72px minmax(0,1fr);gap:10px;align-items:center;padding:8px;border:1px solid var(--line);border-radius:10px;background:#fff}
+-.gallery-admin-item.dragging{opacity:.5;border-style:dashed}.gallery-admin-item img{width:72px;height:72px;object-fit:contain;border-radius:7px;background:var(--sand)}
++.gallery-admin-item.dragging{opacity:.5;border-style:dashed}.gallery-admin-item img{width:72px;height:72px;object-fit:cover;border-radius:7px;background:var(--sand)}
+ .gallery-admin-meta{display:grid;gap:8px;min-width:0}.gallery-admin-meta strong{color:var(--wine);font-size:12px}.gallery-admin-actions{display:flex;flex-wrap:wrap;gap:9px}.gallery-admin-actions .row-button{min-height:32px;padding:3px 2px;font-size:10px}
+ .gallery-upload-button{width:100%;font-size:11px}
+ @media(max-width:600px){
+diff -ruN '--exclude=node_modules' '--exclude=dist' '--exclude=evidencias-v11.1.3' '--exclude=*.pyc' '--exclude=MANIFEST.sha256' /mnt/data/integrall_v113_review/original/public/css/premium-v104.css /mnt/data/integrall_v113_review/work/public/css/premium-v104.css
+--- /mnt/data/integrall_v113_review/original/public/css/premium-v104.css	2026-09-02 19:19:40.000000000 +0000
++++ /mnt/data/integrall_v113_review/work/public/css/premium-v104.css	2026-09-02 20:28:28.914252576 +0000
+@@ -120,9 +120,9 @@
+ html body #catalogSurface .premium-catalog .result-row{max-width:none!important;margin:0!important;color:#9a897d;font-size:.66rem}
+ html body #catalogSurface .premium-catalog .product-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:48px 18px!important}
+ html body #catalogSurface .premium-catalog .card{padding:0!important;background:transparent!important;border:0!important;border-radius:0!important;box-shadow:none!important;text-align:left!important;overflow:visible!important}
+-html body #catalogSurface .premium-catalog .card-image{aspect-ratio:4/5!important;border:0!important;border-radius:0!important;background:#eee5da!important;overflow:hidden}
+-html body #catalogSurface .premium-catalog .card-image img{width:100%;height:100%;object-fit:cover!important;transition:transform .7s cubic-bezier(.2,.6,.3,1)}
+-html body #catalogSurface .premium-catalog .card:hover .card-image img{transform:scale(1.035)}
++html body #catalogSurface .premium-catalog .card-image{aspect-ratio:1/1!important;border:0!important;border-radius:0!important;background:#eee5da!important;overflow:hidden}
++html body #catalogSurface .premium-catalog .card-image .card-image-fill{width:100%;height:100%;object-fit:cover!important}html body #catalogSurface .premium-catalog .card-image .card-image-main{width:100%;height:100%;object-fit:contain!important;transition:transform .7s cubic-bezier(.2,.6,.3,1)}
++html body #catalogSurface .premium-catalog .card:hover .card-image .card-image-main{transform:scale(1.025)}
+ html body #catalogSurface .premium-catalog .badge{left:12px;top:12px;padding:6px 9px;border:0;background:rgba(250,246,239,.94);color:#5d1a22;font-size:.48rem;letter-spacing:.13em}
+ html body #catalogSurface .premium-catalog .card-body{align-items:flex-start!important;padding:18px 1px 0!important}
+ html body #catalogSurface .premium-catalog .category{margin:0 0 7px;color:#a77a3d;font-size:.52rem;letter-spacing:.18em}
+@@ -258,7 +258,7 @@
+ }
+ @media(max-width:450px){
+   html body #catalogSurface .premium-catalog .product-grid{grid-template-columns:1fr!important;gap:42px!important}
+-  html body #catalogSurface .premium-catalog .card-image{aspect-ratio:4/5!important}
++  html body #catalogSurface .premium-catalog .card-image{aspect-ratio:1/1!important}
+   html body #catalogSurface .premium-footer-grid{grid-template-columns:1fr}
+   html body #catalogSurface .premium-footer-brand,html body #catalogSurface .premium-newsletter{grid-column:auto}
+ }
+diff -ruN '--exclude=node_modules' '--exclude=dist' '--exclude=evidencias-v11.1.3' '--exclude=*.pyc' '--exclude=MANIFEST.sha256' /mnt/data/integrall_v113_review/original/public/css/store.css /mnt/data/integrall_v113_review/work/public/css/store.css
+--- /mnt/data/integrall_v113_review/original/public/css/store.css	2026-09-02 19:58:40.000000000 +0000
++++ /mnt/data/integrall_v113_review/work/public/css/store.css	2026-09-02 20:40:25.810145902 +0000
+@@ -48,10 +48,16 @@
+ .result-row{max-width:980px;margin:0 auto 30px;display:flex;justify-content:space-between;gap:16px;color:#918a84;font-size:.74rem}
+ .product-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:48px 34px}
+ .card{display:flex;flex-direction:column;background:transparent;text-align:center}
+-.card-image{position:relative;width:100%;padding:0;border:1px solid #eeeae5;background:#f7f5f2;aspect-ratio:1/1.12;overflow:hidden}
+-.card-image img{width:100%;height:100%;object-fit:cover;transition:transform .55s ease}
+-.card:hover .card-image img{transform:scale(1.018)}
+-.badge{position:absolute;left:12px;top:12px;padding:5px 8px;border:1px solid rgba(170,137,82,.45);background:rgba(255,255,255,.94);color:var(--wine);font-size:.53rem;font-weight:500;letter-spacing:.13em;text-transform:uppercase}
++.card-image{position:relative;width:100%;padding:0;border:0;background:#f2eee8;aspect-ratio:1/1;overflow:hidden;isolation:isolate;touch-action:pan-y pinch-zoom}
++.card-image-fill{position:absolute;z-index:0;inset:0;width:100%;height:100%;object-fit:cover;opacity:.16;filter:saturate(.62) contrast(.9) brightness(1.05);transform:scale(1.025);pointer-events:none}
++.card-image-main{position:relative;z-index:1;width:100%;height:100%;object-fit:contain;transition:transform .55s ease;pointer-events:none}
++.card:hover .card-image-main{transform:scale(1.018)}
++.card-image-open{position:absolute;z-index:2;inset:0;width:100%;height:100%;padding:0;border:0;background:transparent;color:transparent;cursor:pointer}
++.card-gallery-nav{position:absolute;z-index:5;top:50%;width:34px;height:44px;margin-top:-22px;padding:0;border:0;background:rgba(255,255,255,.9);color:var(--wine);display:grid;place-items:center;font:400 1.6rem/1 Georgia,serif;box-shadow:0 4px 14px rgba(35,20,16,.11);opacity:0;transition:opacity .15s ease,background .15s ease}
++.card-gallery-prev{left:7px}.card-gallery-next{right:7px}.card-image:hover .card-gallery-nav,.card-image:focus-within .card-gallery-nav,.card-gallery-nav:focus-visible{opacity:1}.card-gallery-nav:hover{background:#fff}
++.card-gallery-counter{position:absolute;z-index:5;right:8px;bottom:8px;padding:4px 7px;background:rgba(36,9,13,.7);color:#fff;font-size:.56rem;letter-spacing:.05em;pointer-events:none}
++.card-gallery-dots{position:absolute;z-index:5;left:50%;bottom:10px;display:flex;gap:4px;transform:translateX(-50%);pointer-events:none}.card-gallery-dots i{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.58);box-shadow:0 0 0 1px rgba(0,0,0,.08)}.card-gallery-dots i.active{background:#fff;transform:scale(1.2)}
++.badge{position:absolute;z-index:6;left:12px;top:12px;padding:5px 8px;border:1px solid rgba(170,137,82,.45);background:rgba(255,255,255,.94);color:var(--wine);font-size:.53rem;font-weight:500;letter-spacing:.13em;text-transform:uppercase}
+ .badge.out{border-color:transparent;background:rgba(74,10,26,.9);color:#fff}
+ .card-body{flex:1;padding:21px 3px 0;display:flex;flex-direction:column}
+ .category{margin:0 0 8px;color:var(--gold);font-size:.57rem;font-weight:500;letter-spacing:.23em;text-transform:uppercase}
+@@ -87,7 +93,7 @@
+ .footer-bottom{padding-top:20px;display:flex;justify-content:center;flex-wrap:wrap;gap:8px 22px;border-top:1px solid var(--line);margin-top:28px;font-size:.64rem}
+ .footer-bottom [data-mode]{width:100%;color:#aaa39d}
+ 
+-.overlay{position:fixed;inset:0;z-index:100;opacity:0;visibility:hidden;background:rgba(31,25,23,.38);backdrop-filter:blur(3px);transition:.2s}
++.overlay{position:fixed;inset:0;z-index:100;opacity:0;visibility:hidden;background:rgba(31,25,23,.10);backdrop-filter:none;-webkit-backdrop-filter:none;transition:opacity .18s ease,visibility .18s ease}
+ .overlay.open{opacity:1;visibility:visible}
+ .drawer{position:fixed;z-index:110;top:0;right:0;width:min(440px,100%);height:100dvh;min-height:0;display:flex;flex-direction:column;overflow:hidden;background:#fff;box-shadow:-12px 0 45px rgba(0,0,0,.12);transform:translateX(105%);transition:.28s}
+ .drawer.open{transform:none}
+@@ -115,22 +121,26 @@
+ .modal{position:fixed;z-index:120;left:50%;top:50%;width:min(980px,calc(100% - 28px));max-height:92dvh;display:flex;flex-direction:column;opacity:0;visibility:hidden;background:#fff;box-shadow:0 25px 65px rgba(0,0,0,.18);transform:translate(-50%,-48%) scale(.985);transition:.2s;overflow:hidden}
+ .modal.open{opacity:1;visibility:visible;transform:translate(-50%,-50%) scale(1)}
+ .modal-body{padding:22px;overflow:auto}
+-.product-details-inline{position:fixed;z-index:120;left:50%;top:50%;width:min(1120px,calc(100% - 32px));max-height:min(92dvh,920px);min-width:0;margin:0;padding:0;border:1px solid var(--line);background:#fff;box-shadow:0 28px 80px rgba(31,15,18,.28);transform:translate(-50%,-48%) scale(.985);opacity:0;visibility:hidden;overflow:hidden;overflow-wrap:anywhere;transition:opacity .18s ease,transform .18s ease,visibility .18s ease}
++.product-details-inline{position:fixed;z-index:120;left:50%;top:50%;width:min(1120px,calc(100% - 32px));max-height:min(92dvh,920px);min-width:0;margin:0;padding:0;border:1px solid var(--line);background:#fff;box-shadow:0 28px 80px rgba(31,15,18,.22);transform:translate(-50%,-48%) scale(.985);opacity:0;visibility:hidden;overflow-x:hidden;overflow-y:auto;overflow-wrap:anywhere;overscroll-behavior:auto;scrollbar-gutter:stable;-webkit-overflow-scrolling:touch;touch-action:pan-y pinch-zoom;transition:opacity .18s ease,transform .18s ease,visibility .18s ease}
+ .product-details-inline.open{opacity:1;visibility:visible;transform:translate(-50%,-50%) scale(1)}
+ .product-details-inline[hidden]{display:none!important}
+-.product-details-inline .gallery-main img{object-fit:contain}
+-.product-details-toolbar{position:sticky;z-index:4;top:0;display:flex;justify-content:flex-end;margin:0;padding:10px 12px;border-bottom:1px solid var(--line);background:rgba(255,255,255,.96);backdrop-filter:blur(8px)}
+-.product-details-body{min-width:0;max-height:calc(min(92dvh,920px) - 54px);padding:clamp(18px,2.4vw,30px);overflow:auto;overscroll-behavior:contain}
++.product-details-inline .gallery-main .smart-image-main{object-fit:contain}
++.product-details-toolbar{position:sticky;z-index:8;top:0;display:flex;justify-content:flex-end;margin:0;padding:10px 12px;border-bottom:1px solid var(--line);background:rgba(255,255,255,.98);backdrop-filter:none;-webkit-backdrop-filter:none}
++.product-details-body{min-width:0;max-height:none;padding:clamp(18px,2.4vw,30px);overflow:visible}
+ .product-details-grid{display:grid;grid-template-columns:minmax(280px,.88fr) minmax(0,1.12fr);gap:clamp(22px,3vw,42px);align-items:start}
+-.product-gallery{position:sticky;top:0;width:min(100%,500px);margin:0 auto}
++.product-gallery{position:sticky;top:58px;width:min(100%,500px);margin:0 auto}
+ .catalog-pagination{display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap;margin:34px 0 0;padding-top:22px;border-top:1px solid var(--line);color:var(--muted);font-size:.76rem}
+ .catalog-pagination[hidden]{display:none!important}
+ .product-info{min-width:0;overflow-wrap:anywhere}
+ .product-copy{margin-top:22px;padding-top:18px;border-top:1px solid var(--line)}
+ .product-copy h3{margin:0 0 8px;color:var(--wine);font:400 1.1rem var(--serif)}
+ .product-info{width:100%}
+-.gallery-main{position:relative;aspect-ratio:4/5;border:1px solid var(--line);background:var(--sand-2);overflow:hidden}
+-.gallery-main img{width:100%;height:100%;object-fit:cover}
++.gallery-main{position:relative;aspect-ratio:1/1;border:0;background:var(--sand-2);overflow:hidden;isolation:isolate;touch-action:pan-y pinch-zoom}
++.smart-image-fill{position:absolute;z-index:0;inset:0;width:100%;height:100%;object-fit:cover;opacity:.18;filter:saturate(.62) contrast(.9) brightness(1.05);transform:scale(1.025);pointer-events:none}
++.smart-image-main{position:relative;z-index:1;width:100%;height:100%;object-fit:contain;pointer-events:none}
++.gallery-nav{position:absolute;z-index:4;top:50%;width:42px;height:52px;margin-top:-26px;border:0;background:rgba(255,255,255,.9);color:var(--wine);font:400 2rem/1 Georgia,serif;display:grid;place-items:center;box-shadow:0 5px 18px rgba(35,20,16,.12);opacity:.9;transition:opacity .15s ease,background .15s ease}
++.gallery-nav:hover,.gallery-nav:focus-visible{opacity:1;background:#fff}.gallery-nav-prev{left:8px}.gallery-nav-next{right:8px}
++.gallery-counter{position:absolute;z-index:4;right:10px;bottom:10px;padding:5px 8px;background:rgba(36,9,13,.76);color:#fff;font-size:.61rem;letter-spacing:.06em;pointer-events:none}
+ .gallery-thumbs{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:8px}
+ .gallery-thumb{padding:0;border:1px solid var(--line);background:#fff;aspect-ratio:1;overflow:hidden}
+ .gallery-thumb.active{border-color:var(--gold)}
+@@ -180,7 +190,7 @@
+ 
+ @media(max-width:900px){
+   .product-details-inline{width:min(760px,calc(100% - 24px));max-height:94dvh}
+-  .product-details-body{max-height:calc(94dvh - 54px)}
++  .product-details-body{max-height:none}
+   .product-details-grid{grid-template-columns:minmax(0,1fr)}
+   .product-gallery{position:static;width:min(100%,480px)}
+   .wrap{width:min(calc(100% - 36px),var(--max))}
+@@ -199,7 +209,7 @@
+   .nav{width:100%;padding-top:13px;display:none;flex-direction:column;gap:0;border-top:1px solid var(--line)}
+   .nav.open{display:flex}
+   .nav button{width:100%;padding:11px;text-align:center}
+-  .gallery-main{max-height:470px}
++  .gallery-main{max-height:470px;aspect-ratio:1/1}
+   .footer-contact{display:grid;justify-items:center;gap:9px}
+   .footer-contact [data-address]{max-width:100%}
+ }
+@@ -212,7 +222,7 @@
+ 
+ @media(max-width:620px){
+   .product-details-inline{width:calc(100% - 14px);max-height:96dvh}
+-  .product-details-body{max-height:calc(96dvh - 50px);padding:14px}
++  .product-details-body{max-height:none;padding:14px}
+   .product-details-toolbar{padding:8px}
+   .gallery-thumbs{grid-template-columns:repeat(4,minmax(0,1fr))}
+   .catalog-pagination{display:grid;text-align:center}
+@@ -226,7 +236,7 @@
+   .toolbar{grid-template-columns:1fr;margin-bottom:22px}
+   .toolbar input{grid-column:auto}
+   .product-grid{grid-template-columns:1fr;gap:39px}
+-  .card-image{aspect-ratio:1/1.06}
++  .card-image{aspect-ratio:1/1}
+   .product-delivery-form,.form-row{grid-template-columns:1fr}
+   .meta-grid,.spec-list{grid-template-columns:1fr}
+   .related-grid{grid-template-columns:1fr}
+@@ -236,6 +246,8 @@
+   .cart-item img{width:58px;height:70px}
+ }
+ 
++@media(hover:none),(pointer:coarse){.card-gallery-nav{opacity:.92}.card-gallery-counter{display:none}.gallery-nav{opacity:.94}}
++
+ /* Visual editor foundations */
+ .catalog-surface{min-height:100vh;display:flex;flex-direction:column;background:var(--white)}
+ .catalog-surface>#siteMain{flex:1}
+diff -ruN '--exclude=node_modules' '--exclude=dist' '--exclude=evidencias-v11.1.3' '--exclude=*.pyc' '--exclude=MANIFEST.sha256' /mnt/data/integrall_v113_review/original/public/index.html /mnt/data/integrall_v113_review/work/public/index.html
+--- /mnt/data/integrall_v113_review/original/public/index.html	2026-09-02 19:59:32.000000000 +0000
++++ /mnt/data/integrall_v113_review/work/public/index.html	2026-09-02 20:25:40.171114335 +0000
+@@ -9,7 +9,7 @@
+ <meta name="referrer" content="no-referrer"/>
+ <meta name="robots" content="index,follow,max-image-preview:large"/>
+ <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'self'; worker-src 'none'"/>
+-<meta name="integrall-build" content="public-v11.1.2-2026-09-02"/>
++<meta name="integrall-build" content="public-v11.1.3-2026-09-02"/>
+ <meta property="og:locale" content="pt_BR"/>
+ <meta property="og:type" content="website"/>
+ <meta property="og:site_name" content="INTEGRALL"/>
+@@ -28,10 +28,10 @@
+ <link id="siteFavicon" rel="icon" href="/assets/icons/favicon.svg"/>
+ <link rel="apple-touch-icon" sizes="180x180" href="/assets/icons/apple-touch-icon.png"/>
+ <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":["Organization","Store"],"@id":"#organization","name":"INTEGRALL","email":"integrallwine@gmail.com","logo":"/assets/icons/apple-touch-icon.png"},{"@type":"WebSite","@id":"#website","name":"INTEGRALL","publisher":{"@id":"#organization"},"inLanguage":"pt-BR"}]}</script>
+-<link rel="stylesheet" href="/css/store.css?v=11.1.2"/>
+-<link rel="stylesheet" href="/css/checkout.css?v=11.1.2"/>
+-<link rel="stylesheet" href="/css/premium-v104.css?v=11.1.2"/>
+-<link rel="stylesheet" href="/css/commerce-v111.css?v=11.1.2"/>
++<link rel="stylesheet" href="/css/store.css?v=11.1.3"/>
++<link rel="stylesheet" href="/css/checkout.css?v=11.1.3"/>
++<link rel="stylesheet" href="/css/premium-v104.css?v=11.1.3"/>
++<link rel="stylesheet" href="/css/commerce-v111.css?v=11.1.3"/>
+ </head>
+ <body>
+ <noscript><div style="padding:16px;background:#fff3cd;color:#4a0a1a;text-align:center;font-family:Arial,sans-serif"><strong>INTEGRALL</strong><br/>O catálogo interativo precisa de JavaScript. Use os canais de atendimento informados no rodapé.</div></noscript>
+@@ -202,7 +202,13 @@
+   <div class="product-details-body">
+     <div class="product-details-grid">
+       <div class="product-gallery">
+-        <div class="gallery-main"><img alt="" decoding="async" id="modalImage"/></div>
++        <div class="gallery-main" id="modalGalleryStage" data-gallery-swipe="modal">
++          <img alt="" aria-hidden="true" class="smart-image-fill" decoding="async" id="modalImageFill"/>
++          <img alt="" class="smart-image-main" decoding="async" id="modalImage"/>
++          <button aria-label="Foto anterior" class="gallery-nav gallery-nav-prev" data-gallery-step="-1" hidden id="modalGalleryPrev" type="button">‹</button>
++          <button aria-label="Próxima foto" class="gallery-nav gallery-nav-next" data-gallery-step="1" hidden id="modalGalleryNext" type="button">›</button>
++          <span aria-live="polite" class="gallery-counter" hidden id="modalGalleryCounter"></span>
++        </div>
+         <div class="gallery-thumbs" hidden id="modalThumbs"></div>
+       </div>
+       <div class="product-info">
+@@ -357,6 +363,6 @@
+     <div id="accountContent"></div>
+   </div>
+ </section>
+-<div aria-live="polite" class="toast-stack" id="toasts"></div><script id="buildData" type="application/json">{"publicBuild":true,"appVersion":"11.1.2","version":10,"settings":{"catalogId":"catalog-1786110588222-8uuux6","brand":"INTEGRALL","subtitle":"Wine","catalogTitle":"Nossa seleção","catalogText":"Explore uma curadoria de vinhos, cafés, sucos e sabores especiais.","whatsapp":"","email":"integrallwine@gmail.com","instagram":"@integrallwine","address":"Retirada e entrega combinadas no atendimento.","footerDescription":"","shipMode":"quote","fixed":0,"free":0,"zoneFallback":"quote","pickup":"Retirada disponível mediante confirmação no atendimento.","zones":[],"visual":{"version":1,"preset":"editorial","assets":{"headerLogo":"","footerLogo":"","favicon":"","heroBackground":"/assets/brand/integrall-hero-cover.webp","headerBackground":"","footerBackground":"","pageBackground":""},"colors":{"page":"#ffffff","surface":"#ffffff","surfaceAlt":"#faf9f7","surfaceMuted":"#f4f1ec","primary":"#520f1a","primaryHover":"#711827","accent":"#b58a50","text":"#241c18","muted":"#756a62","line":"#dfd4c6","danger":"#a02c35","success":"#276447","buttonText":"#ffffff","headerBackground":"#24090d","footerBackground":"#35080e","cardBackground":"#ffffff","inputBackground":"#ffffff","heroText":"#fff7ec","heroOverlay":"rgba(0,0,0,.28)","headerText":"#f7ecdc","headerMuted":"#e5d7c5","footerText":"#e8d9c9","footerMuted":"#bdab9a","footerHeading":"#f6e9d7","footerAccent":"#c69b5a","price":"#302c29","badgeBackground":"rgba(255,255,255,.94)","badgeText":"#4a0a1a","outOfStockBackground":"rgba(74,10,26,.9)","outOfStockText":"#ffffff","overlay":"rgba(31,25,23,.38)"},"typography":{"bodyFont":"modern","headingFont":"classic","customBody":"","customHeading":"","baseSize":16,"bodyWeight":400,"headingWeight":400,"lineHeight":1.55,"headingScale":1.05,"navSize":10,"navSpacing":0.13,"brandSpacing":0.28,"navTransform":"uppercase"},"layout":{"maxWidth":1360,"gutterDesktop":64,"gutterMobile":20,"headerLayout":"inline","headerSticky":true,"headerPadding":20,"navGap":28,"headerOrder":["brand","nav","actions"],"catalogAlign":"left","catalogTop":80,"catalogBottom":100,"introMaxWidth":710,"blocks":["intro","filters","products"],"toolbarLayout":"columns","gridColumnsDesktop":4,"gridColumnsTablet":2,"gridColumnsMobile":1,"gridGapX":18,"gridGapY":46,"cardStyle":"minimal","cardAlign":"left","cardPadding":0,"imageRatio":"portrait","imageFit":"cover","radius":0,"buttonRadius":0,"inputRadius":0,"shadow":"none","footerAlign":"center","footerOrder":["description","contact","logo"],"headerLogoMode":"text","footerLogoMode":"text","headerLogoWidth":220,"footerLogoWidth":170,"heroMode":"plain","heroPadding":0,"heroRadius":0,"animations":true},"visibility":{"category":true,"unit":true,"stock":true,"quickAdd":true,"search":true,"filters":true,"resultCount":true,"footerDescription":true,"footerContact":true,"headerBrand":true,"headerNav":true,"headerActions":true,"intro":true,"filterBlock":true,"products":true,"footerLogo":true},"customCss":""}},"products":[{"id":"product-1786125158091-2hwfps","name":"Suco Integral de Uva bordô","slug":"suco-integral-de-uva-bordo","department":"sucos","subcategory":"Uva Bordô","brand":"Marqués de Mendonça","sku":"","imported":false,"country":"","region":"","price":2390,"unit":"Garrafa de 1L e 300ml","description":"Suco 100% integral de uva bordô, sem adição de açúcar, água ou conservantes. Pasteurizado para preservar o sabor intenso e os antioxidantes naturais da fruta. Produzido pela Marqués de Mendonça, é o suco de quem leva uva a sério: encorpado, de cor profunda e doçura natural da própria fruta. Disponível em garrafas de 300ml e 1 litro.","images":["/assets/products/01-suco-integral-de-uva-bord.webp"],"variants":[{"id":"variant-1786125213057-vsk38j","name":"300ml","price":1150,"stock":60,"unit":"","weightGrams":520,"image":"","position":1},{"id":"variant-1786125277805-0nrmsu","name":"1L","price":2390,"stock":60,"unit":"","weightGrams":1500,"image":"","position":2}],"attributes":{"volume":"1L e 300ml","flavor":"Uva Bordô","kind":"100% Integral","sugar":"Sem adição de açucar e adoçantes","storage":"Pasteurizado"},"stock":null,"stockMin":3,"maxPerOrder":null,"minPerOrder":null,"weightGrams":null,"lengthCm":9,"widthCm":9,"heightCm":32,"boxes":[{"variantId":"variant-1786125213057-vsk38j","units":12,"lengthCm":23,"widthCm":18,"heightCm":19,"weightGrams":6200},{"variantId":"variant-1786125277805-0nrmsu","units":12,"lengthCm":37,"widthCm":27,"heightCm":29,"weightGrams":18000}],"restockDate":"","preparation":"","available":true,"hidden":false,"featured":false,"madeToOrder":false,"seasonal":false,"giftEnabled":true,"position":1,"created":1786125158091,"updated":1786125308896,"deletedAt":null},{"id":"product-1786125523055-ivln6v","name":"Vinho Tinto Seco","slug":"vinho-tinto-seco","department":"vinhos","subcategory":"Vinho Tinto Seco","brand":"Marqués de Mendonça","sku":"332","imported":false,"country":"Brasil","region":"Serra Gaúcha","price":2699,"unit":"750ml","description":"Vinho tinto seco varietal de uva bordô, produzido pela Marqués de Mendonça na Serra Gaúcha. Aromas de frutas vermelhas maduras, corpo leve e taninos macios — um tinto honesto e fácil de gostar, ideal para o dia a dia. Harmoniza com massas ao molho vermelho, queijos e churrasco. Sirva entre 12° e 14°C. Teor alcoólico: 10,9%. Garrafas de 750ml e 375ml. Códigos do catálogo PDF: 332. Formatos: 750ml.","images":["/assets/products/02-vinho-tinto-seco.webp"],"variants":[{"id":"variant-1786125472992-y1279u","name":"750ml","price":2699,"stock":48,"unit":"","weightGrams":1300,"image":"","position":1},{"id":"variant-1786125496593-h1h204","name":"375ml","price":2150,"stock":24,"unit":"","weightGrams":750,"image":"","position":2}],"attributes":{"wineType":"Tinto","grape":"Bordô","alcohol":"10,9","volume":"750ml","serving":"12° a 14°"},"stock":null,"stockMin":3,"maxPerOrder":null,"minPerOrder":null,"weightGrams":null,"lengthCm":9,"widthCm":9,"heightCm":31,"boxes":[{"variantId":"variant-1786125472992-y1279u","units":12,"lengthCm":30,"widthCm":30,"heightCm":24,"weightGrams":14000},{"variantId":"variant-1786125472992-y1279u","units":6,"lengthCm":30,"widthCm":25,"heightCm":17,"weightGrams":7250}],"restockDate":"","preparation":"","available":true,"hidden":false,"featured":false,"madeToOrder":false,"seasonal":false,"giftEnabled":true,"position":2,"created":1786125523055,"updated":1786125523055,"deletedAt":null},{"id":"product-1786125594468-rlk598","name":"Mentirinha","slug":"mentirinha","department":"petit-four","subcategory":"Biscoito Folheado","brand":"Jurerê","sku":"948","imported":false,"country":"","region":"","price":5490,"unit":"Caixa com 2kg","description":"Biscoito folheado tradicional, crocante e delicado, feito em fornadas artesanais. A caixa de 2kg rende bem e é perfeita para servir com café, chá ou vinho de sobremesa. Validade de 6 meses. Pedido mínimo de 2 caixas. Códigos do catálogo PDF: 948. Formatos: Caixa 2 kg.","images":["/assets/products/03-mentirinha.webp"],"variants":[],"attributes":{"weight":"2kg","quantity":"caixa 2 kg","shelfLife":"6 meses","minOrder":"2 caixas"},"stock":30,"stockMin":3,"maxPerOrder":null,"minPerOrder":2,"weightGrams":2200,"lengthCm":35,"widthCm":25,"heightCm":12,"boxes":[],"restockDate":"","preparation":"","available":true,"hidden":false,"featured":false,"madeToOrder":false,"seasonal":false,"giftEnabled":true,"position":3,"created":1786125594468,"updated":1786125594468,"deletedAt":null},{"id":"product-1786125689329-bqbvu9","name":"Vó Damazia","slug":"vo-damazia","department":"cafes","subcategory":"Café Gerações","brand":"Gerações","sku":"","imported":false,"country":"","region":"","price":3990,"unit":"250g","description":"Café Gerações Vó Damazia: grãos 100% arábica cultivados na Serra Gaúcha, torra média que revela notas de chocolate e caramelo com acidez equilibrada. Uma homenagem de família em cada xícara. Embalagem de 250g.","images":["/assets/products/04-v-damazia.webp"],"variants":[],"attributes":{"origin":"Serra Gaúcha","bean":"Arabica","roast":"Média","weight":"250g","method":"Torrado e moído","kind":"100% Arábica"},"stock":40,"stockMin":3,"maxPerOrder":null,"minPerOrder":null,"weightGrams":300,"lengthCm":18,"widthCm":8,"heightCm":26,"boxes":[],"restockDate":"","preparation":"","available":true,"hidden":false,"featured":false,"madeToOrder":false,"seasonal":false,"giftEnabled":true,"position":4,"created":1786125689329,"updated":1786125689329,"deletedAt":null},{"id":"product-1786125745701-ydcfi8","name":"Vinho verde Pescada","slug":"vinho-verde-pescada","department":"vinhos","subcategory":"Vinho Verde","brand":"Pescada","sku":"","imported":true,"country":"Portugal","region":"","price":6500,"unit":"750ml","description":"Vinho verde branco Pescada, importado de Portugal. Leve, fresco e levemente frisante, com notas cítricas e finalização limpa — o companheiro ideal de peixes, frutos do mar e tardes quentes. Sirva bem gelado. Garrafa de 750ml.","images":["/assets/products/05-vinho-verde-pescada.webp"],"variants":[],"attributes":{"wineType":"Branco","volume":"750ml"},"stock":24,"stockMin":3,"maxPerOrder":null,"minPerOrder":null,"weightGrams":1300,"lengthCm":9,"widthCm":9,"heightCm":31,"boxes":[{"variantId":"","units":12,"lengthCm":30,"widthCm":30,"heightCm":24,"weightGrams":14000},{"variantId":"","units":6,"lengthCm":30,"widthCm":25,"heightCm":17,"weightGrams":7250}],"restockDate":"","preparation":"","available":true,"hidden":false,"featured":false,"madeToOrder":false,"seasonal":false,"giftEnabled":true,"position":5,"created":1786125745701,"updated":1786125745701,"deletedAt":null}],"promotions":[],"commerce":{"businessName":"INTEGRALL | Boutique Gourmet","siteUrl":"","taxId":"","businessAddress":"","supportEmail":"","supportPhone":"","privacyText":"POLÍTICA DE PRIVACIDADEA INTEGRALL coleta apenas os dados necessários para processar o seu pedido: nome, contato (e-mail ou telefone) e, quando houver entrega, o endereço. Esses dados são usados exclusivamente para: registrar e entregar o pedido, emitir comunicações sobre o próprio pedido e cumprir obrigações fiscais.Não vendemos nem compartilhamos seus dados com terceiros para fins de marketing. Os dados de pagamento são processados diretamente pelo provedor de pagamento (Mercado Pago) em ambiente próprio — a INTEGRALL não armazena números de cartão.Conforme a Lei Geral de Proteção de Dados (Lei nº 13.709/2018), você pode solicitar a qualquer momento acesso, correção ou exclusão dos seus dados pelo nosso canal de atendimento. Os registros de pedidos são retidos pelo prazo necessário ao cumprimento de obrigações legais e fiscais.","termsText":"TERMOS DE USO1. Os preços, promoções, disponibilidade de estoque e prazos exibidos na loja podem ser atualizados sem aviso prévio; o valor válido é o confirmado no fechamento do pedido.2. A venda de bebidas alcoólicas é proibida para menores de 18 anos (Lei nº 13.106/2015). Ao comprar produtos alcoólicos, o cliente declara ser maior de idade, e a idade poderá ser conferida na entrega ou retirada mediante documento.3. O pedido é confirmado após o registro no sistema; o pagamento online, quando disponível, é processado pelo Mercado Pago em ambiente seguro.4. Para entregas via Correios, o prazo informado é uma estimativa da transportadora e começa a contar após a confirmação do pagamento e a postagem do pedido.5. Casos omissos serão tratados pelo canal de atendimento da loja.","returnsText":"TROCAS, DEVOLUÇÕES E CANCELAMENTOSDireito de arrependimento (art. 49 do Código de Defesa do Consumidor): em compras realizadas fora do estabelecimento comercial, você pode desistir da compra em até 7 (sete) dias corridos a partir do recebimento do produto, com devolução integral do valor pago, desde que o produto esteja lacrado e em condições de revenda.Produtos com avaria, violação ou erro de envio: comunique o ocorrido em até 7 dias pelo canal de atendimento, com fotos, informando o número do pedido. Faremos a substituição ou o reembolso integral, incluindo o frete.Por se tratar de produtos alimentícios e bebidas, não aceitamos devolução de itens abertos ou parcialmente consumidos, salvo em caso de vício de qualidade.Cancelamentos antes do envio podem ser solicitados a qualquer momento pelo canal de atendimento com estorno integral.","retentionDays":90,"pixKey":"","paymentLink":"","paymentMethods":{"whatsapp":false,"pix":false,"card":false},"apiBaseUrl":"","apiMode":"required","lastUpdated":"2026-08-12T00:00:00.000Z"}}</script>
++<div aria-live="polite" class="toast-stack" id="toasts"></div><script id="buildData" type="application/json">{"publicBuild":true,"appVersion":"11.1.3","version":10,"settings":{"catalogId":"catalog-1786110588222-8uuux6","brand":"INTEGRALL","subtitle":"Wine","catalogTitle":"Nossa seleção","catalogText":"Explore uma curadoria de vinhos, cafés, sucos e sabores especiais.","whatsapp":"","email":"integrallwine@gmail.com","instagram":"@integrallwine","address":"Retirada e entrega combinadas no atendimento.","footerDescription":"","shipMode":"quote","fixed":0,"free":0,"zoneFallback":"quote","pickup":"Retirada disponível mediante confirmação no atendimento.","zones":[],"visual":{"version":1,"preset":"editorial","assets":{"headerLogo":"","footerLogo":"","favicon":"","heroBackground":"/assets/brand/integrall-hero-cover.webp","headerBackground":"","footerBackground":"","pageBackground":""},"colors":{"page":"#ffffff","surface":"#ffffff","surfaceAlt":"#faf9f7","surfaceMuted":"#f4f1ec","primary":"#520f1a","primaryHover":"#711827","accent":"#b58a50","text":"#241c18","muted":"#756a62","line":"#dfd4c6","danger":"#a02c35","success":"#276447","buttonText":"#ffffff","headerBackground":"#24090d","footerBackground":"#35080e","cardBackground":"#ffffff","inputBackground":"#ffffff","heroText":"#fff7ec","heroOverlay":"rgba(0,0,0,.28)","headerText":"#f7ecdc","headerMuted":"#e5d7c5","footerText":"#e8d9c9","footerMuted":"#bdab9a","footerHeading":"#f6e9d7","footerAccent":"#c69b5a","price":"#302c29","badgeBackground":"rgba(255,255,255,.94)","badgeText":"#4a0a1a","outOfStockBackground":"rgba(74,10,26,.9)","outOfStockText":"#ffffff","overlay":"rgba(31,25,23,.18)"},"typography":{"bodyFont":"modern","headingFont":"classic","customBody":"","customHeading":"","baseSize":16,"bodyWeight":400,"headingWeight":400,"lineHeight":1.55,"headingScale":1.05,"navSize":10,"navSpacing":0.13,"brandSpacing":0.28,"navTransform":"uppercase"},"layout":{"maxWidth":1360,"gutterDesktop":64,"gutterMobile":20,"headerLayout":"inline","headerSticky":true,"headerPadding":20,"navGap":28,"headerOrder":["brand","nav","actions"],"catalogAlign":"left","catalogTop":80,"catalogBottom":100,"introMaxWidth":710,"blocks":["intro","filters","products"],"toolbarLayout":"columns","gridColumnsDesktop":4,"gridColumnsTablet":2,"gridColumnsMobile":1,"gridGapX":18,"gridGapY":46,"cardStyle":"minimal","cardAlign":"left","cardPadding":0,"imageRatio":"square","imageFit":"contain","radius":0,"buttonRadius":0,"inputRadius":0,"shadow":"none","footerAlign":"center","footerOrder":["description","contact","logo"],"headerLogoMode":"text","footerLogoMode":"text","headerLogoWidth":220,"footerLogoWidth":170,"heroMode":"plain","heroPadding":0,"heroRadius":0,"animations":true},"visibility":{"category":true,"unit":true,"stock":true,"quickAdd":true,"search":true,"filters":true,"resultCount":true,"footerDescription":true,"footerContact":true,"headerBrand":true,"headerNav":true,"headerActions":true,"intro":true,"filterBlock":true,"products":true,"footerLogo":true},"customCss":""}},"products":[{"id":"product-1786125158091-2hwfps","name":"Suco Integral de Uva bordô","slug":"suco-integral-de-uva-bordo","department":"sucos","subcategory":"Uva Bordô","brand":"Marqués de Mendonça","sku":"","imported":false,"country":"","region":"","price":2390,"unit":"Garrafa de 1L e 300ml","description":"Suco 100% integral de uva bordô, sem adição de açúcar, água ou conservantes. Pasteurizado para preservar o sabor intenso e os antioxidantes naturais da fruta. Produzido pela Marqués de Mendonça, é o suco de quem leva uva a sério: encorpado, de cor profunda e doçura natural da própria fruta. Disponível em garrafas de 300ml e 1 litro.","images":["/assets/products/01-suco-integral-de-uva-bord.webp"],"variants":[{"id":"variant-1786125213057-vsk38j","name":"300ml","price":1150,"stock":60,"unit":"","weightGrams":520,"image":"","position":1},{"id":"variant-1786125277805-0nrmsu","name":"1L","price":2390,"stock":60,"unit":"","weightGrams":1500,"image":"","position":2}],"attributes":{"volume":"1L e 300ml","flavor":"Uva Bordô","kind":"100% Integral","sugar":"Sem adição de açucar e adoçantes","storage":"Pasteurizado"},"stock":null,"stockMin":3,"maxPerOrder":null,"minPerOrder":null,"weightGrams":null,"lengthCm":9,"widthCm":9,"heightCm":32,"boxes":[{"variantId":"variant-1786125213057-vsk38j","units":12,"lengthCm":23,"widthCm":18,"heightCm":19,"weightGrams":6200},{"variantId":"variant-1786125277805-0nrmsu","units":12,"lengthCm":37,"widthCm":27,"heightCm":29,"weightGrams":18000}],"restockDate":"","preparation":"","available":true,"hidden":false,"featured":false,"madeToOrder":false,"seasonal":false,"giftEnabled":true,"position":1,"created":1786125158091,"updated":1786125308896,"deletedAt":null},{"id":"product-1786125523055-ivln6v","name":"Vinho Tinto Seco","slug":"vinho-tinto-seco","department":"vinhos","subcategory":"Vinho Tinto Seco","brand":"Marqués de Mendonça","sku":"332","imported":false,"country":"Brasil","region":"Serra Gaúcha","price":2699,"unit":"750ml","description":"Vinho tinto seco varietal de uva bordô, produzido pela Marqués de Mendonça na Serra Gaúcha. Aromas de frutas vermelhas maduras, corpo leve e taninos macios — um tinto honesto e fácil de gostar, ideal para o dia a dia. Harmoniza com massas ao molho vermelho, queijos e churrasco. Sirva entre 12° e 14°C. Teor alcoólico: 10,9%. Garrafas de 750ml e 375ml. Códigos do catálogo PDF: 332. Formatos: 750ml.","images":["/assets/products/02-vinho-tinto-seco.webp"],"variants":[{"id":"variant-1786125472992-y1279u","name":"750ml","price":2699,"stock":48,"unit":"","weightGrams":1300,"image":"","position":1},{"id":"variant-1786125496593-h1h204","name":"375ml","price":2150,"stock":24,"unit":"","weightGrams":750,"image":"","position":2}],"attributes":{"wineType":"Tinto","grape":"Bordô","alcohol":"10,9","volume":"750ml","serving":"12° a 14°"},"stock":null,"stockMin":3,"maxPerOrder":null,"minPerOrder":null,"weightGrams":null,"lengthCm":9,"widthCm":9,"heightCm":31,"boxes":[{"variantId":"variant-1786125472992-y1279u","units":12,"lengthCm":30,"widthCm":30,"heightCm":24,"weightGrams":14000},{"variantId":"variant-1786125472992-y1279u","units":6,"lengthCm":30,"widthCm":25,"heightCm":17,"weightGrams":7250}],"restockDate":"","preparation":"","available":true,"hidden":false,"featured":false,"madeToOrder":false,"seasonal":false,"giftEnabled":true,"position":2,"created":1786125523055,"updated":1786125523055,"deletedAt":null},{"id":"product-1786125594468-rlk598","name":"Mentirinha","slug":"mentirinha","department":"petit-four","subcategory":"Biscoito Folheado","brand":"Jurerê","sku":"948","imported":false,"country":"","region":"","price":5490,"unit":"Caixa com 2kg","description":"Biscoito folheado tradicional, crocante e delicado, feito em fornadas artesanais. A caixa de 2kg rende bem e é perfeita para servir com café, chá ou vinho de sobremesa. Validade de 6 meses. Pedido mínimo de 2 caixas. Códigos do catálogo PDF: 948. Formatos: Caixa 2 kg.","images":["/assets/products/03-mentirinha.webp"],"variants":[],"attributes":{"weight":"2kg","quantity":"caixa 2 kg","shelfLife":"6 meses","minOrder":"2 caixas"},"stock":30,"stockMin":3,"maxPerOrder":null,"minPerOrder":2,"weightGrams":2200,"lengthCm":35,"widthCm":25,"heightCm":12,"boxes":[],"restockDate":"","preparation":"","available":true,"hidden":false,"featured":false,"madeToOrder":false,"seasonal":false,"giftEnabled":true,"position":3,"created":1786125594468,"updated":1786125594468,"deletedAt":null},{"id":"product-1786125689329-bqbvu9","name":"Vó Damazia","slug":"vo-damazia","department":"cafes","subcategory":"Café Gerações","brand":"Gerações","sku":"","imported":false,"country":"","region":"","price":3990,"unit":"250g","description":"Café Gerações Vó Damazia: grãos 100% arábica cultivados na Serra Gaúcha, torra média que revela notas de chocolate e caramelo com acidez equilibrada. Uma homenagem de família em cada xícara. Embalagem de 250g.","images":["/assets/products/04-v-damazia.webp"],"variants":[],"attributes":{"origin":"Serra Gaúcha","bean":"Arabica","roast":"Média","weight":"250g","method":"Torrado e moído","kind":"100% Arábica"},"stock":40,"stockMin":3,"maxPerOrder":null,"minPerOrder":null,"weightGrams":300,"lengthCm":18,"widthCm":8,"heightCm":26,"boxes":[],"restockDate":"","preparation":"","available":true,"hidden":false,"featured":false,"madeToOrder":false,"seasonal":false,"giftEnabled":true,"position":4,"created":1786125689329,"updated":1786125689329,"deletedAt":null},{"id":"product-1786125745701-ydcfi8","name":"Vinho verde Pescada","slug":"vinho-verde-pescada","department":"vinhos","subcategory":"Vinho Verde","brand":"Pescada","sku":"","imported":true,"country":"Portugal","region":"","price":6500,"unit":"750ml","description":"Vinho verde branco Pescada, importado de Portugal. Leve, fresco e levemente frisante, com notas cítricas e finalização limpa — o companheiro ideal de peixes, frutos do mar e tardes quentes. Sirva bem gelado. Garrafa de 750ml.","images":["/assets/products/05-vinho-verde-pescada.webp"],"variants":[],"attributes":{"wineType":"Branco","volume":"750ml"},"stock":24,"stockMin":3,"maxPerOrder":null,"minPerOrder":null,"weightGrams":1300,"lengthCm":9,"widthCm":9,"heightCm":31,"boxes":[{"variantId":"","units":12,"lengthCm":30,"widthCm":30,"heightCm":24,"weightGrams":14000},{"variantId":"","units":6,"lengthCm":30,"widthCm":25,"heightCm":17,"weightGrams":7250}],"restockDate":"","preparation":"","available":true,"hidden":false,"featured":false,"madeToOrder":false,"seasonal":false,"giftEnabled":true,"position":5,"created":1786125745701,"updated":1786125745701,"deletedAt":null}],"promotions":[],"commerce":{"businessName":"INTEGRALL | Boutique Gourmet","siteUrl":"","taxId":"","businessAddress":"","supportEmail":"","supportPhone":"","privacyText":"POLÍTICA DE PRIVACIDADEA INTEGRALL coleta apenas os dados necessários para processar o seu pedido: nome, contato (e-mail ou telefone) e, quando houver entrega, o endereço. Esses dados são usados exclusivamente para: registrar e entregar o pedido, emitir comunicações sobre o próprio pedido e cumprir obrigações fiscais.Não vendemos nem compartilhamos seus dados com terceiros para fins de marketing. Os dados de pagamento são processados diretamente pelo provedor de pagamento (Mercado Pago) em ambiente próprio — a INTEGRALL não armazena números de cartão.Conforme a Lei Geral de Proteção de Dados (Lei nº 13.709/2018), você pode solicitar a qualquer momento acesso, correção ou exclusão dos seus dados pelo nosso canal de atendimento. Os registros de pedidos são retidos pelo prazo necessário ao cumprimento de obrigações legais e fiscais.","termsText":"TERMOS DE USO1. Os preços, promoções, disponibilidade de estoque e prazos exibidos na loja podem ser atualizados sem aviso prévio; o valor válido é o confirmado no fechamento do pedido.2. A venda de bebidas alcoólicas é proibida para menores de 18 anos (Lei nº 13.106/2015). Ao comprar produtos alcoólicos, o cliente declara ser maior de idade, e a idade poderá ser conferida na entrega ou retirada mediante documento.3. O pedido é confirmado após o registro no sistema; o pagamento online, quando disponível, é processado pelo Mercado Pago em ambiente seguro.4. Para entregas via Correios, o prazo informado é uma estimativa da transportadora e começa a contar após a confirmação do pagamento e a postagem do pedido.5. Casos omissos serão tratados pelo canal de atendimento da loja.","returnsText":"TROCAS, DEVOLUÇÕES E CANCELAMENTOSDireito de arrependimento (art. 49 do Código de Defesa do Consumidor): em compras realizadas fora do estabelecimento comercial, você pode desistir da compra em até 7 (sete) dias corridos a partir do recebimento do produto, com devolução integral do valor pago, desde que o produto esteja lacrado e em condições de revenda.Produtos com avaria, violação ou erro de envio: comunique o ocorrido em até 7 dias pelo canal de atendimento, com fotos, informando o número do pedido. Faremos a substituição ou o reembolso integral, incluindo o frete.Por se tratar de produtos alimentícios e bebidas, não aceitamos devolução de itens abertos ou parcialmente consumidos, salvo em caso de vício de qualidade.Cancelamentos antes do envio podem ser solicitados a qualquer momento pelo canal de atendimento com estorno integral.","retentionDays":90,"pixKey":"","paymentLink":"","paymentMethods":{"whatsapp":false,"pix":false,"card":false},"apiBaseUrl":"","apiMode":"required","lastUpdated":"2026-08-12T00:00:00.000Z"}}</script>
+ 
+-<script defer src="/js/store/age-gate.js?v=11.1.2"></script><script defer src="/js/store/catalog.js?v=11.1.2"></script><script defer src="/js/store/cart.js?v=11.1.2"></script><script defer src="/js/store/shipping.js?v=11.1.2"></script><script defer src="/js/store/api.js?v=11.1.2"></script><script defer src="/js/store/checkout.js?v=11.1.2"></script><script defer src="/js/store/app.js?v=11.1.2"></script><script defer src="/js/store/commerce-v111.js?v=11.1.2"></script><script defer src="/js/store/premium-v104.js?v=11.1.2"></script></body></html>
+\ No newline at end of file
++<script defer src="/js/store/age-gate.js?v=11.1.3"></script><script defer src="/js/store/catalog.js?v=11.1.3"></script><script defer src="/js/store/cart.js?v=11.1.3"></script><script defer src="/js/store/shipping.js?v=11.1.3"></script><script defer src="/js/store/api.js?v=11.1.3"></script><script defer src="/js/store/checkout.js?v=11.1.3"></script><script defer src="/js/store/app.js?v=11.1.3"></script><script defer src="/js/store/commerce-v111.js?v=11.1.3"></script><script defer src="/js/store/premium-v104.js?v=11.1.3"></script></body></html>
+\ No newline at end of file
+diff -ruN '--exclude=node_modules' '--exclude=dist' '--exclude=evidencias-v11.1.3' '--exclude=*.pyc' '--exclude=MANIFEST.sha256' /mnt/data/integrall_v113_review/original/public/js/admin.js /mnt/data/integrall_v113_review/work/public/js/admin.js
+--- /mnt/data/integrall_v113_review/original/public/js/admin.js	2026-09-02 19:58:26.000000000 +0000
++++ /mnt/data/integrall_v113_review/work/public/js/admin.js	2026-09-02 20:33:45.705014158 +0000
+@@ -613,7 +613,7 @@
+     $('#thCatalogAlign').value=l.catalogAlign||'center';
+     $('#thGridDesktop').value=l.gridColumnsDesktop??3; $('#thGridTablet').value=l.gridColumnsTablet??2; $('#thGridMobile').value=l.gridColumnsMobile??1;
+     $('#thCardStyle').value=l.cardStyle||'minimal'; $('#thCardAlign').value=l.cardAlign||'center';
+-    $('#thImageRatio').value=l.imageRatio||'portrait'; $('#thImageFit').value=l.imageFit||'cover';
++    $('#thImageRatio').value=l.imageRatio||'square'; $('#thImageFit').value=l.imageFit||'contain';
+     $('#thRadius').value=l.radius??0; $('#thButtonRadius').value=l.buttonRadius??0; $('#thShadow').value=l.shadow||'none';
+     $('#thFooterAlign').value=l.footerAlign||'center';
+     $('#thFooterOrder').value=Array.isArray(l.footerOrder)&&l.footerOrder.length===3?l.footerOrder.join(','):'logo,description,contact';
+@@ -812,7 +812,7 @@
+   }
+ 
+   function siteImageRatio() {
+-    const value=themeSettings?.visual?.layout?.imageRatio||$('#thImageRatio')?.value||'portrait';
++    const value=themeSettings?.visual?.layout?.imageRatio||$('#thImageRatio')?.value||'square';
+     return ['square','portrait','landscape','auto'].includes(value)?value:'portrait';
+   }
+ 
+@@ -1049,6 +1049,18 @@
+       selectVisualElement(selection);
+     },true);
+     doc.addEventListener('submit',event=>{event.preventDefault();event.stopPropagation()},true);
++    // Rolagem inteligente: a roda do mouse sobre a prévia continua rolando o Admin
++    // enquanto o editor visual ainda ocupa a viewport. Segurar Shift mantém a
++    // rolagem somente dentro da prévia, útil para alcançar seções inferiores.
++    doc.addEventListener('wheel',event=>{
++      if(event.ctrlKey||event.shiftKey||!event.deltaY)return;
++      const panel=$('#visualEditorPanel');if(!panel)return;
++      const rect=panel.getBoundingClientRect(),direction=Math.sign(event.deltaY);
++      const shouldScrollAdmin=direction>0?rect.bottom>window.innerHeight-8:rect.top<8;
++      if(!shouldScrollAdmin)return;
++      event.preventDefault();
++      window.scrollBy({top:event.deltaY,left:0,behavior:'auto'});
++    },{capture:true,passive:false});
+     highlightPreviewSelection();
+   }
+ 
+diff -ruN '--exclude=node_modules' '--exclude=dist' '--exclude=evidencias-v11.1.3' '--exclude=*.pyc' '--exclude=MANIFEST.sha256' /mnt/data/integrall_v113_review/original/public/js/store/catalog.js /mnt/data/integrall_v113_review/work/public/js/store/catalog.js
+--- /mnt/data/integrall_v113_review/original/public/js/store/catalog.js	2026-09-02 19:58:26.000000000 +0000
++++ /mnt/data/integrall_v113_review/work/public/js/store/catalog.js	2026-09-02 20:40:25.810825987 +0000
+@@ -41,14 +41,14 @@
+       text:'#211e1c',muted:'#77716c',line:'#e9e4dd',danger:'#a02c35',success:'#276447',buttonText:'#ffffff',headerBackground:'#ffffff',
+       footerBackground:'#ffffff',cardBackground:'#ffffff',inputBackground:'#ffffff',heroText:'#4a0a1a',heroOverlay:'rgba(0,0,0,.28)',
+       headerText:'#4a0a1a',headerMuted:'#3d3835',footerText:'#77716c',footerMuted:'#746f6b',footerHeading:'#4a0a1a',footerAccent:'#aa8952',
+-      price:'#302c29',badgeBackground:'rgba(255,255,255,.94)',badgeText:'#4a0a1a',outOfStockBackground:'rgba(74,10,26,.9)',outOfStockText:'#ffffff',overlay:'rgba(31,25,23,.38)'
++      price:'#302c29',badgeBackground:'rgba(255,255,255,.94)',badgeText:'#4a0a1a',outOfStockBackground:'rgba(74,10,26,.9)',outOfStockText:'#ffffff',overlay:'rgba(31,25,23,.18)'
+     },
+     typography: {bodyFont:'modern',headingFont:'editorial',customBody:'',customHeading:'',baseSize:16,bodyWeight:400,headingWeight:400,lineHeight:1.55,headingScale:1,navSize:11,navSpacing:.15,brandSpacing:.25,navTransform:'uppercase'},
+     layout: {
+       maxWidth:1240,gutterDesktop:56,gutterMobile:28,headerLayout:'centered',headerSticky:false,headerPadding:48,navGap:40,
+       headerOrder:['brand','nav','actions'],catalogAlign:'center',catalogTop:48,catalogBottom:78,introMaxWidth:710,blocks:['intro','filters','products'],
+       toolbarLayout:'columns',gridColumnsDesktop:3,gridColumnsTablet:2,gridColumnsMobile:1,gridGapX:34,gridGapY:48,cardStyle:'minimal',cardAlign:'center',
+-      cardPadding:0,imageRatio:'portrait',imageFit:'cover',radius:0,buttonRadius:0,inputRadius:0,shadow:'none',footerAlign:'center',footerOrder:['logo','description','contact'],
++      cardPadding:0,imageRatio:'square',imageFit:'contain',radius:0,buttonRadius:0,inputRadius:0,shadow:'none',footerAlign:'center',footerOrder:['logo','description','contact'],
+       headerLogoMode:'text',footerLogoMode:'text',headerLogoWidth:220,footerLogoWidth:170,heroMode:'plain',heroPadding:0,heroRadius:0,animations:true
+     },
+     visibility: {category:true,unit:true,stock:true,quickAdd:true,search:true,filters:true,resultCount:true,footerDescription:true,footerContact:true,headerBrand:true,headerNav:true,headerActions:true,intro:true,filterBlock:true,products:true,footerLogo:true},
+@@ -157,7 +157,8 @@
+ #catalogSurface .product-grid{grid-template-columns:repeat(${l.gridColumnsDesktop},minmax(0,1fr));column-gap:${l.gridGapX}px;row-gap:${l.gridGapY}px}
+ #catalogSurface .card{padding:${l.cardPadding}px;background:${cardBackground};border:${cardBorder};border-radius:${l.radius}px;box-shadow:${cardShadow};text-align:${l.cardAlign};overflow:hidden}
+ #catalogSurface .card-image{aspect-ratio:${ratio};border-radius:${l.radius}px;background:${c.surfaceMuted}}
+-#catalogSurface .card-image img{object-fit:${l.imageFit}}
++#catalogSurface .card-image .card-image-fill{object-fit:cover}
++#catalogSurface .card-image .card-image-main{object-fit:contain}
+ #catalogSurface .card-body{align-items:${l.cardAlign==='center'?'center':l.cardAlign==='right'?'flex-end':'flex-start'}}
+ #catalogSurface .card-actions{justify-content:${l.cardAlign==='center'?'center':l.cardAlign==='right'?'flex-end':'flex-start'}}
+ #catalogSurface .btn,#catalogSurface .icon-btn,#catalogSurface .close-btn{border-radius:${l.buttonRadius}px}
+@@ -289,7 +290,7 @@
+     settings: initialSettings,
+     cart: initialCart,
+     checkout: {...{cep: '', choice: '', name: '', note: ''}, ...initialCheckout},
+-    page: 'vitrine', search: '', category: 'all', sort: 'featured', activeId: '', activeImage: 0, visibleCount: CATALOG_PAGE_SIZE,
++    page: 'vitrine', search: '', category: 'all', sort: 'featured', activeId: '', activeImage: 0, visibleCount: CATALOG_PAGE_SIZE, cardImageIndexes: {}, swipeSuppressedUntil: 0,
+     filters: {country:'all', type:'all', grape:'all', origin:'all', flavor:'all', availability:'all', minPrice:'', maxPrice:'', imported:false},
+     lastFocused: null, pendingSharedProduct: '', catalogReady: publicMode
+   };
+@@ -333,6 +334,56 @@
+     image.src = source || fallback;
+   }
+ 
++  function galleryIndex(index, length) {
++    const total = Math.max(1, Number(length) || 1);
++    const value = Number(index) || 0;
++    return ((value % total) + total) % total;
++  }
++
++  function setSmartProductImage(fill, main, source, product, alt = '') {
++    setProductImage(fill, source, product, '');
++    if (fill) { fill.alt = ''; fill.setAttribute('aria-hidden', 'true'); }
++    setProductImage(main, source, product, alt);
++  }
++
++  function renderCardGalleryStage(stage, product, index = 0) {
++    if (!stage || !product) return;
++    const images = productImages(product);
++    const active = galleryIndex(index, images.length);
++    state.cardImageIndexes[product.id] = active;
++    stage.dataset.cardIndex = String(active);
++    const fill = $('.card-image-fill', stage), main = $('.card-image-main', stage);
++    setSmartProductImage(fill, main, images[active], product, `${product.name} — foto ${active + 1}`);
++    const hasMultiple = images.length > 1;
++    $$('.card-gallery-nav', stage).forEach(button => button.hidden = !hasMultiple);
++    const counter = $('.card-gallery-counter', stage);
++    if (counter) { counter.hidden = !hasMultiple; counter.textContent = `${active + 1}/${images.length}`; }
++    const dots = $('.card-gallery-dots', stage);
++    if (dots) {
++      dots.hidden = !hasMultiple;
++      [...dots.children].forEach((dot, dotIndex) => dot.classList.toggle('active', dotIndex === active));
++    }
++    const opener = $('.card-image-open', stage);
++    if (opener) opener.setAttribute('aria-label', hasMultiple ? `Ver detalhes de ${product.name}. Foto ${active + 1} de ${images.length}` : `Ver detalhes de ${product.name}`);
++  }
++
++  function changeCardGallery(productId, step, stage = null) {
++    const product = getProduct(productId); if (!product) return false;
++    const images = productImages(product); if (images.length < 2) return false;
++    const current = Number(state.cardImageIndexes[product.id] ?? stage?.dataset.cardIndex ?? 0);
++    const next = galleryIndex(current + Number(step || 0), images.length);
++    const targets = stage ? [stage] : $$('[data-card-gallery-product]').filter(node => node.dataset.cardGalleryProduct === product.id);
++    targets.forEach(node => renderCardGalleryStage(node, product, next));
++    return true;
++  }
++
++  function changeModalGallery(step) {
++    const product = getProduct(state.activeId); if (!product) return false;
++    const images = productImages(product); if (images.length < 2) return false;
++    renderGallery(product, state.activeImage + Number(step || 0));
++    return true;
++  }
++
+   function productVariants(product) {
+     if (!Array.isArray(product?.variants)) return [];
+     const seen = new Set();
+@@ -547,10 +598,21 @@
+ 
+     items.forEach(product => {
+       const card = el('article', 'card');
+-      const imageButton = el('button', 'card-image');
+-      imageButton.type = 'button'; imageButton.dataset.details = product.id; imageButton.setAttribute('aria-label', `Ver detalhes de ${product.name}`);
+-      const image = document.createElement('img'); setProductImage(image, productImages(product)[0], product, product.name); image.loading = 'lazy'; image.decoding = 'async'; imageButton.append(image);
++      const imageButton = el('div', 'card-image'); imageButton.dataset.cardGalleryProduct = product.id;
++      const fillImage = document.createElement('img'); fillImage.className = 'card-image-fill'; fillImage.loading = 'lazy'; fillImage.decoding = 'async'; fillImage.alt = ''; fillImage.setAttribute('aria-hidden', 'true');
++      const image = document.createElement('img'); image.className = 'card-image-main'; image.loading = 'lazy'; image.decoding = 'async';
++      const imageOpen = el('button', 'card-image-open'); imageOpen.type = 'button'; imageOpen.dataset.details = product.id;
++      imageButton.append(fillImage, image, imageOpen);
++      const galleryImages = productImages(product);
++      if (galleryImages.length > 1) {
++        const previous = el('button', 'card-gallery-nav card-gallery-prev', '‹'); previous.type = 'button'; previous.dataset.cardGalleryStep = '-1'; previous.dataset.cardProduct = product.id; previous.setAttribute('aria-label', `Foto anterior de ${product.name}`);
++        const next = el('button', 'card-gallery-nav card-gallery-next', '›'); next.type = 'button'; next.dataset.cardGalleryStep = '1'; next.dataset.cardProduct = product.id; next.setAttribute('aria-label', `Próxima foto de ${product.name}`);
++        const dots = el('span', 'card-gallery-dots'); dots.setAttribute('aria-hidden', 'true'); galleryImages.slice(0, 8).forEach(() => dots.append(el('i')));
++        const counter = el('span', 'card-gallery-counter');
++        imageButton.append(previous, next, dots, counter);
++      }
+       if (product.featured || !productAvailable(product)) imageButton.append(el('span', `badge ${!productAvailable(product) ? 'out' : ''}`, !productAvailable(product) ? 'Indisponível' : 'Destaque'));
++      renderCardGalleryStage(imageButton, product, state.cardImageIndexes[product.id] || 0);
+       const body = el('div', 'card-body');
+       body.append(el('p', 'category', product.subcategory || DEPARTMENT_LABELS[product.department] || 'Seleção Integrall'), el('h2', '', product.name));
+       const priceRow = el('div', 'price-row');
+@@ -629,6 +691,14 @@
+       const previous = opener; active = null; opener = null;
+       if (returnFocus && previous instanceof HTMLElement) setTimeout(() => previous.focus(), 20);
+     }
++    overlay?.addEventListener('wheel', event => {
++      if (active?.id !== 'productDetails' || !event.deltaY) return;
++      const maxScroll = Math.max(0, active.scrollHeight - active.clientHeight);
++      if (!maxScroll) return;
++      const before = active.scrollTop;
++      active.scrollTop = Math.max(0, Math.min(maxScroll, active.scrollTop + event.deltaY));
++      if (active.scrollTop !== before) event.preventDefault();
++    }, {passive: false});
+     function current() { return active; }
+     return {open, close, current};
+   })();
+@@ -645,9 +715,11 @@
+   }
+ 
+   function clearProductDetailsState() {
+-    const image = $('#modalImage');
++    const image = $('#modalImage'), fill = $('#modalImageFill');
+     if (image) { image.removeAttribute('src'); image.alt = ''; }
++    if (fill) { fill.removeAttribute('src'); fill.alt = ''; }
+     $('#modalThumbs')?.replaceChildren();
++    ['modalGalleryPrev','modalGalleryNext','modalGalleryCounter'].forEach(id => { const node=$('#'+id); if(node) node.hidden=true; });
+     $('#modalVariant')?.replaceChildren();
+     $('#modalSpecs')?.replaceChildren();
+     $('#relatedGrid')?.replaceChildren();
+@@ -691,7 +763,7 @@
+     if (layers.current() !== details) layers.open(details);
+     else details.classList.add('open');
+     requestAnimationFrame(() => {
+-      const body=$('.product-details-body',details); if(body)body.scrollTop=0;
++      details.scrollTop=0;
+       if(focus) $('#closeProductDetails')?.focus({preventScroll:true});
+     });
+   }
+@@ -724,9 +796,13 @@
+   }
+ 
+   function renderGallery(product, index = 0) {
+-    const images = productImages(product); state.activeImage = Math.max(0, Math.min(index, images.length - 1));
+-    setProductImage($('#modalImage'), images[state.activeImage], product, `${product.name} — foto ${state.activeImage + 1}`);
+-    const thumbs = $('#modalThumbs'); thumbs.replaceChildren(); thumbs.hidden = images.length < 2;
++    const images = productImages(product); state.activeImage = galleryIndex(index, images.length);
++    setSmartProductImage($('#modalImageFill'), $('#modalImage'), images[state.activeImage], product, `${product.name} — foto ${state.activeImage + 1}`);
++    const hasMultiple = images.length > 1;
++    const previous = $('#modalGalleryPrev'), next = $('#modalGalleryNext'), counter = $('#modalGalleryCounter');
++    if (previous) previous.hidden = !hasMultiple; if (next) next.hidden = !hasMultiple;
++    if (counter) { counter.hidden = !hasMultiple; counter.textContent = `${state.activeImage + 1}/${images.length}`; }
++    const thumbs = $('#modalThumbs'); thumbs.replaceChildren(); thumbs.hidden = !hasMultiple;
+     images.forEach((src, i) => {
+       const button = el('button', `gallery-thumb ${i === state.activeImage ? 'active' : ''}`); button.type = 'button'; button.dataset.galleryIndex = String(i); button.setAttribute('aria-label', `Ver foto ${i + 1} de ${product.name}`);
+       const image = document.createElement('img'); setProductImage(image, src, product, ''); button.append(image); thumbs.append(button);
+@@ -1075,16 +1151,45 @@
+     $$('.close-ui').forEach(button => button.addEventListener('click', closeCurrentLayer));
+     $('#closeProductDetails')?.addEventListener('click', () => closeProductDetails());
+     $('#loadMoreProducts')?.addEventListener('click',()=>{state.visibleCount+=CATALOG_PAGE_SIZE;renderProducts();});
+-    document.addEventListener('keydown', event => { if (event.key === 'Escape') { const suggestions=$('#searchSuggestions'); if(suggestions&&!suggestions.hidden){suggestions.hidden=true;$('#search')?.setAttribute('aria-expanded','false');return;} if(layers.current()){closeCurrentLayer();return;} if(productDetailsIsOpen())closeProductDetails(); } });
++    document.addEventListener('keydown', event => {
++      const cardOpener = event.target.closest?.('.card-image-open');
++      if (cardOpener && (event.key === 'ArrowLeft' || event.key === 'ArrowRight')) {
++        const stage = cardOpener.closest('[data-card-gallery-product]');
++        if (stage && changeCardGallery(stage.dataset.cardGalleryProduct, event.key === 'ArrowRight' ? 1 : -1, stage)) event.preventDefault();
++        return;
++      }
++      if (event.key === 'ArrowLeft' && productDetailsIsOpen()) { if (changeModalGallery(-1)) event.preventDefault(); return; }
++      if (event.key === 'ArrowRight' && productDetailsIsOpen()) { if (changeModalGallery(1)) event.preventDefault(); return; }
++      if (event.key === 'Escape') { const suggestions=$('#searchSuggestions'); if(suggestions&&!suggestions.hidden){suggestions.hidden=true;$('#search')?.setAttribute('aria-expanded','false');return;} if(layers.current()){closeCurrentLayer();return;} if(productDetailsIsOpen())closeProductDetails(); }
++    });
+     document.addEventListener('click', event => {
+       const suggestion=event.target.closest('[data-suggest-product]'); if(suggestion){$('#searchSuggestions').hidden=true; openProduct(suggestion.dataset.suggestProduct,{updateHash:publicMode}); return;}
+-      const detail = event.target.closest('[data-details]'); if (detail) openProduct(detail.dataset.details, {updateHash: publicMode});
+-      const gallery = event.target.closest('[data-gallery-index]'); if (gallery) { const product = getProduct(state.activeId); if (product) renderGallery(product, Number(gallery.dataset.galleryIndex)); }
++      const cardGallery = event.target.closest('[data-card-gallery-step]'); if (cardGallery) { event.preventDefault(); event.stopPropagation(); changeCardGallery(cardGallery.dataset.cardProduct, Number(cardGallery.dataset.cardGalleryStep), cardGallery.closest('[data-card-gallery-product]')); return; }
++      const modalGallery = event.target.closest('[data-gallery-step]'); if (modalGallery) { event.preventDefault(); changeModalGallery(Number(modalGallery.dataset.galleryStep)); return; }
++      const detail = event.target.closest('[data-details]'); if (detail) { if (performance.now() < state.swipeSuppressedUntil) return; openProduct(detail.dataset.details, {updateHash: publicMode}); return; }
++      const gallery = event.target.closest('[data-gallery-index]'); if (gallery) { const product = getProduct(state.activeId); if (product) renderGallery(product, Number(gallery.dataset.galleryIndex)); return; }
+       const related = event.target.closest('[data-related-id]'); if (related) openProduct(related.dataset.relatedId, {updateHash: publicMode});
+       const plus = event.target.closest('[data-plus]'); if (plus) changeQuantity(plus.dataset.plus, 1);
+       const minus = event.target.closest('[data-minus]'); if (minus) changeQuantity(minus.dataset.minus, -1);
+       const remove = event.target.closest('[data-remove]'); if (remove) removeLine(remove.dataset.remove);
+     });
++    let gallerySwipe = null;
++    document.addEventListener('pointerdown', event => {
++      if (event.pointerType === 'mouse' && event.button !== 0) return;
++      const stage = event.target.closest?.('[data-gallery-swipe="modal"],[data-card-gallery-product]'); if (!stage) return;
++      gallerySwipe = {pointerId:event.pointerId, stage, x:event.clientX, y:event.clientY};
++    }, {passive:true});
++    document.addEventListener('pointerup', event => {
++      const swipe = gallerySwipe; gallerySwipe = null;
++      if (!swipe || swipe.pointerId !== event.pointerId || !swipe.stage.isConnected) return;
++      const dx = event.clientX - swipe.x, dy = event.clientY - swipe.y;
++      if (Math.abs(dx) < 38 || Math.abs(dx) <= Math.abs(dy) * 1.1) return;
++      const step = dx < 0 ? 1 : -1;
++      if (swipe.stage.dataset.gallerySwipe === 'modal') changeModalGallery(step);
++      else if (changeCardGallery(swipe.stage.dataset.cardGalleryProduct, step, swipe.stage)) state.swipeSuppressedUntil = performance.now() + 420;
++    }, {passive:true});
++    document.addEventListener('pointercancel', () => { gallerySwipe = null; }, {passive:true});
++
+     $('#modalVariant').addEventListener('change',()=>{const product=getProduct(state.activeId);if(product)syncGalleryToVariant(product,$('#modalVariant').value);updateModalSelection()});
+     $('#modalQty').addEventListener('input', event => { if (event.target.value && !/^\d+$/.test(event.target.value)) event.target.value = ''; updateModalSelection(); updateModalDeliveryOptions(); });
+     $('#modalGift').addEventListener('change', event => { $('#giftMessageWrap').hidden = !event.target.checked; if (event.target.checked) $('#modalGiftMessage').focus(); });
+@@ -1136,5 +1241,5 @@
+   const initialRoute = routeFromLocation(); applyPage(initialRoute.page); renderAdvancedFilters(); renderCart();
+   if (initialRoute.productId) setTimeout(() => openProduct(initialRoute.productId), 60);
+ 
+-  return {state, setProducts, setPromotions, setSettings, renderProducts, renderCart, renderCategories, renderAdvancedFilters, openProduct, closeProductDetails, openCart, navigate, notify, calculateShipping, getState, getProduct, productImages, basePrice, regularBasePrice, linePrice, regularLinePrice, productVariants, selectedVariant, variantDisplayImage, productAvailable, stockLimit, money, norm, digits, cepMask, placeholderImage, normalizeVisual, buildVisualCss, scopeVisualCss, visualDefaults: visualClone(VISUAL_DEFAULTS), applyVisualTheme, checkoutValidation, checkoutMessage, cartDetails, cartSubtotal, openWhatsApp, whatsappUrl, saveCart, cleanCart, addReorderItems, effectiveFreeShippingThreshold, activeProductPromotions, automaticPromotionPreview};
++  return {state, setProducts, setPromotions, setSettings, renderProducts, renderCart, renderCategories, renderAdvancedFilters, renderGallery, renderCardGalleryStage, changeCardGallery, changeModalGallery, openProduct, closeProductDetails, openCart, navigate, notify, calculateShipping, getState, getProduct, productImages, basePrice, regularBasePrice, linePrice, regularLinePrice, productVariants, selectedVariant, variantDisplayImage, productAvailable, stockLimit, money, norm, digits, cepMask, placeholderImage, normalizeVisual, buildVisualCss, scopeVisualCss, visualDefaults: visualClone(VISUAL_DEFAULTS), applyVisualTheme, checkoutValidation, checkoutMessage, cartDetails, cartSubtotal, openWhatsApp, whatsappUrl, saveCart, cleanCart, addReorderItems, effectiveFreeShippingThreshold, activeProductPromotions, automaticPromotionPreview};
+ })({embedded:__integrallData,publicMode:true});
+\ No newline at end of file
+diff -ruN '--exclude=node_modules' '--exclude=dist' '--exclude=evidencias-v11.1.3' '--exclude=*.pyc' '--exclude=MANIFEST.sha256' /mnt/data/integrall_v113_review/original/scripts/admin-browser-regression.py /mnt/data/integrall_v113_review/work/scripts/admin-browser-regression.py
+--- /mnt/data/integrall_v113_review/original/scripts/admin-browser-regression.py	2026-09-02 19:09:34.000000000 +0000
++++ /mnt/data/integrall_v113_review/work/scripts/admin-browser-regression.py	2026-09-02 20:29:46.872556368 +0000
+@@ -82,13 +82,25 @@
+       print('OVERFLOW DEBUG',width,after,'NEAR=',json.dumps(near,ensure_ascii=False,indent=2),'TOPS=',json.dumps(tops,ensure_ascii=False,indent=2))
+     assert after['overflow']==0,(width,'dashboard',after)
+     assert page.locator('#productDialog').evaluate("el=>el.tagName==='SECTION' && !el.matches('[role=dialog]')")
++    scroll_styles=page.evaluate("() => ({inspector:getComputedStyle(document.querySelector('.visual-inspector-scroll')).overflowY,preview:getComputedStyle(document.querySelector('.visual-preview-column')).overflowY,workspaceHeight:getComputedStyle(document.querySelector('.visual-editor-workspace')).height})")
++    assert scroll_styles['inspector']=='visible',(width,'inspector-scroll',scroll_styles)
++    assert scroll_styles['preview']=='visible',(width,'preview-scroll',scroll_styles)
++    admin_scroll_handoff=True
++    if width>=1024:
++      page.locator('#visualEditorPanel').scroll_into_view_if_needed(); page.wait_for_timeout(30)
++      page.evaluate("window.scrollTo(0, Math.max(0, document.querySelector('#visualEditorPanel').offsetTop - 10))")
++      before_wheel=page.evaluate('window.scrollY')
++      page.locator('#sitePreview').hover(position={'x':20,'y':20}); page.mouse.wheel(0,420); page.wait_for_timeout(40)
++      after_wheel=page.evaluate('window.scrollY')
++      admin_scroll_handoff=after_wheel>before_wheel
++      assert admin_scroll_handoff,(width,'preview-wheel-handoff',before_wheel,after_wheel)
+     assert page.locator('#logoutButton:not([hidden])').count()==1
+     if width in SHOTS: page.screenshot(path=str(OUT/f'admin-dashboard-{width}px.png'),full_page=True)
+     page.click('#logoutButton'); page.wait_for_selector('#loginView:not([hidden])')
+     assert page.locator('#dashboard[hidden]').count()==1
+     errors=[m for m in messages if m['type']=='error']; assert not errors,(width,errors)
+-    results.append({'width':width,'status':'APROVADO','loginLayout':before,'dashboardLayout':after,'console':messages})
++    results.append({'width':width,'status':'APROVADO','loginLayout':before,'dashboardLayout':after,'scrollStyles':scroll_styles,'adminScrollHandoff':admin_scroll_handoff,'console':messages})
+     context.close()
+   browser.close()
+ (OUT/'admin-browser-audit-results.json').write_text(json.dumps({'engine':'Chromium','mode':'about:blank com HTML/CSS/JS reais e API simulada','results':results},ensure_ascii=False,indent=2),'utf-8')
+-print(f'ADMIN BROWSER AUDIT OK: {len(results)}/{len(WIDTHS)} larguras; login incorreto/correto/logout; overflow global=0; console errors=0')
++print(f'ADMIN BROWSER AUDIT OK: {len(results)}/{len(WIDTHS)} larguras; login incorreto/correto/logout; rolagem natural/iframe handoff; overflow global=0; console errors=0')
+diff -ruN '--exclude=node_modules' '--exclude=dist' '--exclude=evidencias-v11.1.3' '--exclude=*.pyc' '--exclude=MANIFEST.sha256' /mnt/data/integrall_v113_review/original/scripts/audit.mjs /mnt/data/integrall_v113_review/work/scripts/audit.mjs
+--- /mnt/data/integrall_v113_review/original/scripts/audit.mjs	2026-09-02 20:03:26.000000000 +0000
++++ /mnt/data/integrall_v113_review/work/scripts/audit.mjs	2026-09-02 20:31:23.511541508 +0000
+@@ -98,7 +98,7 @@
+ 
+ const css = await readFile(path.join(publicDir, 'css', 'store.css'), 'utf8');
+ if (!/\.product-details-inline\{[^}]*position\s*:\s*fixed[^}]*z-index\s*:\s*120/s.test(css)) failures.push('store.css: popup fixo de produto não detectado');
+-if (!/\.product-details-body\{[^}]*overflow\s*:\s*auto/s.test(css)) failures.push('store.css: popup de produto precisa de rolagem interna');
++if (!/\.product-details-inline\{[^}]*overflow-y\s*:\s*auto/s.test(css) || !/\.product-details-body\{[^}]*overflow\s*:\s*visible/s.test(css)) failures.push('store.css: popup de produto deve rolar no container principal, sem rolagem interna aninhada');
+ if (!/\.product-details-grid\{[^}]*grid-template-columns\s*:\s*minmax\(280px,\.88fr\)\s+minmax\(0,1\.12fr\)/s.test(css)) failures.push('store.css: layout desktop do popup de produto não detectado');
+ if (/(?:^|\})\s*body\s*\{[^}]*min-width\s*:\s*(?:3[2-9][0-9]|[4-9][0-9]{2,}|[1-9][0-9]{3,})px/s.test(css)) failures.push('store.css: body possui largura mínima incompatível com telas pequenas');
+ if (/(?:^|\})\s*body\s*\{[^}]*overflow-x\s*:\s*hidden/s.test(css)) failures.push('store.css: overflow-x:hidden global mascara problemas de layout');
+diff -ruN '--exclude=node_modules' '--exclude=dist' '--exclude=evidencias-v11.1.3' '--exclude=*.pyc' '--exclude=MANIFEST.sha256' /mnt/data/integrall_v113_review/original/scripts/browser-regression.py /mnt/data/integrall_v113_review/work/scripts/browser-regression.py
+--- /mnt/data/integrall_v113_review/original/scripts/browser-regression.py	2026-09-02 20:00:20.000000000 +0000
++++ /mnt/data/integrall_v113_review/work/scripts/browser-regression.py	2026-09-02 20:40:25.811028279 +0000
+@@ -1,5 +1,5 @@
+ #!/usr/bin/env python3
+-"""Regressão visual/funcional da loja INTEGRALL v11.1.2 sem backend.
++"""Regressão visual/funcional da loja INTEGRALL v11.1.3 sem backend.
+ 
+ Valida popup de produto sem deslocamento de página, galeria/foto por variação,
+ fechamento e foco, fallback de imagem, catálogo progressivo (12 por vez),
+@@ -119,6 +119,25 @@
+ 
+             initial_cards = page.locator('#productGrid .card').count()
+             pagination_before = page.evaluate("() => ({hidden:document.querySelector('#catalogPagination')?.hidden,text:document.querySelector('#resultCount')?.textContent})")
++
++            # A galeria do card deve trocar foto sem abrir o produto.
++            card_stage = page.locator('[data-card-gallery-product="audit-product-a"]').first
++            card_initial_src = card_stage.locator('.card-image-main').get_attribute('src')
++            card_stage.locator('[data-card-gallery-step="1"]').click(); page.wait_for_timeout(20)
++            card_next_src = card_stage.locator('.card-image-main').get_attribute('src')
++            card_still_closed = page.locator('#productDetails').evaluate('node => node.hidden')
++            page.evaluate("""() => {
++              const stage=document.querySelector('[data-card-gallery-product="audit-product-a"]');
++              const r=stage.getBoundingClientRect(),y=r.top+r.height/2;
++              stage.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,pointerId:77,pointerType:'touch',clientX:r.left+20,clientY:y}));
++              stage.dispatchEvent(new PointerEvent('pointerup',{bubbles:true,pointerId:77,pointerType:'touch',clientX:r.right-20,clientY:y}));
++            }"""); page.wait_for_timeout(20)
++            card_swipe_src = card_stage.locator('.card-image-main').get_attribute('src')
++            card_media_metrics = page.evaluate("""() => {
++              const stage=document.querySelector('[data-card-gallery-product="audit-product-a"]');
++              const r=stage.getBoundingClientRect(),cs=getComputedStyle(stage);
++              return {w:r.width,h:r.height,borderTop:cs.borderTopWidth,borderLeft:cs.borderLeftWidth,mainFit:getComputedStyle(stage.querySelector('.card-image-main')).objectFit,fillFit:getComputedStyle(stage.querySelector('.card-image-fill')).objectFit};
++            }""")
+             page.locator('#loadMoreProducts').click(); page.wait_for_timeout(20)
+             after_more_cards = page.locator('#productGrid .card').count()
+             # Volta para 12 para validar que filtro/busca reiniciam a janela.
+@@ -134,6 +153,16 @@
+             after_scroll = page.evaluate("() => window.scrollY")
+ 
+             initial_src = page.locator("#modalImage").get_attribute("src")
++            page.locator('#modalGalleryNext').click(); page.wait_for_timeout(20)
++            modal_next_src = page.locator('#modalImage').get_attribute('src')
++            page.keyboard.press('ArrowLeft'); page.wait_for_timeout(20)
++            modal_keyboard_src = page.locator('#modalImage').get_attribute('src')
++            page.locator('#modalGalleryStage').hover(); page.mouse.wheel(0, 650); page.wait_for_timeout(35)
++            popup_scroll_top = page.locator('#productDetails').evaluate('node => node.scrollTop')
++            page.locator('#productDetails').evaluate('node => node.scrollTop=0')
++            page.mouse.move(2, 180); page.mouse.wheel(0, 650); page.wait_for_timeout(35)
++            overlay_forward_scroll_top = page.locator('#productDetails').evaluate('node => node.scrollTop')
++            page.locator('#productDetails').evaluate('node => node.scrollTop=0')
+             page.select_option("#modalVariant", "audit-a-v2"); page.locator("#modalVariant").dispatch_event("change"); page.wait_for_timeout(40)
+             variant_src = page.locator("#modalImage").get_attribute("src")
+ 
+@@ -145,7 +174,7 @@
+             metrics = page.evaluate("""() => {
+               const details=document.querySelector('#productDetails'); const rect=details?.getBoundingClientRect(); const style=details?getComputedStyle(details):null;
+               const gridStyle=getComputedStyle(document.querySelector('.product-details-grid'));
+-              return {detailsExists:!!details,detailsCount:document.querySelectorAll('#productDetails').length,hidden:details?.hidden,ariaHidden:details?.getAttribute('aria-hidden'),ariaModal:details?.getAttribute('aria-modal'),role:details?.getAttribute('role'),position:style?.position,display:style?.display,gridColumns:gridStyle.gridTemplateColumns,top:rect?.top,bottom:rect?.bottom,left:rect?.left,right:rect?.right,viewportW:innerWidth,viewportH:innerHeight,bodyLocked:document.body.classList.contains('lock'),overlayOpen:document.querySelector('#overlay')?.classList.contains('open'),horizontalOverflow:document.documentElement.scrollWidth>document.documentElement.clientWidth+1,activeName:document.querySelector('#modalName')?.textContent,activeId:globalThis.__integrallApp.getState().activeId,imgObjectFit:getComputedStyle(document.querySelector('#modalImage')).objectFit};
++              return {detailsExists:!!details,detailsCount:document.querySelectorAll('#productDetails').length,hidden:details?.hidden,ariaHidden:details?.getAttribute('aria-hidden'),ariaModal:details?.getAttribute('aria-modal'),role:details?.getAttribute('role'),position:style?.position,display:style?.display,gridColumns:gridStyle.gridTemplateColumns,top:rect?.top,bottom:rect?.bottom,left:rect?.left,right:rect?.right,viewportW:innerWidth,viewportH:innerHeight,bodyLocked:document.body.classList.contains('lock'),overlayOpen:document.querySelector('#overlay')?.classList.contains('open'),horizontalOverflow:document.documentElement.scrollWidth>document.documentElement.clientWidth+1,activeName:document.querySelector('#modalName')?.textContent,activeId:globalThis.__integrallApp.getState().activeId,imgObjectFit:getComputedStyle(document.querySelector('#modalImage')).objectFit,overlayBackdrop:getComputedStyle(document.querySelector('#overlay')).backdropFilter||getComputedStyle(document.querySelector('#overlay')).webkitBackdropFilter||'none',popupOverflowY:style?.overflowY};
+             }""")
+ 
+             if width in SCREENSHOT_WIDTHS:
+@@ -169,6 +198,12 @@
+                 "inside_viewport": metrics["top"] >= -1 and metrics["left"] >= -1 and metrics["right"] <= metrics["viewportW"] + 1 and metrics["bottom"] <= metrics["viewportH"] + 1,
+                 "responsive_columns": columns == (1 if width <= 900 else 2),
+                 "no_global_overflow": not metrics["horizontalOverflow"],
++                "card_gallery_without_open": card_initial_src == first and card_next_src == second and card_swipe_src == first and card_still_closed is True,
++                "card_square_smart_fill": abs(card_media_metrics["w"] - card_media_metrics["h"]) <= 2 and card_media_metrics["borderTop"] == "0px" and card_media_metrics["borderLeft"] == "0px" and card_media_metrics["mainFit"] == "contain" and card_media_metrics["fillFit"] == "cover",
++                "modal_gallery_controls": initial_src == first and modal_next_src == second and modal_keyboard_src == first,
++                "modal_scroll_anywhere": popup_scroll_top > 0 and overlay_forward_scroll_top > 0 and before_scroll == after_scroll,
++                "no_backdrop_blur": metrics["overlayBackdrop"] in ("none", ""),
++                "popup_is_scroll_container": metrics["popupOverflowY"] in ("auto", "scroll"),
+                 "variant_image_switch": initial_src == first and variant_src == second,
+                 "switch_clears_state": switched["name"] == "Segundo produto" and switched["qty"] == "1" and switched["variantHidden"] is True and switched["activeId"] == "audit-product-b",
+                 "close_clears_and_restores_focus": closed["hidden"] is True and closed["ariaHidden"] == "true" and closed["activeId"] == "" and closed["focusedDetails"] == "audit-product-a" and not closed["bodyLocked"] and not closed["overlayOpen"],
+diff -ruN '--exclude=node_modules' '--exclude=dist' '--exclude=evidencias-v11.1.3' '--exclude=*.pyc' '--exclude=MANIFEST.sha256' /mnt/data/integrall_v113_review/original/scripts/gallery-browser-regression.py /mnt/data/integrall_v113_review/work/scripts/gallery-browser-regression.py
+--- /mnt/data/integrall_v113_review/original/scripts/gallery-browser-regression.py	2026-09-02 20:02:50.000000000 +0000
++++ /mnt/data/integrall_v113_review/work/scripts/gallery-browser-regression.py	2026-09-02 20:25:39.898155938 +0000
+@@ -5,7 +5,7 @@
+ import json, re, sys, base64
+ 
+ ROOT=Path(sys.argv[1] if len(sys.argv)>1 else '.').resolve()
+-OUT=Path(sys.argv[2] if len(sys.argv)>2 else 'docs/evidencias-v11.1.2/galeria').resolve(); OUT.mkdir(parents=True,exist_ok=True)
++OUT=Path(sys.argv[2] if len(sys.argv)>2 else 'docs/evidencias-v11.1.3/galeria').resolve(); OUT.mkdir(parents=True,exist_ok=True)
+ html=(ROOT/'public/admin.html').read_text('utf-8')
+ css=(ROOT/'public/css/admin.css').read_text('utf-8')
+ html=re.sub(r'<link rel="stylesheet" href="[^"]+">',f'<style>{css}</style>',html,count=1)
+diff -ruN '--exclude=node_modules' '--exclude=dist' '--exclude=evidencias-v11.1.3' '--exclude=*.pyc' '--exclude=MANIFEST.sha256' /mnt/data/integrall_v113_review/original/scripts/production-http-smoke.mjs /mnt/data/integrall_v113_review/work/scripts/production-http-smoke.mjs
+--- /mnt/data/integrall_v113_review/original/scripts/production-http-smoke.mjs	2026-09-02 20:04:26.000000000 +0000
++++ /mnt/data/integrall_v113_review/work/scripts/production-http-smoke.mjs	2026-09-02 20:25:39.898042453 +0000
+@@ -55,7 +55,7 @@
+ 
+ try {
+   const checks = [
+-    ['/', text => text.includes('public-v11.1.2-') && text.includes('id="productDetails"')],
++    ['/', text => text.includes('public-v11.1.3-') && text.includes('id="productDetails"')],
+     ['/produto/suco-integral-de-uva-bordo', text => text.includes('id="buildData"') && text.includes('suco-integral-de-uva-bordo')],
+     ['/admin.html', text => text.includes('id="loginForm"') && text.includes('Administração INTEGRALL')],
+     ['/css/store.css', text => text.includes('.product-details-inline') && text.includes('position:fixed') && text.includes('.catalog-pagination')],
+diff -ruN '--exclude=node_modules' '--exclude=dist' '--exclude=evidencias-v11.1.3' '--exclude=*.pyc' '--exclude=MANIFEST.sha256' /mnt/data/integrall_v113_review/original/tests/v11.1.2-ux.test.js /mnt/data/integrall_v113_review/work/tests/v11.1.2-ux.test.js
+--- /mnt/data/integrall_v113_review/original/tests/v11.1.2-ux.test.js	2026-09-02 19:59:32.000000000 +0000
++++ /mnt/data/integrall_v113_review/work/tests/v11.1.2-ux.test.js	2026-09-02 20:25:57.537359235 +0000
+@@ -22,14 +22,14 @@
+   return out;
+ }
+ 
+-test('versão 11.1.2 está coerente no pacote e na API', async () => {
++test('contratos herdados da v11.1.2 permanecem coerentes na versão atual', async () => {
+   const pkg = JSON.parse(await text('package.json'));
+   const server = await text('server.js');
+   const html = await text('public/index.html');
+-  assert.equal(pkg.version, '11.1.2');
++  assert.equal(pkg.version, '11.1.3');
+   assert.match(server, /const appVersion = String\(packageMetadata\.version/);
+   assert.match(server, /version:\s*appVersion/);
+-  assert.match(html, /integrall-build" content="public-v11\.1\.2-/);
++  assert.match(html, /integrall-build" content="public-v11\.1\.3-/);
+ });
+ 
+ test('detalhes do produto abrem em um único popup acessível sem deslocar o catálogo', async () => {
+@@ -39,7 +39,8 @@
+   assert.equal((html.match(/id="productDetails"/g) || []).length, 1);
+   assert.match(html, /<section[^>]*aria-modal="true"[^>]*id="productDetails"[^>]*role="dialog"/i);
+   assert.match(css, /\.product-details-inline\{[^}]*position:fixed[^}]*z-index:120[^}]*max-height:/s);
+-  assert.match(css, /\.product-details-body\{[^}]*overflow:auto/s);
++  assert.match(css, /\.product-details-inline\{[^}]*overflow-y:auto/s);
++  assert.match(css, /\.product-details-body\{[^}]*overflow:visible/s);
+   assert.match(js, /layers\.open\(details\)/);
+   assert.doesNotMatch(js, /details\.scrollIntoView/);
+ });
+@@ -128,7 +129,7 @@
+   for (const relative of ['public/index.html', 'public/admin.html', 'public/404.html', 'public/500.html']) {
+     const html = await text(relative);
+     const refs = [...html.matchAll(/(?:src|href)=["'](\/(?:css|js)\/[^"']+)["']/g)].map(match => match[1]);
+-    const stale = refs.filter(value => !value.includes('?v=11.1.2'));
++    const stale = refs.filter(value => !value.includes('?v=11.1.3'));
+     assert.deepEqual(stale, [], `${relative} contém assets sem versionamento: ${stale.join(', ')}`);
+   }
+ });
+diff -ruN '--exclude=node_modules' '--exclude=dist' '--exclude=evidencias-v11.1.3' '--exclude=*.pyc' '--exclude=MANIFEST.sha256' /mnt/data/integrall_v113_review/original/tests/v11.1.3-ux.test.js /mnt/data/integrall_v113_review/work/tests/v11.1.3-ux.test.js
+--- /mnt/data/integrall_v113_review/original/tests/v11.1.3-ux.test.js	1970-01-01 00:00:00.000000000 +0000
++++ /mnt/data/integrall_v113_review/work/tests/v11.1.3-ux.test.js	2026-09-02 20:40:25.811174517 +0000
+@@ -0,0 +1,74 @@
++import test from 'node:test';
++import assert from 'node:assert/strict';
++import {readFile} from 'node:fs/promises';
++import path from 'node:path';
++
++const root = process.cwd();
++const text = relative => readFile(path.join(root, relative), 'utf8');
++
++test('v11.1.3 remove desfoque do fundo e usa o próprio popup como área de rolagem', async () => {
++  const pkg = JSON.parse(await text('package.json'));
++  const html = await text('public/index.html');
++  const css = await text('public/css/store.css');
++  const js = await text('public/js/store/catalog.js');
++  assert.equal(pkg.version, '11.1.3');
++  assert.match(html, /integrall-build" content="public-v11\.1\.3-/);
++  assert.match(css, /\.overlay\{[^}]*backdrop-filter:none[^}]*-webkit-backdrop-filter:none/s);
++  assert.match(css, /\.product-details-inline\{[^}]*overflow-y:auto[^}]*overscroll-behavior:auto/s);
++  assert.match(css, /\.product-details-body\{[^}]*overflow:visible/s);
++  assert.match(js, /details\.scrollTop=0/);
++  assert.match(js, /overlay\?\.addEventListener\('wheel'/);
++  assert.match(js, /active\?\.id !== 'productDetails'/);
++  assert.doesNotMatch(css, /\.overlay\{[^}]*backdrop-filter:blur/s);
++});
++
++test('cards usam quadro quadrado sem borda e preservam a imagem inteira com preenchimento visual', async () => {
++  const css = await text('public/css/store.css');
++  const premium = await text('public/css/premium-v104.css');
++  const js = await text('public/js/store/catalog.js');
++  const catalog = JSON.parse(await text('data/catalog.json'));
++  assert.equal(catalog.settings.visual.layout.imageRatio, 'square');
++  assert.equal(catalog.settings.visual.layout.imageFit, 'contain');
++  assert.match(css, /\.card-image\{[^}]*border:0[^}]*aspect-ratio:1\/1/s);
++  assert.match(css, /\.card-image-fill\{[^}]*object-fit:cover/s);
++  assert.match(css, /\.card-image-main\{[^}]*object-fit:contain/s);
++  assert.match(premium, /\.premium-catalog \.card-image\{aspect-ratio:1\/1!important;border:0!important/s);
++  assert.match(js, /setSmartProductImage/);
++});
++
++test('carrossel funciona nos cards e no popup por controles, teclado e gesto horizontal', async () => {
++  const html = await text('public/index.html');
++  const js = await text('public/js/store/catalog.js');
++  assert.match(html, /data-gallery-step="-1"[^>]*id="modalGalleryPrev"/);
++  assert.match(html, /data-gallery-step="1"[^>]*id="modalGalleryNext"/);
++  assert.match(js, /cardGallery\.dataset\.cardGalleryStep/);
++  assert.match(js, /changeCardGallery/);
++  assert.match(js, /changeModalGallery/);
++  assert.match(js, /pointerdown/);
++  assert.match(js, /pointerup/);
++  assert.match(js, /Math\.abs\(dx\) < 38/);
++  assert.match(js, /event\.key === 'ArrowLeft'/);
++  assert.match(js, /event\.key === 'ArrowRight'/);
++});
++
++test('Admin evita rolagens aninhadas desnecessárias e encaminha roda da prévia ao painel', async () => {
++  const css = await text('public/css/admin.css');
++  const js = await text('public/js/admin.js');
++  assert.match(css, /\.visual-editor-workspace\{[^}]*height:auto/s);
++  assert.match(css, /\.visual-inspector-scroll\{[^}]*overflow:visible/s);
++  assert.match(css, /\.visual-preview-column\{[^}]*overflow:visible/s);
++  assert.doesNotMatch(css, /\.visual-inspector-scroll\{[^}]*overscroll-behavior:contain/s);
++  assert.match(js, /doc\.addEventListener\('wheel'/);
++  assert.match(js, /window\.scrollBy\(\{top:event\.deltaY/);
++  assert.match(js, /event\.shiftKey/);
++  assert.match(js, /imageRatio\|\|'square'/);
++  assert.match(js, /imageFit\|\|'contain'/);
++});
++
++test('todas as referências públicas usam cache-busting da v11.1.3', async () => {
++  for (const relative of ['public/index.html','public/admin.html','public/404.html','public/500.html']) {
++    const html = await text(relative);
++    const refs = [...html.matchAll(/(?:src|href)=["'](\/(?:css|js)\/[^"']+)["']/g)].map(match => match[1]);
++    assert.deepEqual(refs.filter(value => !value.includes('?v=11.1.3')), [], relative);
++  }
++});

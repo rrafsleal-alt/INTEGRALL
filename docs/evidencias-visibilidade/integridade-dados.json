@@ -1,0 +1,26 @@
+{
+  "base": "HTTP-R1",
+  "baseZipSha256": "e193d44325771c99fa7ed7fea9a02fe31df790152c4080fa99c7fbbbc462026a",
+  "filesCompared": 445,
+  "identical": 443,
+  "changedOnlyVisibility": [
+    "data/catalog.json",
+    "data/local-state/catalog.json"
+  ],
+  "productCount": 227,
+  "revealed": 222,
+  "hidden": 0,
+  "variants": 52,
+  "unpricedVariants": 48,
+  "unchangedCore": {
+    "server.js": true,
+    "src/auth.js": true,
+    "src/catalog.js": true,
+    "src/correios.js": true,
+    "src/shipping-checkout.js": true,
+    "src/order-state.js": true,
+    "src/payment-state.js": true,
+    "src/repository.js": true,
+    "package-lock.json": true
+  }
+}

@@ -1,0 +1,376 @@
+{
+  "status": "APROVADO",
+  "scope": "about:blank actual admin UI; test-driver cookie jar and HTTP bridge; production session controllers/Auth/Repository; ancillary dashboard data fixtures; NOT Express/TLS/browser-cookie-policy/native navigation",
+  "results": [
+    {
+      "test": "negative-empty",
+      "status": "APROVADO"
+    },
+    {
+      "test": "negative-lowercase",
+      "status": "APROVADO"
+    },
+    {
+      "test": "negative-uppercase",
+      "status": "APROVADO"
+    },
+    {
+      "test": "negative-partial",
+      "status": "APROVADO"
+    },
+    {
+      "test": "negative-trailing-space",
+      "status": "APROVADO"
+    },
+    {
+      "test": "negative-different",
+      "status": "APROVADO"
+    },
+    {
+      "test": "exact-credential-enter-controller-real",
+      "status": "APROVADO"
+    },
+    {
+      "test": "new-document-session-restore",
+      "status": "APROVADO"
+    },
+    {
+      "test": "logout-503-retains-session-and-retry",
+      "status": "APROVADO"
+    },
+    {
+      "test": "logout-and-stale-response-generation",
+      "status": "APROVADO"
+    },
+    {
+      "test": "second-client-focus-rechecks-server-revocation",
+      "status": "APROVADO"
+    },
+    {
+      "test": "corrupted-cookie-refused",
+      "status": "APROVADO"
+    },
+    {
+      "test": "uncaught-page-errors",
+      "status": "APROVADO",
+      "errors": []
+    }
+  ],
+  "requests": [
+    {
+      "method": "GET",
+      "path": "/api/health",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/session",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/session/login",
+      "status": 401
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/session/login",
+      "status": 401
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/session/login",
+      "status": 401
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/session/login",
+      "status": 401
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/session/login",
+      "status": 401
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/session/login",
+      "status": 401
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/session/login",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/orders?limit=300",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/customers?limit=300",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/catalog",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/coupons",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/products",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/settings",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/health",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/promotions",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/inventory/alerts",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/reviews?status=pending&limit=300",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/health",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/session",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/orders?limit=300",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/customers?limit=300",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/catalog",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/coupons",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/products",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/settings",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/health",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/promotions",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/inventory/alerts",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/reviews?status=pending&limit=300",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/session/logout",
+      "status": 503
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/session",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/session",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/session/logout",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/session",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/session/login",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/orders?limit=300",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/customers?limit=300",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/catalog",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/coupons",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/products",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/settings",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/health",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/promotions",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/inventory/alerts",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/reviews?status=pending&limit=300",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/health",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/session",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/orders?limit=300",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/customers?limit=300",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/catalog",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/coupons",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/products",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/settings",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/health",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/session/logout",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/session",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/promotions",
+      "status": 401
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/inventory/alerts",
+      "status": 401
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/reviews?status=pending&limit=300",
+      "status": 401
+    },
+    {
+      "method": "GET",
+      "path": "/api/health",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/session",
+      "status": 200
+    }
+  ]
+}

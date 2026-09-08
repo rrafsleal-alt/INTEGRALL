@@ -1,0 +1,26 @@
+{
+  "name": "INTEGRALL | Boutique Gourmet",
+  "short_name": "INTEGRALL",
+  "description": "Vinhos, cafés, sucos e sabores selecionados com curadoria.",
+  "lang": "pt-BR",
+  "dir": "ltr",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#24090d",
+  "icons": [
+    {
+      "src": "/assets/icons/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/icons/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

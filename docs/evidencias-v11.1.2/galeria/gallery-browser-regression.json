@@ -1,0 +1,12 @@
+{
+  "status": "APROVADO",
+  "initialImages": 1,
+  "finalImages": [
+    "/assets/products/01-suco-integral-de-uva-bord.webp",
+    "/media/products/media-browser-1",
+    "/media/products/media-browser-2"
+  ],
+  "uploads": 2,
+  "variantImage": "/media/products/media-browser-2",
+  "consoleErrors": []
+}

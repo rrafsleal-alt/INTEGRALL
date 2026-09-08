@@ -1,0 +1,124 @@
+TAP version 13
+# Subtest: cliente: código com letras é recusado sem consumir o código válido
+ok 1 - cliente: código com letras é recusado sem consumir o código válido
+  ---
+  duration_ms: 8.061066
+  type: 'test'
+  ...
+# Subtest: cliente: código com dígitos excedentes é recusado sem consumir o código válido
+ok 2 - cliente: código com dígitos excedentes é recusado sem consumir o código válido
+  ---
+  duration_ms: 0.582317
+  type: 'test'
+  ...
+# Subtest: cliente: código com separadores internos é recusado sem consumir o código válido
+ok 3 - cliente: código com separadores internos é recusado sem consumir o código válido
+  ---
+  duration_ms: 0.689237
+  type: 'test'
+  ...
+# Subtest: cliente: e-mail acima de 254 caracteres não vira outro identificador truncado
+ok 4 - cliente: e-mail acima de 254 caracteres não vira outro identificador truncado
+  ---
+  duration_ms: 0.369359
+  type: 'test'
+  ...
+# Subtest: cliente: sessão com expiração inválido é revogada
+ok 5 - cliente: sessão com expiração inválido é revogada
+  ---
+  duration_ms: 1.371304
+  type: 'test'
+  ...
+# Subtest: cliente: sessão com expiração  é revogada
+ok 6 - cliente: sessão com expiração  é revogada
+  ---
+  duration_ms: 0.827531
+  type: 'test'
+  ...
+# Subtest: cliente: sessão com expiração undefined é revogada
+ok 7 - cliente: sessão com expiração undefined é revogada
+  ---
+  duration_ms: 0.747735
+  type: 'test'
+  ...
+# Subtest: cliente: sessão válida continua aceita e cookie malformado é recusado
+ok 8 - cliente: sessão válida continua aceita e cookie malformado é recusado
+  ---
+  duration_ms: 1.00689
+  type: 'test'
+  ...
+# Subtest: API: erro HTTP preserva status, código e requestId para expiração da sessão
+ok 9 - API: erro HTTP preserva status, código e requestId para expiração da sessão
+  ---
+  duration_ms: 73.186293
+  type: 'test'
+  ...
+# Subtest: API: resposta 200 contendo HTML não é apresentada como sucesso vazio
+ok 10 - API: resposta 200 contendo HTML não é apresentada como sucesso vazio
+  ---
+  duration_ms: 10.060666
+  type: 'test'
+  ...
+# Subtest: API: resposta HTTP 503 sem JSON preserva o status
+ok 11 - API: resposta HTTP 503 sem JSON preserva o status
+  ---
+  duration_ms: 4.92224
+  type: 'test'
+  ...
+# Subtest: API: HTTP 204 sem corpo continua compatível
+ok 12 - API: HTTP 204 sem corpo continua compatível
+  ---
+  duration_ms: 3.107769
+  type: 'test'
+  ...
+# Subtest: API: requisição já cancelada não inicia acesso à rede
+ok 13 - API: requisição já cancelada não inicia acesso à rede
+  ---
+  duration_ms: 3.307078
+  type: 'test'
+  ...
+# Subtest: API: cancelamento externo durante a resposta é propagado
+ok 14 - API: cancelamento externo durante a resposta é propagado
+  ---
+  duration_ms: 3.914502
+  type: 'test'
+  ...
+# Subtest: API: FormData mantém cabeçalho multipart gerado pelo navegador
+ok 15 - API: FormData mantém cabeçalho multipart gerado pelo navegador
+  ---
+  duration_ms: 5.064059
+  type: 'test'
+  ...
+# Subtest: mídia local: ordena por data antes de limitar, não pelo nome aleatório
+ok 16 - mídia local: ordena por data antes de limitar, não pelo nome aleatório
+  ---
+  duration_ms: 43.370776
+  type: 'test'
+  ...
+# Subtest: upload: WebP apenas com cabeçalho de canvas, sem imagem, é recusado
+ok 17 - upload: WebP apenas com cabeçalho de canvas, sem imagem, é recusado
+  ---
+  duration_ms: 1.701411
+  type: 'test'
+  ...
+# Subtest: upload: dimensões de VP8 ocultas por um VP8X pequeno não burlam o limite
+ok 18 - upload: dimensões de VP8 ocultas por um VP8X pequeno não burlam o limite
+  ---
+  duration_ms: 39.66513
+  type: 'test'
+  ...
+# Subtest: upload: cabeçalho VP8L sem dados de pixels é recusado
+ok 19 - upload: cabeçalho VP8L sem dados de pixels é recusado
+  ---
+  duration_ms: 0.633528
+  type: 'test'
+  ...
+1..19
+# tests 19
+# suites 0
+# pass 19
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 444.06896

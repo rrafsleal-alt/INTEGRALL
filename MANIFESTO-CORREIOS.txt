@@ -1,0 +1,24 @@
+INTEGRALL — INTEGRAÇÃO CORREIOS PAC/SEDEX
+Data: 07/09/2026
+Versão interna preservada: 11.1.8
+Entrada SHA-256: 6f3da28c35911f83b8f8285400f61ff6e96c77310de96b0ff45b2b2228a6fd54
+
+Documentação vigente: CONFIGURAR-CORREIOS.md, INTEGRACAO-CORREIOS.md,
+TESTES-CORREIOS.md e ARQUIVOS-ALTERADOS-CORREIOS.md.
+Documentação de auditorias anteriores: histórico, sem nova certificação implícita.
+
+Sem credenciais reais ou Bearer token da conversa.
+Configure código de acesso privado no servidor e embalagens reais no administrador.
+Não houve cadastro de medidas fictícias nos produtos.
+Dados/assets/backups: 445 arquivos preservados; lockfile preservado.
+Fonte: MANIFEST.sha256 / npm run source:verify.
+Build incluído: perfil OFFLINE, não aprovação Express/produção.
+
+Instalação: npm ci
+Diagnóstico local: npm run correios:check:local
+Execução local: npm run start:local
+Execução em hospedagem com variáveis injetadas: npm start
+Build completo: npm run build
+Testes: npm run test:dependency-free
+
+O reteste do ZIP final e seu hash estão no comprovante externo RETESTE-CORREIOS.txt.

@@ -1,0 +1,14 @@
+INTEGRALL ONLINE v10.4 — PREMIUM EDITORIAL
+
+- Nova home inspirada em linguagem editorial de vinícolas premium.
+- Imagem enviada pelo usuário aplicada como capa cinematográfica em tela cheia.
+- Cabeçalho transparente sobre a capa e sólido ao rolar.
+- Hero com tipografia editorial, CTAs e animação suave.
+- Seção institucional “Nosso propósito” com valores da marca.
+- Coleções visuais para vinhos, importados, cafés e gourmet.
+- Produto em destaque usando item real do catálogo.
+- Catálogo real preservado com busca, filtros, ordenação, carrinho e checkout.
+- Rodapé premium reestruturado com contatos e atalhos.
+- Efeitos de reveal, parallax sutil, hover editorial e header reativo.
+- Layout mobile redesenhado.
+- Editor visual, Admin por 3 cliques na marca do rodapé e backend preservados.

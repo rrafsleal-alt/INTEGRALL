@@ -1,0 +1,8 @@
+{
+  "status": "APROVADO",
+  "sourceZipSha256": "0a99fb33e2000f9eb3b55f6013e304693d85ece0c6d67a8962dc5e7644e94a32",
+  "scope": "public/assets/** e data/**, comparação direta SHA-256 com os bytes da entrada",
+  "filesCompared": 442,
+  "bytesCompared": 143926988,
+  "changed": []
+}

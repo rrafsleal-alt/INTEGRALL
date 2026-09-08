@@ -1,0 +1,34 @@
+INTEGRALL v11.1.6 — MANIFESTO DE ENTREGA
+Data: 03/09/2026
+
+Instalação: npm ci
+Desenvolvimento: npm run dev
+Execução: npm start
+Build: npm run build:production
+Verificação principal: npm run verify:v11.1.6
+Suíte completa: npm test
+Navegador loja: npm run test:browser
+Navegador Admin: npm run test:browser:admin
+Build HTTP: npm run test:production:http
+Build Chromium: npm run test:browser:production
+
+RESULTADOS PRÉ-ZIP
+- Expert: 48/48 APROVADOS
+- Dependency-free: 196/196 APROVADOS
+- Suíte total: 211 / 196 pass / 15 skip / 0 fail
+- Segurança: APROVADO
+- npm audit --offline: 0 vulnerabilidades registradas
+- Loja Chromium: 18/18
+- Admin Chromium: 18/18
+- Galeria múltipla: APROVADO
+- Build: 297 arquivos
+- Smoke HTTP: 8/8
+- Build Chromium: 18/18
+
+NÃO EXECUTADO
+- npm ci completo: registry indisponível; cache offline incompleto (xtend-4.0.2.tgz).
+- Chrome/Edge/Firefox/WebKit/Safari nativos.
+- integrações externas reais com credenciais de produção/sandbox.
+- prova PDF -> catálogo (PDFs-fonte não presentes).
+
+O arquivo MANIFEST.sha256 contém o hash individual dos arquivos do pacote e deve ser validado novamente após extrair o ZIP final.

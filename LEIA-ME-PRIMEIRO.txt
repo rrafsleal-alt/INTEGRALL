@@ -1,0 +1,43 @@
+REVISÃO PAGINACAO-R1 — 07/09/2026
+12 produtos por página, números, Anterior e Próxima. Todos continuam no catálogo.
+Imagens Gourmet em quadros quadrados iguais; fotos originais não foram alteradas.
+Leia PAGINACAO-E-CARDS.md. Esta revisão substitui apenas a exibição de todos de uma vez.
+Preserve .env, pedidos, configurações e uploads da instalação existente.
+
+REVISÃO VISIBILIDADE-R1 — 07/09/2026
+Todos os 227 produtos estão visíveis, sem botão Ver mais.
+222 produtos sem preço aparecem sob consulta, com a compra online bloqueada.
+Leia TODOS-PRODUTOS-VISIVEIS.md antes de reaproveitar uma instalação configurada.
+Preserve os dados operacionais e as configurações privadas.
+
+REVISÃO HTTP-R1 — 07/09/2026
+Correção das causas das 7 falhas HTTP relatadas e proteção financeira de frete.
+Leia CORRECAO-HTTP-R1.md e TESTES-HTTP-R1.md antes dos relatórios históricos.
+Após aplicar: npm run test:http e npm run verify. O build incluído permanece offline;
+a suíte Express completa precisa ser executada com as dependências instaladas.
+Não substitua configurações privadas nem dados locais por uma cópia antiga.
+
+ATUALIZAÇÃO: CORREIOS INTEGRADO À SACOLA E AO PEDIDO
+Leia CONFIGURAR-CORREIOS.md. Credenciais privadas e caixas reais precisam ser configuradas; nenhum token real foi incluído.
+O build desta entrega é offline; homologação completa de produção não foi concluída neste ambiente.
+
+REVISÃO ATUAL: CLIENTE R2 — base 11.1.8 preservada.
+Leia REVISAO-CLIENTE-R2.md, TESTES-CLIENTE-R2.md e APRESENTACAO-AO-CLIENTE.md antes de demonstrar/publicar.
+Validação local não equivale a homologação completa de produção.
+
+INTEGRALL — REVISÃO DE 6 DE SETEMBRO DE 2026
+Base interna: 11.1.8. Nome externo V11.0.4 mantido conforme solicitado.
+
+1. Consulte README.md, CORRECOES-V11.0.4.md e TESTES-V11.0.4.md.
+2. As correções estão nos arquivos de código, não somente no relatório.
+3. O catálogo, as fotos e os vídeos ativos recebidos foram preservados.
+4. Modo padrão true aceita apenas a senha inicial do briefing e ignora hash legado.
+   Modo personalizado false aceita apenas ADMIN_PASSWORD_HASH configurado.
+5. A versão de sessão mudou: faça novo login; dados comerciais não são apagados.
+6. Instale com npm ci e execute npm run dev com configuração privada local.
+7. O dist entregue é OFFLINE. Instalação completa, Express real e produção
+   não foram homologados neste ambiente; não há certificação de 100%.
+8. O relatório externo RETESTE-ZIP-V11.0.4.txt registra o reteste do ZIP final
+   pelo seu hash. A instalação que falhou não foi marcada como aprovada.
+9. Não sobrescreva dados de uma loja em operação por este catálogo inicial.
+Relatórios com outros números de versão são históricos.

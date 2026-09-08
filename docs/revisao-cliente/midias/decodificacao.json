@@ -1,0 +1,1568 @@
+{
+  "scope": "Decodificação independente com Pillow das cópias sanitizadas; não testa upload HTTP",
+  "totalUnique": 223,
+  "failed": 0,
+  "results": [
+    {
+      "sha256": "0098475a2cac4193d1878f98b887187e6089e8736fec9004be95a3043fe90a76",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 900
+    },
+    {
+      "sha256": "00ec91d80c62d6c1fdcc63b9303931a58ab95ec14ed3f451159b6a13479e8740",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 899,
+      "height": 899
+    },
+    {
+      "sha256": "029ee165b392f18f1eb7bef844848f7a37b986b014316ee5332d52a07a15cbfe",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 1122,
+      "height": 1402
+    },
+    {
+      "sha256": "02cae43e30c30e4a7e698ea5dd74931a2563764de140e1cbbcae7724817465ff",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 900
+    },
+    {
+      "sha256": "037900c868772903359b5c7c858cb56b75b2e18551347258e0aeff05c141be2e",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 1402,
+      "height": 1122
+    },
+    {
+      "sha256": "03fde852e1f3c90129500a3073dc22a0c35adf9297da7af265e442e1f3e2e845",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 839
+    },
+    {
+      "sha256": "0495f07ad74cc15f2edd2bb921eb778944f9dd1815d1962c405f351a0fe94348",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 781
+    },
+    {
+      "sha256": "08833280974dac893cf98592bb58033bd5301a98540f64bf5ffeaa5b79979862",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 900
+    },
+    {
+      "sha256": "0b1f2e1fb5384242189db7ab502c4614a637ac7c4d05214711c2c0896b4d5bb7",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 900
+    },
+    {
+      "sha256": "0e7b87aaf2bcccd56bfac0f05b26a0f1b3aa520f3b37be85595abcc54b62c9ef",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 900
+    },
+    {
+      "sha256": "1264a6769fecff1aaf0362aa2ae7071645f350824407217a9a5ed62db8f3a866",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 779
+    },
+    {
+      "sha256": "12c0e68b420867c9a84499f5db09eaaead2dbe8d9bceac9633a10f317412ae02",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 900
+    },
+    {
+      "sha256": "1432bf06f53dfae8363b3f1fc3cf05fce188981986851f3c7cc3955dd278d953",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 857
+    },
+    {
+      "sha256": "15b8a1c448b3e21d5ec1e6fd849faff6d200a97d73a4094826e75d14c501a1ca",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 1272
+    },
+    {
+      "sha256": "15e9d17d34cff7638528450fb021ab7298fb6112b5277f88f5e79759dd3194d4",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 1037
+    },
+    {
+      "sha256": "18959ca954eb9c5f7194e568f66ad21f41084a3e1b1ac74aa298bf94ef505217",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 431,
+      "height": 1359
+    },
+    {
+      "sha256": "19568541f528a51e7bee2ec57678cea3b8fd8bb73fbb66b88bd29c7d9119b64b",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 900
+    },
+    {
+      "sha256": "19e0c658fcb45d098b632ce351f3fb393a44e2fe2da76c628fae122678dc4bb8",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 1037
+    },
+    {
+      "sha256": "1f666b003749fcec9245e6e1b838beabd6f78c55a94e810d3464ce9ab5446802",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 781
+    },
+    {
+      "sha256": "2003988c1818a40adc4b1a74b500505333f9e944ff3322e18f803ea7940bd6b0",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 896,
+      "height": 781
+    },
+    {
+      "sha256": "226f5e12e680cff40d7fe0301bfe6174f9674d5a0ed53b23494e35ac47a23540",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 1254,
+      "height": 1254
+    },
+    {
+      "sha256": "2292243be6f1cb594ced66799c3b035188857578735ec585e3ca3126061259d7",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 900
+    },
+    {
+      "sha256": "22923546c4001a75e2713bdfe45aed49eedd7e6379993e0c9a24b155d0541fe1",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 839
+    },
+    {
+      "sha256": "22b4c0dd4aaf96efa9a4f2ffba73bd9187078484d886eb8040cd203eb83cb6ca",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 780
+    },
+    {
+      "sha256": "22dda7716d7dfa7fcc7c1de42d52de681ade2d37012e9e4f1e7a210b1efe17af",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 899,
+      "height": 1272
+    },
+    {
+      "sha256": "236f356673a015a4bf059d47fa2fc97253937de97069137a3ff0baa6afa4e14c",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 900
+    },
+    {
+      "sha256": "24f7c52e2da0945ea7d64cc3ee1b710994380475ad3da577d32fab077fce4c76",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 900
+    },
+    {
+      "sha256": "27f05ce8ba8a6c86dfe29f51815fc71f2dba806f4aba77fd5e1c68a98aa1daa2",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 900
+    },
+    {
+      "sha256": "2b1b30cbd9d4799bd89d2c1fc171f82fbd6aad64d7171866072029108a53b6ef",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 900
+    },
+    {
+      "sha256": "2bebb110b3e41606b4ba1ec41685d16086b84bca136aaaac88d0eb643cd9e886",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 900
+    },
+    {
+      "sha256": "2e2c09537cfc0c378f74297464845d1e52be6de3e5c429337916897e40907764",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 32,
+      "height": 24
+    },
+    {
+      "sha256": "2f9b751e8d462416a660f493abb31b4b9df49214ae7011476abc315d28534967",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 899,
+      "height": 1272
+    },
+    {
+      "sha256": "3199fdb8064192137c41ec0a84adb315fd9d45afc3a02749aeeee481fc90a7dc",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 1036
+    },
+    {
+      "sha256": "34a57d4e2b3967e3af888f40eb4e53239d95d2a10da2bd50ec18d2276059370e",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 900
+    },
+    {
+      "sha256": "3573bbeb61ceef3b6a659713676a9c6c7d4ee7df5e5ef357173c4d6920d2e0cc",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 900
+    },
+    {
+      "sha256": "39988de1dec2bd71c99b26b3b21d44bae6505133f0d6b6dc775d1cbcab689e63",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 1254,
+      "height": 1254
+    },
+    {
+      "sha256": "3b05396f9f07ffedd4ad0f35a0c6560c9ec61f172067fbd3b58b9113a3c49cd8",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 900
+    },
+    {
+      "sha256": "3cbfb8ca11d18cf71d54631a7ed87e7359dda77f2b490758380379b22af39492",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 1040
+    },
+    {
+      "sha256": "3d4fd5f50b21d2a2904cb9153297ac4f18dbbf0980ec44180dbbd18df432aadd",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 839
+    },
+    {
+      "sha256": "3d5fd73ae07b189d810472804140a51b2305832a51892c280f81531bd4adc14b",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 1120,
+      "height": 1400
+    },
+    {
+      "sha256": "3d7ec5b5640f038a8844b26015dfb7394b6be399b20bda7194d893a6b0eb25c7",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 900
+    },
+    {
+      "sha256": "3e3b8e1a3b157a32fb559b4edea9b38a88deb7ece7392ee446bc7d0ba11ee32d",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 900
+    },
+    {
+      "sha256": "3e638af901603b88298824da473916abca4833db944125e462834b8eb3cc332e",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 900
+    },
+    {
+      "sha256": "3f730e5d2d1b73fc226141c7a968e2feb8790f0f6bbf95e2fdb53feca932f8b6",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 1254,
+      "height": 1254
+    },
+    {
+      "sha256": "40c64a3f09184d189cd2104e693883b9d92b3aa9d635ec3713660da3331ca8d0",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 518
+    },
+    {
+      "sha256": "4368f1d45fc697bdbec5985f8d675e602f893d90a1599d84bd823639f47c5ab2",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 1036
+    },
+    {
+      "sha256": "43f0fb903f1e4f9acea7d0fe3bce7d77b1824a3a5bc215c29331e0b8dc96528a",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 624,
+      "height": 595
+    },
+    {
+      "sha256": "46946be791eea34c717192b768a52f1009f0d1a6562e7c17f3cf73d9aa503ea6",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 899,
+      "height": 838
+    },
+    {
+      "sha256": "477cdccfe95ba65a41c28dbb685f1b32e4602a7465ab0587e4debb7b65d86ded",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 1259
+    },
+    {
+      "sha256": "4859cfce0d9aa3369d7092cbbacd997bb534b1afdd22ed24a0a6ef27a2521161",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 840
+    },
+    {
+      "sha256": "4879ffef4616e28f9367ba39fbe3efa9129dcf413635bfde9d2931f17ca19071",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 441,
+      "height": 1825
+    },
+    {
+      "sha256": "4a06862db8d34ac19038208ae07571a6e8bd3d306fdba267ae3c604868fb4233",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 900
+    },
+    {
+      "sha256": "4c4b1fc7b712bf29d65ceb2b3817d0d9bc13d340b367b073681ab8b800131739",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 900
+    },
+    {
+      "sha256": "50e09195ee04d5d65287302d7e6b27c248e9348527b97386ffc00c86c0f8dd74",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 900
+    },
+    {
+      "sha256": "519d96d9c51e08cd8492a370dfc8415eec58407b601bfc920c8732ecf1547e4f",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 1254,
+      "height": 1254
+    },
+    {
+      "sha256": "5395cdea89dd521df19fff48ea89d0945bd02edf30ba5cccb9a156051516c4ea",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 899,
+      "height": 1272
+    },
+    {
+      "sha256": "53b63edd3e7b87d34663db9fd3054e7f8134c68a7396f12900eff4717dfeaa33",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 899,
+      "height": 1272
+    },
+    {
+      "sha256": "5500d35444c24693207c781db7d099818daa622c5237b20e6517ff93fac6e401",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 900
+    },
+    {
+      "sha256": "55803d1f1dded5bd0763db9d490235064073118aaf582c130b2a0f3910f15bb2",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 1448,
+      "height": 1086
+    },
+    {
+      "sha256": "55a2381991757340a2b53b71112c7dc1bcc5d5549fb5f73051d5aa97c935fb52",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 32,
+      "height": 24
+    },
+    {
+      "sha256": "5678490a1745e765b99b0da3c869f737298e868e2fe61316e9f8d627f993a8bd",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 385,
+      "height": 1314
+    },
+    {
+      "sha256": "5a483adf07ca7f92f14eff4f789baaaa568f75b916991fc7b88d4f03f8f143b8",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 899,
+      "height": 1272
+    },
+    {
+      "sha256": "5a85c735da0013f7330b1c7f3f6c98978d15b52b6182af80c1036ba0e9b1a0b4",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 803
+    },
+    {
+      "sha256": "5d550a7a631047eb26414d2d4e8c00eabf1280570288ca2eec508c4dcdcb9093",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 1272
+    },
+    {
+      "sha256": "621b97e98dceffbbacdbb16fcab187f7f19cd73267fc5de30e1e9a6eec3e3d16",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 500,
+      "height": 1591
+    },
+    {
+      "sha256": "660ec92e0123e9211de36b86bd3e7218b6b2d07fc95d5b117f1e307f8c2ab881",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 780
+    },
+    {
+      "sha256": "669aaa18d132f4c88e1ad628c7b5a5bf05cda2d7a29ac2e6e6d886fa9dc3bcfb",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 1254,
+      "height": 1254
+    },
+    {
+      "sha256": "672fb61feee57baa2561cbedb498bb7eea552dd93bd25d422fbb0c2f66d2dd23",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 900
+    },
+    {
+      "sha256": "694ef4022442102958ca7f11eed850a3934e879e00b58c1d1bfc649cf552fb48",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 1037
+    },
+    {
+      "sha256": "697ccd9a041b26a1401accd43104aeb01ffed4a8f547bc193c741c01975e9bb8",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 900
+    },
+    {
+      "sha256": "6bb05c1a77c5d89703d74f5e5a51c8a7c16fcdc64faf1558d1af18b29a4d6fec",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 1385,
+      "height": 1136
+    },
+    {
+      "sha256": "6e76c1294c2fe7131d0181bbbf44f809c707e1a9962d8ed5af1f57f1d3eb8c83",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 899,
+      "height": 1272
+    },
+    {
+      "sha256": "711dd6e00ab758b7c313bb11106ff5563c3bac9b9b272075761e211859dc5ae9",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 900
+    },
+    {
+      "sha256": "75006921a18d38c9edd80b2ebc2619ade0c77b4d14f7a860662f3514e6af13ad",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 1036
+    },
+    {
+      "sha256": "750715914e9cfc0b20ec7a39f80aa5a6a70762d5f5dc5b1f7267f4aa02ee6019",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 762,
+      "height": 1078
+    },
+    {
+      "sha256": "763ff7d69674bcb3bbe87a4b67883dd72d6f75c63234e6e04b25122f55a005b9",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 1036
+    },
+    {
+      "sha256": "7833bc815f4848c90a49eef8a505e1b0c95a4aecf8d01abe67f2cfd869cf8c03",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 32,
+      "height": 24
+    },
+    {
+      "sha256": "786fa70c1e02e11fa550ad945d14ac288121fda22bcb4bd5786bbd55593f3f6b",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 32,
+      "height": 24
+    },
+    {
+      "sha256": "79cc6679e2767e8e6f43bee54462433ce36fa8794c30153fd2852a4e69e1bc5c",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 876,
+      "height": 1549
+    },
+    {
+      "sha256": "7aed2329c545c160d34f4a3e69d8f5d2c936588b476ac0fa75211949205aca63",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 1254,
+      "height": 1254
+    },
+    {
+      "sha256": "7b125d400fe08d26a3ce3578614dfc5da024a68d2d47e2c969b64368f80053f9",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 1368
+    },
+    {
+      "sha256": "7d3fb373cce2e428038e79b048cf704e62e522c575d9604ab635f79b5afa9828",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 703,
+      "height": 1549
+    },
+    {
+      "sha256": "7d683fdcb3d00a8b94a58959e3b7280c11deb879dd17e13308418d95204199e2",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 1254,
+      "height": 1254
+    },
+    {
+      "sha256": "7da3721e73b8d6e185b940648c606ee589fa5a322c30eadede725ffbad6e7cc7",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 900
+    },
+    {
+      "sha256": "7ea596ccbe216882a6dd927c9c7f3c6d082a48a30c9ecdfb9854ca076eed0dab",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 1254,
+      "height": 1254
+    },
+    {
+      "sha256": "7eba519404ebfafbe4d45f5f35903598e0954d93621871c050184e0a4ab1fdd8",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 900
+    },
+    {
+      "sha256": "7ef5559610d1167a76eafe9089bea2ea11c1177c66744594315eef7943979646",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 840
+    },
+    {
+      "sha256": "7f1296de47faf21f3777895a6029be463dda5be15b7bcb0c19005155c3731bdf",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 1254,
+      "height": 1254
+    },
+    {
+      "sha256": "814554018f4b4cba8c4253f521e6a2a22d9f238fc1a4213f5a425c41ce5ce797",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 900
+    },
+    {
+      "sha256": "819b59eb68af9280f6178043207df0f7c46ff7fffabf05b21709cd2e9e8c341f",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 900
+    },
+    {
+      "sha256": "827c80936e84acf843dc44397fdd2dde6871ce9407e849c5c9e4d24351ddd39a",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 1547
+    },
+    {
+      "sha256": "867ec45666bfc86a7bc43836529cd70dc2619f25ae45ef0df9dded1e5e349993",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 900
+    },
+    {
+      "sha256": "873e6d17d89aa9a46e628a08060fed3ee2b8ab275b896b4abaf5f10b2645efa6",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 779
+    },
+    {
+      "sha256": "87d9b65fc1662b01456c79667608dbb5e0823f6fa4d304b2fe39df8737316dc0",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 900
+    },
+    {
+      "sha256": "8804227b1f7ce064c07902a6b9259ee1e952200770f77007ac4fb9d9ae677436",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 900
+    },
+    {
+      "sha256": "8d677374c639f810bbc99b12f7f44c4ff52fc26ba1c32b823b07b82cbcb6e1aa",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 1254,
+      "height": 1254
+    },
+    {
+      "sha256": "8e3208e6f23db3bc4fb3595ebee42b5d1ab194373e9316dd3f98f8a82d75f018",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 1273
+    },
+    {
+      "sha256": "8e8a6fbd87c8b1ea1b81cc02fd7853f59c5f134694dbbacc3f33fd0733156c66",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 900
+    },
+    {
+      "sha256": "8f7772b06fe8aee72c5b84a1de4972a980e7c980d763042ea433e6e18802fa07",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 1254,
+      "height": 1254
+    },
+    {
+      "sha256": "9020053d80e9bc346ec898fd518f42bb943d2aea5201b75fa589942cdef2268b",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 900
+    },
+    {
+      "sha256": "904c73ad239e8be16691a554356edfd3a10867bdc009e907c2611923bb20b225",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 1402,
+      "height": 1122
+    },
+    {
+      "sha256": "917ebc97b61294282ce973ea8122fcaea80666c537e58bbebb560e6ecf9c877f",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 900
+    },
+    {
+      "sha256": "91dd2bbd9de29004cdb53ef005d4d7e04b543d91eb5ce09c2084eb2f4b55a3cd",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 900
+    },
+    {
+      "sha256": "9284347db3c8e81f08e7df8998220b1513b4197936ff4827bb77823a748c828d",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 900
+    },
+    {
+      "sha256": "9367476a0bdfe8eab2c8cbebb7488894d1efee401b27bd38b3bed9c13383b650",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 1122,
+      "height": 1402
+    },
+    {
+      "sha256": "94c061fd47dd056c2f3f89731548b1298d5c06f54185461069d7064b7ee92385",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 1402,
+      "height": 1122
+    },
+    {
+      "sha256": "97fe667554475fe30fdd0bf5603c026b934cfc9e8cd0b843fb5f5319dc53060d",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 900
+    },
+    {
+      "sha256": "98b572f1c9f56364fc7d54307e3e00b3ee3b3dea70729b3c8c10968092d0e421",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 900
+    },
+    {
+      "sha256": "98de122363919f43f6037751b1685fa024d6629febc887f69ae3e39b9dc28bfc",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 900
+    },
+    {
+      "sha256": "98e43a55618b40a37b6aca88c87ced2c51c6a4031c7575ef5bb0651e1fb1dccb",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 1456,
+      "height": 1080
+    },
+    {
+      "sha256": "9926029a0ddc1caab48f9e6ecfe574785980bb4cd2230c19575b9311a5495915",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 900
+    },
+    {
+      "sha256": "99ac6581c5ac217e6e05ac47720ccd08dfd5900e8ac30eb109e164fd72ea433d",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 840
+    },
+    {
+      "sha256": "99cfca4e4155f9982c3b0d569d06f4a55f0ba55ee412403c43aaf46e1052d15e",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 1254,
+      "height": 1254
+    },
+    {
+      "sha256": "9ae7c67569a472833e3f580f98ef97f8c60a3f72c07b5430243541eccdb1cbc3",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 781
+    },
+    {
+      "sha256": "9c2b7f5600cebb78dbddb8504cd38b9ee321d01cfdb1b3315fb5df75448ad2d0",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 839
+    },
+    {
+      "sha256": "9d2a94e281453dd8d3d3908ff50bda417621e06aa15a3015c4ffcc4f772448a7",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 900
+    },
+    {
+      "sha256": "9d6f5cb192b5d79ba144e0c01adffefb954c4ddadd1ba71d22ec28465bf764fe",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 900
+    },
+    {
+      "sha256": "9d854fc172045056540c4d5befcc01aff9a6e90a1394d4e04c8c0383baaf8f29",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 1299,
+      "height": 1211
+    },
+    {
+      "sha256": "9de1a7e03def92d723975fb279b73dd29442231af89808482c1bff6baa9d5d64",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 900
+    },
+    {
+      "sha256": "9eb637be76585dcff30188cf3b33de6c3d7159729842ab45e36155c88dfaffae",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 330,
+      "height": 1315
+    },
+    {
+      "sha256": "9f2285fd2c34e32ea2f3626b65791b087fbdb3dee71a72d23f4ddf3b87822d3b",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 900
+    },
+    {
+      "sha256": "9f5acb0bd35cb4c52e71b51c5ee0fcbfeca36a2fcd0fae63fe990820b69a4122",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 900
+    },
+    {
+      "sha256": "a190901876207d968e4a8a5bf65cfd082c0f4a1ba4a9f1ca2508b816fd283627",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 900
+    },
+    {
+      "sha256": "a2ad7e973be5de711c41a64c6f2763edd868ceff7ae0d66aa95588d6a0b2898a",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 900
+    },
+    {
+      "sha256": "a2c053566d4b0ead78292fb4db0c568a7b5783fcdf228c76b264bbfa0d8c0c62",
+      "status": "APROVADO",
+      "frames": 2,
+      "width": 32,
+      "height": 24
+    },
+    {
+      "sha256": "a2efc1c4831178ce7b6509f2ea3ee7cef24516377c07d1376efb30f74eaed194",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 1254,
+      "height": 1254
+    },
+    {
+      "sha256": "a32f4ca1626d85f8f3e12da437cd934429569a84030d86c50ce840fc1cd8d4ab",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 794,
+      "height": 934
+    },
+    {
+      "sha256": "a3b5b9e10785eb384feecf0b1abdec1adf9c03858fa98a7fd63e093db9dfe192",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 1037
+    },
+    {
+      "sha256": "a40bb3484fc7c26ac42a87ad727bca9165b194edad81393f9f4166e5104f9c26",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 1254,
+      "height": 1254
+    },
+    {
+      "sha256": "a4343e66b9663688ef7b9eac6047cd5608d088d051f923d60073b3eac0846d5a",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 899,
+      "height": 899
+    },
+    {
+      "sha256": "a8ac33277325f10c80555ed25850f12b236e48d6ac99fa896ccfb302716454f0",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 900
+    },
+    {
+      "sha256": "ac1771d63691198d9dc481d8905cb8404f7b1377e6691e647593435abb0eff6a",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 60
+    },
+    {
+      "sha256": "af00c14e247a4b251c191b7ce31ee40bf0cb485007f9a8fef73dab7063a9c70e",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 1254,
+      "height": 1254
+    },
+    {
+      "sha256": "afb1dd6186a5907023bf27e15dcd92bb39d278f0e8960e71bd965378c25836f8",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 900
+    },
+    {
+      "sha256": "b140895d45e3d8487c4f29f49ae8f18078d4f660ab74971afc41dfda6b891842",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 901
+    },
+    {
+      "sha256": "b1469651d2537e15230581d3d99794eb74a82b5ea68f1a4e13164c723c3adf9d",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 740,
+      "height": 1549
+    },
+    {
+      "sha256": "b1f9bec7b4a561aa819a19fb6bca34314b992362ea057faa7fe417dda929cbd8",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 900
+    },
+    {
+      "sha256": "b2eafcf98678cdf6acc9644ec029ef7e84f2da2bb1020da01148898fc3291a97",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 1402,
+      "height": 1122
+    },
+    {
+      "sha256": "b3470595ff5d4e07b564154a03088c12c1f6287f9c8e9835eca3bb4aafe5610b",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 900
+    },
+    {
+      "sha256": "b3e03458867e9ffc1367b96f16b5d75b38b56041129892e7e143ac093ff8dea7",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 1254,
+      "height": 1254
+    },
+    {
+      "sha256": "b43c028f6b8adc1f6e76bd161a0a8cb2524f440899786977a21790cf0ceac43b",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 900
+    },
+    {
+      "sha256": "b43d2cd8e639b10f2252bfa15ac1fb4c4aac9366dd775e455559ec86e55186bb",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 1129,
+      "height": 1393
+    },
+    {
+      "sha256": "b4e96f3f13b2cd6f3044a4b3a462eb9a789dabb19516b60f4654259cd826e1c1",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 900
+    },
+    {
+      "sha256": "b566dceffd217ce4fbcf4e2fd671b7cfbc34cfd122c6ea02a2d744002b20129d",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 467,
+      "height": 1549
+    },
+    {
+      "sha256": "b6f846198de7d12126092b8617d09406174fc0a0cd5ba292371455c5404389ea",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 899,
+      "height": 1272
+    },
+    {
+      "sha256": "b8ae87e97a7c25aa7cb2333d5a1008249da1e3e4a600c8a4e69542d6fb559c4c",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 1402,
+      "height": 1122
+    },
+    {
+      "sha256": "ba3023a50a7d2e3303a620564244f49b725e16cf36a78e0def9819361f8fcd98",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 1254,
+      "height": 1254
+    },
+    {
+      "sha256": "ba549882c7f0ab7ef9810ffe07c6a0f5e92ab1cd5ae660de1d3b40e2631ca5a6",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 899,
+      "height": 1272
+    },
+    {
+      "sha256": "bb183e1d7e0990518ef2cedefdb18829ee7c1a3296a946a286eb67b47459c68b",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 1273
+    },
+    {
+      "sha256": "bbc6ccfac1e7248670e520c311d2ec28fcd55311ac9ee7f2e1daec08b7a13541",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 900
+    },
+    {
+      "sha256": "bbcbd1501284b1cdcc60a4bda594612bdefe0eef05a921ec9b20604cdedf1a43",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 791,
+      "height": 60
+    },
+    {
+      "sha256": "bc0ae4e604c6eddc36e129a90e33d4e0e61b314d17453ac56dd4d732a9dc11ac",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 1125
+    },
+    {
+      "sha256": "bd1244ded92f29f994cb5e34ca1f2f56296a3f2fafddc8fe9801d14fc74fd47f",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 1254,
+      "height": 1254
+    },
+    {
+      "sha256": "be517518efe3c71e088d240dad6077d379c5935e30f4ed7b6800bfaa0b6ab760",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 1273
+    },
+    {
+      "sha256": "becb1be6581fcd55e8444a0cb37d694d044843b00e8f76cce3d1621721e3cc7f",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 781
+    },
+    {
+      "sha256": "bf6f45c9c873f5b6083ea754abeef5bb14d19f19505ecd2ac719e01920650902",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 900
+    },
+    {
+      "sha256": "c02e0c5761a42908e5eb0d073299f0dfdaa4c6f6112864dca3b1f39d5905da57",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 1037
+    },
+    {
+      "sha256": "c12875445bfec68115f013b2335d9f6588e06f23fd31b301745a860b57e5c35c",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 1254,
+      "height": 1254
+    },
+    {
+      "sha256": "c2367ce909c75d2cbdb5df6e3e9792834a9013f76282cb8a925dcd3bedf5d6c2",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 900
+    },
+    {
+      "sha256": "c2cae4be7ac26b9dc0775351e4321514efd00ded31fd9510f2c3bee1423e142e",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 180,
+      "height": 180
+    },
+    {
+      "sha256": "c455c92366a3b1d1935bce1a41d1b088031304d67fd25aaa58f5cfc238730c14",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 1329,
+      "height": 1183
+    },
+    {
+      "sha256": "c4e5d5f34c671445a39683a7f136b84b81c0fecb365933564c9249c0644eb429",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 900
+    },
+    {
+      "sha256": "c5421968c51a6f11762fd6fbeda4946bdf2a03e2058c718bddb50635fa7f572c",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 900
+    },
+    {
+      "sha256": "c58ed91bba260674dbba496f06a84dedebd2de71321596ac250bc1d81896bbcf",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 840
+    },
+    {
+      "sha256": "c60d42aa2f65e5804d15b6fa43139ab62b0d6ade891a8fbf9040ac0fc062c56b",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 899,
+      "height": 1272
+    },
+    {
+      "sha256": "c660a1d6d056c91c46ff19f2b94e0e0afd0f97246055fe16a6ea83b343b6ebdc",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 900
+    },
+    {
+      "sha256": "c735adba3001c5b9e68c3772d1a7d98fab7c77c045022e947640883cff1f1da6",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 900
+    },
+    {
+      "sha256": "c8259e5f800d3146031f91274a81eee7e83e54e6720e11bca82181015c9c9b48",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 900
+    },
+    {
+      "sha256": "cabad7d3a8f6f54a2b55c79804e43a3ccfeb2c0fd2d35786b18f114e3d1801dd",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 899,
+      "height": 1271
+    },
+    {
+      "sha256": "cb3b4282a56377b7ed3eca68599df7cb2727dc392681e04d8372fe559ee93588",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 1324
+    },
+    {
+      "sha256": "cc7732ff74bbcbdf194668ef2edb8ed629f3cca00788be8198937e3b0a04fc5d",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 900
+    },
+    {
+      "sha256": "ce82a22cb6e28babfdab069a55970ab930f28db8fae7daf973058a564ce37458",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 900
+    },
+    {
+      "sha256": "cf3bdb5c12f044cc9de034efb27c9ed05fe70bf823ede7599ccfbffab366744b",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 900
+    },
+    {
+      "sha256": "cf4aa23f586b01be46874f3df8fd2bcaf5aab2cbf2676588e3c07f50c4e8be22",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 900
+    },
+    {
+      "sha256": "d03096ab19d6bc06b2014db698a1bd5e2dd0c490ef584a77067c4f78f2165947",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 1254,
+      "height": 1254
+    },
+    {
+      "sha256": "d14953325006dcaeca6def39b884b065d69ba1cc9fcf260ff833dda74b0030a0",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 900
+    },
+    {
+      "sha256": "d2397c972bd875b171992e6394b3a787f4f2753165eee7263dc256eb996d6a1a",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 1400,
+      "height": 1050
+    },
+    {
+      "sha256": "d246cf6c0a1d0d44df198aeafc05e1cbc0672f394190745fa434fcf6949ce28a",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 826,
+      "height": 1168
+    },
+    {
+      "sha256": "d24dd68bbf1fc960b8df952e03ad2356df3702bff9912d8f59cc5b2d09fa1d3d",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 1280,
+      "height": 1502
+    },
+    {
+      "sha256": "d2afcfcfb4c8f0aba1bdc21aa34c4a5816817a866c25e0d741a11e8291d896b9",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 840
+    },
+    {
+      "sha256": "d7e42f04f42748187789eaa4eaeb913ff232fe6001775ff9e222deb2eb8971f8",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 839
+    },
+    {
+      "sha256": "d84c167857ad085fa8ab8493ce1293d99aafc158aa181993b34b4e45ff3848c9",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 900
+    },
+    {
+      "sha256": "d8ef3cc8fd9fccd5e0b0269ccda0faf1024e5168de826c567fb43b6f3b2421d2",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 900
+    },
+    {
+      "sha256": "d99ac81f8ca9db6c30b7c76d3de4ff4807c5854055ad775ce80d338ee705b144",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 422,
+      "height": 1549
+    },
+    {
+      "sha256": "dc9c07aca5b0379c7b7e169e902ecb7a3ebf7fd836b0bb067901d2efe88d9427",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 803
+    },
+    {
+      "sha256": "de2b049c2e5dd3210960bee30450a6b1f5e19b3346353babc7bcb1f9f9581617",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 899,
+      "height": 838
+    },
+    {
+      "sha256": "de47efeb6ae8e6ce42f23e4ef9890e0440278a249ec5403b4d893a26d9bb81ea",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 731,
+      "height": 1549
+    },
+    {
+      "sha256": "de91fa403ca213ad1312e49422d8bfd25d2fb9bb85e61f77bb76c58433f8d786",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 1402,
+      "height": 1122
+    },
+    {
+      "sha256": "e038875fb756eac57343ae1d9b0efec89affac2bac2c8b0b4ff0074136a0494f",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 900
+    },
+    {
+      "sha256": "e41bec91e28793df5b9a02900a01cf7325dc397cebc26d8798b48f1c00eca0df",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 900
+    },
+    {
+      "sha256": "e5fad0731834730b2eac3671e7fe0503eba7c287897a6e3aa5161cfc383f8d98",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 899,
+      "height": 1272
+    },
+    {
+      "sha256": "e633bbee3df9068aeed632ac3c66dad1faee4e9e13ae2ccc53dc99bf483b083b",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 316,
+      "height": 316
+    },
+    {
+      "sha256": "e64ac4a721fabb48599c75d62a0202ac2ba78e9249c04a7d18bd3f2ef431b15c",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 1037
+    },
+    {
+      "sha256": "eab2b48b5d53de3ab4faa0cc38a1963793db4702cc64b3f56e673c3600740e07",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 780
+    },
+    {
+      "sha256": "eab8fcee98aad05b2fcce11ad4d2f4f5fae292ac100d4882267bbae2527f4deb",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 645,
+      "height": 1549
+    },
+    {
+      "sha256": "ebc0604c169e5e84efe2874b70fc65be84674173a1ade8309cb575ad96dcaf0f",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 883,
+      "height": 1273
+    },
+    {
+      "sha256": "ec2e2cebf66ac55d77e65bedafb4d8dfc9af1bb3d09f0abfde6710afb5c0a85f",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 1254,
+      "height": 1254
+    },
+    {
+      "sha256": "ec30082fb3efa055895f23d2618ede9b4081f1918b68127c14bcd4b3debad495",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 900
+    },
+    {
+      "sha256": "ecf05a022e8c51a72dae74f93695e662784e63a8d78275098ac8c4d42cfe6dfc",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 828,
+      "height": 510
+    },
+    {
+      "sha256": "edb43d50d4e70a284b763413e32c7bf3c5686c3276b0302cc93e8e302914dd10",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 779
+    },
+    {
+      "sha256": "ef1e5a57d74e6688ae7949442c5056f7e8641573e38c23bdc326c8aecbc6112f",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 900
+    },
+    {
+      "sha256": "f0275b25f2396cb1ca65d2a5fe42475c73207102da8adda4e78f68d3d85fd559",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 726,
+      "height": 1026
+    },
+    {
+      "sha256": "f1bf78682a18fb6a8cd6876d008c28a71bff331bda51c1c78c569048fc203b06",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 900
+    },
+    {
+      "sha256": "f220f8dcdb557eb1284d49b4627668dada239c555e71c3524873ed5931966b87",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 900
+    },
+    {
+      "sha256": "f2397f92f6c948e4da67091b38d0a786cc0d93eba7c82cea232bd412fb7a6043",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 900
+    },
+    {
+      "sha256": "f23dc413538f720536c0ca6f319262489fc32e3e4208c45c617c3b0780ece338",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 1254,
+      "height": 1254
+    },
+    {
+      "sha256": "f350d683942ed4fcb5d13a908853e85e2e96baf93a1d59d5e01465647c47c562",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 899,
+      "height": 1272
+    },
+    {
+      "sha256": "f6547c628c20f2831f6f852fc4e45a7051dca787ea01a6956803bf8ed7a188d2",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 1037
+    },
+    {
+      "sha256": "f6713b07d51074e66d509fd939037681549dd9a41598b698979c5602225bc65c",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 900
+    },
+    {
+      "sha256": "f6f5778c9c6fc04b688a25b4045cff966594479774bfe4ebaf927c0f4233f424",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 900
+    },
+    {
+      "sha256": "f6fc00010328b2388a4a1d7195ffe646a72aa85eb65f57e26e5f86eecbcc560f",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 900
+    },
+    {
+      "sha256": "f742203aa56fe085aa5976be128c0ab0181fad08f000c6699e8fd1434f1f7e5a",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 899,
+      "height": 1272
+    },
+    {
+      "sha256": "f77780a3a57f66ad9b6f15a57cf42cb2e662128c03843afd6ef71d306ade71b0",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 1272
+    },
+    {
+      "sha256": "f87ac7e11b69ab37e816818b7db7d60ba48909599cbdb47faaaf7c273b1e54ba",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 900
+    },
+    {
+      "sha256": "f8a0355da42c635ec6bd3d4c93b26ef3fb540d12fb7cc5f43190b27c46dcf617",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 900
+    },
+    {
+      "sha256": "fb3b0f14d4f0eb56e969eed98e0fcc52d5f4ea7d4949b0d978e521482d3f7071",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 1036
+    },
+    {
+      "sha256": "fc1a2bddf8f1fcade795c9c04a7b40ac4c776f1d64f8ea6ba3757f9a5b1c61de",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 900
+    },
+    {
+      "sha256": "fc9902ad6e1e746135b861d7ab0a006ad2109d8f6143ee035095d93200a4464a",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 899,
+      "height": 1272
+    },
+    {
+      "sha256": "fcd8d00d6c2ed39a743a2a3361a71bb22b271b043ff317358e68de8db4b14279",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 900
+    },
+    {
+      "sha256": "fd530b2957295e789789ec4c6c5f9038e77c846a67dfe429925b1a24f9d2c1bd",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 899,
+      "height": 1272
+    },
+    {
+      "sha256": "fdd5174f4501d4cc974b81b58035f86afb482a6f0b13440e5dfff8c61adcb420",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 900
+    },
+    {
+      "sha256": "fde0bfdaaf203258af64d0b9a77b26f2218465f720dcdcff49f0bfc933851b15",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 1037
+    },
+    {
+      "sha256": "fe8e6e8f3794ff6ed208f79bae51288cfa3cf6a5f6371d82bc219e4241541cc2",
+      "status": "APROVADO",
+      "frames": 1,
+      "width": 900,
+      "height": 1227
+    }
+  ]
+}

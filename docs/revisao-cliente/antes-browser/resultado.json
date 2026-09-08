@@ -1,0 +1,72 @@
+{
+  "scope": "Chromium com DOM/CSS/JS reais e API simulada; about:blank, sem certificação HTTP/cookies/Express",
+  "results": [
+    {
+      "test": "Logout disponível com pedidos ainda carregando",
+      "status": "REPROVADO",
+      "observed": {
+        "ok": false,
+        "logoutWhileOrdersPending": false
+      }
+    },
+    {
+      "test": "Resposta de sessão anterior não desfaz logout",
+      "status": "REPROVADO",
+      "observed": {
+        "ok": false,
+        "resurrectedSession": true
+      }
+    },
+    {
+      "test": "Pedidos atrasados não acrescentam ações privadas na tela de login",
+      "status": "REPROVADO",
+      "observed": {
+        "ok": false,
+        "privateActionsOnLogin": 1
+      }
+    },
+    {
+      "test": "Solicitação antiga de código não substitui tela reaberta",
+      "status": "REPROVADO",
+      "observed": {
+        "ok": false,
+        "oldCodeViewReappeared": true
+      }
+    },
+    {
+      "test": "Comprar novamente preserva trava de rolagem da sacola",
+      "status": "REPROVADO",
+      "observed": {
+        "locked": false,
+        "cartOpen": true,
+        "accountOpen": false,
+        "ok": false
+      }
+    },
+    {
+      "test": "Logout com sessão expirada volta ao login",
+      "status": "APROVADO",
+      "observed": {
+        "ok": true,
+        "loginVisible": true
+      }
+    },
+    {
+      "test": "Falha de logout não simula sucesso; nova tentativa funciona",
+      "status": "APROVADO",
+      "observed": {
+        "ok": true,
+        "keptOnFailure": true,
+        "retryWorks": true
+      }
+    },
+    {
+      "test": "Endereço incompleto não é enviado como cadastro válido",
+      "status": "REPROVADO",
+      "observed": {
+        "ok": false,
+        "invalidAddressSubmitted": true
+      }
+    }
+  ]
+}

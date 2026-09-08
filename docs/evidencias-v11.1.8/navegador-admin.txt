@@ -1,0 +1,1 @@
+ADMIN BROWSER AUDIT OK: 4/4 larguras; login incorreto/correto/logout; rolagem natural/iframe handoff; overflow global=0; console errors=0

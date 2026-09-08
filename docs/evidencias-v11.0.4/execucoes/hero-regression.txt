@@ -1,0 +1,66 @@
+[actual-media fixture] 320px no-preference
+  geometry/media ready
+  mobile menu
+    menu clicked
+    menu clicked
+  account
+  catalog synchronization
+[actual-media fixture] 360px no-preference
+  geometry/media ready
+  mobile menu
+    menu clicked
+    menu clicked
+  account
+  catalog synchronization
+[actual-media fixture] 390px no-preference
+  geometry/media ready
+  mobile menu
+    menu clicked
+    menu clicked
+  account
+  catalog synchronization
+[actual-media fixture] 430px no-preference
+  geometry/media ready
+  mobile menu
+    menu clicked
+    menu clicked
+  account
+  catalog synchronization
+[actual-media fixture] 768px no-preference
+  geometry/media ready
+  mobile menu
+    menu clicked
+    menu clicked
+  account
+  catalog synchronization
+[actual-media fixture] 790px no-preference
+  geometry/media ready
+  mobile menu
+    menu clicked
+    menu clicked
+  account
+  catalog synchronization
+[actual-media fixture] 820px no-preference
+  geometry/media ready
+  account
+  catalog synchronization
+[actual-media fixture] 1024px no-preference
+  geometry/media ready
+  account
+  catalog synchronization
+[actual-media fixture] 1440px no-preference
+  geometry/media ready
+  account
+  catalog synchronization
+[actual-media fixture] 390px reduce
+  geometry/media ready
+  mobile menu
+    menu clicked
+    menu clicked
+  account
+  catalog synchronization
+{
+  "status": "passed",
+  "cases": 10,
+  "failures": []
+}

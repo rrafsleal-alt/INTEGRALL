@@ -1,0 +1,16 @@
+{
+  "scope": "Chromium com DOM/CSS/JS reais e API simulada; about:blank, sem certificação HTTP/cookies/Express",
+  "results": [
+    {
+      "test": "Conta com textos longos em 280px",
+      "status": "REPROVADO",
+      "observed": {
+        "globalOverflow": false,
+        "contentOverflow": true,
+        "panelWidth": 265,
+        "viewport": 280,
+        "ok": false
+      }
+    }
+  ]
+}

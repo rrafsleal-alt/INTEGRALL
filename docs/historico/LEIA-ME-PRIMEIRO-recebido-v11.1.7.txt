@@ -1,0 +1,44 @@
+INTEGRALL v11.1.6 — AUDITORIA EXPERT DE PRODUÇÃO, ESTOQUE E CONCORRÊNCIA
+
+PRINCIPAIS RECURSOS
+- Loja completa com catálogo, carrinho, pedidos, frete, promoções e Mercado Pago.
+- Conta do cliente por código de e-mail, recompra, favoritos e endereços.
+- Reserva de estoque, avaliações verificadas e alertas “Avise-me”.
+- Admin com produtos, fotos, variações, pedidos, clientes, promoções e editor visual.
+- Até 12 fotos por produto; cada variação pode ser vinculada a uma foto da galeria.
+- Produto abre em popup central, sem deslocar a página; fecha por botão, clique fora ou Esc.
+- Carrossel de fotos nos cards e no popup quando houver duas ou mais imagens.
+- Catálogo mostra 12 produtos por vez; os demais aparecem somente ao clicar em “Ver mais”.
+- Busca com sugestões navegáveis por teclado e fechamento consistente.
+- Produto, sacola, conta, termos legais e acompanhamento de pedido não ficam empilhados de forma conflitante.
+- Política de privacidade, termos e trocas preservam parágrafos e quebras de linha.
+- URLs individuais /produto/<slug>, SEO e sitemap.
+
+PARA RODAR
+1. Execute PREPARAR-DEPENDENCIAS.bat ou npm ci.
+2. Execute INICIAR-INTEGRALL.bat ou npm run dev.
+3. Loja: http://localhost:3000/
+4. Admin: http://localhost:3000/admin
+5. No primeiro acesso local, deixe o e-mail em branco e use a credencial inicial definida no briefing. Ela não é impressa neste arquivo.
+
+SEGURANÇA DO ADMIN
+- A credencial inicial existe somente como hash scrypt no backend.
+- Quando ADMIN_PASSWORD_HASH é preenchido, ele substitui integralmente a credencial inicial.
+- Em produção, use ADMIN_DEFAULT_LOGIN_ENABLED=false, ADMIN_PASSWORD_HASH próprio,
+  ADMIN_SESSION_SECRET e CUSTOMER_AUTH_SECRET persistentes.
+
+VALIDAÇÃO
+- npm run verify:v11.1.6
+- npm test
+- npm run test:browser
+- npm run test:browser:admin
+- npm run test:production
+- python3 tools/audit_products.py
+
+LEITURA OBRIGATÓRIA
+ALTERACOES-V11.1.6.md
+TESTES-V11.1.6.md
+AUDITORIA-EXPERT-V11.1.6.md
+AUDITORIA-FORENSE-V11.1.1.md
+DEPLOYMENT_RUNBOOK.md
+SECURITY.md

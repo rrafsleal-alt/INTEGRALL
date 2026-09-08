@@ -1,0 +1,43 @@
+{
+  "width": 390,
+  "scrollWidth": 375,
+  "brand": {
+    "x": 16,
+    "y": 20.21875,
+    "w": 123.625,
+    "h": 27.546875,
+    "visible": true
+  },
+  "menu": {
+    "x": 319,
+    "y": 12,
+    "w": 40,
+    "h": 44,
+    "visible": true
+  },
+  "account": {
+    "x": 226,
+    "y": 12,
+    "w": 40,
+    "h": 44,
+    "visible": true
+  },
+  "cart": {
+    "x": 268,
+    "y": 12,
+    "w": 49,
+    "h": 44,
+    "visible": true
+  },
+  "video": {
+    "paused": false,
+    "speed": 1.35,
+    "width": 720,
+    "height": 846,
+    "loaded": 4
+  },
+  "featurePrice": "R$ 26,99",
+  "navVisibility": "hidden",
+  "publicProducts": 5,
+  "motion": "no-preference"
+}

@@ -1,0 +1,68 @@
+[
+  {
+    "test": "Logout disponível com pedidos ainda carregando",
+    "status": "APROVADO",
+    "observed": {
+      "ok": true,
+      "logoutWhileOrdersPending": true,
+      "pageErrors": []
+    }
+  },
+  {
+    "test": "Resposta de sessão anterior não desfaz logout",
+    "status": "APROVADO",
+    "observed": {
+      "ok": true,
+      "resurrectedSession": false,
+      "pageErrors": []
+    }
+  },
+  {
+    "test": "Pedidos atrasados não acrescentam ações privadas na tela de login",
+    "status": "APROVADO",
+    "observed": {
+      "ok": true,
+      "privateActionsOnLogin": 0,
+      "pageErrors": []
+    }
+  },
+  {
+    "test": "Solicitação antiga de código não substitui tela reaberta",
+    "status": "APROVADO",
+    "observed": {
+      "ok": true,
+      "oldCodeViewReappeared": false,
+      "pageErrors": []
+    }
+  },
+  {
+    "test": "Comprar novamente preserva trava de rolagem da sacola",
+    "status": "APROVADO",
+    "observed": {
+      "locked": true,
+      "cartOpen": true,
+      "accountOpen": false,
+      "ok": true,
+      "pageErrors": []
+    }
+  },
+  {
+    "test": "Logout com sessão expirada volta ao login",
+    "status": "APROVADO",
+    "observed": {
+      "ok": true,
+      "loginVisible": true,
+      "pageErrors": []
+    }
+  },
+  {
+    "test": "Falha de logout não simula sucesso; nova tentativa funciona",
+    "status": "APROVADO",
+    "observed": {
+      "ok": true,
+      "keptOnFailure": true,
+      "retryWorks": true,
+      "pageErrors": []
+    }
+  }
+]

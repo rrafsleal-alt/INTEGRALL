@@ -1,0 +1,2481 @@
+{
+  "status": "APROVADO",
+  "browser": "144.0.7559.96",
+  "scope": "Chromium about:blank; código real e imagens reais; sem Express/CSP/cookies de produção",
+  "results": [
+    {
+      "name": "227 produtos preservados e nenhum oculto; 222 sem preço continuam sob consulta",
+      "status": "APROVADO",
+      "details": {
+        "total": 227,
+        "hidden": 0,
+        "quote": 222
+      }
+    },
+    {
+      "name": "Gourmet: primeira página contém 12 de 82, com 7 páginas",
+      "status": "APROVADO",
+      "details": {
+        "cards": 12,
+        "current": 1,
+        "count": "Mostrando 1–12 de 82 produtos • Página 1 de 7",
+        "horizontal": false,
+        "frames": [
+          {
+            "id": "product-1786125594468-rlk598",
+            "w": 316.5,
+            "h": 316.5,
+            "cardHeight": 509.375,
+            "fit": "cover",
+            "imageH": 316.5,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-972",
+            "w": 316.5,
+            "h": 316.5,
+            "cardHeight": 509.375,
+            "fit": "cover",
+            "imageH": 316.5,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-973",
+            "w": 316.5,
+            "h": 316.5,
+            "cardHeight": 509.375,
+            "fit": "cover",
+            "imageH": 316.5,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-974",
+            "w": 316.5,
+            "h": 316.5,
+            "cardHeight": 509.375,
+            "fit": "cover",
+            "imageH": 316.5,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-976",
+            "w": 316.5,
+            "h": 316.5,
+            "cardHeight": 509.375,
+            "fit": "cover",
+            "imageH": 316.5,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-975",
+            "w": 316.5,
+            "h": 316.5,
+            "cardHeight": 509.375,
+            "fit": "cover",
+            "imageH": 316.5,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-924",
+            "w": 316.5,
+            "h": 316.5,
+            "cardHeight": 509.375,
+            "fit": "cover",
+            "imageH": 316.5,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-903",
+            "w": 316.5,
+            "h": 316.5,
+            "cardHeight": 509.375,
+            "fit": "cover",
+            "imageH": 316.5,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-901",
+            "w": 316.5,
+            "h": 316.5,
+            "cardHeight": 509.375,
+            "fit": "cover",
+            "imageH": 316.5,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-926",
+            "w": 316.5,
+            "h": 316.5,
+            "cardHeight": 509.375,
+            "fit": "cover",
+            "imageH": 316.5,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-925",
+            "w": 316.5,
+            "h": 316.5,
+            "cardHeight": 509.375,
+            "fit": "cover",
+            "imageH": 316.5,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-955",
+            "w": 316.5,
+            "h": 316.5,
+            "cardHeight": 509.375,
+            "fit": "cover",
+            "imageH": 316.5,
+            "actionsVisible": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "Primeira página: Anterior desabilitado e número atual indicado",
+      "status": "APROVADO",
+      "details": null
+    },
+    {
+      "name": "Gourmet página 1: 12 itens",
+      "status": "APROVADO",
+      "details": null
+    },
+    {
+      "name": "Gourmet página 2: 12 itens",
+      "status": "APROVADO",
+      "details": null
+    },
+    {
+      "name": "Gourmet página 3: 12 itens",
+      "status": "APROVADO",
+      "details": null
+    },
+    {
+      "name": "Gourmet página 4: 12 itens",
+      "status": "APROVADO",
+      "details": null
+    },
+    {
+      "name": "Gourmet página 5: 12 itens",
+      "status": "APROVADO",
+      "details": null
+    },
+    {
+      "name": "Gourmet página 6: 12 itens",
+      "status": "APROVADO",
+      "details": null
+    },
+    {
+      "name": "Gourmet página 7: 10 itens",
+      "status": "APROVADO",
+      "details": null
+    },
+    {
+      "name": "82 produtos Gourmet alcançáveis sem duplicar ou omitir",
+      "status": "APROVADO",
+      "details": null
+    },
+    {
+      "name": "Última página: Próxima desabilitada",
+      "status": "APROVADO",
+      "details": null
+    },
+    {
+      "name": "Clique no número substitui a página e leva foco ao catálogo",
+      "status": "APROVADO",
+      "details": null
+    },
+    {
+      "name": "Próxima avança para 3",
+      "status": "APROVADO",
+      "details": null
+    },
+    {
+      "name": "Voltar restaura a página 2 e o departamento Gourmet",
+      "status": "APROVADO",
+      "details": null
+    },
+    {
+      "name": "Voltar mantém os resultados abaixo do cabeçalho",
+      "status": "APROVADO",
+      "details": {
+        "top": 87.625,
+        "header": 72,
+        "height": 1000,
+        "restoration": "manual"
+      }
+    },
+    {
+      "name": "Avançar restaura a página 3",
+      "status": "APROVADO",
+      "details": null
+    },
+    {
+      "name": "Paginação por teclado funciona e o foco inicia nos resultados",
+      "status": "APROVADO",
+      "details": null
+    },
+    {
+      "name": "Produto sob consulta abre na página selecionada sem permitir compra",
+      "status": "APROVADO",
+      "details": null
+    },
+    {
+      "name": "Fechar o produto mantém a página 4",
+      "status": "APROVADO",
+      "details": null
+    },
+    {
+      "name": "Pesquisa volta à página 1 e filtra",
+      "status": "APROVADO",
+      "details": null
+    },
+    {
+      "name": "Busca vazia não deixa paginação nem cards antigos",
+      "status": "APROVADO",
+      "details": null
+    },
+    {
+      "name": "Limpar filtros recupera os 82 produtos paginados",
+      "status": "APROVADO",
+      "details": null
+    },
+    {
+      "name": "Alterar categoria volta à primeira página",
+      "status": "APROVADO",
+      "details": null
+    },
+    {
+      "name": "Alterar ordenação volta à primeira página",
+      "status": "APROVADO",
+      "details": null
+    },
+    {
+      "name": "Filtro avançado volta à primeira página e mantém compra protegida",
+      "status": "APROVADO",
+      "details": null
+    },
+    {
+      "name": "Vitrine: todas as 19 páginas cobrem exatamente 227 produtos",
+      "status": "APROVADO",
+      "details": null
+    },
+    {
+      "name": "Atualização do catálogo mantém a página atual",
+      "status": "APROVADO",
+      "details": null
+    },
+    {
+      "name": "Atualização de promoções não reinicia a paginação",
+      "status": "APROVADO",
+      "details": null
+    },
+    {
+      "name": "Atualização de configurações não reinicia a paginação",
+      "status": "APROVADO",
+      "details": null
+    },
+    {
+      "name": "Redução do catálogo limita a página antiga sem deixar tela vazia",
+      "status": "APROVADO",
+      "details": null
+    },
+    {
+      "name": "vinhos: até 12 de 129, primeira página",
+      "status": "APROVADO",
+      "details": null
+    },
+    {
+      "name": "vinhos: garrafas/embalagens inteiras com contain",
+      "status": "APROVADO",
+      "details": null
+    },
+    {
+      "name": "cafes: até 12 de 7, primeira página",
+      "status": "APROVADO",
+      "details": null
+    },
+    {
+      "name": "cafes: garrafas/embalagens inteiras com contain",
+      "status": "APROVADO",
+      "details": null
+    },
+    {
+      "name": "sucos: até 12 de 9, primeira página",
+      "status": "APROVADO",
+      "details": null
+    },
+    {
+      "name": "sucos: garrafas/embalagens inteiras com contain",
+      "status": "APROVADO",
+      "details": null
+    },
+    {
+      "name": "280px: 12 cards iguais, quadros quadrados, fotos preenchidas e sem overflow",
+      "status": "APROVADO",
+      "details": {
+        "cards": 12,
+        "current": 1,
+        "count": "Mostrando 1–12 de 82 produtos • Página 1 de 7",
+        "horizontal": false,
+        "frames": [
+          {
+            "id": "product-1786125594468-rlk598",
+            "w": 225,
+            "h": 225,
+            "cardHeight": 409.046875,
+            "fit": "cover",
+            "imageH": 225,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-972",
+            "w": 225,
+            "h": 225,
+            "cardHeight": 409.046875,
+            "fit": "cover",
+            "imageH": 225,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-973",
+            "w": 225,
+            "h": 225,
+            "cardHeight": 409.046875,
+            "fit": "cover",
+            "imageH": 225,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-974",
+            "w": 225,
+            "h": 225,
+            "cardHeight": 409.046875,
+            "fit": "cover",
+            "imageH": 225,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-976",
+            "w": 225,
+            "h": 225,
+            "cardHeight": 409.046875,
+            "fit": "cover",
+            "imageH": 225,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-975",
+            "w": 225,
+            "h": 225,
+            "cardHeight": 409.046875,
+            "fit": "cover",
+            "imageH": 225,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-924",
+            "w": 225,
+            "h": 225,
+            "cardHeight": 409.046875,
+            "fit": "cover",
+            "imageH": 225,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-903",
+            "w": 225,
+            "h": 225,
+            "cardHeight": 409.046875,
+            "fit": "cover",
+            "imageH": 225,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-901",
+            "w": 225,
+            "h": 225,
+            "cardHeight": 409.046875,
+            "fit": "cover",
+            "imageH": 225,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-926",
+            "w": 225,
+            "h": 225,
+            "cardHeight": 409.046875,
+            "fit": "cover",
+            "imageH": 225,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-925",
+            "w": 225,
+            "h": 225,
+            "cardHeight": 409.046875,
+            "fit": "cover",
+            "imageH": 225,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-955",
+            "w": 225,
+            "h": 225,
+            "cardHeight": 409.046875,
+            "fit": "cover",
+            "imageH": 225,
+            "actionsVisible": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "320px: 12 cards iguais, quadros quadrados, fotos preenchidas e sem overflow",
+      "status": "APROVADO",
+      "details": {
+        "cards": 12,
+        "current": 1,
+        "count": "Mostrando 1–12 de 82 produtos • Página 1 de 7",
+        "horizontal": false,
+        "frames": [
+          {
+            "id": "product-1786125594468-rlk598",
+            "w": 265,
+            "h": 265,
+            "cardHeight": 449.046875,
+            "fit": "cover",
+            "imageH": 265,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-972",
+            "w": 265,
+            "h": 265,
+            "cardHeight": 449.046875,
+            "fit": "cover",
+            "imageH": 265,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-973",
+            "w": 265,
+            "h": 265,
+            "cardHeight": 449.046875,
+            "fit": "cover",
+            "imageH": 265,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-974",
+            "w": 265,
+            "h": 265,
+            "cardHeight": 449.046875,
+            "fit": "cover",
+            "imageH": 265,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-976",
+            "w": 265,
+            "h": 265,
+            "cardHeight": 449.046875,
+            "fit": "cover",
+            "imageH": 265,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-975",
+            "w": 265,
+            "h": 265,
+            "cardHeight": 449.046875,
+            "fit": "cover",
+            "imageH": 265,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-924",
+            "w": 265,
+            "h": 265,
+            "cardHeight": 449.046875,
+            "fit": "cover",
+            "imageH": 265,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-903",
+            "w": 265,
+            "h": 265,
+            "cardHeight": 449.046875,
+            "fit": "cover",
+            "imageH": 265,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-901",
+            "w": 265,
+            "h": 265,
+            "cardHeight": 449.046875,
+            "fit": "cover",
+            "imageH": 265,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-926",
+            "w": 265,
+            "h": 265,
+            "cardHeight": 449.046875,
+            "fit": "cover",
+            "imageH": 265,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-925",
+            "w": 265,
+            "h": 265,
+            "cardHeight": 449.046875,
+            "fit": "cover",
+            "imageH": 265,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-955",
+            "w": 265,
+            "h": 265,
+            "cardHeight": 449.046875,
+            "fit": "cover",
+            "imageH": 265,
+            "actionsVisible": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "360px: 12 cards iguais, quadros quadrados, fotos preenchidas e sem overflow",
+      "status": "APROVADO",
+      "details": {
+        "cards": 12,
+        "current": 1,
+        "count": "Mostrando 1–12 de 82 produtos • Página 1 de 7",
+        "horizontal": false,
+        "frames": [
+          {
+            "id": "product-1786125594468-rlk598",
+            "w": 305,
+            "h": 305,
+            "cardHeight": 489.046875,
+            "fit": "cover",
+            "imageH": 305,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-972",
+            "w": 305,
+            "h": 305,
+            "cardHeight": 489.046875,
+            "fit": "cover",
+            "imageH": 305,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-973",
+            "w": 305,
+            "h": 305,
+            "cardHeight": 489.046875,
+            "fit": "cover",
+            "imageH": 305,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-974",
+            "w": 305,
+            "h": 305,
+            "cardHeight": 489.046875,
+            "fit": "cover",
+            "imageH": 305,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-976",
+            "w": 305,
+            "h": 305,
+            "cardHeight": 489.046875,
+            "fit": "cover",
+            "imageH": 305,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-975",
+            "w": 305,
+            "h": 305,
+            "cardHeight": 489.046875,
+            "fit": "cover",
+            "imageH": 305,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-924",
+            "w": 305,
+            "h": 305,
+            "cardHeight": 489.046875,
+            "fit": "cover",
+            "imageH": 305,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-903",
+            "w": 305,
+            "h": 305,
+            "cardHeight": 489.046875,
+            "fit": "cover",
+            "imageH": 305,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-901",
+            "w": 305,
+            "h": 305,
+            "cardHeight": 489.046875,
+            "fit": "cover",
+            "imageH": 305,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-926",
+            "w": 305,
+            "h": 305,
+            "cardHeight": 489.046875,
+            "fit": "cover",
+            "imageH": 305,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-925",
+            "w": 305,
+            "h": 305,
+            "cardHeight": 489.046875,
+            "fit": "cover",
+            "imageH": 305,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-955",
+            "w": 305,
+            "h": 305,
+            "cardHeight": 489.046875,
+            "fit": "cover",
+            "imageH": 305,
+            "actionsVisible": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "375px: 12 cards iguais, quadros quadrados, fotos preenchidas e sem overflow",
+      "status": "APROVADO",
+      "details": {
+        "cards": 12,
+        "current": 1,
+        "count": "Mostrando 1–12 de 82 produtos • Página 1 de 7",
+        "horizontal": false,
+        "frames": [
+          {
+            "id": "product-1786125594468-rlk598",
+            "w": 320,
+            "h": 320,
+            "cardHeight": 504.046875,
+            "fit": "cover",
+            "imageH": 320,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-972",
+            "w": 320,
+            "h": 320,
+            "cardHeight": 504.046875,
+            "fit": "cover",
+            "imageH": 320,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-973",
+            "w": 320,
+            "h": 320,
+            "cardHeight": 504.046875,
+            "fit": "cover",
+            "imageH": 320,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-974",
+            "w": 320,
+            "h": 320,
+            "cardHeight": 504.046875,
+            "fit": "cover",
+            "imageH": 320,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-976",
+            "w": 320,
+            "h": 320,
+            "cardHeight": 504.046875,
+            "fit": "cover",
+            "imageH": 320,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-975",
+            "w": 320,
+            "h": 320,
+            "cardHeight": 504.046875,
+            "fit": "cover",
+            "imageH": 320,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-924",
+            "w": 320,
+            "h": 320,
+            "cardHeight": 504.046875,
+            "fit": "cover",
+            "imageH": 320,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-903",
+            "w": 320,
+            "h": 320,
+            "cardHeight": 504.046875,
+            "fit": "cover",
+            "imageH": 320,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-901",
+            "w": 320,
+            "h": 320,
+            "cardHeight": 504.046875,
+            "fit": "cover",
+            "imageH": 320,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-926",
+            "w": 320,
+            "h": 320,
+            "cardHeight": 504.046875,
+            "fit": "cover",
+            "imageH": 320,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-925",
+            "w": 320,
+            "h": 320,
+            "cardHeight": 504.046875,
+            "fit": "cover",
+            "imageH": 320,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-955",
+            "w": 320,
+            "h": 320,
+            "cardHeight": 504.046875,
+            "fit": "cover",
+            "imageH": 320,
+            "actionsVisible": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "390px: 12 cards iguais, quadros quadrados, fotos preenchidas e sem overflow",
+      "status": "APROVADO",
+      "details": {
+        "cards": 12,
+        "current": 1,
+        "count": "Mostrando 1–12 de 82 produtos • Página 1 de 7",
+        "horizontal": false,
+        "frames": [
+          {
+            "id": "product-1786125594468-rlk598",
+            "w": 335,
+            "h": 335,
+            "cardHeight": 519.046875,
+            "fit": "cover",
+            "imageH": 335,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-972",
+            "w": 335,
+            "h": 335,
+            "cardHeight": 519.046875,
+            "fit": "cover",
+            "imageH": 335,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-973",
+            "w": 335,
+            "h": 335,
+            "cardHeight": 519.046875,
+            "fit": "cover",
+            "imageH": 335,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-974",
+            "w": 335,
+            "h": 335,
+            "cardHeight": 519.046875,
+            "fit": "cover",
+            "imageH": 335,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-976",
+            "w": 335,
+            "h": 335,
+            "cardHeight": 519.046875,
+            "fit": "cover",
+            "imageH": 335,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-975",
+            "w": 335,
+            "h": 335,
+            "cardHeight": 519.046875,
+            "fit": "cover",
+            "imageH": 335,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-924",
+            "w": 335,
+            "h": 335,
+            "cardHeight": 519.046875,
+            "fit": "cover",
+            "imageH": 335,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-903",
+            "w": 335,
+            "h": 335,
+            "cardHeight": 519.046875,
+            "fit": "cover",
+            "imageH": 335,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-901",
+            "w": 335,
+            "h": 335,
+            "cardHeight": 519.046875,
+            "fit": "cover",
+            "imageH": 335,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-926",
+            "w": 335,
+            "h": 335,
+            "cardHeight": 519.046875,
+            "fit": "cover",
+            "imageH": 335,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-925",
+            "w": 335,
+            "h": 335,
+            "cardHeight": 519.046875,
+            "fit": "cover",
+            "imageH": 335,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-955",
+            "w": 335,
+            "h": 335,
+            "cardHeight": 519.046875,
+            "fit": "cover",
+            "imageH": 335,
+            "actionsVisible": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "412px: 12 cards iguais, quadros quadrados, fotos preenchidas e sem overflow",
+      "status": "APROVADO",
+      "details": {
+        "cards": 12,
+        "current": 1,
+        "count": "Mostrando 1–12 de 82 produtos • Página 1 de 7",
+        "horizontal": false,
+        "frames": [
+          {
+            "id": "product-1786125594468-rlk598",
+            "w": 357,
+            "h": 357,
+            "cardHeight": 541.046875,
+            "fit": "cover",
+            "imageH": 357,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-972",
+            "w": 357,
+            "h": 357,
+            "cardHeight": 541.046875,
+            "fit": "cover",
+            "imageH": 357,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-973",
+            "w": 357,
+            "h": 357,
+            "cardHeight": 541.046875,
+            "fit": "cover",
+            "imageH": 357,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-974",
+            "w": 357,
+            "h": 357,
+            "cardHeight": 541.046875,
+            "fit": "cover",
+            "imageH": 357,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-976",
+            "w": 357,
+            "h": 357,
+            "cardHeight": 541.046875,
+            "fit": "cover",
+            "imageH": 357,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-975",
+            "w": 357,
+            "h": 357,
+            "cardHeight": 541.046875,
+            "fit": "cover",
+            "imageH": 357,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-924",
+            "w": 357,
+            "h": 357,
+            "cardHeight": 541.046875,
+            "fit": "cover",
+            "imageH": 357,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-903",
+            "w": 357,
+            "h": 357,
+            "cardHeight": 541.046875,
+            "fit": "cover",
+            "imageH": 357,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-901",
+            "w": 357,
+            "h": 357,
+            "cardHeight": 541.046875,
+            "fit": "cover",
+            "imageH": 357,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-926",
+            "w": 357,
+            "h": 357,
+            "cardHeight": 541.046875,
+            "fit": "cover",
+            "imageH": 357,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-925",
+            "w": 357,
+            "h": 357,
+            "cardHeight": 541.046875,
+            "fit": "cover",
+            "imageH": 357,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-955",
+            "w": 357,
+            "h": 357,
+            "cardHeight": 541.046875,
+            "fit": "cover",
+            "imageH": 357,
+            "actionsVisible": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "430px: 12 cards iguais, quadros quadrados, fotos preenchidas e sem overflow",
+      "status": "APROVADO",
+      "details": {
+        "cards": 12,
+        "current": 1,
+        "count": "Mostrando 1–12 de 82 produtos • Página 1 de 7",
+        "horizontal": false,
+        "frames": [
+          {
+            "id": "product-1786125594468-rlk598",
+            "w": 375,
+            "h": 375,
+            "cardHeight": 559.046875,
+            "fit": "cover",
+            "imageH": 375,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-972",
+            "w": 375,
+            "h": 375,
+            "cardHeight": 559.046875,
+            "fit": "cover",
+            "imageH": 375,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-973",
+            "w": 375,
+            "h": 375,
+            "cardHeight": 559.046875,
+            "fit": "cover",
+            "imageH": 375,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-974",
+            "w": 375,
+            "h": 375,
+            "cardHeight": 559.046875,
+            "fit": "cover",
+            "imageH": 375,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-976",
+            "w": 375,
+            "h": 375,
+            "cardHeight": 559.046875,
+            "fit": "cover",
+            "imageH": 375,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-975",
+            "w": 375,
+            "h": 375,
+            "cardHeight": 559.046875,
+            "fit": "cover",
+            "imageH": 375,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-924",
+            "w": 375,
+            "h": 375,
+            "cardHeight": 559.046875,
+            "fit": "cover",
+            "imageH": 375,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-903",
+            "w": 375,
+            "h": 375,
+            "cardHeight": 559.046875,
+            "fit": "cover",
+            "imageH": 375,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-901",
+            "w": 375,
+            "h": 375,
+            "cardHeight": 559.046875,
+            "fit": "cover",
+            "imageH": 375,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-926",
+            "w": 375,
+            "h": 375,
+            "cardHeight": 559.046875,
+            "fit": "cover",
+            "imageH": 375,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-925",
+            "w": 375,
+            "h": 375,
+            "cardHeight": 559.046875,
+            "fit": "cover",
+            "imageH": 375,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-955",
+            "w": 375,
+            "h": 375,
+            "cardHeight": 559.046875,
+            "fit": "cover",
+            "imageH": 375,
+            "actionsVisible": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "480px: 12 cards iguais, quadros quadrados, fotos preenchidas e sem overflow",
+      "status": "APROVADO",
+      "details": {
+        "cards": 12,
+        "current": 1,
+        "count": "Mostrando 1–12 de 82 produtos • Página 1 de 7",
+        "horizontal": false,
+        "frames": [
+          {
+            "id": "product-1786125594468-rlk598",
+            "w": 207,
+            "h": 207,
+            "cardHeight": 391.046875,
+            "fit": "cover",
+            "imageH": 207,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-972",
+            "w": 207,
+            "h": 207,
+            "cardHeight": 391.046875,
+            "fit": "cover",
+            "imageH": 207,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-973",
+            "w": 207,
+            "h": 207,
+            "cardHeight": 391.046875,
+            "fit": "cover",
+            "imageH": 207,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-974",
+            "w": 207,
+            "h": 207,
+            "cardHeight": 391.046875,
+            "fit": "cover",
+            "imageH": 207,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-976",
+            "w": 207,
+            "h": 207,
+            "cardHeight": 391.046875,
+            "fit": "cover",
+            "imageH": 207,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-975",
+            "w": 207,
+            "h": 207,
+            "cardHeight": 391.046875,
+            "fit": "cover",
+            "imageH": 207,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-924",
+            "w": 207,
+            "h": 207,
+            "cardHeight": 391.046875,
+            "fit": "cover",
+            "imageH": 207,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-903",
+            "w": 207,
+            "h": 207,
+            "cardHeight": 391.046875,
+            "fit": "cover",
+            "imageH": 207,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-901",
+            "w": 207,
+            "h": 207,
+            "cardHeight": 391.046875,
+            "fit": "cover",
+            "imageH": 207,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-926",
+            "w": 207,
+            "h": 207,
+            "cardHeight": 391.046875,
+            "fit": "cover",
+            "imageH": 207,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-925",
+            "w": 207,
+            "h": 207,
+            "cardHeight": 391.046875,
+            "fit": "cover",
+            "imageH": 207,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-955",
+            "w": 207,
+            "h": 207,
+            "cardHeight": 391.046875,
+            "fit": "cover",
+            "imageH": 207,
+            "actionsVisible": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "600px: 12 cards iguais, quadros quadrados, fotos preenchidas e sem overflow",
+      "status": "APROVADO",
+      "details": {
+        "cards": 12,
+        "current": 1,
+        "count": "Mostrando 1–12 de 82 produtos • Página 1 de 7",
+        "horizontal": false,
+        "frames": [
+          {
+            "id": "product-1786125594468-rlk598",
+            "w": 267,
+            "h": 267,
+            "cardHeight": 451.046875,
+            "fit": "cover",
+            "imageH": 267,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-972",
+            "w": 267,
+            "h": 267,
+            "cardHeight": 451.046875,
+            "fit": "cover",
+            "imageH": 267,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-973",
+            "w": 267,
+            "h": 267,
+            "cardHeight": 451.046875,
+            "fit": "cover",
+            "imageH": 267,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-974",
+            "w": 267,
+            "h": 267,
+            "cardHeight": 451.046875,
+            "fit": "cover",
+            "imageH": 267,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-976",
+            "w": 267,
+            "h": 267,
+            "cardHeight": 451.046875,
+            "fit": "cover",
+            "imageH": 267,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-975",
+            "w": 267,
+            "h": 267,
+            "cardHeight": 451.046875,
+            "fit": "cover",
+            "imageH": 267,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-924",
+            "w": 267,
+            "h": 267,
+            "cardHeight": 451.046875,
+            "fit": "cover",
+            "imageH": 267,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-903",
+            "w": 267,
+            "h": 267,
+            "cardHeight": 451.046875,
+            "fit": "cover",
+            "imageH": 267,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-901",
+            "w": 267,
+            "h": 267,
+            "cardHeight": 451.046875,
+            "fit": "cover",
+            "imageH": 267,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-926",
+            "w": 267,
+            "h": 267,
+            "cardHeight": 451.046875,
+            "fit": "cover",
+            "imageH": 267,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-925",
+            "w": 267,
+            "h": 267,
+            "cardHeight": 451.046875,
+            "fit": "cover",
+            "imageH": 267,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-955",
+            "w": 267,
+            "h": 267,
+            "cardHeight": 451.046875,
+            "fit": "cover",
+            "imageH": 267,
+            "actionsVisible": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "768px: 12 cards iguais, quadros quadrados, fotos preenchidas e sem overflow",
+      "status": "APROVADO",
+      "details": {
+        "cards": 12,
+        "current": 1,
+        "count": "Mostrando 1–12 de 82 produtos • Página 1 de 7",
+        "horizontal": false,
+        "frames": [
+          {
+            "id": "product-1786125594468-rlk598",
+            "w": 351,
+            "h": 351,
+            "cardHeight": 535.046875,
+            "fit": "cover",
+            "imageH": 351,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-972",
+            "w": 351,
+            "h": 351,
+            "cardHeight": 535.046875,
+            "fit": "cover",
+            "imageH": 351,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-973",
+            "w": 351,
+            "h": 351,
+            "cardHeight": 535.046875,
+            "fit": "cover",
+            "imageH": 351,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-974",
+            "w": 351,
+            "h": 351,
+            "cardHeight": 535.046875,
+            "fit": "cover",
+            "imageH": 351,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-976",
+            "w": 351,
+            "h": 351,
+            "cardHeight": 535.046875,
+            "fit": "cover",
+            "imageH": 351,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-975",
+            "w": 351,
+            "h": 351,
+            "cardHeight": 535.046875,
+            "fit": "cover",
+            "imageH": 351,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-924",
+            "w": 351,
+            "h": 351,
+            "cardHeight": 535.046875,
+            "fit": "cover",
+            "imageH": 351,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-903",
+            "w": 351,
+            "h": 351,
+            "cardHeight": 535.046875,
+            "fit": "cover",
+            "imageH": 351,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-901",
+            "w": 351,
+            "h": 351,
+            "cardHeight": 535.046875,
+            "fit": "cover",
+            "imageH": 351,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-926",
+            "w": 351,
+            "h": 351,
+            "cardHeight": 535.046875,
+            "fit": "cover",
+            "imageH": 351,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-925",
+            "w": 351,
+            "h": 351,
+            "cardHeight": 535.046875,
+            "fit": "cover",
+            "imageH": 351,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-955",
+            "w": 351,
+            "h": 351,
+            "cardHeight": 535.046875,
+            "fit": "cover",
+            "imageH": 351,
+            "actionsVisible": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "820px: 12 cards iguais, quadros quadrados, fotos preenchidas e sem overflow",
+      "status": "APROVADO",
+      "details": {
+        "cards": 12,
+        "current": 1,
+        "count": "Mostrando 1–12 de 82 produtos • Página 1 de 7",
+        "horizontal": false,
+        "frames": [
+          {
+            "id": "product-1786125594468-rlk598",
+            "w": 232.328125,
+            "h": 232.328125,
+            "cardHeight": 425.203125,
+            "fit": "cover",
+            "imageH": 232.328125,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-972",
+            "w": 232.328125,
+            "h": 232.328125,
+            "cardHeight": 425.203125,
+            "fit": "cover",
+            "imageH": 232.328125,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-973",
+            "w": 232.328125,
+            "h": 232.328125,
+            "cardHeight": 425.203125,
+            "fit": "cover",
+            "imageH": 232.328125,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-974",
+            "w": 232.328125,
+            "h": 232.328125,
+            "cardHeight": 425.203125,
+            "fit": "cover",
+            "imageH": 232.328125,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-976",
+            "w": 232.328125,
+            "h": 232.328125,
+            "cardHeight": 425.203125,
+            "fit": "cover",
+            "imageH": 232.328125,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-975",
+            "w": 232.328125,
+            "h": 232.328125,
+            "cardHeight": 425.203125,
+            "fit": "cover",
+            "imageH": 232.328125,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-924",
+            "w": 232.328125,
+            "h": 232.328125,
+            "cardHeight": 425.203125,
+            "fit": "cover",
+            "imageH": 232.328125,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-903",
+            "w": 232.328125,
+            "h": 232.328125,
+            "cardHeight": 425.203125,
+            "fit": "cover",
+            "imageH": 232.328125,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-901",
+            "w": 232.328125,
+            "h": 232.328125,
+            "cardHeight": 425.203125,
+            "fit": "cover",
+            "imageH": 232.328125,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-926",
+            "w": 232.328125,
+            "h": 232.328125,
+            "cardHeight": 425.203125,
+            "fit": "cover",
+            "imageH": 232.328125,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-925",
+            "w": 232.328125,
+            "h": 232.328125,
+            "cardHeight": 425.203125,
+            "fit": "cover",
+            "imageH": 232.328125,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-955",
+            "w": 232.328125,
+            "h": 232.328125,
+            "cardHeight": 425.203125,
+            "fit": "cover",
+            "imageH": 232.328125,
+            "actionsVisible": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "1024px: 12 cards iguais, quadros quadrados, fotos preenchidas e sem overflow",
+      "status": "APROVADO",
+      "details": {
+        "cards": 12,
+        "current": 1,
+        "count": "Mostrando 1–12 de 82 produtos • Página 1 de 7",
+        "horizontal": false,
+        "frames": [
+          {
+            "id": "product-1786125594468-rlk598",
+            "w": 300.328125,
+            "h": 300.328125,
+            "cardHeight": 493.21875,
+            "fit": "cover",
+            "imageH": 300.328125,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-972",
+            "w": 300.328125,
+            "h": 300.328125,
+            "cardHeight": 493.21875,
+            "fit": "cover",
+            "imageH": 300.328125,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-973",
+            "w": 300.34375,
+            "h": 300.34375,
+            "cardHeight": 493.21875,
+            "fit": "cover",
+            "imageH": 300.34375,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-974",
+            "w": 300.328125,
+            "h": 300.328125,
+            "cardHeight": 493.21875,
+            "fit": "cover",
+            "imageH": 300.328125,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-976",
+            "w": 300.328125,
+            "h": 300.328125,
+            "cardHeight": 493.21875,
+            "fit": "cover",
+            "imageH": 300.328125,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-975",
+            "w": 300.34375,
+            "h": 300.34375,
+            "cardHeight": 493.21875,
+            "fit": "cover",
+            "imageH": 300.34375,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-924",
+            "w": 300.328125,
+            "h": 300.328125,
+            "cardHeight": 493.21875,
+            "fit": "cover",
+            "imageH": 300.328125,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-903",
+            "w": 300.328125,
+            "h": 300.328125,
+            "cardHeight": 493.21875,
+            "fit": "cover",
+            "imageH": 300.328125,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-901",
+            "w": 300.34375,
+            "h": 300.34375,
+            "cardHeight": 493.21875,
+            "fit": "cover",
+            "imageH": 300.34375,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-926",
+            "w": 300.328125,
+            "h": 300.328125,
+            "cardHeight": 493.21875,
+            "fit": "cover",
+            "imageH": 300.328125,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-925",
+            "w": 300.328125,
+            "h": 300.328125,
+            "cardHeight": 493.21875,
+            "fit": "cover",
+            "imageH": 300.328125,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-955",
+            "w": 300.34375,
+            "h": 300.34375,
+            "cardHeight": 493.21875,
+            "fit": "cover",
+            "imageH": 300.34375,
+            "actionsVisible": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "1280px: 12 cards iguais, quadros quadrados, fotos preenchidas e sem overflow",
+      "status": "APROVADO",
+      "details": {
+        "cards": 12,
+        "current": 1,
+        "count": "Mostrando 1–12 de 82 produtos • Página 1 de 7",
+        "horizontal": false,
+        "frames": [
+          {
+            "id": "product-1786125594468-rlk598",
+            "w": 284.75,
+            "h": 284.75,
+            "cardHeight": 477.625,
+            "fit": "cover",
+            "imageH": 284.75,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-972",
+            "w": 284.75,
+            "h": 284.75,
+            "cardHeight": 477.625,
+            "fit": "cover",
+            "imageH": 284.75,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-973",
+            "w": 284.75,
+            "h": 284.75,
+            "cardHeight": 477.625,
+            "fit": "cover",
+            "imageH": 284.75,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-974",
+            "w": 284.75,
+            "h": 284.75,
+            "cardHeight": 477.625,
+            "fit": "cover",
+            "imageH": 284.75,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-976",
+            "w": 284.75,
+            "h": 284.75,
+            "cardHeight": 477.625,
+            "fit": "cover",
+            "imageH": 284.75,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-975",
+            "w": 284.75,
+            "h": 284.75,
+            "cardHeight": 477.625,
+            "fit": "cover",
+            "imageH": 284.75,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-924",
+            "w": 284.75,
+            "h": 284.75,
+            "cardHeight": 477.625,
+            "fit": "cover",
+            "imageH": 284.75,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-903",
+            "w": 284.75,
+            "h": 284.75,
+            "cardHeight": 477.625,
+            "fit": "cover",
+            "imageH": 284.75,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-901",
+            "w": 284.75,
+            "h": 284.75,
+            "cardHeight": 477.625,
+            "fit": "cover",
+            "imageH": 284.75,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-926",
+            "w": 284.75,
+            "h": 284.75,
+            "cardHeight": 477.625,
+            "fit": "cover",
+            "imageH": 284.75,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-925",
+            "w": 284.75,
+            "h": 284.75,
+            "cardHeight": 477.625,
+            "fit": "cover",
+            "imageH": 284.75,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-955",
+            "w": 284.75,
+            "h": 284.75,
+            "cardHeight": 477.625,
+            "fit": "cover",
+            "imageH": 284.75,
+            "actionsVisible": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "1366px: 12 cards iguais, quadros quadrados, fotos preenchidas e sem overflow",
+      "status": "APROVADO",
+      "details": {
+        "cards": 12,
+        "current": 1,
+        "count": "Mostrando 1–12 de 82 produtos • Página 1 de 7",
+        "horizontal": false,
+        "frames": [
+          {
+            "id": "product-1786125594468-rlk598",
+            "w": 306.25,
+            "h": 306.25,
+            "cardHeight": 499.125,
+            "fit": "cover",
+            "imageH": 306.25,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-972",
+            "w": 306.25,
+            "h": 306.25,
+            "cardHeight": 499.125,
+            "fit": "cover",
+            "imageH": 306.25,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-973",
+            "w": 306.25,
+            "h": 306.25,
+            "cardHeight": 499.125,
+            "fit": "cover",
+            "imageH": 306.25,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-974",
+            "w": 306.25,
+            "h": 306.25,
+            "cardHeight": 499.125,
+            "fit": "cover",
+            "imageH": 306.25,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-976",
+            "w": 306.25,
+            "h": 306.25,
+            "cardHeight": 499.125,
+            "fit": "cover",
+            "imageH": 306.25,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-975",
+            "w": 306.25,
+            "h": 306.25,
+            "cardHeight": 499.125,
+            "fit": "cover",
+            "imageH": 306.25,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-924",
+            "w": 306.25,
+            "h": 306.25,
+            "cardHeight": 499.125,
+            "fit": "cover",
+            "imageH": 306.25,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-903",
+            "w": 306.25,
+            "h": 306.25,
+            "cardHeight": 499.125,
+            "fit": "cover",
+            "imageH": 306.25,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-901",
+            "w": 306.25,
+            "h": 306.25,
+            "cardHeight": 499.125,
+            "fit": "cover",
+            "imageH": 306.25,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-926",
+            "w": 306.25,
+            "h": 306.25,
+            "cardHeight": 499.125,
+            "fit": "cover",
+            "imageH": 306.25,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-925",
+            "w": 306.25,
+            "h": 306.25,
+            "cardHeight": 499.125,
+            "fit": "cover",
+            "imageH": 306.25,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-955",
+            "w": 306.25,
+            "h": 306.25,
+            "cardHeight": 499.125,
+            "fit": "cover",
+            "imageH": 306.25,
+            "actionsVisible": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "1440px: 12 cards iguais, quadros quadrados, fotos preenchidas e sem overflow",
+      "status": "APROVADO",
+      "details": {
+        "cards": 12,
+        "current": 1,
+        "count": "Mostrando 1–12 de 82 produtos • Página 1 de 7",
+        "horizontal": false,
+        "frames": [
+          {
+            "id": "product-1786125594468-rlk598",
+            "w": 316.5,
+            "h": 316.5,
+            "cardHeight": 509.375,
+            "fit": "cover",
+            "imageH": 316.5,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-972",
+            "w": 316.5,
+            "h": 316.5,
+            "cardHeight": 509.375,
+            "fit": "cover",
+            "imageH": 316.5,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-973",
+            "w": 316.5,
+            "h": 316.5,
+            "cardHeight": 509.375,
+            "fit": "cover",
+            "imageH": 316.5,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-974",
+            "w": 316.5,
+            "h": 316.5,
+            "cardHeight": 509.375,
+            "fit": "cover",
+            "imageH": 316.5,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-976",
+            "w": 316.5,
+            "h": 316.5,
+            "cardHeight": 509.375,
+            "fit": "cover",
+            "imageH": 316.5,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-975",
+            "w": 316.5,
+            "h": 316.5,
+            "cardHeight": 509.375,
+            "fit": "cover",
+            "imageH": 316.5,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-924",
+            "w": 316.5,
+            "h": 316.5,
+            "cardHeight": 509.375,
+            "fit": "cover",
+            "imageH": 316.5,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-903",
+            "w": 316.5,
+            "h": 316.5,
+            "cardHeight": 509.375,
+            "fit": "cover",
+            "imageH": 316.5,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-901",
+            "w": 316.5,
+            "h": 316.5,
+            "cardHeight": 509.375,
+            "fit": "cover",
+            "imageH": 316.5,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-926",
+            "w": 316.5,
+            "h": 316.5,
+            "cardHeight": 509.375,
+            "fit": "cover",
+            "imageH": 316.5,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-925",
+            "w": 316.5,
+            "h": 316.5,
+            "cardHeight": 509.375,
+            "fit": "cover",
+            "imageH": 316.5,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-955",
+            "w": 316.5,
+            "h": 316.5,
+            "cardHeight": 509.375,
+            "fit": "cover",
+            "imageH": 316.5,
+            "actionsVisible": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "1600px: 12 cards iguais, quadros quadrados, fotos preenchidas e sem overflow",
+      "status": "APROVADO",
+      "details": {
+        "cards": 12,
+        "current": 1,
+        "count": "Mostrando 1–12 de 82 produtos • Página 1 de 7",
+        "horizontal": false,
+        "frames": [
+          {
+            "id": "product-1786125594468-rlk598",
+            "w": 316.5,
+            "h": 316.5,
+            "cardHeight": 509.375,
+            "fit": "cover",
+            "imageH": 316.5,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-972",
+            "w": 316.5,
+            "h": 316.5,
+            "cardHeight": 509.375,
+            "fit": "cover",
+            "imageH": 316.5,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-973",
+            "w": 316.5,
+            "h": 316.5,
+            "cardHeight": 509.375,
+            "fit": "cover",
+            "imageH": 316.5,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-974",
+            "w": 316.5,
+            "h": 316.5,
+            "cardHeight": 509.375,
+            "fit": "cover",
+            "imageH": 316.5,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-976",
+            "w": 316.5,
+            "h": 316.5,
+            "cardHeight": 509.375,
+            "fit": "cover",
+            "imageH": 316.5,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-975",
+            "w": 316.5,
+            "h": 316.5,
+            "cardHeight": 509.375,
+            "fit": "cover",
+            "imageH": 316.5,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-924",
+            "w": 316.5,
+            "h": 316.5,
+            "cardHeight": 509.375,
+            "fit": "cover",
+            "imageH": 316.5,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-903",
+            "w": 316.5,
+            "h": 316.5,
+            "cardHeight": 509.375,
+            "fit": "cover",
+            "imageH": 316.5,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-901",
+            "w": 316.5,
+            "h": 316.5,
+            "cardHeight": 509.375,
+            "fit": "cover",
+            "imageH": 316.5,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-926",
+            "w": 316.5,
+            "h": 316.5,
+            "cardHeight": 509.375,
+            "fit": "cover",
+            "imageH": 316.5,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-925",
+            "w": 316.5,
+            "h": 316.5,
+            "cardHeight": 509.375,
+            "fit": "cover",
+            "imageH": 316.5,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-955",
+            "w": 316.5,
+            "h": 316.5,
+            "cardHeight": 509.375,
+            "fit": "cover",
+            "imageH": 316.5,
+            "actionsVisible": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "1920px: 12 cards iguais, quadros quadrados, fotos preenchidas e sem overflow",
+      "status": "APROVADO",
+      "details": {
+        "cards": 12,
+        "current": 1,
+        "count": "Mostrando 1–12 de 82 produtos • Página 1 de 7",
+        "horizontal": false,
+        "frames": [
+          {
+            "id": "product-1786125594468-rlk598",
+            "w": 316.5,
+            "h": 316.5,
+            "cardHeight": 509.375,
+            "fit": "cover",
+            "imageH": 316.5,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-972",
+            "w": 316.5,
+            "h": 316.5,
+            "cardHeight": 509.375,
+            "fit": "cover",
+            "imageH": 316.5,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-973",
+            "w": 316.5,
+            "h": 316.5,
+            "cardHeight": 509.375,
+            "fit": "cover",
+            "imageH": 316.5,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-974",
+            "w": 316.5,
+            "h": 316.5,
+            "cardHeight": 509.375,
+            "fit": "cover",
+            "imageH": 316.5,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-976",
+            "w": 316.5,
+            "h": 316.5,
+            "cardHeight": 509.375,
+            "fit": "cover",
+            "imageH": 316.5,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-975",
+            "w": 316.5,
+            "h": 316.5,
+            "cardHeight": 509.375,
+            "fit": "cover",
+            "imageH": 316.5,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-924",
+            "w": 316.5,
+            "h": 316.5,
+            "cardHeight": 509.375,
+            "fit": "cover",
+            "imageH": 316.5,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-903",
+            "w": 316.5,
+            "h": 316.5,
+            "cardHeight": 509.375,
+            "fit": "cover",
+            "imageH": 316.5,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-901",
+            "w": 316.5,
+            "h": 316.5,
+            "cardHeight": 509.375,
+            "fit": "cover",
+            "imageH": 316.5,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-926",
+            "w": 316.5,
+            "h": 316.5,
+            "cardHeight": 509.375,
+            "fit": "cover",
+            "imageH": 316.5,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-925",
+            "w": 316.5,
+            "h": 316.5,
+            "cardHeight": 509.375,
+            "fit": "cover",
+            "imageH": 316.5,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-955",
+            "w": 316.5,
+            "h": 316.5,
+            "cardHeight": 509.375,
+            "fit": "cover",
+            "imageH": 316.5,
+            "actionsVisible": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "2560px: 12 cards iguais, quadros quadrados, fotos preenchidas e sem overflow",
+      "status": "APROVADO",
+      "details": {
+        "cards": 12,
+        "current": 1,
+        "count": "Mostrando 1–12 de 82 produtos • Página 1 de 7",
+        "horizontal": false,
+        "frames": [
+          {
+            "id": "product-1786125594468-rlk598",
+            "w": 316.5,
+            "h": 316.5,
+            "cardHeight": 509.375,
+            "fit": "cover",
+            "imageH": 316.5,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-972",
+            "w": 316.5,
+            "h": 316.5,
+            "cardHeight": 509.375,
+            "fit": "cover",
+            "imageH": 316.5,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-973",
+            "w": 316.5,
+            "h": 316.5,
+            "cardHeight": 509.375,
+            "fit": "cover",
+            "imageH": 316.5,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-974",
+            "w": 316.5,
+            "h": 316.5,
+            "cardHeight": 509.375,
+            "fit": "cover",
+            "imageH": 316.5,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-976",
+            "w": 316.5,
+            "h": 316.5,
+            "cardHeight": 509.375,
+            "fit": "cover",
+            "imageH": 316.5,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-975",
+            "w": 316.5,
+            "h": 316.5,
+            "cardHeight": 509.375,
+            "fit": "cover",
+            "imageH": 316.5,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-924",
+            "w": 316.5,
+            "h": 316.5,
+            "cardHeight": 509.375,
+            "fit": "cover",
+            "imageH": 316.5,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-903",
+            "w": 316.5,
+            "h": 316.5,
+            "cardHeight": 509.375,
+            "fit": "cover",
+            "imageH": 316.5,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-901",
+            "w": 316.5,
+            "h": 316.5,
+            "cardHeight": 509.375,
+            "fit": "cover",
+            "imageH": 316.5,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-926",
+            "w": 316.5,
+            "h": 316.5,
+            "cardHeight": 509.375,
+            "fit": "cover",
+            "imageH": 316.5,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-925",
+            "w": 316.5,
+            "h": 316.5,
+            "cardHeight": 509.375,
+            "fit": "cover",
+            "imageH": 316.5,
+            "actionsVisible": true
+          },
+          {
+            "id": "pdf-bis-955",
+            "w": 316.5,
+            "h": 316.5,
+            "cardHeight": 509.375,
+            "fit": "cover",
+            "imageH": 316.5,
+            "actionsVisible": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "Sem erros JavaScript no navegador",
+      "status": "APROVADO",
+      "details": []
+    }
+  ]
+}

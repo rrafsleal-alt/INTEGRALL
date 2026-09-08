@@ -1,0 +1,276 @@
+{
+  "engine": "Chromium",
+  "mode": "about:blank com HTML/CSS/JS reais e API simulada",
+  "results": [
+    {
+      "width": 280,
+      "status": "APROVADO",
+      "loginLayout": {
+        "scrollWidth": 280,
+        "clientWidth": 280,
+        "overflow": 0
+      },
+      "dashboardLayout": {
+        "scrollWidth": 280,
+        "clientWidth": 280,
+        "overflow": 0
+      },
+      "console": []
+    },
+    {
+      "width": 320,
+      "status": "APROVADO",
+      "loginLayout": {
+        "scrollWidth": 320,
+        "clientWidth": 320,
+        "overflow": 0
+      },
+      "dashboardLayout": {
+        "scrollWidth": 320,
+        "clientWidth": 320,
+        "overflow": 0
+      },
+      "console": []
+    },
+    {
+      "width": 360,
+      "status": "APROVADO",
+      "loginLayout": {
+        "scrollWidth": 360,
+        "clientWidth": 360,
+        "overflow": 0
+      },
+      "dashboardLayout": {
+        "scrollWidth": 360,
+        "clientWidth": 360,
+        "overflow": 0
+      },
+      "console": []
+    },
+    {
+      "width": 375,
+      "status": "APROVADO",
+      "loginLayout": {
+        "scrollWidth": 375,
+        "clientWidth": 375,
+        "overflow": 0
+      },
+      "dashboardLayout": {
+        "scrollWidth": 375,
+        "clientWidth": 375,
+        "overflow": 0
+      },
+      "console": []
+    },
+    {
+      "width": 390,
+      "status": "APROVADO",
+      "loginLayout": {
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "overflow": 0
+      },
+      "dashboardLayout": {
+        "scrollWidth": 390,
+        "clientWidth": 390,
+        "overflow": 0
+      },
+      "console": []
+    },
+    {
+      "width": 412,
+      "status": "APROVADO",
+      "loginLayout": {
+        "scrollWidth": 412,
+        "clientWidth": 412,
+        "overflow": 0
+      },
+      "dashboardLayout": {
+        "scrollWidth": 412,
+        "clientWidth": 412,
+        "overflow": 0
+      },
+      "console": []
+    },
+    {
+      "width": 430,
+      "status": "APROVADO",
+      "loginLayout": {
+        "scrollWidth": 430,
+        "clientWidth": 430,
+        "overflow": 0
+      },
+      "dashboardLayout": {
+        "scrollWidth": 430,
+        "clientWidth": 430,
+        "overflow": 0
+      },
+      "console": []
+    },
+    {
+      "width": 480,
+      "status": "APROVADO",
+      "loginLayout": {
+        "scrollWidth": 480,
+        "clientWidth": 480,
+        "overflow": 0
+      },
+      "dashboardLayout": {
+        "scrollWidth": 480,
+        "clientWidth": 480,
+        "overflow": 0
+      },
+      "console": []
+    },
+    {
+      "width": 600,
+      "status": "APROVADO",
+      "loginLayout": {
+        "scrollWidth": 600,
+        "clientWidth": 600,
+        "overflow": 0
+      },
+      "dashboardLayout": {
+        "scrollWidth": 600,
+        "clientWidth": 600,
+        "overflow": 0
+      },
+      "console": []
+    },
+    {
+      "width": 768,
+      "status": "APROVADO",
+      "loginLayout": {
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "overflow": 0
+      },
+      "dashboardLayout": {
+        "scrollWidth": 768,
+        "clientWidth": 768,
+        "overflow": 0
+      },
+      "console": []
+    },
+    {
+      "width": 820,
+      "status": "APROVADO",
+      "loginLayout": {
+        "scrollWidth": 820,
+        "clientWidth": 820,
+        "overflow": 0
+      },
+      "dashboardLayout": {
+        "scrollWidth": 820,
+        "clientWidth": 820,
+        "overflow": 0
+      },
+      "console": []
+    },
+    {
+      "width": 1024,
+      "status": "APROVADO",
+      "loginLayout": {
+        "scrollWidth": 1024,
+        "clientWidth": 1024,
+        "overflow": 0
+      },
+      "dashboardLayout": {
+        "scrollWidth": 1024,
+        "clientWidth": 1024,
+        "overflow": 0
+      },
+      "console": []
+    },
+    {
+      "width": 1280,
+      "status": "APROVADO",
+      "loginLayout": {
+        "scrollWidth": 1280,
+        "clientWidth": 1280,
+        "overflow": 0
+      },
+      "dashboardLayout": {
+        "scrollWidth": 1280,
+        "clientWidth": 1280,
+        "overflow": 0
+      },
+      "console": []
+    },
+    {
+      "width": 1366,
+      "status": "APROVADO",
+      "loginLayout": {
+        "scrollWidth": 1366,
+        "clientWidth": 1366,
+        "overflow": 0
+      },
+      "dashboardLayout": {
+        "scrollWidth": 1366,
+        "clientWidth": 1366,
+        "overflow": 0
+      },
+      "console": []
+    },
+    {
+      "width": 1440,
+      "status": "APROVADO",
+      "loginLayout": {
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "overflow": 0
+      },
+      "dashboardLayout": {
+        "scrollWidth": 1440,
+        "clientWidth": 1440,
+        "overflow": 0
+      },
+      "console": []
+    },
+    {
+      "width": 1600,
+      "status": "APROVADO",
+      "loginLayout": {
+        "scrollWidth": 1600,
+        "clientWidth": 1600,
+        "overflow": 0
+      },
+      "dashboardLayout": {
+        "scrollWidth": 1600,
+        "clientWidth": 1600,
+        "overflow": 0
+      },
+      "console": []
+    },
+    {
+      "width": 1920,
+      "status": "APROVADO",
+      "loginLayout": {
+        "scrollWidth": 1920,
+        "clientWidth": 1920,
+        "overflow": 0
+      },
+      "dashboardLayout": {
+        "scrollWidth": 1920,
+        "clientWidth": 1920,
+        "overflow": 0
+      },
+      "console": []
+    },
+    {
+      "width": 2560,
+      "status": "APROVADO",
+      "loginLayout": {
+        "scrollWidth": 2560,
+        "clientWidth": 2560,
+        "overflow": 0
+      },
+      "dashboardLayout": {
+        "scrollWidth": 2560,
+        "clientWidth": 2560,
+        "overflow": 0
+      },
+      "console": []
+    }
+  ]
+}

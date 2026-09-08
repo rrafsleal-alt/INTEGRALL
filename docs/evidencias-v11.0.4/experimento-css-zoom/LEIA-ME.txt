@@ -1,0 +1,3 @@
+Experimento preservado, inclusive as três reprovações.
+Injeção de document.body.style.zoom em 125%, 150% e 200% não altera as media queries da viewport como o zoom nativo. A home/cabeçalho transbordam neste experimento; o produto continua abaixo da galeria. Não é uma aprovação nem uma reprovação do zoom nativo. O zoom nativo NÃO FOI EXECUTADO com resultado verificável.
+Reprodução: python3 scripts/browser-regression.py --root . --out resultado-css-zoom --experimental-css-zoom

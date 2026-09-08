@@ -1,0 +1,7 @@
+Ajuste aplicado na versão 11.0.3:
+- Modal de produto reorganizado em coluna única em todas as telas.
+- Imagem do produto fica em cima.
+- Descrição, variações, frete e botões ficam embaixo.
+- Mantida compatibilidade com desktop, tablet e celular.
+Arquivo alterado:
+- public/css/store.css

@@ -1,0 +1,1626 @@
+
+> integrall-online@11.1.8 build:offline
+> node scripts/build.mjs --offline
+
+BUILD v11.1.8 — perfil offline. Integração HTTP NÃO será declarada aprovada.
+
+> integrall-online@11.1.8 catalog:embed
+> node scripts/sync-embedded-catalog.mjs
+
+EMBEDDED CATALOG OK - v11.1.8; 5 produtos vendáveis sincronizados
+
+> integrall-online@11.1.8 check
+> node scripts/check-syntax.mjs
+
+SYNTAX CHECK OK - 83 arquivos JavaScript verificados
+
+> integrall-online@11.1.8 lint
+> node scripts/lint.mjs
+
+LINT OK — 92 arquivos; regras de conflitos, debugger e bytes inválidos (sem inferência de tipos).
+
+> integrall-online@11.1.8 security:scan
+> node scripts/security-scan.mjs
+
+SECURITY SCAN OK - 114 arquivos inspecionados
+WARN: scripts/migrate.mjs: TLS sem validação existe somente no modo DATABASE_SSL_MODE=require; produção deve preferir verify-full
+WARN: src/repository.js: TLS sem validação existe somente no modo DATABASE_SSL_MODE=require; produção deve preferir verify-full
+
+> integrall-online@11.1.8 audit
+> node scripts/audit.mjs
+
+AUDIT OK
+- index.html: 45936 bytes
+- versão 11.1.8; 227 produtos; 52 variações; 230 referências de imagem
+- 0 variações possuem foto específica no catálogo entregue
+- 22 arquivos públicos de texto e 1540 arquivos do pacote auditados
+
+> integrall-online@11.1.8 media:verify
+> node scripts/verify-media.mjs
+
+MEDIA OK — 43 IDs preservados; 33 imagens únicas; 237 referências verificadas nos catálogos.
+
+> integrall-online@11.1.8 test:offline
+> node --test --test-concurrency=1 tests/auth.test.js tests/carrier-split.test.js tests/catalog.test.js tests/correios.test.js tests/customer-auth-hardening.test.js tests/default-admin.test.js tests/image-upload.test.js tests/jadlog.test.js tests/mailer.test.js tests/order-state.test.js tests/payment-state.test.js tests/payments-checkout.test.js tests/providers.test.js tests/public-order.test.js tests/repository.test.js tests/v11.1-commerce.test.js tests/v11.1.2-ux.test.js tests/v11.1.3-ux.test.js tests/variant-images.test.js tests/visual-editor.test.js tests/v11.1.4-ux.test.js tests/v11.1.5-ux.test.js tests/v11.1.6-expert.test.js tests/release-v11.1.8.test.js tests/audit-regression.test.js tests/client-readiness.test.js
+
+TAP version 13
+# Subtest: AUDIT-AUTH-01: permissões inválidas falham fechadas, inclusive protótipo
+ok 1 - AUDIT-AUTH-01: permissões inválidas falham fechadas, inclusive protótipo
+  ---
+  duration_ms: 4.644026
+  type: 'test'
+  ...
+# Subtest: AUDIT-AUTH-02: credencial exata e variantes negativas sem normalização
+ok 2 - AUDIT-AUTH-02: credencial exata e variantes negativas sem normalização
+  ---
+  duration_ms: 1914.442432
+  type: 'test'
+  ...
+# Subtest: AUDIT-AUTH-03: alteração do hash invalida sessões antigas mesmo com o mesmo segredo
+ok 3 - AUDIT-AUTH-03: alteração do hash invalida sessões antigas mesmo com o mesmo segredo
+  ---
+  duration_ms: 291.609121
+  type: 'test'
+  ...
+# Subtest: AUDIT-AUTH-04: redução do papel invalida sessão que concedia mais permissões
+ok 4 - AUDIT-AUTH-04: redução do papel invalida sessão que concedia mais permissões
+  ---
+  duration_ms: 234.37525
+  type: 'test'
+  ...
+# Subtest: AUDIT-AUTH-05: sessão antiga, corrompida, expirada ou malformada é recusada
+ok 5 - AUDIT-AUTH-05: sessão antiga, corrompida, expirada ou malformada é recusada
+  ---
+  duration_ms: 246.246899
+  type: 'test'
+  ...
+# Subtest: AUDIT-AUTH-06: fábrica de sessão não emite tokens para usuário ou papel divergente
+ok 6 - AUDIT-AUTH-06: fábrica de sessão não emite tokens para usuário ou papel divergente
+  ---
+  duration_ms: 1.266459
+  type: 'test'
+  ...
+# Subtest: AUDIT-AUTH-07: cookie seguro, revogação e proteção CSRF/origem usam autenticação real
+ok 7 - AUDIT-AUTH-07: cookie seguro, revogação e proteção CSRF/origem usam autenticação real
+  ---
+  duration_ms: 249.252669
+  type: 'test'
+  ...
+# Subtest: AUDIT-AUTH-08: falha na revogação do repositório não é silenciada
+ok 8 - AUDIT-AUTH-08: falha na revogação do repositório não é silenciada
+  ---
+  duration_ms: 0.892984
+  type: 'test'
+  ...
+# Subtest: AUDIT-HASH-01: ferramenta de hash conserva espaços finais e não imprime a senha
+ok 9 - AUDIT-HASH-01: ferramenta de hash conserva espaços finais e não imprime a senha
+  ---
+  duration_ms: 954.806165
+  type: 'test'
+  ...
+# Subtest: AUDIT-UI-01: logout exige confirmação; atualização entre abas não transporta segredos
+ok 10 - AUDIT-UI-01: logout exige confirmação; atualização entre abas não transporta segredos
+  ---
+  duration_ms: 7.212967
+  type: 'test'
+  ...
+# Subtest: AUDIT-HTTP-01: controladores reais, cookie, CSRF e logout por HTTP (sem Express)
+ok 11 - AUDIT-HTTP-01: controladores reais, cookie, CSRF e logout por HTTP (sem Express)
+  ---
+  duration_ms: 1494.55899
+  type: 'test'
+  ...
+# Subtest: scrypt cria hash verificável e rejeita senha incorreta
+ok 12 - scrypt cria hash verificável e rejeita senha incorreta
+  ---
+  duration_ms: 89.056281
+  type: 'test'
+  ...
+# Subtest: sessão administrativa é assinada, expira e carrega CSRF
+ok 13 - sessão administrativa é assinada, expira e carrega CSRF
+  ---
+  duration_ms: 95.307277
+  type: 'test'
+  ...
+# Subtest: login aceita e-mail em branco e valida somente o hash configurado
+ok 14 - login aceita e-mail em branco e valida somente o hash configurado
+  ---
+  duration_ms: 57.827669
+  type: 'test'
+  ...
+# Subtest: papéis aplicam menor privilégio
+ok 15 - papéis aplicam menor privilégio
+  ---
+  duration_ms: 0.608544
+  type: 'test'
+  ...
+# Subtest: middleware administrativo aplica no-store também em sessão autenticada
+ok 16 - middleware administrativo aplica no-store também em sessão autenticada
+  ---
+  duration_ms: 30.025842
+  type: 'test'
+  ...
+# Subtest: logout revoga a sessão administrativa no armazenamento compartilhado
+ok 17 - logout revoga a sessão administrativa no armazenamento compartilhado
+  ---
+  duration_ms: 27.824346
+  type: 'test'
+  ...
+# Subtest: até 12 unidades vai pelos Correios; acima, pela Jadlog
+ok 18 - até 12 unidades vai pelos Correios; acima, pela Jadlog
+  ---
+  duration_ms: 2.93272
+  type: 'test'
+  ...
+# Subtest: com apenas uma transportadora configurada, a regra não bloqueia nada
+ok 19 - com apenas uma transportadora configurada, a regra não bloqueia nada
+  ---
+  duration_ms: 0.590997
+  type: 'test'
+  ...
+# Subtest: split 0 desativa a regra: todas cotam sempre
+ok 20 - split 0 desativa a regra: todas cotam sempre
+  ---
+  duration_ms: 0.576437
+  type: 'test'
+  ...
+# Subtest: limite customizado é respeitado
+ok 21 - limite customizado é respeitado
+  ---
+  duration_ms: 0.317415
+  type: 'test'
+  ...
+# Subtest: catálogo normaliza e não preserva segredos ou campos arbitrários
+ok 22 - catálogo normaliza e não preserva segredos ou campos arbitrários
+  ---
+  duration_ms: 76.052132
+  type: 'test'
+  ...
+# Subtest: catálogo aceita imagens enviadas pelo painel em /media/products/
+ok 23 - catálogo aceita imagens enviadas pelo painel em /media/products/
+  ---
+  duration_ms: 21.339321
+  type: 'test'
+  ...
+# Subtest: variação pode apontar para uma foto específica da galeria do produto
+ok 24 - variação pode apontar para uma foto específica da galeria do produto
+  ---
+  duration_ms: 2.561919
+  type: 'test'
+  ...
+# Subtest: foto da variação precisa pertencer à galeria do produto
+ok 25 - foto da variação precisa pertencer à galeria do produto
+  ---
+  duration_ms: 1.425784
+  type: 'test'
+  ...
+# Subtest: catálogo público só habilita meios realmente configurados no servidor
+ok 26 - catálogo público só habilita meios realmente configurados no servidor
+  ---
+  duration_ms: 36.794886
+  type: 'test'
+  ...
+# Subtest: pedido ignora preço enviado pelo navegador e recalcula no servidor
+ok 27 - pedido ignora preço enviado pelo navegador e recalcula no servidor
+  ---
+  duration_ms: 5.180054
+  type: 'test'
+  ...
+# Subtest: pedido gera id forte e token de checkout de capacidade
+ok 28 - pedido gera id forte e token de checkout de capacidade
+  ---
+  duration_ms: 1.615908
+  type: 'test'
+  ...
+# Subtest: frete fixo e frete grátis são calculados no servidor
+ok 29 - frete fixo e frete grátis são calculados no servidor
+  ---
+  duration_ms: 0.356764
+  type: 'test'
+  ...
+# Subtest: modo cotação impede inventar preço de frete
+ok 30 - modo cotação impede inventar preço de frete
+  ---
+  duration_ms: 0.851649
+  type: 'test'
+  ...
+# Subtest: pedido rejeita quantidade inválida, produto inexistente e email inválido
+ok 31 - pedido rejeita quantidade inválida, produto inexistente e email inválido
+  ---
+  duration_ms: 2.558612
+  type: 'test'
+  ...
+# Subtest: catálogo rejeita ids de produto e variante duplicados
+ok 32 - catálogo rejeita ids de produto e variante duplicados
+  ---
+  duration_ms: 1.108445
+  type: 'test'
+  ...
+# Subtest: URLs inseguras de imagens importadas são descartadas
+ok 33 - URLs inseguras de imagens importadas são descartadas
+  ---
+  duration_ms: 1.865038
+  type: 'test'
+  ...
+# Subtest: catálogo rejeita preço negativo
+ok 34 - catálogo rejeita preço negativo
+  ---
+  duration_ms: 0.410263
+  type: 'test'
+  ...
+# Subtest: quantidades repetidas não contornam limite por pedido nem estoque
+ok 35 - quantidades repetidas não contornam limite por pedido nem estoque
+  ---
+  duration_ms: 4.109087
+  type: 'test'
+  ...
+# Subtest: frete fixo negativo de ambiente nunca reduz o total
+ok 36 - frete fixo negativo de ambiente nunca reduz o total
+  ---
+  duration_ms: 0.137537
+  type: 'test'
+  ...
+# Subtest: entrega exige endereço completo e contato
+ok 37 - entrega exige endereço completo e contato
+  ---
+  duration_ms: 1.456322
+  type: 'test'
+  ...
+# Subtest: pedido com bebida alcoólica exige confirmação de maioridade
+ok 38 - pedido com bebida alcoólica exige confirmação de maioridade
+  ---
+  duration_ms: 1.554894
+  type: 'test'
+  ...
+# Subtest: cupons são normalizados, aplicados no servidor e não vazam no catálogo público
+ok 39 - cupons são normalizados, aplicados no servidor e não vazam no catálogo público
+  ---
+  duration_ms: 36.727953
+  type: 'test'
+  ...
+# Subtest: cupom nunca zera nem negativa o total e expira corretamente
+ok 40 - cupom nunca zera nem negativa o total e expira corretamente
+  ---
+  duration_ms: 12.206587
+  type: 'test'
+  ...
+# Subtest: cupom de frete grátis desconta exatamente o frete calculado
+ok 41 - cupom de frete grátis desconta exatamente o frete calculado
+  ---
+  duration_ms: 12.256919
+  type: 'test'
+  ...
+# Subtest: quantidade mínima por produto é validada no servidor
+ok 42 - quantidade mínima por produto é validada no servidor
+  ---
+  duration_ms: 4.20635
+  type: 'test'
+  ...
+# Subtest: peso e dimensões são normalizados no catálogo
+ok 43 - peso e dimensões são normalizados no catálogo
+  ---
+  duration_ms: 10.797569
+  type: 'test'
+  ...
+# Subtest: modo correios usa cotação resolvida pelo servidor e cai para cotação manual sem ela
+ok 44 - modo correios usa cotação resolvida pelo servidor e cai para cotação manual sem ela
+  ---
+  duration_ms: 0.240313
+  type: 'test'
+  ...
+# Subtest: frete grátis por limiar vence o modo correios
+ok 45 - frete grátis por limiar vence o modo correios
+  ---
+  duration_ms: 0.230229
+  type: 'test'
+  ...
+# Subtest: catálogo público sincroniza modo/valores de frete do servidor
+ok 46 - catálogo público sincroniza modo/valores de frete do servidor
+  ---
+  duration_ms: 41.294455
+  type: 'test'
+  ...
+# Subtest: cleanText remove caracteres invisíveis e overrides bidirecionais (anti-spoofing)
+ok 47 - cleanText remove caracteres invisíveis e overrides bidirecionais (anti-spoofing)
+  ---
+  duration_ms: 0.204249
+  type: 'test'
+  ...
+# Subtest: couponDiscount nunca deixa o subtotal abaixo de R$ 1,00 (paridade com o front)
+ok 48 - couponDiscount nunca deixa o subtotal abaixo de R$ 1,00 (paridade com o front)
+  ---
+  duration_ms: 0.142793
+  type: 'test'
+  ...
+# Subtest: produto oculto permanece no Admin, não aparece no catálogo público e não pode ser comprado
+ok 49 - produto oculto permanece no Admin, não aparece no catálogo público e não pode ser comprado
+  ---
+  duration_ms: 20.130921
+  type: 'test'
+  ...
+# Subtest: configuração visual preserva controles do editor visual e texto do rodapé
+ok 50 - configuração visual preserva controles do editor visual e texto do rodapé
+  ---
+  duration_ms: 7.990887
+  type: 'test'
+  ...
+# Subtest: IDs de variação precisam ser únicos em todo o catálogo
+ok 51 - IDs de variação precisam ser únicos em todo o catálogo
+  ---
+  duration_ms: 0.670016
+  type: 'test'
+  ...
+# Subtest: cliente: código com letras é recusado sem consumir o código válido
+ok 52 - cliente: código com letras é recusado sem consumir o código válido
+  ---
+  duration_ms: 12.690248
+  type: 'test'
+  ...
+# Subtest: cliente: código com dígitos excedentes é recusado sem consumir o código válido
+ok 53 - cliente: código com dígitos excedentes é recusado sem consumir o código válido
+  ---
+  duration_ms: 0.83026
+  type: 'test'
+  ...
+# Subtest: cliente: código com separadores internos é recusado sem consumir o código válido
+ok 54 - cliente: código com separadores internos é recusado sem consumir o código válido
+  ---
+  duration_ms: 0.714868
+  type: 'test'
+  ...
+# Subtest: cliente: e-mail acima de 254 caracteres não vira outro identificador truncado
+ok 55 - cliente: e-mail acima de 254 caracteres não vira outro identificador truncado
+  ---
+  duration_ms: 0.332476
+  type: 'test'
+  ...
+# Subtest: cliente: sessão com expiração inválido é revogada
+ok 56 - cliente: sessão com expiração inválido é revogada
+  ---
+  duration_ms: 1.308866
+  type: 'test'
+  ...
+# Subtest: cliente: sessão com expiração  é revogada
+ok 57 - cliente: sessão com expiração  é revogada
+  ---
+  duration_ms: 0.651026
+  type: 'test'
+  ...
+# Subtest: cliente: sessão com expiração undefined é revogada
+ok 58 - cliente: sessão com expiração undefined é revogada
+  ---
+  duration_ms: 0.55827
+  type: 'test'
+  ...
+# Subtest: cliente: sessão válida continua aceita e cookie malformado é recusado
+ok 59 - cliente: sessão válida continua aceita e cookie malformado é recusado
+  ---
+  duration_ms: 0.887498
+  type: 'test'
+  ...
+# Subtest: API: erro HTTP preserva status, código e requestId para expiração da sessão
+ok 60 - API: erro HTTP preserva status, código e requestId para expiração da sessão
+  ---
+  duration_ms: 74.540896
+  type: 'test'
+  ...
+# Subtest: API: resposta 200 contendo HTML não é apresentada como sucesso vazio
+ok 61 - API: resposta 200 contendo HTML não é apresentada como sucesso vazio
+  ---
+  duration_ms: 8.924985
+  type: 'test'
+  ...
+# Subtest: API: resposta HTTP 503 sem JSON preserva o status
+ok 62 - API: resposta HTTP 503 sem JSON preserva o status
+  ---
+  duration_ms: 4.592169
+  type: 'test'
+  ...
+# Subtest: API: HTTP 204 sem corpo continua compatível
+ok 63 - API: HTTP 204 sem corpo continua compatível
+  ---
+  duration_ms: 4.133045
+  type: 'test'
+  ...
+# Subtest: API: requisição já cancelada não inicia acesso à rede
+ok 64 - API: requisição já cancelada não inicia acesso à rede
+  ---
+  duration_ms: 3.241211
+  type: 'test'
+  ...
+# Subtest: API: cancelamento externo durante a resposta é propagado
+ok 65 - API: cancelamento externo durante a resposta é propagado
+  ---
+  duration_ms: 8.349669
+  type: 'test'
+  ...
+# Subtest: API: FormData mantém cabeçalho multipart gerado pelo navegador
+ok 66 - API: FormData mantém cabeçalho multipart gerado pelo navegador
+  ---
+  duration_ms: 3.945124
+  type: 'test'
+  ...
+# Subtest: mídia local: ordena por data antes de limitar, não pelo nome aleatório
+ok 67 - mídia local: ordena por data antes de limitar, não pelo nome aleatório
+  ---
+  duration_ms: 31.572602
+  type: 'test'
+  ...
+# Subtest: upload: WebP apenas com cabeçalho de canvas, sem imagem, é recusado
+ok 68 - upload: WebP apenas com cabeçalho de canvas, sem imagem, é recusado
+  ---
+  duration_ms: 1.524796
+  type: 'test'
+  ...
+# Subtest: upload: dimensões de VP8 ocultas por um VP8X pequeno não burlam o limite
+ok 69 - upload: dimensões de VP8 ocultas por um VP8X pequeno não burlam o limite
+  ---
+  duration_ms: 34.345264
+  type: 'test'
+  ...
+# Subtest: upload: cabeçalho VP8L sem dados de pixels é recusado
+ok 70 - upload: cabeçalho VP8L sem dados de pixels é recusado
+  ---
+  duration_ms: 0.671268
+  type: 'test'
+  ...
+# Subtest: perfil: CEP ausente retorna erro em vez de descartar ou truncar dados
+ok 71 - perfil: CEP ausente retorna erro em vez de descartar ou truncar dados
+  ---
+  duration_ms: 0.817907
+  type: 'test'
+  ...
+# Subtest: perfil: CEP excedente retorna erro em vez de descartar ou truncar dados
+ok 72 - perfil: CEP excedente retorna erro em vez de descartar ou truncar dados
+  ---
+  duration_ms: 0.180794
+  type: 'test'
+  ...
+# Subtest: perfil: sexto endereço retorna erro em vez de descartar ou truncar dados
+ok 73 - perfil: sexto endereço retorna erro em vez de descartar ou truncar dados
+  ---
+  duration_ms: 0.090541
+  type: 'test'
+  ...
+# Subtest: perfil: endereço incompleto retorna erro em vez de descartar ou truncar dados
+ok 74 - perfil: endereço incompleto retorna erro em vez de descartar ou truncar dados
+  ---
+  duration_ms: 0.369206
+  type: 'test'
+  ...
+# Subtest: perfil: tipo incorreto retorna erro em vez de descartar ou truncar dados
+ok 75 - perfil: tipo incorreto retorna erro em vez de descartar ou truncar dados
+  ---
+  duration_ms: 0.181843
+  type: 'test'
+  ...
+# Subtest: perfil: editar nome preserva endereços legados, sem migração destrutiva
+ok 76 - perfil: editar nome preserva endereços legados, sem migração destrutiva
+  ---
+  duration_ms: 2.340319
+  type: 'test'
+  ...
+# Subtest: perfil: endereço completo normaliza CEP e UF, exclusão explícita funciona
+ok 77 - perfil: endereço completo normaliza CEP e UF, exclusão explícita funciona
+  ---
+  duration_ms: 0.712267
+  type: 'test'
+  ...
+# Subtest: perfil: validação falha dentro do lock sem apagar os dados anteriores
+ok 78 - perfil: validação falha dentro do lock sem apagar os dados anteriores
+  ---
+  duration_ms: 3.150793
+  type: 'test'
+  ...
+# Subtest: repositório: expiração ou tentativas inválidas não validam código temporário
+ok 79 - repositório: expiração ou tentativas inválidas não validam código temporário
+  ---
+  duration_ms: 0.574713
+  type: 'test'
+  ...
+# Subtest: upload: WebP válido lossy.webp permanece aceito
+ok 80 - upload: WebP válido lossy.webp permanece aceito
+  ---
+  duration_ms: 13.342003
+  type: 'test'
+  ...
+# Subtest: upload: WebP válido lossless.webp permanece aceito
+ok 81 - upload: WebP válido lossless.webp permanece aceito
+  ---
+  duration_ms: 2.457928
+  type: 'test'
+  ...
+# Subtest: upload: WebP válido alpha.webp permanece aceito
+ok 82 - upload: WebP válido alpha.webp permanece aceito
+  ---
+  duration_ms: 1.859473
+  type: 'test'
+  ...
+# Subtest: upload: WebP válido animated.webp permanece aceito
+ok 83 - upload: WebP válido animated.webp permanece aceito
+  ---
+  duration_ms: 1.395236
+  type: 'test'
+  ...
+# Subtest: upload: WebP válido metadata.webp permanece aceito
+ok 84 - upload: WebP válido metadata.webp permanece aceito
+  ---
+  duration_ms: 1.049285
+  type: 'test'
+  ...
+# Subtest: API: cancelamento durante leitura do JSON não vira erro de formato
+ok 85 - API: cancelamento durante leitura do JSON não vira erro de formato
+  ---
+  duration_ms: 3.332371
+  type: 'test'
+  ...
+# Subtest: API: timeout tem código próprio, distinto de cancelamento do usuário
+ok 86 - API: timeout tem código próprio, distinto de cancelamento do usuário
+  ---
+  duration_ms: 8.517349
+  type: 'test'
+  ...
+# {"level":"warn","event":"media_metadata_invalid","file":"invalid-file-0001.json","message":"Metadados de mídia inválidos."}
+# Subtest: mídia local: sidecar nulo não derruba a listagem de arquivos válidos
+ok 87 - mídia local: sidecar nulo não derruba a listagem de arquivos válidos
+  ---
+  duration_ms: 9.855162
+  type: 'test'
+  ...
+# Subtest: serviço fica não-configurado sem credenciais e configurado com elas
+ok 88 - serviço fica não-configurado sem credenciais e configurado com elas
+  ---
+  duration_ms: 2.53234
+  type: 'test'
+  ...
+# Subtest: empacotamento soma pesos com margem, respeita mínimos e detecta dados ausentes
+ok 89 - empacotamento soma pesos com margem, respeita mínimos e detecta dados ausentes
+  ---
+  duration_ms: 1.855009
+  type: 'test'
+  ...
+# Subtest: caixas reais são usadas para quantidades fechadas e o restante vai avulso
+ok 90 - caixas reais são usadas para quantidades fechadas e o restante vai avulso
+  ---
+  duration_ms: 1.641206
+  type: 'test'
+  ...
+# Subtest: cotação autentica, consulta preço/prazo e escolhe a opção mais barata
+ok 91 - cotação autentica, consulta preço/prazo e escolhe a opção mais barata
+  ---
+  duration_ms: 5.182954
+  type: 'test'
+  ...
+# Subtest: token expirado é renovado automaticamente em caso de 401
+ok 92 - token expirado é renovado automaticamente em caso de 401
+  ---
+  duration_ms: 1.452082
+  type: 'test'
+  ...
+# Subtest: pedido com múltiplos volumes soma o frete de todas as caixas
+ok 93 - pedido com múltiplos volumes soma o frete de todas as caixas
+  ---
+  duration_ms: 3.982907
+  type: 'test'
+  ...
+# Subtest: erros da API viram mensagens claras
+ok 94 - erros da API viram mensagens claras
+  ---
+  duration_ms: 1.961244
+  type: 'test'
+  ...
+# Subtest: rastreio Correios normaliza eventos da API Rastro
+ok 95 - rastreio Correios normaliza eventos da API Rastro
+  ---
+  duration_ms: 1.41254
+  type: 'test'
+  ...
+# Subtest: parse de preço tolera formato brasileiro e internacional (proteção contra erro de 100x)
+ok 96 - parse de preço tolera formato brasileiro e internacional (proteção contra erro de 100x)
+  ---
+  duration_ms: 1.858144
+  type: 'test'
+  ...
+# Subtest: lote de preço é fatiado em blocos de 5 (limite do manual V2.4)
+ok 97 - lote de preço é fatiado em blocos de 5 (limite do manual V2.4)
+  ---
+  duration_ms: 5.17506
+  type: 'test'
+  ...
+# Subtest: valor declarado usa o código correto POR SERVIÇO (019 SEDEX, 064 PAC — manual oficial)
+ok 98 - valor declarado usa o código correto POR SERVIÇO (019 SEDEX, 064 PAC — manual oficial)
+  ---
+  duration_ms: 1.551871
+  type: 'test'
+  ...
+# Subtest: versão da API é configurável (v1 padrão dos exemplos; v3 da seção Ambientes)
+ok 99 - versão da API é configurável (v1 padrão dos exemplos; v3 da seção Ambientes)
+  ---
+  duration_ms: 1.186931
+  type: 'test'
+  ...
+# Subtest: CustomerAuth exige segredo persistente com pelo menos 32 caracteres
+ok 100 - CustomerAuth exige segredo persistente com pelo menos 32 caracteres
+  ---
+  duration_ms: 2.670496
+  type: 'test'
+  ...
+# Subtest: código temporário é armazenado como HMAC vinculado ao e-mail
+ok 101 - código temporário é armazenado como HMAC vinculado ao e-mail
+  ---
+  duration_ms: 4.995912
+  type: 'test'
+  ...
+# Subtest: mesmo código não autentica outro e-mail
+ok 102 - mesmo código não autentica outro e-mail
+  ---
+  duration_ms: 1.077879
+  type: 'test'
+  ...
+# Subtest: código de login é consumido atomicamente e só cria uma sessão
+ok 103 - código de login é consumido atomicamente e só cria uma sessão
+  ---
+  duration_ms: 1.713897
+  type: 'test'
+  ...
+# Subtest: cookie do cliente é HttpOnly, SameSite Strict e pode ser limpo de forma explícita
+ok 104 - cookie do cliente é HttpOnly, SameSite Strict e pode ser limpo de forma explícita
+  ---
+  duration_ms: 0.84934
+  type: 'test'
+  ...
+# Subtest: middleware CSRF recusa requisição cross-site mesmo com token correto
+ok 105 - middleware CSRF recusa requisição cross-site mesmo com token correto
+  ---
+  duration_ms: 1.906518
+  type: 'test'
+  ...
+# Subtest: middleware CSRF aceita mesma origem e token válido
+ok 106 - middleware CSRF aceita mesma origem e token válido
+  ---
+  duration_ms: 1.359825
+  type: 'test'
+  ...
+# Subtest: cookie malformado não causa exceção nem derruba a autenticação
+ok 107 - cookie malformado não causa exceção nem derruba a autenticação
+  ---
+  duration_ms: 3.349429
+  type: 'test'
+  ...
+# Subtest: middlewares autenticados impedem cache de dados privados
+ok 108 - middlewares autenticados impedem cache de dados privados
+  ---
+  duration_ms: 1.688683
+  type: 'test'
+  ...
+# Subtest: credencial administrativa inicial autentica com e-mail em branco e diferencia maiúsculas
+ok 109 - credencial administrativa inicial autentica com e-mail em branco e diferencia maiúsculas
+  ---
+  duration_ms: 739.404553
+  type: 'test'
+  ...
+# Subtest: modo personalizado explícito substitui integralmente a credencial inicial
+ok 110 - modo personalizado explícito substitui integralmente a credencial inicial
+  ---
+  duration_ms: 100.431124
+  type: 'test'
+  ...
+# Subtest: produção exige hash próprio e segredo de sessão persistente
+ok 111 - produção exige hash próprio e segredo de sessão persistente
+  ---
+  duration_ms: 38.963879
+  type: 'test'
+  ...
+# Subtest: modo padrão recusa hash legado configurado e aceita somente a credencial inicial
+ok 112 - modo padrão recusa hash legado configurado e aceita somente a credencial inicial
+  ---
+  duration_ms: 525.075269
+  type: 'test'
+  ...
+# Subtest: PNG válido tem assinatura, dimensão, checksum e metadados controlados
+ok 113 - PNG válido tem assinatura, dimensão, checksum e metadados controlados
+  ---
+  duration_ms: 3.793161
+  type: 'test'
+  ...
+# Subtest: MIME falso e arquivo corrompido são recusados
+ok 114 - MIME falso e arquivo corrompido são recusados
+  ---
+  duration_ms: 1.378424
+  type: 'test'
+  ...
+# Subtest: multipart extrai um arquivo real e campos auxiliares
+ok 115 - multipart extrai um arquivo real e campos auxiliares
+  ---
+  duration_ms: 5.288927
+  type: 'test'
+  ...
+# Subtest: data URL antiga permanece migrável, mas passa pela mesma validação
+ok 116 - data URL antiga permanece migrável, mas passa pela mesma validação
+  ---
+  duration_ms: 1.28113
+  type: 'test'
+  ...
+# Subtest: serviço fica não-configurado sem credenciais e configurado com elas
+ok 117 - serviço fica não-configurado sem credenciais e configurado com elas
+  ---
+  duration_ms: 2.571647
+  type: 'test'
+  ...
+# Subtest: peso cobrado é o maior entre real e cubado (divisor 6000)
+ok 118 - peso cobrado é o maior entre real e cubado (divisor 6000)
+  ---
+  duration_ms: 0.541565
+  type: 'test'
+  ...
+# Subtest: cotação envia payload correto e soma múltiplos volumes
+ok 119 - cotação envia payload correto e soma múltiplos volumes
+  ---
+  duration_ms: 3.054887
+  type: 'test'
+  ...
+# Subtest: erros da API Jadlog viram mensagens claras
+ok 120 - erros da API Jadlog viram mensagens claras
+  ---
+  duration_ms: 2.418487
+  type: 'test'
+  ...
+# Subtest: mais de 3 volumes são fatiados em múltiplas chamadas
+ok 121 - mais de 3 volumes são fatiados em múltiplas chamadas
+  ---
+  duration_ms: 2.456161
+  type: 'test'
+  ...
+# Subtest: rastreio Jadlog normaliza eventos (mais recente primeiro)
+ok 122 - rastreio Jadlog normaliza eventos (mais recente primeiro)
+  ---
+  duration_ms: 1.436645
+  type: 'test'
+  ...
+# Subtest: mailer só fica configurado com todos os dados SMTP
+ok 123 - mailer só fica configurado com todos os dados SMTP
+  ---
+  duration_ms: 1.974972
+  type: 'test'
+  ...
+# Subtest: envio sem configuração falha graciosamente sem lançar
+ok 124 - envio sem configuração falha graciosamente sem lançar
+  ---
+  duration_ms: 0.608698
+  type: 'test'
+  ...
+# Subtest: destinatário inválido é rejeitado antes de conectar
+ok 125 - destinatário inválido é rejeitado antes de conectar
+  ---
+  duration_ms: 0.623569
+  type: 'test'
+  ...
+# Subtest: e-mail de pedido criado contém itens, total, desconto, rastreio e link
+ok 126 - e-mail de pedido criado contém itens, total, desconto, rastreio e link
+  ---
+  duration_ms: 42.377067
+  type: 'test'
+  ...
+# Subtest: e-mail de atualização usa o status como assunto
+ok 127 - e-mail de atualização usa o status como assunto
+  ---
+  duration_ms: 1.040275
+  type: 'test'
+  ...
+# Subtest: frete sob cotação aparece como "a confirmar"
+ok 128 - frete sob cotação aparece como "a confirmar"
+  ---
+  duration_ms: 1.137027
+  type: 'test'
+  ...
+# Subtest: itens de presente aparecem no e-mail com a mensagem
+ok 129 - itens de presente aparecem no e-mail com a mensagem
+  ---
+  duration_ms: 1.744572
+  type: 'test'
+  ...
+# Subtest: Reply-To é incluído quando configurado e válido
+ok 130 - Reply-To é incluído quando configurado e válido
+  ---
+  duration_ms: 0.225888
+  type: 'test'
+  ...
+# Subtest: SMTP rejeita mailbox/header injection e e-mail não duplica subtotal
+ok 131 - SMTP rejeita mailbox/header injection e e-mail não duplica subtotal
+  ---
+  duration_ms: 1.601165
+  type: 'test'
+  ...
+# Subtest: máquina de estados permite o fluxo comercial esperado
+ok 132 - máquina de estados permite o fluxo comercial esperado
+  ---
+  duration_ms: 1.690196
+  type: 'test'
+  ...
+# Subtest: máquina de estados bloqueia regressões e transições impossíveis
+ok 133 - máquina de estados bloqueia regressões e transições impossíveis
+  ---
+  duration_ms: 2.069173
+  type: 'test'
+  ...
+# Subtest: pagamento aprovado válido avança para pago
+ok 134 - pagamento aprovado válido avança para pago
+  ---
+  duration_ms: 2.774612
+  type: 'test'
+  ...
+# Subtest: valor, moeda ou preferência divergentes bloqueiam confirmação
+ok 135 - valor, moeda ou preferência divergentes bloqueiam confirmação
+  ---
+  duration_ms: 4.217862
+  type: 'test'
+  ...
+# Subtest: webhook pendente ou recusado atrasado não rebaixa pedido pago
+ok 136 - webhook pendente ou recusado atrasado não rebaixa pedido pago
+  ---
+  duration_ms: 0.336112
+  type: 'test'
+  ...
+# Subtest: mediação, reembolso parcial, reembolso total e chargeback ficam explícitos
+ok 137 - mediação, reembolso parcial, reembolso total e chargeback ficam explícitos
+  ---
+  duration_ms: 0.837609
+  type: 'test'
+  ...
+# Subtest: pagamento expirado fica explícito e pode ser tentado novamente
+ok 138 - pagamento expirado fica explícito e pode ser tentado novamente
+  ---
+  duration_ms: 0.445955
+  type: 'test'
+  ...
+# Subtest: pagamento aprovado de pedido cancelado vai para revisão, nunca ressuscita como pago
+ok 139 - pagamento aprovado de pedido cancelado vai para revisão, nunca ressuscita como pago
+  ---
+  duration_ms: 0.587133
+  type: 'test'
+  ...
+# Subtest: checkout só começa com reserva ativa e margem mínima de um minuto
+ok 140 - checkout só começa com reserva ativa e margem mínima de um minuto
+  ---
+  duration_ms: 0.564948
+  type: 'test'
+  ...
+# Subtest: preferência do Mercado Pago expira no máximo junto com a reserva de estoque
+ok 141 - preferência do Mercado Pago expira no máximo junto com a reserva de estoque
+  ---
+  duration_ms: 4.78373
+  type: 'test'
+  ...
+# Subtest: contratos recusam capacidades não declaradas de forma explícita
+ok 142 - contratos recusam capacidades não declaradas de forma explícita
+  ---
+  duration_ms: 3.061718
+  type: 'test'
+  ...
+# Subtest: providers reais satisfazem os contratos da aplicação
+ok 143 - providers reais satisfazem os contratos da aplicação
+  ---
+  duration_ms: 1.747765
+  type: 'test'
+  ...
+# Subtest: projeção pública do pedido remove dados pessoais e observações internas
+ok 144 - projeção pública do pedido remove dados pessoais e observações internas
+  ---
+  duration_ms: 3.160047
+  type: 'test'
+  ...
+# Subtest: projeção pública tolera pedido parcial sem lançar exceção
+ok 145 - projeção pública tolera pedido parcial sem lançar exceção
+  ---
+  duration_ms: 0.545249
+  type: 'test'
+  ...
+# Subtest: v11.1.8: pedido, estoque, índice e cliente sobrevivem ao reinício
+ok 146 - v11.1.8: pedido, estoque, índice e cliente sobrevivem ao reinício
+  ---
+  duration_ms: 51.23914
+  type: 'test'
+  ...
+# Subtest: v11.1.8: cancelamento libera estoque uma vez, inclusive depois de reiniciar
+ok 147 - v11.1.8: cancelamento libera estoque uma vez, inclusive depois de reiniciar
+  ---
+  duration_ms: 32.908167
+  type: 'test'
+  ...
+# Subtest: v11.1.8: pagamento confirmado persiste e não repõe estoque após reiniciar
+ok 148 - v11.1.8: pagamento confirmado persiste e não repõe estoque após reiniciar
+  ---
+  duration_ms: 24.441118
+  type: 'test'
+  ...
+# Subtest: v11.1.8: expiração recupera reserva depois de reiniciar e é idempotente
+ok 149 - v11.1.8: expiração recupera reserva depois de reiniciar e é idempotente
+  ---
+  duration_ms: 20.226477
+  type: 'test'
+  ...
+# Subtest: v11.1.8: falha no commit não deixa estoque ou pedido apenas na memória
+ok 150 - v11.1.8: falha no commit não deixa estoque ou pedido apenas na memória
+  ---
+  duration_ms: 11.827856
+  type: 'test'
+  ...
+# Subtest: v11.1.8: state.json é autoritativo sobre exportação antiga do catálogo
+ok 151 - v11.1.8: state.json é autoritativo sobre exportação antiga do catálogo
+  ---
+  duration_ms: 12.497657
+  type: 'test'
+  ...
+# Subtest: v11.1.8: JSON danificado impede inicialização, sem apagar dados silenciosamente
+ok 152 - v11.1.8: JSON danificado impede inicialização, sem apagar dados silenciosamente
+  ---
+  duration_ms: 3.678939
+  type: 'test'
+  ...
+# Subtest: v11.1.8: perfil, favoritos, avaliações, alertas e auditoria persistem
+ok 153 - v11.1.8: perfil, favoritos, avaliações, alertas e auditoria persistem
+  ---
+  duration_ms: 31.707368
+  type: 'test'
+  ...
+# Subtest: v11.1.8: 43 IDs recuperados têm mídia em uma instalação nova sem pasta local
+ok 154 - v11.1.8: 43 IDs recuperados têm mídia em uma instalação nova sem pasta local
+  ---
+  duration_ms: 150.439552
+  type: 'test'
+  ...
+# Subtest: v11.1.8: migração de fotografia é específica, repetível e preserva novas edições
+ok 155 - v11.1.8: migração de fotografia é específica, repetível e preserva novas edições
+  ---
+  duration_ms: 21.006314
+  type: 'test'
+  ...
+# Subtest: v11.1.8: 227 cadastros preservados e cinco ofertas no catálogo público
+ok 156 - v11.1.8: 227 cadastros preservados e cinco ofertas no catálogo público
+  ---
+  duration_ms: 14.507086
+  type: 'test'
+  ...
+# Subtest: v11.1.8: fallback usa imagens recuperadas e pagamentos continuam dependentes da API
+ok 157 - v11.1.8: fallback usa imagens recuperadas e pagamentos continuam dependentes da API
+  ---
+  duration_ms: 3.200488
+  type: 'test'
+  ...
+# Subtest: v11.1.8: suíte HTTP exige dependências e usa dados privados temporários
+ok 158 - v11.1.8: suíte HTTP exige dependências e usa dados privados temporários
+  ---
+  duration_ms: 2.384967
+  type: 'test'
+  ...
+# Subtest: v11.1.8: nenhum preço ou estoque original foi inventado durante a recuperação
+ok 159 - v11.1.8: nenhum preço ou estoque original foi inventado durante a recuperação
+  ---
+  duration_ms: 11.139299
+  type: 'test'
+  ...
+# Subtest: v11.1.8: estado nulo não reinicializa estoque silenciosamente
+ok 160 - v11.1.8: estado nulo não reinicializa estoque silenciosamente
+  ---
+  duration_ms: 4.294925
+  type: 'test'
+  ...
+# Subtest: v11.1.8: identificação pública editável sem enviar preços e produtos
+ok 161 - v11.1.8: identificação pública editável sem enviar preços e produtos
+  ---
+  duration_ms: 3.571208
+  type: 'test'
+  ...
+# Subtest: repositório em memória lista pedidos sem falhar no structuredClone
+ok 162 - repositório em memória lista pedidos sem falhar no structuredClone
+  ---
+  duration_ms: 6.92021
+  type: 'test'
+  ...
+# Subtest: repositório consolida cliente e baixa estoque exatamente uma vez ao confirmar pagamento
+ok 163 - repositório consolida cliente e baixa estoque exatamente uma vez ao confirmar pagamento
+  ---
+  duration_ms: 2.376424
+  type: 'test'
+  ...
+# Subtest: pedidos antigos sem pagamento expiram; pedidos pagos nunca expiram
+ok 164 - pedidos antigos sem pagamento expiram; pedidos pagos nunca expiram
+  ---
+  duration_ms: 2.877585
+  type: 'test'
+  ...
+# Subtest: mutateCatalog aplica mutação sobre o estado mais recente e propaga erros sem salvar
+ok 165 - mutateCatalog aplica mutação sobre o estado mais recente e propaga erros sem salvar
+  ---
+  duration_ms: 2.013619
+  type: 'test'
+  ...
+# Subtest: busca com % e _ é tratada literalmente (sem curinga acidental)
+ok 166 - busca com % e _ é tratada literalmente (sem curinga acidental)
+  ---
+  duration_ms: 3.993165
+  type: 'test'
+  ...
+# Subtest: updateOrder funcional: decisão tomada sobre o estado fresco (anti-TOCTOU do webhook)
+ok 167 - updateOrder funcional: decisão tomada sobre o estado fresco (anti-TOCTOU do webhook)
+  ---
+  duration_ms: 1.143004
+  type: 'test'
+  ...
+# Subtest: catálogo local de versão anterior é normalizado e persistido sem perder o produto
+ok 168 - catálogo local de versão anterior é normalizado e persistido sem perder o produto
+  ---
+  duration_ms: 39.442045
+  type: 'test'
+  ...
+# Subtest: código de login do cliente é consumido uma única vez no repositório em memória
+ok 169 - código de login do cliente é consumido uma única vez no repositório em memória
+  ---
+  duration_ms: 2.014022
+  type: 'test'
+  ...
+# Subtest: código incorreto incrementa tentativas sem consumir o código válido
+ok 170 - código incorreto incrementa tentativas sem consumir o código válido
+  ---
+  duration_ms: 1.353354
+  type: 'test'
+  ...
+# Subtest: sessão administrativa persistida pode ser revogada imediatamente
+ok 171 - sessão administrativa persistida pode ser revogada imediatamente
+  ---
+  duration_ms: 1.575476
+  type: 'test'
+  ...
+# Subtest: v11.1 gera slugs amigáveis únicos para páginas de produto
+ok 172 - v11.1 gera slugs amigáveis únicos para páginas de produto
+  ---
+  duration_ms: 6.475962
+  type: 'test'
+  ...
+# Subtest: v11.1 aplica preço promocional e desconto automático no servidor
+ok 173 - v11.1 aplica preço promocional e desconto automático no servidor
+  ---
+  duration_ms: 5.704873
+  type: 'test'
+  ...
+# Subtest: v11.1 promoção pode reduzir o limite efetivo de frete grátis
+ok 174 - v11.1 promoção pode reduzir o limite efetivo de frete grátis
+  ---
+  duration_ms: 0.909388
+  type: 'test'
+  ...
+# Subtest: v11.1 reserva estoque de forma imutável e libera na expiração/cancelamento
+ok 175 - v11.1 reserva estoque de forma imutável e libera na expiração/cancelamento
+  ---
+  duration_ms: 2.163285
+  type: 'test'
+  ...
+# Subtest: v11.1 reserva impede sobrevenda da última unidade
+ok 176 - v11.1 reserva impede sobrevenda da última unidade
+  ---
+  duration_ms: 1.6067
+  type: 'test'
+  ...
+# Subtest: v11.1 conta do cliente autentica por código com sessão HttpOnly
+ok 177 - v11.1 conta do cliente autentica por código com sessão HttpOnly
+  ---
+  duration_ms: 3.538998
+  type: 'test'
+  ...
+# Subtest: v11.1 endpoints de avaliações verificadas e avise-me estão protegidos no servidor
+ok 178 - v11.1 endpoints de avaliações verificadas e avise-me estão protegidos no servidor
+  ---
+  duration_ms: 16.151848
+  type: 'test'
+  ...
+# Subtest: v11.1 frontend/admin contém todos os pontos de integração principais
+ok 179 - v11.1 frontend/admin contém todos os pontos de integração principais
+  ---
+  duration_ms: 13.088513
+  type: 'test'
+  ...
+# Subtest: contratos herdados da v11.1.2 permanecem coerentes na versão atual
+ok 180 - contratos herdados da v11.1.2 permanecem coerentes na versão atual
+  ---
+  duration_ms: 21.722645
+  type: 'test'
+  ...
+# Subtest: detalhes do produto têm região única, ordem semântica e fluxo em coluna
+ok 181 - detalhes do produto têm região única, ordem semântica e fluxo em coluna
+  ---
+  duration_ms: 6.169826
+  type: 'test'
+  ...
+# Subtest: catálogo limita a exibição inicial e só mostra mais produtos por ação explícita
+ok 182 - catálogo limita a exibição inicial e só mostra mais produtos por ação explícita
+  ---
+  duration_ms: 4.19071
+  type: 'test'
+  ...
+# Subtest: seleção múltipla da galeria é copiada antes de limpar o input
+ok 183 - seleção múltipla da galeria é copiada antes de limpar o input
+  ---
+  duration_ms: 7.853859
+  type: 'test'
+  ...
+# Subtest: autenticação administrativa não possui cadeia de senha fallback
+ok 184 - autenticação administrativa não possui cadeia de senha fallback
+  ---
+  duration_ms: 13.98414
+  type: 'test'
+  ...
+# Subtest: credencial inicial não aparece nos assets públicos nem nos atalhos Windows
+ok 185 - credencial inicial não aparece nos assets públicos nem nos atalhos Windows
+  ---
+  duration_ms: 36.803656
+  type: 'test'
+  ...
+# Subtest: catálogo entregue não contém IDs globais de variação repetidos
+ok 186 - catálogo entregue não contém IDs globais de variação repetidos
+  ---
+  duration_ms: 8.977614
+  type: 'test'
+  ...
+# Subtest: deploy usa lockfile e desativa credencial inicial compartilhada
+ok 187 - deploy usa lockfile e desativa credencial inicial compartilhada
+  ---
+  duration_ms: 2.533748
+  type: 'test'
+  ...
+# Subtest: fallback embutido corresponde aos produtos vendáveis e não habilita pagamento offline
+ok 188 - fallback embutido corresponde aos produtos vendáveis e não habilita pagamento offline
+  ---
+  duration_ms: 21.552192
+  type: 'test'
+  ...
+# Subtest: imagem de fundo otimizada existe e é significativamente menor que o PNG social
+ok 189 - imagem de fundo otimizada existe e é significativamente menor que o PNG social
+  ---
+  duration_ms: 1.77885
+  type: 'test'
+  ...
+# Subtest: CSS e JavaScript referenciados pelo HTML usam chave de versão para invalidar cache antigo
+ok 190 - CSS e JavaScript referenciados pelo HTML usam chave de versão para invalidar cache antigo
+  ---
+  duration_ms: 3.810119
+  type: 'test'
+  ...
+# Subtest: detalhes usam rolagem do documento; outras camadas preservam fundo sem desfoque
+ok 191 - detalhes usam rolagem do documento; outras camadas preservam fundo sem desfoque
+  ---
+  duration_ms: 19.041686
+  type: 'test'
+  ...
+# Subtest: cards usam quadro quadrado sem borda e preservam a imagem inteira com preenchimento visual
+ok 192 - cards usam quadro quadrado sem borda e preservam a imagem inteira com preenchimento visual
+  ---
+  duration_ms: 18.229507
+  type: 'test'
+  ...
+# Subtest: carrossel funciona nos cards e no popup por controles, teclado e gesto horizontal
+ok 193 - carrossel funciona nos cards e no popup por controles, teclado e gesto horizontal
+  ---
+  duration_ms: 5.598886
+  type: 'test'
+  ...
+# Subtest: Admin evita rolagens aninhadas desnecessárias e encaminha roda da prévia ao painel
+ok 194 - Admin evita rolagens aninhadas desnecessárias e encaminha roda da prévia ao painel
+  ---
+  duration_ms: 5.413764
+  type: 'test'
+  ...
+# Subtest: todas as referências públicas usam cache-busting da versão atual
+ok 195 - todas as referências públicas usam cache-busting da versão atual
+  ---
+  duration_ms: 7.711726
+  type: 'test'
+  ...
+# Subtest: v11.1.4 coordena camadas em vez de empilhar conta, produto e sacola
+ok 196 - v11.1.4 coordena camadas em vez de empilhar conta, produto e sacola
+  ---
+  duration_ms: 16.561688
+  type: 'test'
+  ...
+# Subtest: favorito solicitado antes do login é preservado e aplicado após autenticar
+ok 197 - favorito solicitado antes do login é preservado e aplicado após autenticar
+  ---
+  duration_ms: 7.975156
+  type: 'test'
+  ...
+# Subtest: busca inteligente expõe combobox e navegação por setas/Escape
+ok 198 - busca inteligente expõe combobox e navegação por setas/Escape
+  ---
+  duration_ms: 3.849651
+  type: 'test'
+  ...
+# Subtest: auditoria de catálogo do ZIP não depende obrigatoriamente dos PDFs-fonte
+ok 199 - auditoria de catálogo do ZIP não depende obrigatoriamente dos PDFs-fonte
+  ---
+  duration_ms: 1.740054
+  type: 'test'
+  ...
+# Subtest: smoke de produção valida detalhes em fluxo e uma coluna
+ok 200 - smoke de produção valida detalhes em fluxo e uma coluna
+  ---
+  duration_ms: 1.612854
+  type: 'test'
+  ...
+# Subtest: textos legais preservam quebras de linha sem aceitar controles perigosos
+ok 201 - textos legais preservam quebras de linha sem aceitar controles perigosos
+  ---
+  duration_ms: 10.128618
+  type: 'test'
+  ...
+# Subtest: modais legais e de pedido usam backdrop próprio e coordenador único de camadas
+ok 202 - modais legais e de pedido usam backdrop próprio e coordenador único de camadas
+  ---
+  duration_ms: 8.214837
+  type: 'test'
+  ...
+# Subtest: fechar uma camada autônoma não remove o lock se outra camada bloqueadora continuar aberta
+ok 203 - fechar uma camada autônoma não remove o lock se outra camada bloqueadora continuar aberta
+  ---
+  duration_ms: 2.585245
+  type: 'test'
+  ...
+# Subtest: fallback público embutido mantém os parágrafos dos textos legais
+ok 204 - fallback público embutido mantém os parágrafos dos textos legais
+  ---
+  duration_ms: 5.533788
+  type: 'test'
+  ...
+# Subtest: pagamento tardio após liberação recompromete estoque; se não houver estoque, aborta atomicamente
+ok 205 - pagamento tardio após liberação recompromete estoque; se não houver estoque, aborta atomicamente
+  ---
+  duration_ms: 11.894541
+  type: 'test'
+  ...
+# Subtest: pagamento tardio com estoque disponível baixa novamente e marca commit
+ok 206 - pagamento tardio com estoque disponível baixa novamente e marca commit
+  ---
+  duration_ms: 1.464352
+  type: 'test'
+  ...
+# Subtest: pedido expirado não volta artificialmente para aguardando pagamento sem nova reserva
+ok 207 - pedido expirado não volta artificialmente para aguardando pagamento sem nova reserva
+  ---
+  duration_ms: 0.394276
+  type: 'test'
+  ...
+# Subtest: frete automático nunca inventa dimensões e Jadlog rejeita peso real acima do limite
+ok 208 - frete automático nunca inventa dimensões e Jadlog rejeita peso real acima do limite
+  ---
+  duration_ms: 2.874656
+  type: 'test'
+  ...
+# Subtest: projeção pública preserva frete sob cotação como null, nunca R$ 0
+ok 209 - projeção pública preserva frete sob cotação como null, nunca R$ 0
+  ---
+  duration_ms: 0.553161
+  type: 'test'
+  ...
+# Subtest: metadados de promoções somam exatamente o desconto efetivo após teto
+ok 210 - metadados de promoções somam exatamente o desconto efetivo após teto
+  ---
+  duration_ms: 1.00529
+  type: 'test'
+  ...
+# Subtest: frete grátis elegível fica registrado mesmo com preço ainda zero e o recálculo manual respeita o snapshot
+ok 211 - frete grátis elegível fica registrado mesmo com preço ainda zero e o recálculo manual respeita o snapshot
+  ---
+  duration_ms: 0.946302
+  type: 'test'
+  ...
+# Subtest: trava de checkout evita duas preferências simultâneas e reutiliza tentativa idempotente após falha
+ok 212 - trava de checkout evita duas preferências simultâneas e reutiliza tentativa idempotente após falha
+  ---
+  duration_ms: 1.107895
+  type: 'test'
+  ...
+# Subtest: Mercado Pago recusa criar preferência quando a reserva explicitamente já expirou
+ok 213 - Mercado Pago recusa criar preferência quando a reserva explicitamente já expirou
+  ---
+  duration_ms: 1.624337
+  type: 'test'
+  ...
+# Subtest: sessões de cliente expiradas são limpas ao salvar uma nova sessão em memória
+ok 214 - sessões de cliente expiradas são limpas ao salvar uma nova sessão em memória
+  ---
+  duration_ms: 1.536805
+  type: 'test'
+  ...
+# Subtest: catálogo recusa configuração impossível de quantidade mínima acima da máxima
+ok 215 - catálogo recusa configuração impossível de quantidade mínima acima da máxima
+  ---
+  duration_ms: 2.106586
+  type: 'test'
+  ...
+# Subtest: verificação de compra não depende do limite de 200 pedidos recentes
+ok 216 - verificação de compra não depende do limite de 200 pedidos recentes
+  ---
+  duration_ms: 23.948627
+  type: 'test'
+  ...
+# Subtest: aviso de reposição só considera item realmente comprável e nunca herda estoque após remover variação
+ok 217 - aviso de reposição só considera item realmente comprável e nunca herda estoque após remover variação
+  ---
+  duration_ms: 0.565918
+  type: 'test'
+  ...
+# Subtest: idempotência de criação usa capability separada e nunca confia só no clientOrderId
+ok 218 - idempotência de criação usa capability separada e nunca confia só no clientOrderId
+  ---
+  duration_ms: 3.821948
+  type: 'test'
+  ...
+# Subtest: contratos críticos da v11.1.6 estão ligados às rotas reais
+ok 219 - contratos críticos da v11.1.6 estão ligados às rotas reais
+  ---
+  duration_ms: 32.412868
+  type: 'test'
+  ...
+# Subtest: combo percentual respeita a quantidade real de cada variação e não duplica preço barato
+ok 220 - combo percentual respeita a quantidade real de cada variação e não duplica preço barato
+  ---
+  duration_ms: 0.565377
+  type: 'test'
+  ...
+# Subtest: hash da tentativa é estável sem depender do estoque ou do catálogo atual
+ok 221 - hash da tentativa é estável sem depender do estoque ou do catálogo atual
+  ---
+  duration_ms: 0.861795
+  type: 'test'
+  ...
+# Subtest: modo memória serializa criações concorrentes do mesmo clientOrderId
+ok 222 - modo memória serializa criações concorrentes do mesmo clientOrderId
+  ---
+  duration_ms: 0.905287
+  type: 'test'
+  ...
+# Subtest: revisão do catálogo detecta gravação administrativa obsoleta
+ok 223 - revisão do catálogo detecta gravação administrativa obsoleta
+  ---
+  duration_ms: 0.483311
+  type: 'test'
+  ...
+# Subtest: frete grátis por limiar é sanitizado como regra global para não prometer escopo ignorado
+ok 224 - frete grátis por limiar é sanitizado como regra global para não prometer escopo ignorado
+  ---
+  duration_ms: 2.126316
+  type: 'test'
+  ...
+# Subtest: rotas administrativas usam revisão otimista para importação e ordem por IDs
+ok 225 - rotas administrativas usam revisão otimista para importação e ordem por IDs
+  ---
+  duration_ms: 11.058311
+  type: 'test'
+  ...
+# Subtest: promoção não acumulável nunca é somada ao grupo acumulável
+ok 226 - promoção não acumulável nunca é somada ao grupo acumulável
+  ---
+  duration_ms: 0.846793
+  type: 'test'
+  ...
+# Subtest: fuzz: descontos automáticos respeitam teto, metadados e não acumulabilidade
+ok 227 - fuzz: descontos automáticos respeitam teto, metadados e não acumulabilidade
+  ---
+  duration_ms: 30.689721
+  type: 'test'
+  ...
+# Subtest: fuzz: reservar e liberar estoque preserva exatamente o inventário original
+ok 228 - fuzz: reservar e liberar estoque preserva exatamente o inventário original
+  ---
+  duration_ms: 22.955058
+  type: 'test'
+  ...
+# Subtest: contratos expert adicionais: catálogo monotônico, checkout no-store e webhook usa estado sob lock
+ok 229 - contratos expert adicionais: catálogo monotônico, checkout no-store e webhook usa estado sob lock
+  ---
+  duration_ms: 10.281056
+  type: 'test'
+  ...
+# Subtest: lock de reposição impede envio concorrente e permite retry quando SMTP falha
+ok 230 - lock de reposição impede envio concorrente e permite retry quando SMTP falha
+  ---
+  duration_ms: 27.276345
+  type: 'test'
+  ...
+# Subtest: pedido legado sem reserva também não pode ser marcado pago sem estoque real
+ok 231 - pedido legado sem reserva também não pode ser marcado pago sem estoque real
+  ---
+  duration_ms: 1.001963
+  type: 'test'
+  ...
+# Subtest: PUBLIC_URL de produção precisa ser origem HTTPS limpa
+ok 232 - PUBLIC_URL de produção precisa ser origem HTTPS limpa
+  ---
+  duration_ms: 0.467121
+  type: 'test'
+  ...
+# Subtest: SEO marca estoque com a mesma regra de comprabilidade e não anuncia preço zero
+ok 233 - SEO marca estoque com a mesma regra de comprabilidade e não anuncia preço zero
+  ---
+  duration_ms: 10.117609
+  type: 'test'
+  ...
+# Subtest: slugs duplicados longos continuam únicos e roteáveis dentro do limite de 100 caracteres
+ok 234 - slugs duplicados longos continuam únicos e roteáveis dentro do limite de 100 caracteres
+  ---
+  duration_ms: 2.840618
+  type: 'test'
+  ...
+# Subtest: conta do cliente faz merge atômico e não perde atualização concorrente de campo distinto
+ok 235 - conta do cliente faz merge atômico e não perde atualização concorrente de campo distinto
+  ---
+  duration_ms: 17.762106
+  type: 'test'
+  ...
+# Subtest: cotação de frete rejeita antes da transportadora itens que o pedido rejeitaria
+ok 236 - cotação de frete rejeita antes da transportadora itens que o pedido rejeitaria
+  ---
+  duration_ms: 1.885721
+  type: 'test'
+  ...
+# Subtest: rota pública de frete usa validador estrito e conta não faz read-modify-write fora do lock
+ok 237 - rota pública de frete usa validador estrito e conta não faz read-modify-write fora do lock
+  ---
+  duration_ms: 4.754756
+  type: 'test'
+  ...
+# Subtest: colisão de clientOrderId sem capability é rejeitada no preflight antes de cotar frete
+ok 238 - colisão de clientOrderId sem capability é rejeitada no preflight antes de cotar frete
+  ---
+  duration_ms: 3.234705
+  type: 'test'
+  ...
+# Subtest: exclusão lógica preserva âncora de estoque para cancelar pedido reservado
+ok 239 - exclusão lógica preserva âncora de estoque para cancelar pedido reservado
+  ---
+  duration_ms: 2.185398
+  type: 'test'
+  ...
+# Subtest: Admin usa tombstone em exclusão e importação/reordenação preserva arquivados
+ok 240 - Admin usa tombstone em exclusão e importação/reordenação preserva arquivados
+  ---
+  duration_ms: 4.570228
+  type: 'test'
+  ...
+# Subtest: revisão por produto impede Admin de sobrescrever estoque alterado por venda concorrente
+ok 241 - revisão por produto impede Admin de sobrescrever estoque alterado por venda concorrente
+  ---
+  duration_ms: 0.406501
+  type: 'test'
+  ...
+# Subtest: variação arquivada some da loja mas continua como âncora para liberar reserva antiga
+ok 242 - variação arquivada some da loja mas continua como âncora para liberar reserva antiga
+  ---
+  duration_ms: 1.709014
+  type: 'test'
+  ...
+# Subtest: contrato do Admin exige revisão por produto e arquiva variações omitidas
+ok 243 - contrato do Admin exige revisão por produto e arquiva variações omitidas
+  ---
+  duration_ms: 8.773499
+  type: 'test'
+  ...
+# Subtest: promoções importadas perigosas são rejeitadas no backend e preço promocional é sempre preço-base acumulável
+ok 244 - promoções importadas perigosas são rejeitadas no backend e preço promocional é sempre preço-base acumulável
+  ---
+  duration_ms: 2.13166
+  type: 'test'
+  ...
+# Subtest: tombstones nunca reaparecem no catálogo público, estoque, SEO ou sitemap
+ok 245 - tombstones nunca reaparecem no catálogo público, estoque, SEO ou sitemap
+  ---
+  duration_ms: 7.541454
+  type: 'test'
+  ...
+# Subtest: PostgreSQL serializa clientOrderId antes de tocar no estoque
+ok 246 - PostgreSQL serializa clientOrderId antes de tocar no estoque
+  ---
+  duration_ms: 1.59617
+  type: 'test'
+  ...
+# Subtest: empacotador não encolhe geometria impossível para obter cotação automática
+ok 247 - empacotador não encolhe geometria impossível para obter cotação automática
+  ---
+  duration_ms: 0.709657
+  type: 'test'
+  ...
+# Subtest: rotas públicas e alertas administrativos ignoram produtos arquivados
+ok 248 - rotas públicas e alertas administrativos ignoram produtos arquivados
+  ---
+  duration_ms: 3.010995
+  type: 'test'
+  ...
+# Subtest: Admin não oferece acumulação fictícia para preço-base/frete e ressincroniza controles após reset
+ok 249 - Admin não oferece acumulação fictícia para preço-base/frete e ressincroniza controles após reset
+  ---
+  duration_ms: 4.018364
+  type: 'test'
+  ...
+# Subtest: pedido não aceita contato telefônico evidentemente inválido
+ok 250 - pedido não aceita contato telefônico evidentemente inválido
+  ---
+  duration_ms: 3.854218
+  type: 'test'
+  ...
+# Subtest: revisões por seção impedem perda de edição sem conflitar com estoque alheio
+ok 251 - revisões por seção impedem perda de edição sem conflitar com estoque alheio
+  ---
+  duration_ms: 11.158522
+  type: 'test'
+  ...
+# Subtest: catálogo rejeita produto/variação ativa sem preço ou sem nome
+ok 252 - catálogo rejeita produto/variação ativa sem preço ou sem nome
+  ---
+  duration_ms: 1.651273
+  type: 'test'
+  ...
+# Subtest: admin permite vincular uma foto da galeria a cada variação
+ok 253 - admin permite vincular uma foto da galeria a cada variação
+  ---
+  duration_ms: 1.948094
+  type: 'test'
+  ...
+# Subtest: loja sincroniza a galeria ao trocar a variação e aceita até 12 fotos
+ok 254 - loja sincroniza a galeria ao trocar a variação e aceita até 12 fotos
+  ---
+  duration_ms: 0.580087
+  type: 'test'
+  ...
+# Subtest: backend persiste a foto da variação e protege mídia referenciada
+ok 255 - backend persiste a foto da variação e protege mídia referenciada
+  ---
+  duration_ms: 0.438392
+  type: 'test'
+  ...
+# Subtest: Admin usa editor visual lado a lado e produto não abre em dialog/modal
+ok 256 - Admin usa editor visual lado a lado e produto não abre em dialog/modal
+  ---
+  duration_ms: 2.244814
+  type: 'test'
+  ...
+# Subtest: prévia pode ser clicada para selecionar e editar elementos reais da loja
+ok 257 - prévia pode ser clicada para selecionar e editar elementos reais da loja
+  ---
+  duration_ms: 0.767124
+  type: 'test'
+  ...
+# Subtest: editor de foto oferece recorte, arrastar, zoom, formato e exportação antes do upload
+ok 258 - editor de foto oferece recorte, arrastar, zoom, formato e exportação antes do upload
+  ---
+  duration_ms: 0.529642
+  type: 'test'
+  ...
+# Subtest: preview same-origin é permitida sem liberar enquadramento por sites externos
+ok 259 - preview same-origin é permitida sem liberar enquadramento por sites externos
+  ---
+  duration_ms: 0.308298
+  type: 'test'
+  ...
+# Subtest: modo de preview ignora age gate e mantém produtos ocultos fora da grade
+ok 260 - modo de preview ignora age gate e mantém produtos ocultos fora da grade
+  ---
+  duration_ms: 0.475663
+  type: 'test'
+  ...
+1..260
+# tests 260
+# suites 0
+# pass 260
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 15064.751962
+PRODUCTION BUILD OK - v11.1.8; 436 arquivos; 46629571 bytes; manifesto verificado
+Saída: dist
+MEDIA OK — 43 IDs preservados; 33 imagens únicas; 237 referências verificadas nos catálogos.
+RELEASE OK — 435 hashes conferidos; nenhuma mídia referenciada ausente.
+BUILD CONCLUÍDO (offline). Consulte dist/BUILD-INFO.json; serviços externos não são homologados por este comando.
+
+> integrall-online@11.1.8 test:production:http
+> node scripts/production-http-smoke.mjs dist/public
+
+PRODUCTION HTTP SMOKE OK - 10 cenários; 435 hashes verificados

@@ -1,0 +1,22 @@
+INTEGRALL — REVISÃO CLIENTE R2
+Data: 6 de setembro de 2026
+Versão interna: 11.1.8 (sem downgrade)
+Nome externo do ZIP: INTEGRALL-v11.0.4-corrigido-auditado.zip
+Base: entrega auditada anterior, SHA-256 463dfb326bbb87535a2b4d44084626bcb77f292ae83c2261147753262e7487eb
+
+Leia REVISAO-CLIENTE-R2.md, TESTES-CLIENTE-R2.md e APRESENTACAO-AO-CLIENTE.md.
+Código, assets, estado recebido, testes, evidências e build offline incluídos.
+Dependências e lockfile mantidos. Não inclui node_modules, caches ou .env privado.
+
+Instalação: npm ci (não concluída neste ambiente).
+Desenvolvimento: npm run dev
+Verificação dos bytes recebidos: npm run source:verify
+Testes novos: npm run test:client
+Testes locais completos: npm run test:offline (260 aprovados).
+Build completo: npm run build (falhou por Express ausente).
+Build offline: npm run build:offline (aprovado, não homologação integral).
+Verificação do pacote dist: npm run release:verify
+Smoke estático HTTP: npm run test:production:http (10 cenários aprovados).
+
+O comprovante externo RETESTE-ZIP-CLIENTE-R2.txt registra o reteste efetivo
+após extração e o SHA-256 exato do ZIP entregue. Relatórios antigos são históricos.

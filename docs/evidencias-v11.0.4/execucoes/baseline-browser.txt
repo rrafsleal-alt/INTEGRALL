@@ -1,0 +1,2 @@
+PRODUCTION BROWSER SMOKE NÃO EXECUTADO
+- motivo: Page.goto: net::ERR_BLOCKED_BY_ADMINISTRATOR at http://127.0.0.1:46773/produto/suco-integral-de-uva-bordo

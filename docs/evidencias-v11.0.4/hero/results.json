@@ -1,0 +1,558 @@
+{
+  "status": "passed",
+  "scope": "Controlled about:blank fixture; actual shipped media/catalog, CSP removed only in fixture; no network/backend validation",
+  "cases": 10,
+  "results": [
+    {
+      "width": 320,
+      "scrollWidth": 305,
+      "brand": {
+        "x": 16,
+        "y": 20.59375,
+        "w": 118.34375,
+        "h": 26.796875,
+        "visible": true
+      },
+      "menu": {
+        "x": 249,
+        "y": 12,
+        "w": 40,
+        "h": 44,
+        "visible": true
+      },
+      "account": {
+        "x": 156,
+        "y": 12,
+        "w": 40,
+        "h": 44,
+        "visible": true
+      },
+      "cart": {
+        "x": 198,
+        "y": 12,
+        "w": 49,
+        "h": 44,
+        "visible": true
+      },
+      "video": {
+        "paused": false,
+        "speed": 1.35,
+        "width": 720,
+        "height": 846,
+        "loaded": 4
+      },
+      "featurePrice": "R$ 26,99",
+      "navVisibility": "hidden",
+      "publicProducts": 5,
+      "motion": "no-preference",
+      "catalogSync": {
+        "price": "R$ 49,90",
+        "name": "Vinho — atualização de teste",
+        "selected": "variant-1786125472992-y1279u",
+        "unavailableHidden": true,
+        "deletedHidden": true
+      },
+      "businessIdentitySync": {
+        "text": "Fornecedor de teste • CPF/CNPJ: 00000000000 • Endereço fictício • teste@example.invalid",
+        "email": "teste@example.invalid"
+      },
+      "errors": []
+    },
+    {
+      "width": 360,
+      "scrollWidth": 345,
+      "brand": {
+        "x": 16,
+        "y": 20.59375,
+        "w": 118.34375,
+        "h": 26.796875,
+        "visible": true
+      },
+      "menu": {
+        "x": 289,
+        "y": 12,
+        "w": 40,
+        "h": 44,
+        "visible": true
+      },
+      "account": {
+        "x": 196,
+        "y": 12,
+        "w": 40,
+        "h": 44,
+        "visible": true
+      },
+      "cart": {
+        "x": 238,
+        "y": 12,
+        "w": 49,
+        "h": 44,
+        "visible": true
+      },
+      "video": {
+        "paused": false,
+        "speed": 1.35,
+        "width": 720,
+        "height": 846,
+        "loaded": 4
+      },
+      "featurePrice": "R$ 26,99",
+      "navVisibility": "hidden",
+      "publicProducts": 5,
+      "motion": "no-preference",
+      "catalogSync": {
+        "price": "R$ 49,90",
+        "name": "Vinho — atualização de teste",
+        "selected": "variant-1786125472992-y1279u",
+        "unavailableHidden": true,
+        "deletedHidden": true
+      },
+      "businessIdentitySync": {
+        "text": "Fornecedor de teste • CPF/CNPJ: 00000000000 • Endereço fictício • teste@example.invalid",
+        "email": "teste@example.invalid"
+      },
+      "errors": []
+    },
+    {
+      "width": 390,
+      "scrollWidth": 375,
+      "brand": {
+        "x": 16,
+        "y": 20.21875,
+        "w": 123.625,
+        "h": 27.546875,
+        "visible": true
+      },
+      "menu": {
+        "x": 319,
+        "y": 12,
+        "w": 40,
+        "h": 44,
+        "visible": true
+      },
+      "account": {
+        "x": 226,
+        "y": 12,
+        "w": 40,
+        "h": 44,
+        "visible": true
+      },
+      "cart": {
+        "x": 268,
+        "y": 12,
+        "w": 49,
+        "h": 44,
+        "visible": true
+      },
+      "video": {
+        "paused": false,
+        "speed": 1.35,
+        "width": 720,
+        "height": 846,
+        "loaded": 4
+      },
+      "featurePrice": "R$ 26,99",
+      "navVisibility": "hidden",
+      "publicProducts": 5,
+      "motion": "no-preference",
+      "catalogSync": {
+        "price": "R$ 49,90",
+        "name": "Vinho — atualização de teste",
+        "selected": "variant-1786125472992-y1279u",
+        "unavailableHidden": true,
+        "deletedHidden": true
+      },
+      "businessIdentitySync": {
+        "text": "Fornecedor de teste • CPF/CNPJ: 00000000000 • Endereço fictício • teste@example.invalid",
+        "email": "teste@example.invalid"
+      },
+      "errors": []
+    },
+    {
+      "width": 430,
+      "scrollWidth": 415,
+      "brand": {
+        "x": 16,
+        "y": 19.328125,
+        "w": 136.390625,
+        "h": 29.34375,
+        "visible": true
+      },
+      "menu": {
+        "x": 359,
+        "y": 12,
+        "w": 40,
+        "h": 44,
+        "visible": true
+      },
+      "account": {
+        "x": 266,
+        "y": 12,
+        "w": 40,
+        "h": 44,
+        "visible": true
+      },
+      "cart": {
+        "x": 308,
+        "y": 12,
+        "w": 49,
+        "h": 44,
+        "visible": true
+      },
+      "video": {
+        "paused": false,
+        "speed": 1.35,
+        "width": 720,
+        "height": 846,
+        "loaded": 4
+      },
+      "featurePrice": "R$ 26,99",
+      "navVisibility": "hidden",
+      "publicProducts": 5,
+      "motion": "no-preference",
+      "catalogSync": {
+        "price": "R$ 49,90",
+        "name": "Vinho — atualização de teste",
+        "selected": "variant-1786125472992-y1279u",
+        "unavailableHidden": true,
+        "deletedHidden": true
+      },
+      "businessIdentitySync": {
+        "text": "Fornecedor de teste • CPF/CNPJ: 00000000000 • Endereço fictício • teste@example.invalid",
+        "email": "teste@example.invalid"
+      },
+      "errors": []
+    },
+    {
+      "width": 768,
+      "scrollWidth": 753,
+      "brand": {
+        "x": 16,
+        "y": 17.390625,
+        "w": 163.5,
+        "h": 33.203125,
+        "visible": true
+      },
+      "menu": {
+        "x": 697,
+        "y": 12,
+        "w": 40,
+        "h": 44,
+        "visible": true
+      },
+      "account": {
+        "x": 604,
+        "y": 12,
+        "w": 40,
+        "h": 44,
+        "visible": true
+      },
+      "cart": {
+        "x": 646,
+        "y": 12,
+        "w": 49,
+        "h": 44,
+        "visible": true
+      },
+      "video": {
+        "paused": false,
+        "speed": 1.35,
+        "width": 720,
+        "height": 846,
+        "loaded": 4
+      },
+      "featurePrice": "R$ 26,99",
+      "navVisibility": "hidden",
+      "publicProducts": 5,
+      "motion": "no-preference",
+      "catalogSync": {
+        "price": "R$ 49,90",
+        "name": "Vinho — atualização de teste",
+        "selected": "variant-1786125472992-y1279u",
+        "unavailableHidden": true,
+        "deletedHidden": true
+      },
+      "businessIdentitySync": {
+        "text": "Fornecedor de teste • CPF/CNPJ: 00000000000 • Endereço fictício • teste@example.invalid",
+        "email": "teste@example.invalid"
+      },
+      "errors": []
+    },
+    {
+      "width": 790,
+      "scrollWidth": 775,
+      "brand": {
+        "x": 16,
+        "y": 17.390625,
+        "w": 163.5,
+        "h": 33.203125,
+        "visible": true
+      },
+      "menu": {
+        "x": 719,
+        "y": 12,
+        "w": 40,
+        "h": 44,
+        "visible": true
+      },
+      "account": {
+        "x": 626,
+        "y": 12,
+        "w": 40,
+        "h": 44,
+        "visible": true
+      },
+      "cart": {
+        "x": 668,
+        "y": 12,
+        "w": 49,
+        "h": 44,
+        "visible": true
+      },
+      "video": {
+        "paused": false,
+        "speed": 1.35,
+        "width": 720,
+        "height": 846,
+        "loaded": 4
+      },
+      "featurePrice": "R$ 26,99",
+      "navVisibility": "hidden",
+      "publicProducts": 5,
+      "motion": "no-preference",
+      "catalogSync": {
+        "price": "R$ 49,90",
+        "name": "Vinho — atualização de teste",
+        "selected": "variant-1786125472992-y1279u",
+        "unavailableHidden": true,
+        "deletedHidden": true
+      },
+      "businessIdentitySync": {
+        "text": "Fornecedor de teste • CPF/CNPJ: 00000000000 • Endereço fictício • teste@example.invalid",
+        "email": "teste@example.invalid"
+      },
+      "errors": []
+    },
+    {
+      "width": 820,
+      "scrollWidth": 805,
+      "brand": {
+        "x": 21,
+        "y": 22.796875,
+        "w": 247.109375,
+        "h": 40.40625,
+        "visible": true
+      },
+      "menu": {
+        "x": 0,
+        "y": 0,
+        "w": 0,
+        "h": 0,
+        "visible": false
+      },
+      "account": {
+        "x": 709.765625,
+        "y": 21,
+        "w": 38,
+        "h": 44,
+        "visible": true
+      },
+      "cart": {
+        "x": 752.765625,
+        "y": 21,
+        "w": 57,
+        "h": 44,
+        "visible": true
+      },
+      "video": {
+        "paused": false,
+        "speed": 1.35,
+        "width": 1280,
+        "height": 1502,
+        "loaded": 4
+      },
+      "featurePrice": "R$ 26,99",
+      "navVisibility": "visible",
+      "publicProducts": 5,
+      "motion": "no-preference",
+      "catalogSync": {
+        "price": "R$ 49,90",
+        "name": "Vinho — atualização de teste",
+        "selected": "variant-1786125472992-y1279u",
+        "unavailableHidden": true,
+        "deletedHidden": true
+      },
+      "businessIdentitySync": {
+        "text": "Fornecedor de teste • CPF/CNPJ: 00000000000 • Endereço fictício • teste@example.invalid",
+        "email": "teste@example.invalid"
+      },
+      "errors": []
+    },
+    {
+      "width": 1024,
+      "scrollWidth": 1009,
+      "brand": {
+        "x": 21,
+        "y": 22.796875,
+        "w": 247.109375,
+        "h": 40.40625,
+        "visible": true
+      },
+      "menu": {
+        "x": 0,
+        "y": 0,
+        "w": 0,
+        "h": 0,
+        "visible": false
+      },
+      "account": {
+        "x": 888,
+        "y": 21,
+        "w": 38,
+        "h": 44,
+        "visible": true
+      },
+      "cart": {
+        "x": 931,
+        "y": 21,
+        "w": 57,
+        "h": 44,
+        "visible": true
+      },
+      "video": {
+        "paused": false,
+        "speed": 1.35,
+        "width": 1280,
+        "height": 1502,
+        "loaded": 4
+      },
+      "featurePrice": "R$ 26,99",
+      "navVisibility": "visible",
+      "publicProducts": 5,
+      "motion": "no-preference",
+      "catalogSync": {
+        "price": "R$ 49,90",
+        "name": "Vinho — atualização de teste",
+        "selected": "variant-1786125472992-y1279u",
+        "unavailableHidden": true,
+        "deletedHidden": true
+      },
+      "businessIdentitySync": {
+        "text": "Fornecedor de teste • CPF/CNPJ: 00000000000 • Endereço fictício • teste@example.invalid",
+        "email": "teste@example.invalid"
+      },
+      "errors": []
+    },
+    {
+      "width": 1440,
+      "scrollWidth": 1425,
+      "brand": {
+        "x": 36,
+        "y": 22.796875,
+        "w": 247.109375,
+        "h": 40.40625,
+        "visible": true
+      },
+      "menu": {
+        "x": 0,
+        "y": 0,
+        "w": 0,
+        "h": 0,
+        "visible": false
+      },
+      "account": {
+        "x": 1289,
+        "y": 21,
+        "w": 38,
+        "h": 44,
+        "visible": true
+      },
+      "cart": {
+        "x": 1332,
+        "y": 21,
+        "w": 57,
+        "h": 44,
+        "visible": true
+      },
+      "video": {
+        "paused": false,
+        "speed": 1.35,
+        "width": 1280,
+        "height": 1502,
+        "loaded": 4
+      },
+      "featurePrice": "R$ 26,99",
+      "navVisibility": "visible",
+      "publicProducts": 5,
+      "motion": "no-preference",
+      "catalogSync": {
+        "price": "R$ 49,90",
+        "name": "Vinho — atualização de teste",
+        "selected": "variant-1786125472992-y1279u",
+        "unavailableHidden": true,
+        "deletedHidden": true
+      },
+      "businessIdentitySync": {
+        "text": "Fornecedor de teste • CPF/CNPJ: 00000000000 • Endereço fictício • teste@example.invalid",
+        "email": "teste@example.invalid"
+      },
+      "errors": []
+    },
+    {
+      "width": 390,
+      "scrollWidth": 375,
+      "brand": {
+        "x": 16,
+        "y": 20.21875,
+        "w": 123.625,
+        "h": 27.546875,
+        "visible": true
+      },
+      "menu": {
+        "x": 319,
+        "y": 12,
+        "w": 40,
+        "h": 44,
+        "visible": true
+      },
+      "account": {
+        "x": 226,
+        "y": 12,
+        "w": 40,
+        "h": 44,
+        "visible": true
+      },
+      "cart": {
+        "x": 268,
+        "y": 12,
+        "w": 49,
+        "h": 44,
+        "visible": true
+      },
+      "video": {
+        "paused": true,
+        "speed": 1.35,
+        "width": 0,
+        "height": 0,
+        "loaded": 0
+      },
+      "featurePrice": "R$ 26,99",
+      "navVisibility": "hidden",
+      "publicProducts": 5,
+      "motion": "reduce",
+      "catalogSync": {
+        "price": "R$ 49,90",
+        "name": "Vinho — atualização de teste",
+        "selected": "variant-1786125472992-y1279u",
+        "unavailableHidden": true,
+        "deletedHidden": true
+      },
+      "businessIdentitySync": {
+        "text": "Fornecedor de teste • CPF/CNPJ: 00000000000 • Endereço fictício • teste@example.invalid",
+        "email": "teste@example.invalid"
+      },
+      "errors": []
+    }
+  ],
+  "failures": []
+}

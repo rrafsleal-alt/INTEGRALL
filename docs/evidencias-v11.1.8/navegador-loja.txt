@@ -1,0 +1,27 @@
+
+> integrall-online@11.1.8 test:browser
+> python3 scripts/browser-regression.py --root . --out docs/evidencias-v11.1.8/loja
+
+[browser] 280px
+[browser] 320px
+[browser] 360px
+[browser] 375px
+[browser] 390px
+[browser] 412px
+[browser] 430px
+[browser] 480px
+[browser] 600px
+[browser] 768px
+[browser] 820px
+[browser] 1024px
+[browser] 1280px
+[browser] 1366px
+[browser] 1440px
+[browser] 1600px
+[browser] 1920px
+[browser] 2560px
+{
+  "status": "APROVADO",
+  "widths": 18,
+  "failures": []
+}

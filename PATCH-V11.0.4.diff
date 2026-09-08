@@ -1,0 +1,1572 @@
+# INTEGRALL 11.1.8 — patch de fontes/testes/configuração; base é o ZIP recebido.
+# Os arquivos completos e o inventário de saídas geradas acompanham a entrega.
+--- a/.env.example
++++ b/.env.example
+@@ -14,11 +14,11 @@
+ DATABASE_CA_BASE64=
+ 
+ # ===== Administração segura =====
+-# Desenvolvimento local: sem ADMIN_PASSWORD_HASH e com a opção abaixo em true,
+-# a credencial inicial definida no briefing permite o primeiro acesso.
++# Desenvolvimento local: com a opção abaixo em true, somente a credencial
++# inicial do briefing é aceita; hashes antigos do ambiente ficam inativos.
+ # Produção: gere um hash com `npm run admin:hash`, preencha ADMIN_PASSWORD_HASH
+-# e mantenha ADMIN_DEFAULT_LOGIN_ENABLED=false. Uma senha configurada substitui
+-# integralmente a credencial inicial; não existe fallback concorrente.
++# e mantenha ADMIN_DEFAULT_LOGIN_ENABLED=false. Nesse modo personalizado,
++# somente o hash configurado é aceito; não existe fallback concorrente.
+ ADMIN_EMAIL=
+ ADMIN_PASSWORD_HASH=
+ ADMIN_DEFAULT_LOGIN_ENABLED=true
+--- a/package.json
++++ b/package.json
+@@ -21,9 +21,9 @@
+     "build": "node scripts/build.mjs",
+     "verify": "npm run build",
+     "admin:check-default": "node scripts/check-default-admin.mjs",
+-    "test:dependency-free": "node --test --test-concurrency=1 tests/auth.test.js tests/carrier-split.test.js tests/catalog.test.js tests/correios.test.js tests/customer-auth-hardening.test.js tests/default-admin.test.js tests/image-upload.test.js tests/jadlog.test.js tests/mailer.test.js tests/order-state.test.js tests/payment-state.test.js tests/payments-checkout.test.js tests/providers.test.js tests/public-order.test.js tests/repository.test.js tests/v11.1-commerce.test.js tests/v11.1.2-ux.test.js tests/v11.1.3-ux.test.js tests/variant-images.test.js tests/visual-editor.test.js tests/v11.1.4-ux.test.js tests/v11.1.5-ux.test.js tests/v11.1.6-expert.test.js tests/release-v11.1.8.test.js",
++    "test:dependency-free": "node --test --test-concurrency=1 tests/auth.test.js tests/carrier-split.test.js tests/catalog.test.js tests/correios.test.js tests/customer-auth-hardening.test.js tests/default-admin.test.js tests/image-upload.test.js tests/jadlog.test.js tests/mailer.test.js tests/order-state.test.js tests/payment-state.test.js tests/payments-checkout.test.js tests/providers.test.js tests/public-order.test.js tests/repository.test.js tests/v11.1-commerce.test.js tests/v11.1.2-ux.test.js tests/v11.1.3-ux.test.js tests/variant-images.test.js tests/visual-editor.test.js tests/v11.1.4-ux.test.js tests/v11.1.5-ux.test.js tests/v11.1.6-expert.test.js tests/release-v11.1.8.test.js tests/audit-regression.test.js",
+     "test:http": "node --test --test-concurrency=1 tests/http.test.js",
+-    "test:offline": "node --test --test-concurrency=1 tests/auth.test.js tests/carrier-split.test.js tests/catalog.test.js tests/correios.test.js tests/customer-auth-hardening.test.js tests/default-admin.test.js tests/image-upload.test.js tests/jadlog.test.js tests/mailer.test.js tests/order-state.test.js tests/payment-state.test.js tests/payments-checkout.test.js tests/providers.test.js tests/public-order.test.js tests/repository.test.js tests/v11.1-commerce.test.js tests/v11.1.2-ux.test.js tests/v11.1.3-ux.test.js tests/variant-images.test.js tests/visual-editor.test.js tests/v11.1.4-ux.test.js tests/v11.1.5-ux.test.js tests/v11.1.6-expert.test.js tests/release-v11.1.8.test.js",
++    "test:offline": "node --test --test-concurrency=1 tests/auth.test.js tests/carrier-split.test.js tests/catalog.test.js tests/correios.test.js tests/customer-auth-hardening.test.js tests/default-admin.test.js tests/image-upload.test.js tests/jadlog.test.js tests/mailer.test.js tests/order-state.test.js tests/payment-state.test.js tests/payments-checkout.test.js tests/providers.test.js tests/public-order.test.js tests/repository.test.js tests/v11.1-commerce.test.js tests/v11.1.2-ux.test.js tests/v11.1.3-ux.test.js tests/variant-images.test.js tests/visual-editor.test.js tests/v11.1.4-ux.test.js tests/v11.1.5-ux.test.js tests/v11.1.6-expert.test.js tests/release-v11.1.8.test.js tests/audit-regression.test.js",
+     "test:browser": "python3 scripts/browser-regression.py --root . --out docs/evidencias-v11.1.8/loja",
+     "build:production": "npm run build",
+     "test:browser:admin": "python3 scripts/admin-browser-regression.py . docs/evidencias-v11.1.8/admin",
+@@ -43,7 +43,11 @@
+     "deployment:check": "node scripts/deployment-check.mjs",
+     "test:browser:real": "python3 scripts/browser-real.py --root . --out docs/evidencias-v11.1.8/real",
+     "build:offline": "node scripts/build.mjs --offline",
+-    "source:verify": "node scripts/verify-source.mjs"
++    "source:verify": "node scripts/verify-source.mjs",
++    "test:audit": "node --test tests/audit-regression.test.js",
++    "test:browser:audit": "python3 scripts/browser-regression.py --root . --out docs/evidencias-v11.0.4/fixture",
++    "test:browser:audit:real": "python3 scripts/audit-real-layout.py --root . --out docs/evidencias-v11.0.4/produtos-reais",
++    "test:browser:audit:admin": "python3 scripts/audit-admin-browser.py --root . --out docs/evidencias-v11.0.4/admin-controladores"
+   },
+   "dependencies": {
+     "express": "5.1.0",
+--- a/public/admin.html
++++ b/public/admin.html
+@@ -9,7 +9,7 @@
+   <title>INTEGRALL | Administração</title>
+   <link rel="icon" href="/assets/icons/favicon.svg">
+   <link rel="stylesheet" href="/css/admin.css?v=11.1.8">
+-  <script src="/js/admin.js?v=11.1.8" defer></script>
++  <script src="/js/admin.js?v=11.1.8-audit-20260906" defer></script>
+ </head>
+ <body>
+   <a class="skip-link" href="#main">Ir para o conteúdo</a>
+@@ -27,6 +27,7 @@
+   </header>
+ 
+   <main id="main">
++    <p id="adminSessionFeedback" class="feedback" role="alert" hidden></p>
+     <section class="login-panel" id="loginView" aria-labelledby="loginTitle">
+       <div class="login-card">
+         <p class="eyebrow">Acesso protegido</p>
+--- a/public/css/store.css
++++ b/public/css/store.css
+@@ -121,14 +121,13 @@
+ .modal{position:fixed;z-index:120;left:50%;top:50%;width:min(980px,calc(100% - 28px));max-height:92dvh;display:flex;flex-direction:column;opacity:0;visibility:hidden;background:#fff;box-shadow:0 25px 65px rgba(0,0,0,.18);transform:translate(-50%,-48%) scale(.985);transition:.2s;overflow:hidden}
+ .modal.open{opacity:1;visibility:visible;transform:translate(-50%,-50%) scale(1)}
+ .modal-body{padding:22px;overflow:auto}
+-.product-details-inline{position:fixed;z-index:120;left:50%;left:50vw;top:50%;top:50dvh;width:min(1120px,calc(100% - 32px));max-height:min(92dvh,920px);min-width:0;margin:0;padding:0;border:1px solid var(--line);background:#fff;box-shadow:0 28px 80px rgba(31,15,18,.22);transform:translate(-50%,-50%) scale(.985);transform-origin:center;opacity:0;visibility:hidden;overflow-x:hidden;overflow-y:auto;overflow-wrap:anywhere;overscroll-behavior:auto;scrollbar-gutter:stable;-webkit-overflow-scrolling:touch;touch-action:pan-y pinch-zoom;transition:opacity .18s ease,transform .18s ease,visibility .18s ease}
+-.product-details-inline.open{opacity:1;visibility:visible;transform:translate(-50%,-50%) scale(1)}
+-.product-details-inline[hidden]{display:none!important}
++.product-details-inline{position:relative;width:min(1120px,calc(100% - 32px));min-width:0;margin:28px auto 48px;padding:0;border:1px solid var(--line);background:#fff;box-shadow:0 12px 32px rgba(31,15,18,.08);overflow:visible;overflow-wrap:anywhere;scroll-margin-top:100px}
++.product-details-inline[hidden]{display:none}
+ .product-details-inline .gallery-main .smart-image-main{object-fit:contain}
+-.product-details-toolbar{position:sticky;z-index:8;top:0;display:flex;justify-content:flex-end;margin:0;padding:10px 12px;border-bottom:1px solid var(--line);background:rgba(255,255,255,.98);backdrop-filter:none;-webkit-backdrop-filter:none}
++.product-details-toolbar{display:flex;justify-content:flex-end;margin:0;padding:10px 12px;border-bottom:1px solid var(--line);background:#fff}
+ .product-details-body{min-width:0;max-height:none;padding:clamp(18px,2.4vw,30px);overflow:visible}
+-.product-details-grid{display:grid;grid-template-columns:minmax(280px,.88fr) minmax(0,1.12fr);gap:clamp(22px,3vw,42px);align-items:start}
+-.product-gallery{position:sticky;top:58px;width:min(100%,500px);margin:0 auto}
++.product-details-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:clamp(22px,3vw,42px);align-items:start}
++.product-gallery{position:static;width:min(100%,500px);min-width:0;margin:0 auto}
+ .catalog-pagination{display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap;margin:34px 0 0;padding-top:22px;border-top:1px solid var(--line);color:var(--muted);font-size:.76rem}
+ .catalog-pagination[hidden]{display:none!important}
+ .product-info{min-width:0;overflow-wrap:anywhere}
+@@ -189,7 +188,7 @@
+ .toast-action{margin-left:10px;padding:0;border:0;background:none;color:#fff;text-decoration:underline;font-size:inherit}
+ 
+ @media(max-width:900px){
+-  .product-details-inline{width:min(760px,calc(100% - 24px));max-height:94dvh}
++  .product-details-inline{width:calc(100% - 24px)}
+   .product-details-body{max-height:none}
+   .product-details-grid{grid-template-columns:minmax(0,1fr)}
+   .product-gallery{position:static;width:min(100%,480px)}
+@@ -221,7 +220,7 @@
+ }
+ 
+ @media(max-width:620px){
+-  .product-details-inline{width:calc(100% - 14px);max-height:96dvh}
++  .product-details-inline{width:calc(100% - 20px);scroll-margin-top:90px}
+   .product-details-body{max-height:none;padding:14px}
+   .product-details-toolbar{padding:8px}
+   .gallery-thumbs{grid-template-columns:repeat(4,minmax(0,1fr))}
+--- a/public/index.html
++++ b/public/index.html
+@@ -28,7 +28,7 @@
+ <link id="siteFavicon" rel="icon" href="/assets/icons/favicon.svg"/>
+ <link rel="apple-touch-icon" sizes="180x180" href="/assets/icons/apple-touch-icon.png"/>
+ <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":["Organization","Store"],"@id":"#organization","name":"INTEGRALL","email":"integrallwine@gmail.com","logo":"/assets/icons/apple-touch-icon.png"},{"@type":"WebSite","@id":"#website","name":"INTEGRALL","publisher":{"@id":"#organization"},"inLanguage":"pt-BR"}]}</script>
+-<link rel="stylesheet" href="/css/store.css?v=11.1.8"/>
++<link rel="stylesheet" href="/css/store.css?v=11.1.8-audit-20260906"/>
+ <link rel="stylesheet" href="/css/checkout.css?v=11.1.8"/>
+ <link rel="stylesheet" href="/css/premium-v104.css?v=11.1.8"/>
+ <link rel="stylesheet" href="/css/commerce-v111.css?v=11.1.8"/>
+@@ -205,36 +205,7 @@
+     </div>
+   </section>
+ 
+-  <section class="premium-closing reveal" aria-label="Manifesto final">
+-    <p>Curadoria, origem e sabor.</p>
+-    <h2>Escolhas que fazem<br/>o momento <em>permanecer.</em></h2>
+-    <button class="premium-text-link light" id="closingExplore" type="button">Explorar a coleção <span>→</span></button>
+-  </section>
+-</main>
+-
+-<footer class="footer premium-footer" data-visual-region="footer" id="footer">
+-  <div class="premium-footer-grid">
+-    <div class="premium-footer-brand">
+-      <div class="footer-secret-brand" data-footer-block="logo" title="">
+-        <img alt="" class="brand-logo brand-logo-footer" decoding="async" hidden id="footerLogo"/>
+-        <span class="footer-brand-copy" data-brand-copy><b data-brand>INTEGRALL</b><small data-subtitle>Wine</small></span>
+-      </div>
+-      <p data-footer-block="description">A arte do sabor em sua forma mais nobre.</p>
+-      <div class="premium-socials"><a href="https://instagram.com/integrallwine" target="_blank" rel="noopener" aria-label="Instagram">◎</a><a href="mailto:integrallwine@gmail.com" aria-label="E-mail">✉</a></div>
+-    </div>
+-    <div class="premium-footer-col"><h3>Compre</h3><button data-premium-page="vinhos" type="button">Vinhos</button><button data-premium-page="cafes" type="button">Cafés</button><button data-premium-page="sucos" type="button">Sucos</button><button data-premium-page="petit-four" type="button">Gourmet</button></div>
+-    <div class="premium-footer-col"><h3>Institucional</h3><button data-scroll-to="purposeSection" type="button">Sobre nós</button><button data-scroll-to="purposeSection" type="button">Nosso propósito</button><button data-scroll-to="collectionSection" type="button">Curadoria</button></div>
+-    <div class="premium-footer-col"><h3>Atendimento</h3><a id="emailLink" data-disabled="0" href="mailto:integrallwine@gmail.com"><span id="emailText">integrallwine@gmail.com</span></a><a id="instagramLink" data-disabled="0" href="https://instagram.com/integrallwine" target="_blank" rel="noopener"><span id="instagramText">@integrallwine</span></a><span data-address id="addressText">Retirada e entrega combinadas no atendimento.</span></div>
+-    <div class="premium-footer-col premium-newsletter"><h3>Contato</h3><p>Novidades, produtos e atendimento pelos nossos canais oficiais.</p><a class="premium-footer-contact-btn" href="mailto:integrallwine@gmail.com">Falar com a INTEGRALL <span>→</span></a></div>
+-  </div>
+-  <div class="premium-legal">
+-    <p class="footer-business-identity" id="footerBusinessIdentity" hidden></p>
+-    <div class="legal-links"><button data-legal="privacy" type="button">Privacidade</button><button data-legal="terms" type="button">Termos</button><button data-legal="returns" type="button">Trocas e devoluções</button></div>
+-    <div class="footer-bottom" data-footer-block="legal"><span>© <span id="year">2026</span> <span data-brand>INTEGRALL</span>. Todos os direitos reservados.</span><span data-mode id="modeLabel">Catálogo público</span></div>
+-    <div class="footer-age-notice">Venda de bebidas alcoólicas proibida para menores de 18 anos — Lei nº 13.106/2015. Aprecie com moderação.</div>
+-  </div>
+-</footer>
+-<section aria-hidden="true" aria-labelledby="modalName" aria-modal="true" class="product-details-inline" hidden id="productDetails" role="dialog" tabindex="-1">
++<section aria-hidden="true" aria-labelledby="modalName" class="product-details-inline" hidden id="productDetails" role="region" tabindex="-1">
+   <div class="product-details-toolbar">
+     <button aria-label="Fechar detalhes do produto" class="btn ghost small" id="closeProductDetails" type="button">Fechar <span aria-hidden="true">✕</span></button>
+   </div>
+@@ -314,6 +285,37 @@
+     <div class="related" hidden id="relatedSection"><h3>Você também pode gostar</h3><div class="related-grid" id="relatedGrid"></div></div>
+   </div>
+ </section>
++
++  <section class="premium-closing reveal" aria-label="Manifesto final">
++    <p>Curadoria, origem e sabor.</p>
++    <h2>Escolhas que fazem<br/>o momento <em>permanecer.</em></h2>
++    <button class="premium-text-link light" id="closingExplore" type="button">Explorar a coleção <span>→</span></button>
++  </section>
++</main>
++
++<footer class="footer premium-footer" data-visual-region="footer" id="footer">
++  <div class="premium-footer-grid">
++    <div class="premium-footer-brand">
++      <div class="footer-secret-brand" data-footer-block="logo" title="">
++        <img alt="" class="brand-logo brand-logo-footer" decoding="async" hidden id="footerLogo"/>
++        <span class="footer-brand-copy" data-brand-copy><b data-brand>INTEGRALL</b><small data-subtitle>Wine</small></span>
++      </div>
++      <p data-footer-block="description">A arte do sabor em sua forma mais nobre.</p>
++      <div class="premium-socials"><a href="https://instagram.com/integrallwine" target="_blank" rel="noopener" aria-label="Instagram">◎</a><a href="mailto:integrallwine@gmail.com" aria-label="E-mail">✉</a></div>
++    </div>
++    <div class="premium-footer-col"><h3>Compre</h3><button data-premium-page="vinhos" type="button">Vinhos</button><button data-premium-page="cafes" type="button">Cafés</button><button data-premium-page="sucos" type="button">Sucos</button><button data-premium-page="petit-four" type="button">Gourmet</button></div>
++    <div class="premium-footer-col"><h3>Institucional</h3><button data-scroll-to="purposeSection" type="button">Sobre nós</button><button data-scroll-to="purposeSection" type="button">Nosso propósito</button><button data-scroll-to="collectionSection" type="button">Curadoria</button></div>
++    <div class="premium-footer-col"><h3>Atendimento</h3><a id="emailLink" data-disabled="0" href="mailto:integrallwine@gmail.com"><span id="emailText">integrallwine@gmail.com</span></a><a id="instagramLink" data-disabled="0" href="https://instagram.com/integrallwine" target="_blank" rel="noopener"><span id="instagramText">@integrallwine</span></a><span data-address id="addressText">Retirada e entrega combinadas no atendimento.</span></div>
++    <div class="premium-footer-col premium-newsletter"><h3>Contato</h3><p>Novidades, produtos e atendimento pelos nossos canais oficiais.</p><a class="premium-footer-contact-btn" href="mailto:integrallwine@gmail.com">Falar com a INTEGRALL <span>→</span></a></div>
++  </div>
++  <div class="premium-legal">
++    <p class="footer-business-identity" id="footerBusinessIdentity" hidden></p>
++    <div class="legal-links"><button data-legal="privacy" type="button">Privacidade</button><button data-legal="terms" type="button">Termos</button><button data-legal="returns" type="button">Trocas e devoluções</button></div>
++    <div class="footer-bottom" data-footer-block="legal"><span>© <span id="year">2026</span> <span data-brand>INTEGRALL</span>. Todos os direitos reservados.</span><span data-mode id="modeLabel">Catálogo público</span></div>
++    <div class="footer-age-notice">Venda de bebidas alcoólicas proibida para menores de 18 anos — Lei nº 13.106/2015. Aprecie com moderação.</div>
++  </div>
++</footer>
++
+ <div class="overlay" id="overlay"></div>
+ <aside aria-hidden="true" aria-labelledby="cartTitle" aria-modal="true" class="drawer" id="cartDrawer" role="dialog">
+ <div class="panel-head"><h2 id="cartTitle">Minha sacola</h2><button aria-label="Fechar sacola" class="close-btn close-ui" type="button">✕</button></div>
+@@ -373,4 +375,4 @@
+ </section>
+ <div aria-live="polite" class="toast-stack" id="toasts"></div><script id="buildData" type="application/json">{"publicBuild":true,"appVersion":"11.1.8","version":10,"settings":{"catalogId":"catalog-1786110588222-8uuux6","brand":"INTEGRALL","subtitle":"Wine","catalogTitle":"Nossa seleção","catalogText":"Explore uma curadoria de vinhos, cafés, sucos e sabores especiais.","whatsapp":"","email":"integrallwine@gmail.com","instagram":"@integrallwine","address":"Retirada e entrega combinadas no atendimento.","footerDescription":"","shipMode":"quote","fixed":0,"free":0,"zoneFallback":"quote","pickup":"Retirada disponível mediante confirmação no atendimento.","zones":[],"visual":{"version":1,"preset":"editorial","assets":{"headerLogo":"","footerLogo":"","favicon":"","heroBackground":"/assets/brand/integrall-hero-cover.webp","headerBackground":"","footerBackground":"","pageBackground":""},"colors":{"page":"#ffffff","surface":"#ffffff","surfaceAlt":"#faf9f7","surfaceMuted":"#f4f1ec","primary":"#520f1a","primaryHover":"#711827","accent":"#b58a50","text":"#241c18","muted":"#756a62","line":"#dfd4c6","danger":"#a02c35","success":"#276447","buttonText":"#ffffff","headerBackground":"#24090d","footerBackground":"#35080e","cardBackground":"#ffffff","inputBackground":"#ffffff","heroText":"#fff7ec","heroOverlay":"rgba(0,0,0,.28)","headerText":"#f7ecdc","headerMuted":"#e5d7c5","footerText":"#e8d9c9","footerMuted":"#bdab9a","footerHeading":"#f6e9d7","footerAccent":"#c69b5a","price":"#302c29","badgeBackground":"rgba(255,255,255,.94)","badgeText":"#4a0a1a","outOfStockBackground":"rgba(74,10,26,.9)","outOfStockText":"#ffffff","overlay":"rgba(31,25,23,.18)"},"typography":{"bodyFont":"modern","headingFont":"classic","customBody":"","customHeading":"","baseSize":16,"bodyWeight":400,"headingWeight":400,"lineHeight":1.55,"headingScale":1.05,"navSize":10,"navSpacing":0.13,"brandSpacing":0.28,"navTransform":"uppercase"},"layout":{"maxWidth":1360,"gutterDesktop":64,"gutterMobile":20,"headerLayout":"inline","headerSticky":true,"headerPadding":20,"navGap":28,"headerOrder":["brand","nav","actions"],"catalogAlign":"left","catalogTop":80,"catalogBottom":100,"introMaxWidth":710,"blocks":["intro","filters","products"],"toolbarLayout":"columns","gridColumnsDesktop":4,"gridColumnsTablet":2,"gridColumnsMobile":1,"gridGapX":18,"gridGapY":46,"cardStyle":"minimal","cardAlign":"left","cardPadding":0,"imageRatio":"square","imageFit":"contain","radius":0,"buttonRadius":0,"inputRadius":0,"shadow":"none","footerAlign":"center","footerOrder":["description","contact","logo"],"headerLogoMode":"text","footerLogoMode":"text","headerLogoWidth":220,"footerLogoWidth":170,"heroMode":"plain","heroPadding":0,"heroRadius":0,"animations":true},"visibility":{"category":true,"unit":true,"stock":true,"quickAdd":true,"search":true,"filters":true,"resultCount":true,"footerDescription":true,"footerContact":true,"headerBrand":true,"headerNav":true,"headerActions":true,"intro":true,"filterBlock":true,"products":true,"footerLogo":true},"customCss":""}},"products":[{"id":"product-1786125158091-2hwfps","name":"Suco Integral de Uva bordô","slug":"suco-integral-de-uva-bordo","department":"sucos","subcategory":"Uva Bordô","brand":"Marqués de Mendonça","sku":"","imported":false,"country":"","region":"","price":2390,"unit":"Garrafa de 1L e 300ml","description":"Suco 100% integral de uva bordô, sem adição de açúcar, água ou conservantes. Pasteurizado para preservar o sabor intenso e os antioxidantes naturais da fruta. Produzido pela Marqués de Mendonça, é o suco de quem leva uva a sério: encorpado, de cor profunda e doçura natural da própria fruta. Disponível em garrafas de 300ml e 1 litro.","images":["/assets/products/01-suco-integral-de-uva-bord.webp"],"variants":[{"id":"variant-1786125213057-vsk38j","name":"300ml","price":1150,"stock":60,"unit":"","weightGrams":520,"image":"","position":1,"deletedAt":null},{"id":"variant-1786125277805-0nrmsu","name":"1L","price":2390,"stock":60,"unit":"","weightGrams":1500,"image":"","position":2,"deletedAt":null}],"attributes":{"volume":"1L e 300ml","flavor":"Uva Bordô","kind":"100% Integral","sugar":"Sem adição de açucar e adoçantes","storage":"Pasteurizado"},"stock":null,"stockMin":3,"maxPerOrder":null,"minPerOrder":null,"weightGrams":null,"lengthCm":9,"widthCm":9,"heightCm":32,"boxes":[{"variantId":"variant-1786125213057-vsk38j","units":12,"lengthCm":23,"widthCm":18,"heightCm":19,"weightGrams":6200},{"variantId":"variant-1786125277805-0nrmsu","units":12,"lengthCm":37,"widthCm":27,"heightCm":29,"weightGrams":18000}],"restockDate":"","preparation":"","available":true,"hidden":false,"featured":false,"madeToOrder":false,"seasonal":false,"giftEnabled":true,"position":1,"created":1786125158091,"updated":1786125308896,"deletedAt":null},{"id":"product-1786125523055-ivln6v","name":"Vinho Tinto Seco","slug":"vinho-tinto-seco","department":"vinhos","subcategory":"Vinho Tinto Seco","brand":"Marqués de Mendonça","sku":"332","imported":false,"country":"Brasil","region":"Serra Gaúcha","price":2699,"unit":"750ml","description":"Vinho tinto seco varietal de uva bordô, produzido pela Marqués de Mendonça na Serra Gaúcha. Aromas de frutas vermelhas maduras, corpo leve e taninos macios — um tinto honesto e fácil de gostar, ideal para o dia a dia. Harmoniza com massas ao molho vermelho, queijos e churrasco. Sirva entre 12° e 14°C. Teor alcoólico: 10,9%. Garrafas de 750ml e 375ml. Códigos do catálogo PDF: 332. Formatos: 750ml.","images":["/assets/products/02-vinho-tinto-seco.webp"],"variants":[{"id":"variant-1786125472992-y1279u","name":"750ml","price":2699,"stock":48,"unit":"","weightGrams":1300,"image":"","position":1,"deletedAt":null},{"id":"variant-1786125496593-h1h204","name":"375ml","price":2150,"stock":24,"unit":"","weightGrams":750,"image":"","position":2,"deletedAt":null}],"attributes":{"wineType":"Tinto","grape":"Bordô","alcohol":"10,9","volume":"750ml","serving":"12° a 14°"},"stock":null,"stockMin":3,"maxPerOrder":null,"minPerOrder":null,"weightGrams":null,"lengthCm":9,"widthCm":9,"heightCm":31,"boxes":[{"variantId":"variant-1786125472992-y1279u","units":12,"lengthCm":30,"widthCm":30,"heightCm":24,"weightGrams":14000},{"variantId":"variant-1786125472992-y1279u","units":6,"lengthCm":30,"widthCm":25,"heightCm":17,"weightGrams":7250}],"restockDate":"","preparation":"","available":true,"hidden":false,"featured":false,"madeToOrder":false,"seasonal":false,"giftEnabled":true,"position":2,"created":1786125523055,"updated":1786125523055,"deletedAt":null},{"id":"product-1786125594468-rlk598","name":"Mentirinha","slug":"mentirinha","department":"petit-four","subcategory":"Biscoito Folheado","brand":"Jurerê","sku":"948","imported":false,"country":"","region":"","price":5490,"unit":"Caixa com 2kg","description":"Biscoito folheado tradicional, crocante e delicado, feito em fornadas artesanais. A caixa de 2kg rende bem e é perfeita para servir com café, chá ou vinho de sobremesa. Validade de 6 meses. Pedido mínimo de 2 caixas. Códigos do catálogo PDF: 948. Formatos: Caixa 2 kg.","images":["/assets/recovered/1c10f7ef32d7e3a6e870cffa90741b4c496e512e3b37f667dd9edf331473a71f.webp"],"variants":[],"attributes":{"weight":"2kg","quantity":"caixa 2 kg","shelfLife":"6 meses","minOrder":"2 caixas"},"stock":30,"stockMin":3,"maxPerOrder":null,"minPerOrder":2,"weightGrams":2200,"lengthCm":35,"widthCm":25,"heightCm":12,"boxes":[],"restockDate":"","preparation":"","available":true,"hidden":false,"featured":false,"madeToOrder":false,"seasonal":false,"giftEnabled":true,"position":3,"created":1786125594468,"updated":1786125594468,"deletedAt":null},{"id":"product-1786125689329-bqbvu9","name":"Vó Damazia","slug":"vo-damazia","department":"cafes","subcategory":"Café Gerações","brand":"Gerações","sku":"","imported":false,"country":"","region":"","price":3990,"unit":"250g","description":"Café Gerações Vó Damazia: grãos 100% arábica cultivados na Serra Gaúcha, torra média que revela notas de chocolate e caramelo com acidez equilibrada. Uma homenagem de família em cada xícara. Embalagem de 250g.","images":["/assets/recovered/2ea21276cf85af8a2db2ce2a5e707f79503db89ad49cab194ea01f652a1a865a.webp"],"variants":[],"attributes":{"origin":"Serra Gaúcha","bean":"Arabica","roast":"Média","weight":"250g","method":"Torrado e moído","kind":"100% Arábica"},"stock":40,"stockMin":3,"maxPerOrder":null,"minPerOrder":null,"weightGrams":300,"lengthCm":18,"widthCm":8,"heightCm":26,"boxes":[],"restockDate":"","preparation":"","available":true,"hidden":false,"featured":false,"madeToOrder":false,"seasonal":false,"giftEnabled":true,"position":4,"created":1786125689329,"updated":1786125689329,"deletedAt":null},{"id":"product-1786125745701-ydcfi8","name":"Vinho verde Pescada","slug":"vinho-verde-pescada","department":"vinhos","subcategory":"Vinho Verde","brand":"Pescada","sku":"","imported":true,"country":"Portugal","region":"","price":6500,"unit":"750ml","description":"Vinho verde branco Pescada, importado de Portugal. Leve, fresco e levemente frisante, com notas cítricas e finalização limpa — o companheiro ideal de peixes, frutos do mar e tardes quentes. Sirva bem gelado. Garrafa de 750ml.","images":["/assets/products/05-vinho-verde-pescada.webp"],"variants":[],"attributes":{"wineType":"Branco","volume":"750ml"},"stock":24,"stockMin":3,"maxPerOrder":null,"minPerOrder":null,"weightGrams":1300,"lengthCm":9,"widthCm":9,"heightCm":31,"boxes":[{"variantId":"","units":12,"lengthCm":30,"widthCm":30,"heightCm":24,"weightGrams":14000},{"variantId":"","units":6,"lengthCm":30,"widthCm":25,"heightCm":17,"weightGrams":7250}],"restockDate":"","preparation":"","available":true,"hidden":false,"featured":false,"madeToOrder":false,"seasonal":false,"giftEnabled":true,"position":5,"created":1786125745701,"updated":1786125745701,"deletedAt":null}],"promotions":[],"commerce":{"businessName":"INTEGRALL | Boutique Gourmet","siteUrl":"","taxId":"","businessAddress":"","supportEmail":"integrallwine@gmail.com","supportPhone":"","privacyText":"POLÍTICA DE PRIVACIDADE\n\nA INTEGRALL coleta apenas os dados necessários para processar o seu pedido: nome, contato (e-mail ou telefone) e, quando houver entrega, o endereço. Esses dados são usados exclusivamente para: registrar e entregar o pedido, emitir comunicações sobre o próprio pedido e cumprir obrigações fiscais.\n\nNão vendemos nem compartilhamos seus dados com terceiros para fins de marketing. Os dados de pagamento são processados diretamente pelo provedor de pagamento (Mercado Pago) em ambiente próprio — a INTEGRALL não armazena números de cartão.\n\nConforme a Lei Geral de Proteção de Dados (Lei nº 13.709/2018), você pode solicitar a qualquer momento acesso, correção ou exclusão dos seus dados pelo nosso canal de atendimento. Os registros de pedidos são retidos pelo prazo necessário ao cumprimento de obrigações legais e fiscais.","termsText":"TERMOS DE USO\n\n1. Os preços, promoções, disponibilidade de estoque e prazos exibidos na loja podem ser atualizados sem aviso prévio; o valor válido é o confirmado no fechamento do pedido.\n\n2. A venda de bebidas alcoólicas é proibida para menores de 18 anos (Lei nº 13.106/2015). Ao comprar produtos alcoólicos, o cliente declara ser maior de idade, e a idade poderá ser conferida na entrega ou retirada mediante documento.\n\n3. O pedido é confirmado após o registro no sistema; o pagamento online, quando disponível, é processado pelo Mercado Pago em ambiente seguro.\n\n4. Para entregas via Correios, o prazo informado é uma estimativa da transportadora e começa a contar após a confirmação do pagamento e a postagem do pedido.\n\n5. Casos omissos serão tratados pelo canal de atendimento da loja.","returnsText":"TROCAS, DEVOLUÇÕES E CANCELAMENTOS\n\nArrependimento: nas compras realizadas fora do estabelecimento comercial, você pode exercer o direito de arrependimento no prazo legal de 7 dias, contado da assinatura ou do recebimento do produto, conforme o caso. Entre em contato pelo atendimento e informe o pedido. Os valores pagos serão restituídos na forma da legislação, sem transferir ao consumidor os custos necessários ao exercício desse direito.\n\nAvarias, produto incorreto e problemas de qualidade: comunique o ocorrido ao atendimento assim que possível. O número do pedido, uma descrição e fotos, quando disponíveis, ajudam na análise, mas a falta de fotos não impede a solicitação. Os prazos legais para reclamar de vícios não se confundem com os 7 dias de arrependimento. Para produtos não duráveis, o CDC prevê 30 dias para vícios aparentes ou de fácil constatação; nos vícios ocultos, a contagem se inicia quando o problema fica evidenciado.\n\nAlimentos e bebidas: preserve, quando possível, embalagem, lote e informações de validade e observe as condições de armazenamento. Não consuma produtos que apresentem sinais de deterioração ou risco. A abertura da embalagem não implica recusa automática da análise nem supressão dos direitos legais. O caso concreto será tratado conforme a legislação aplicável.\n\nCancelamento: solicite pelo atendimento, indicando o pedido. Antes do envio, o cancelamento será processado com restituição dos valores pagos. Após o envio, orientaremos o procedimento aplicável, sem afastar os direitos do consumidor.\n\nAtendimento: integrallwine@gmail.com.","retentionDays":90,"pixKey":"","paymentLink":"","paymentMethods":{"whatsapp":false,"pix":false,"card":false},"apiBaseUrl":"","apiMode":"required","lastUpdated":"2026-09-05T00:00:00.000Z"}}</script>
+ 
+-<script defer src="/js/store/age-gate.js?v=11.1.8"></script><script defer src="/js/store/catalog.js?v=11.1.8"></script><script defer src="/js/store/cart.js?v=11.1.8"></script><script defer src="/js/store/shipping.js?v=11.1.8"></script><script defer src="/js/store/api.js?v=11.1.8"></script><script defer src="/js/store/checkout.js?v=11.1.8"></script><script defer src="/js/store/app.js?v=11.1.8"></script><script defer src="/js/store/commerce-v111.js?v=11.1.8"></script><script defer src="/js/store/premium-v104.js?v=11.1.8"></script></body></html>+<script defer src="/js/store/age-gate.js?v=11.1.8"></script><script defer src="/js/store/catalog.js?v=11.1.8-audit-20260906"></script><script defer src="/js/store/cart.js?v=11.1.8"></script><script defer src="/js/store/shipping.js?v=11.1.8"></script><script defer src="/js/store/api.js?v=11.1.8"></script><script defer src="/js/store/checkout.js?v=11.1.8"></script><script defer src="/js/store/app.js?v=11.1.8"></script><script defer src="/js/store/commerce-v111.js?v=11.1.8-audit-20260906"></script><script defer src="/js/store/premium-v104.js?v=11.1.8"></script></body></html>--- a/public/js/admin.js
++++ b/public/js/admin.js
+@@ -29,6 +29,12 @@
+   const pendingUploadedMediaIds = new Set();
+   const removedMediaIds = new Set();
+   let adminSession = {configured:false, authenticated:false, user:null, csrfToken:''};
++  let sessionGeneration = 0;
++  let sessionActionPending = false;
++  let sessionRecheckPending = false;
++  const sessionNoticeKey = 'integrall_admin_session_event_v2';
++  let sessionChannel = null;
++  try { if ('BroadcastChannel' in window) sessionChannel = new BroadcastChannel(sessionNoticeKey); } catch { /* Storage-restricted browsers use focus revalidation. */ }
+   let cropState = {image:null, objectUrl:'', zoom:1, panX:0, panY:0, dragging:false, pointerX:0, pointerY:0};
+   let visualSelection = null;
+   let previewUpdateTimer = null;
+@@ -38,6 +44,7 @@
+   function setFeedback(node, text, type='') { if (!node) return; node.textContent=text; node.className=`feedback${type?` ${type}`:''}`; }
+ 
+   async function request(path, options={}) {
++    const generation = sessionGeneration;
+     const headers = new Headers(options.headers || {});
+     headers.set('Accept','application/json');
+     const isFormData=options.body instanceof FormData;
+@@ -46,6 +53,9 @@
+     if (!['GET','HEAD','OPTIONS'].includes(method) && adminSession.csrfToken) headers.set('X-CSRF-Token',adminSession.csrfToken);
+     const response = await fetch(path,{...options,headers,credentials:'same-origin'});
+     const data = await response.json().catch(()=>({}));
++    if (path.startsWith('/api/admin/') && !path.startsWith('/api/admin/session') && generation !== sessionGeneration) {
++      const error = new Error('A sessão mudou. Entre novamente antes de continuar.'); error.code = 'SESSION_CHANGED'; throw error;
++    }
+     if (!response.ok) {
+       if(response.status===401 && !path.endsWith('/session/login'))showLogin('Sua sessão expirou. Entre novamente.');
+       const error=new Error(data.error || `HTTP ${response.status}`);error.code=data.code||'';error.requestId=data.requestId||'';error.status=response.status;throw error;
+@@ -53,11 +63,16 @@
+     return data;
+   }
+ 
+-  function showLogin(message='') {
++  function showLogin(message='', type='bad') {
++    sessionGeneration += 1;
++    delete document.body.dataset.adminRole;
+     adminSession={configured:adminSession.configured,authenticated:false,user:null,csrfToken:''};
+     const login=$('#loginView'),dashboard=$('#dashboard'),identity=$('#adminIdentity'),logout=$('#logoutButton');
+     if(login)login.hidden=false;if(dashboard)dashboard.hidden=true;if(identity)identity.hidden=true;if(logout)logout.hidden=true;
+-    if(message)setFeedback($('#loginFeedback'),message,'bad');
++    setFeedback($('#loginFeedback'),message,type);
++    const sessionFeedback=$('#adminSessionFeedback'); if(sessionFeedback){sessionFeedback.hidden=true;sessionFeedback.textContent='';}
++    ['productDialog','orderDialog'].forEach(id=>{const panel=$('#'+id);if(panel)panel.hidden=true;});
++    if(activeUploadRequest)activeUploadRequest.abort();
+     setTimeout(()=>$('#loginPassword')?.focus(),0);
+   }
+ 
+@@ -72,26 +87,87 @@
+ 
+   async function authenticateAdmin(event) {
+     event?.preventDefault();
++    if(sessionActionPending)return;
++    sessionActionPending=true;
++    const generation=++sessionGeneration;
+     const button=$('#loginButton');if(button)button.disabled=true;
+     setFeedback($('#loginFeedback'),'Validando credenciais…');
+     try{
+       const data=await request('/api/admin/session/login',{method:'POST',body:JSON.stringify({email:$('#loginEmail').value.trim(),password:$('#loginPassword').value})});
+-      $('#loginPassword').value='';showDashboard(data);setFeedback($('#loginFeedback'),'');await loadAll();
+-    }catch(error){setFeedback($('#loginFeedback'),error.message,'bad');$('#loginPassword')?.focus()}finally{if(button)button.disabled=false}
++      $('#loginPassword').value='';
++      if(generation!==sessionGeneration)return;
++      showDashboard(data);setFeedback($('#loginFeedback'),'');notifySessionChange('login');await loadAll();
++    }catch(error){setFeedback($('#loginFeedback'),error.message,'bad');$('#loginPassword')?.focus()}finally{sessionActionPending=false;if(button)button.disabled=false}
+   }
+ 
+   async function bootstrapAdminSession() {
++    const generation=sessionGeneration;
+     try{
+-      const data=await request('/api/admin/session');adminSession.configured=data.configured===true;
++      const data=await request('/api/admin/session');
++      if(generation!==sessionGeneration)return false;
++      adminSession.configured=data.configured===true;
+       if(!data.configured){showLogin('O acesso administrativo não pôde ser inicializado. Verifique as configurações ADMIN_* do servidor.');return false}
+       if(!data.authenticated){showLogin();return false}
+       showDashboard(data);return true;
+-    }catch(error){showLogin(error.message);return false}
++    }catch(error){if(generation===sessionGeneration)showLogin(error.message);return false}
++  }
++
++  function notifySessionChange(action) {
++    // Only a notification, never a token, password, or authorization decision.
++    const notice={action,at:Date.now()};
++    try { sessionChannel?.postMessage(notice); } catch { /* Focus also revalidates. */ }
++    try { localStorage.setItem(sessionNoticeKey,JSON.stringify(notice)); } catch { /* Private/storage-restricted mode. */ }
++  }
++
++  async function revalidateSession() {
++    if(sessionActionPending || sessionRecheckPending)return;
++    sessionRecheckPending=true;
++    const wasAuthenticated=adminSession.authenticated;
++    const oldUser=JSON.stringify(adminSession.user);
++    const generation=sessionGeneration;
++    try {
++      const data=await request('/api/admin/session');
++      if(generation!==sessionGeneration)return;
++      if(!data.authenticated){
++        if(wasAuthenticated)showLogin('Sua sessão foi encerrada ou expirou. Entre novamente.');
++        return;
++      }
++      if(!wasAuthenticated || oldUser!==JSON.stringify(data.user)) {
++        sessionGeneration+=1;showDashboard(data);await loadAll();
++      } else {
++        // Do not overwrite unsaved product/theme forms on a normal tab focus.
++        adminSession.csrfToken=data.csrfToken||'';
++      }
++    } catch {
++      if(wasAuthenticated && generation===sessionGeneration) {
++        const feedback=$('#adminSessionFeedback');if(feedback){feedback.hidden=false;setFeedback(feedback,'Não foi possível verificar a sessão. Verifique sua conexão antes de salvar.','bad');}
++      }
++    } finally {sessionRecheckPending=false;}
++  }
++
++  function bindSessionLifecycle() {
++    const changed=()=>revalidateSession();
++    if(sessionChannel)sessionChannel.addEventListener('message',changed);
++    window.addEventListener('storage',event=>{if(event.key===sessionNoticeKey)changed();});
++    window.addEventListener('focus',changed);
++    window.addEventListener('pageshow',event=>{if(event.persisted)changed();});
++    document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')changed();});
+   }
+ 
+   async function logoutAdmin() {
++    if(sessionActionPending)return;
++    sessionActionPending=true;sessionGeneration+=1;
+     const button=$('#logoutButton');if(button)button.disabled=true;
+-    try{await request('/api/admin/session/logout',{method:'POST'});}catch(error){console.warn('O servidor não confirmou o logout.',error?.message||error)}finally{if(button)button.disabled=false;showLogin('Sessão encerrada com segurança.')}
++    try {
++      await request('/api/admin/session/logout',{method:'POST'});
++      showLogin('Sessão encerrada.','ok');notifySessionChange('logout');
++    } catch(error) {
++      if(error.status===401){showLogin('Sessão encerrada.','ok');notifySessionChange('logout');}
++      else {
++        const feedback=$('#adminSessionFeedback');
++        if(feedback){feedback.hidden=false;setFeedback(feedback,'Não foi possível encerrar a sessão no servidor. Verifique sua conexão e clique em Sair novamente.','bad');}
++      }
++    } finally {sessionActionPending=false;if(button)button.disabled=false;}
+   }
+ 
+   async function checkHealth() {
+@@ -1566,7 +1642,7 @@
+     $('#catalogFile').addEventListener('change',event=>{const file=event.target.files?.[0];if(file)importCatalog(file);event.target.value=''});
+   }
+ 
+-  async function init(){bind();checkHealth();if(await bootstrapAdminSession())await loadAll();}
++  async function init(){bind();bindSessionLifecycle();checkHealth();if(await bootstrapAdminSession())await loadAll();}
+   window.addEventListener('beforeunload',event=>{if(productDirty||themeDirty||themePendingMediaIds.size){event.preventDefault();event.returnValue=''}});
+   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init,{once:true}); else init();
+ })();
+--- a/public/js/store/catalog.js
++++ b/public/js/store/catalog.js
+@@ -612,7 +612,7 @@
+       const imageButton = el('div', 'card-image'); imageButton.dataset.cardGalleryProduct = product.id;
+       const fillImage = document.createElement('img'); fillImage.className = 'card-image-fill'; fillImage.loading = 'lazy'; fillImage.decoding = 'async'; fillImage.alt = ''; fillImage.setAttribute('aria-hidden', 'true');
+       const image = document.createElement('img'); image.className = 'card-image-main'; image.loading = 'lazy'; image.decoding = 'async';
+-      const imageOpen = el('button', 'card-image-open'); imageOpen.type = 'button'; imageOpen.dataset.details = product.id;
++      const imageOpen = el('button', 'card-image-open'); imageOpen.type = 'button'; imageOpen.dataset.details = product.id; imageOpen.setAttribute('aria-controls', 'productDetails'); imageOpen.setAttribute('aria-expanded', String(productDetailsIsOpen() && state.activeId === product.id));
+       imageButton.append(fillImage, image, imageOpen);
+       const galleryImages = productImages(product);
+       if (galleryImages.length > 1) {
+@@ -635,8 +635,8 @@
+       if (Number.isFinite(limit) && limit > 0 && limit <= (Number(product.stockMin) || 3)) priceRow.append(el('div', 'stock-note', `Últimas ${limit} unidade(s)`));
+       body.append(priceRow);
+       const actions = el('div', 'card-actions');
+-      const detail = el('button', 'btn outline small', 'Conhecer'); detail.type = 'button'; detail.dataset.details = product.id;
+-      const add = el('button', 'icon-btn', '＋'); add.type = 'button'; add.dataset.details = product.id; add.disabled = !productAvailable(product); add.setAttribute('aria-label', `Escolher opções de ${product.name}`);
++      const detail = el('button', 'btn outline small', 'Conhecer'); detail.type = 'button'; detail.dataset.details = product.id; detail.setAttribute('aria-controls', 'productDetails'); detail.setAttribute('aria-expanded', String(productDetailsIsOpen() && state.activeId === product.id));
++      const add = el('button', 'icon-btn', '＋'); add.type = 'button'; add.dataset.details = product.id; add.setAttribute('aria-controls', 'productDetails'); add.setAttribute('aria-expanded', String(productDetailsIsOpen() && state.activeId === product.id)); add.disabled = !productAvailable(product); add.setAttribute('aria-label', `Escolher opções de ${product.name}`);
+       actions.append(detail, add); body.append(actions); card.append(imageButton, body); grid.append(card);
+     });
+   }
+@@ -702,14 +702,6 @@
+       const previous = opener; active = null; opener = null;
+       if (returnFocus && previous instanceof HTMLElement) setTimeout(() => previous.focus({preventScroll: true}), 20);
+     }
+-    overlay?.addEventListener('wheel', event => {
+-      if (active?.id !== 'productDetails' || !event.deltaY) return;
+-      const maxScroll = Math.max(0, active.scrollHeight - active.clientHeight);
+-      if (!maxScroll) return;
+-      const before = active.scrollTop;
+-      active.scrollTop = Math.max(0, Math.min(maxScroll, active.scrollTop + event.deltaY));
+-      if (active.scrollTop !== before) event.preventDefault();
+-    }, {passive: false});
+     function current() { return active; }
+     return {open, close, current};
+   })();
+@@ -741,6 +733,13 @@
+     const badges = $('#modalPromotionBadges'); if (badges) badges.replaceChildren();
+     const related = $('#relatedSection'); if (related) related.hidden = true;
+     const reviewForm = $('#reviewForm'); if (reviewForm) reviewForm.hidden = true;
++    $('#reviewForm')?.reset();
++    $('#restockAlertForm')?.reset();
++    $$('#reviewForm button[type="submit"], #restockAlertForm button[type="submit"]').forEach(button=>{button.disabled=false;});
++    const gift = $('#modalGift'); if (gift) gift.checked = false;
++    const giftMessage = $('#modalGiftMessage'); if (giftMessage) giftMessage.value = '';
++    const giftWrap = $('#giftMessageWrap'); if (giftWrap) giftWrap.hidden = true;
++    const quantity = $('#modalQty'); if (quantity) quantity.value = '1';
+     state.activeId = '';
+     state.activeImage = 0;
+   }
+@@ -749,10 +748,10 @@
+     const details = $('#productDetails');
+     if (!details || details.hidden) return false;
+     const productId = state.activeId;
+-    if (layers.current() === details) layers.close(false);
+     details.hidden = true;
+     details.classList.remove('open');
+     details.setAttribute('aria-hidden', 'true');
++    updateProductTriggers();
+     clearProductDetailsState();
+     if (updateHistory && publicMode && (/^\/produto\//i.test(location.pathname) || location.hash.startsWith('#product='))) {
+       history.replaceState({page: state.page}, '', catalogLocation());
+@@ -760,10 +759,19 @@
+     const previous = productOpener;
+     productOpener = null;
+     if (returnFocus && previous instanceof HTMLElement && previous.isConnected) {
+-      setTimeout(() => previous.focus({preventScroll: true}), 20);
++      setTimeout(() => previous.focus(), 20);
+     }
+     document.dispatchEvent(new CustomEvent('integrall:product-closed', {detail: {productId}}));
+     return true;
++  }
++
++  function updateProductTriggers() {
++    const open = productDetailsIsOpen();
++    $$('[data-details], [data-open-product], [data-related-id], [data-suggest-product]').forEach(button => {
++      const id = button.dataset.details || button.dataset.openProduct || button.dataset.relatedId || button.dataset.suggestProduct;
++      button.setAttribute('aria-controls', 'productDetails');
++      button.setAttribute('aria-expanded', String(open && id === state.activeId));
++    });
+   }
+ 
+   function revealProductDetails({focus = true} = {}) {
+@@ -771,12 +779,15 @@
+     if (!details) return;
+     details.hidden = false;
+     details.setAttribute('aria-hidden', 'false');
+-    if (layers.current() !== details) layers.open(details, {focus});
+-    else {
+-      details.classList.add('open');
+-      if (focus) setTimeout(() => $('#closeProductDetails')?.focus({preventScroll: true}), 0);
+-    }
+-    requestAnimationFrame(() => { details.scrollTop = 0; });
++    details.classList.add('open');
++    updateProductTriggers();
++    requestAnimationFrame(() => {
++      // One normal-flow region. Only opening/switching scrolls; field edits never do.
++      if (details.hidden) return;
++      const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
++      details.scrollIntoView({block:'start', behavior:focus && !reducedMotion ? 'smooth' : 'auto'});
++      if (focus) details.focus({preventScroll:true});
++    });
+   }
+ 
+   function specsFor(product) {
+@@ -868,7 +879,8 @@
+     const product = getProduct(id); if (!product) return;
+     const details = $('#productDetails');
+     if (details?.hidden && document.activeElement instanceof HTMLElement) productOpener = document.activeElement;
+-    if (layers.current() && layers.current() !== details) layers.close(false);
++    if (layers.current()) layers.close(false);
++    clearProductDetailsState();
+     state.activeId = id; state.activeImage = 0;
+     $('#modalCategory').textContent = product.subcategory || DEPARTMENT_LABELS[product.department] || 'Seleção Integrall';
+     $('#modalName').textContent = product.name; $('#modalDescription').textContent = product.description || 'Consulte mais informações diretamente com a Integrall.';
+@@ -877,7 +889,7 @@
+     $('#modalCep').value = state.checkout.cep ? cepMask(state.checkout.cep) : '';
+     $('#modalError').textContent = '';
+     renderGallery(product); renderSpecs(product); renderVariants(product); renderRelated(product);
+-    if (variantId && selectedVariant(product, variantId)) { $('#modalVariant').value = variantId; updateModalSelection(); }
++    if (variantId && selectedVariant(product, variantId) && stockLimit(product, variantId) > 0) { $('#modalVariant').value = variantId; syncGalleryToVariant(product, variantId); updateModalSelection(); }
+     updateModalDeliveryOptions();
+     $$('input[name="shippingChoice"]').forEach(radio => radio.checked = radio.value === state.checkout.choice);
+     updateShippingChoiceClasses();
+@@ -1181,7 +1193,7 @@
+     $('#filterImported')?.addEventListener('change',event=>{state.filters.imported=event.target.checked;resetProductWindow();renderProducts();});
+     $('#clearFilters').addEventListener('click', () => { state.search = ''; state.category = 'all'; state.sort = 'featured'; state.filters={country:'all',type:'all',grape:'all',origin:'all',flavor:'all',availability:'all',minPrice:'',maxPrice:'',imported:false}; $('#search').value = ''; $('#category').value = 'all'; $('#sort').value = 'featured'; ['filterCountry','filterType','filterGrape','filterOrigin','filterFlavor','filterAvailability'].forEach(id=>{if($('#'+id))$('#'+id).value='all'}); ['filterMinPrice','filterMaxPrice'].forEach(id=>{if($('#'+id))$('#'+id).value=''}); if($('#filterImported'))$('#filterImported').checked=false; resetProductWindow(); renderProducts(); updateSearchSuggestions(); });
+     $('#openCart').addEventListener('click', openCart);
+-    const closeCurrentLayer = () => layers.current() === $('#productDetails') ? closeProductDetails() : layers.close();
++    const closeCurrentLayer = () => layers.close();
+     const overlay = $('#overlay');
+     let overlayPointerStarted = false;
+     overlay.addEventListener('pointerdown', event => { overlayPointerStarted = event.target === overlay; });
+@@ -1206,8 +1218,9 @@
+         if (stage && changeCardGallery(stage.dataset.cardGalleryProduct, event.key === 'ArrowRight' ? 1 : -1, stage)) event.preventDefault();
+         return;
+       }
+-      if (event.key === 'ArrowLeft' && productDetailsIsOpen()) { if (changeModalGallery(-1)) event.preventDefault(); return; }
+-      if (event.key === 'ArrowRight' && productDetailsIsOpen()) { if (changeModalGallery(1)) event.preventDefault(); return; }
++      const galleryKeyboard = !layers.current() && productDetailsIsOpen() && event.target.closest?.('.product-gallery, #productDetails') && !event.target.closest?.('input, textarea, select, [contenteditable="true"]');
++      if (event.key === 'ArrowLeft' && galleryKeyboard) { if (changeModalGallery(-1)) event.preventDefault(); return; }
++      if (event.key === 'ArrowRight' && galleryKeyboard) { if (changeModalGallery(1)) event.preventDefault(); return; }
+       if (event.key === 'Escape') { const suggestions=$('#searchSuggestions'); if(suggestions&&!suggestions.hidden){closeSearchSuggestions({focusInput:true});return;} if(layers.current()){closeCurrentLayer();return;} if(productDetailsIsOpen())closeProductDetails(); }
+     });
+     document.addEventListener('click', event => {
+--- a/public/js/store/commerce-v111.js
++++ b/public/js/store/commerce-v111.js
+@@ -55,7 +55,17 @@
+     renderAddresses(root);
+     await renderOrders(root);
+     renderFavorites(root);
+-    const actions=appendAccountSection(root,'Sessão');const logout=create('button','btn ghost small','Sair desta conta');logout.type='button';actions.append(logout);logout.addEventListener('click',async()=>{try{await request('/api/account/logout',{method:'POST',csrf:true})}catch{}state.authenticated=false;state.account=null;state.csrfToken='';state.orders=[];accountButton();renderLogin();syncFavoriteButton();syncReviewForm()});
++    const actions=appendAccountSection(root,'Sessão');const logout=create('button','btn ghost small','Sair desta conta');logout.type='button';actions.append(logout);logout.addEventListener('click',async()=>{
++      if(logout.disabled)return;logout.disabled=true;
++      try {
++        await request('/api/account/logout',{method:'POST',csrf:true});
++        state.authenticated=false;state.account=null;state.csrfToken='';state.orders=[];
++        accountButton();renderLogin();syncFavoriteButton();syncReviewForm();
++      } catch(error) {
++        if(error.status===401){state.authenticated=false;state.account=null;state.csrfToken='';state.orders=[];accountButton();renderLogin();syncFavoriteButton();syncReviewForm();}
++        else app.notify('Não foi possível sair da conta. Verifique a conexão e tente novamente.','bad');
++      } finally {logout.disabled=false;}
++    });
+   }
+ 
+   function renderAddresses(root){
+@@ -83,12 +93,39 @@
+     if(requestId===state.reviewRequest&&state.activeProductId===productId)syncReviewForm();
+   }
+   function syncReviewForm(){const form=$('#reviewForm'),note=$('#reviewLoginNote');if(!form||!note)return;form.hidden=!state.authenticated;note.hidden=state.authenticated;}
+-  async function submitReview(event){event.preventDefault();if(!state.authenticated){accountOpen(true);renderLogin();return}const productId=state.activeProductId||app.getState().activeId;if(!productId)return;const button=event.currentTarget.querySelector('button[type=submit]');button.disabled=true;setFeedback('#reviewFeedback','Enviando…');try{const data=await request(`/api/products/${encodeURIComponent(productId)}/reviews`,{method:'POST',csrf:true,body:JSON.stringify({rating:Number($('#reviewRating').value),title:$('#reviewTitle').value,body:$('#reviewBody').value})});setFeedback('#reviewFeedback',data.message||'Avaliação enviada.','ok');event.currentTarget.reset();}catch(error){setFeedback('#reviewFeedback',error.message,'bad')}finally{button.disabled=false}}
++  async function submitReview(event) {
++    event.preventDefault();
++    if(!state.authenticated){accountOpen(true);renderLogin();return;}
++    const productId=state.activeProductId||app.getState().activeId;if(!productId)return;
++    const form=event.currentTarget,button=form.querySelector('button[type=submit]');
++    if(button.disabled)return;
++    const viewVersion=state.reviewRequest;
++    const isCurrent=()=>state.activeProductId===productId&&state.reviewRequest===viewVersion;
++    button.disabled=true;setFeedback('#reviewFeedback','Enviando…');
++    try {
++      const data=await request(`/api/products/${encodeURIComponent(productId)}/reviews`,{method:'POST',csrf:true,body:JSON.stringify({rating:Number($('#reviewRating').value),title:$('#reviewTitle').value,body:$('#reviewBody').value})});
++      if(isCurrent()){setFeedback('#reviewFeedback',data.message||'Avaliação enviada.','ok');form.reset();}
++    } catch(error){if(isCurrent())setFeedback('#reviewFeedback',error.message,'bad');}
++    finally{if(isCurrent())button.disabled=false;}
++  }
+ 
+   function syncRestockBox(){
+     const box=$('#restockAlertBox');if(!box)return;const product=app.getProduct(state.activeProductId||app.getState().activeId);if(!product){box.hidden=true;return}const variantId=$('#modalVariant')?.value||'';const stock=app.stockLimit(product,variantId);const controlled=Number.isFinite(stock);box.hidden=!(controlled&&stock===0);const email=$('#restockEmail');if(email&&!email.value&&state.account?.email)email.value=state.account.email;
+   }
+-  async function submitRestock(event){event.preventDefault();const product=app.getProduct(state.activeProductId||app.getState().activeId);if(!product)return;const button=event.currentTarget.querySelector('button');button.disabled=true;setFeedback('#restockFeedback','Registrando…');try{await request('/api/stock-alerts',{method:'POST',body:JSON.stringify({email:$('#restockEmail').value,productId:product.id,variantId:$('#modalVariant')?.value||''})});setFeedback('#restockFeedback','Pronto. Vamos avisar por e-mail quando voltar.','ok')}catch(error){setFeedback('#restockFeedback',error.message,'bad')}finally{button.disabled=false}}
++  async function submitRestock(event) {
++    event.preventDefault();
++    const product=app.getProduct(state.activeProductId||app.getState().activeId);if(!product)return;
++    const button=event.currentTarget.querySelector('button');if(button.disabled)return;
++    const variantId=$('#modalVariant')?.value||'',viewVersion=state.reviewRequest;
++    const sameView=()=>state.activeProductId===product.id&&state.reviewRequest===viewVersion;
++    const sameSelection=()=>sameView()&&($('#modalVariant')?.value||'')===variantId;
++    button.disabled=true;setFeedback('#restockFeedback','Registrando…');
++    try {
++      await request('/api/stock-alerts',{method:'POST',body:JSON.stringify({email:$('#restockEmail').value,productId:product.id,variantId})});
++      if(sameSelection())setFeedback('#restockFeedback','Pronto. Vamos avisar por e-mail quando voltar.','ok');
++    }catch(error){if(sameSelection())setFeedback('#restockFeedback',error.message,'bad');}
++    finally{if(sameView())button.disabled=false;}
++  }
+ 
+   async function openAccount(){state.pendingFavoriteId='';accountOpen(true);await loadSession();await renderAccount()}
+   $('#openAccount')?.addEventListener('click',openAccount);$('#closeAccount')?.addEventListener('click',()=>accountOpen(false));$('#accountBackdrop')?.addEventListener('click',()=>accountOpen(false));$('#modalFavorite')?.addEventListener('click',toggleFavorite);$('#reviewForm')?.addEventListener('submit',submitReview);$('#restockAlertForm')?.addEventListener('submit',submitRestock);
+--- /dev/null
++++ b/scripts/audit-admin-browser.py
+@@ -0,0 +1,89 @@
++#!/usr/bin/env python3
++"""Real admin UI + production auth controllers via a test-driver HTTP bridge.
++Chromium's managed URL policy is NOT changed. about:blank hosts the HTML/CSS/JS.
++Cookies are held by the test driver, not the browser; TLS/Express/browser cookie
++policy and native navigation are not certified by this integration test.
++"""
++import argparse,json,re,subprocess,time,urllib.request,urllib.error
++from pathlib import Path
++from playwright.sync_api import sync_playwright
++
++p=argparse.ArgumentParser();p.add_argument('--root',type=Path,default=Path.cwd());p.add_argument('--out',type=Path,required=True);args=p.parse_args()
++root=args.root.resolve();out=args.out.resolve();out.mkdir(parents=True,exist_ok=True)
++server=subprocess.Popen(['node','tests/fixtures/admin-http-adapter.mjs'],cwd=root,stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True)
++info=json.loads(server.stdout.readline());base=info['url'];cookie='';calls=[];results=[]
++credential='159213'+'Rafs'
++def http(payload):
++ global cookie
++ path=payload['path'];assert path.startswith('/api/')
++ headers=dict(payload.get('headers') or {});headers['Origin']=base
++ if cookie:headers['Cookie']=cookie
++ body=payload.get('body');request=urllib.request.Request(base+path,data=body.encode() if body else None,headers=headers,method=payload.get('method','GET'))
++ try:response=urllib.request.urlopen(request,timeout=10)
++ except urllib.error.HTTPError as error:response=error
++ set_cookie=response.headers.get('Set-Cookie')
++ if set_cookie:cookie=set_cookie.split(';')[0]
++ data=json.loads(response.read());calls.append({'method':request.method,'path':path,'status':response.status})
++ return {'status':response.status,'data':data}
++def state(**values):
++ server.stdin.write(json.dumps(values)+'\n');server.stdin.flush();time.sleep(.05)
++html=(root/'public/admin.html').read_text()
++html=re.sub(r'<link\b[^>]*>','',html,flags=re.I)
++html=re.sub(r'<script\b[^>]*src=[^>]*></script>','',html,flags=re.I)
++html=html.replace('src="/?adminPreview=1"','src="about:blank"')
++css=(root/'public/css/admin.css').read_text();js=(root/'public/js/admin.js').read_text()
++try:
++ with sync_playwright() as pw:
++  browser=pw.chromium.launch(executable_path='/usr/bin/chromium',headless=True,args=['--no-sandbox','--disable-dev-shm-usage'])
++  context=browser.new_context(viewport={'width':1440,'height':950},reduced_motion='reduce')
++  pages=[];errors=[]
++  def open_ui():
++   page=context.new_page();pages.append(page);page.set_default_timeout(10000)
++   page.on('pageerror',lambda error:errors.append(str(error)))
++   page.expose_function('auditHttp',http)
++   page.set_content(html,wait_until='domcontentloaded');page.add_style_tag(content=css)
++   page.evaluate("""() => { window.fetch=async (url,options={})=>{ const result=await window.auditHttp({path:String(url),method:options.method||'GET',headers:Object.fromEntries(new Headers(options.headers||{})),body:typeof options.body==='string'?options.body:undefined});return new Response(JSON.stringify(result.data),{status:result.status,headers:{'Content-Type':'application/json'}}); }; }""")
++   page.add_script_tag(content=js);return page
++  page=open_ui();page.wait_for_selector('#loginView:not([hidden])')
++  for value,label in [('', 'empty'),(credential.lower(),'lowercase'),(credential.upper(),'uppercase'),(credential[:-1],'partial'),(credential+' ','trailing-space'),('senha-anterior','different')]:
++   page.fill('#loginPassword',value);page.click('#loginButton');page.wait_for_function("document.querySelector('#loginFeedback').textContent.includes('inválidos')")
++   assert page.locator('#dashboard').is_hidden();results.append({'test':'negative-'+label,'status':'APROVADO'})
++  page.screenshot(path=str(out/'senha-incorreta-recusada.png'))
++  page.fill('#loginPassword',credential);page.locator('#loginPassword').press('Enter');page.wait_for_selector('#dashboard:not([hidden])');page.wait_for_timeout(150)
++  assert page.locator('#loginPassword').input_value()==''
++  assert credential not in page.locator('body').inner_text()
++  page.screenshot(path=str(out/'login-correto.png'));results.append({'test':'exact-credential-enter-controller-real','status':'APROVADO'})
++  # New document starts without password, retaining the driver's cookie jar.
++  page2=open_ui();page2.wait_for_selector('#dashboard:not([hidden])');page2.wait_for_timeout(100)
++  page2.screenshot(path=str(out/'painel-rebootstrap.png'));results.append({'test':'new-document-session-restore','status':'APROVADO'})
++  page2.close();pages.remove(page2)
++  state(failLogout=True);page.click('#logoutButton');page.wait_for_selector('#adminSessionFeedback:not([hidden])')
++  assert 'clique em Sair novamente' in page.locator('#adminSessionFeedback').inner_text()
++  assert page.locator('#dashboard').is_visible()
++  assert http({'path':'/api/admin/session'})['data']['authenticated']
++  page.screenshot(path=str(out/'logout-falha-nao-mascarada.png'));results.append({'test':'logout-503-retains-session-and-retry','status':'APROVADO'})
++  # An old session response must not reopen a dashboard after successful logout.
++  state(failLogout=False,delaySession=300)
++  page.evaluate("window.dispatchEvent(new Event('focus'))")
++  page.wait_for_timeout(30);page.click('#logoutButton');page.wait_for_selector('#loginView:not([hidden])');page.wait_for_timeout(500)
++  assert page.locator('#dashboard').is_hidden();assert not http({'path':'/api/admin/session'})['data']['authenticated']
++  page.screenshot(path=str(out/'logout-confirmado.png'));results.append({'test':'logout-and-stale-response-generation','status':'APROVADO'})
++  state(delaySession=0)
++  page.fill('#loginPassword',credential);page.click('#loginButton');page.wait_for_selector('#dashboard:not([hidden])')
++  page2=open_ui();page2.wait_for_selector('#dashboard:not([hidden])')
++  page.click('#logoutButton');page.wait_for_selector('#loginView:not([hidden])')
++  page2.evaluate("window.dispatchEvent(new Event('focus'))");page2.wait_for_selector('#loginView:not([hidden])')
++  results.append({'test':'second-client-focus-rechecks-server-revocation','status':'APROVADO'})
++  cookie='integrall_admin_session=corrupted'
++  page3=open_ui();page3.wait_for_selector('#loginView:not([hidden])');assert page3.locator('#dashboard').is_hidden()
++  results.append({'test':'corrupted-cookie-refused','status':'APROVADO'})
++  assert not errors,errors
++  results.append({'test':'uncaught-page-errors','status':'APROVADO','errors':errors})
++  browser.close()
++finally:
++ server.terminate()
++ try:server.wait(timeout=5)
++ except subprocess.TimeoutExpired:server.kill()
++report={'status':'APROVADO','scope':'about:blank actual admin UI; test-driver cookie jar and HTTP bridge; production session controllers/Auth/Repository; ancillary dashboard data fixtures; NOT Express/TLS/browser-cookie-policy/native navigation','results':results,'requests':calls}
++(out/'results.json').write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n')
++print(json.dumps({'status':report['status'],'tests':len(results),'requests':len(calls)},ensure_ascii=False))
+--- /dev/null
++++ b/scripts/audit-real-layout.py
+@@ -0,0 +1,77 @@
++#!/usr/bin/env python3
++"""Actual shipped HTML/styles/scripts/media rendered in an isolated about:blank.
++No HTTP, native browser zoom, network performance, or production CSP claim.
++Assets are embedded from their unchanged bytes. Mutations below affect only memory.
++"""
++import argparse,base64,json,mimetypes,re
++from pathlib import Path
++from playwright.sync_api import sync_playwright
++WIDTHS=[280,320,360,375,390,412,430,480,600,768,820,1024,1280,1366,1440,1600,1920,2560]
++STYLES=['store.css','checkout.css','premium-v104.css','commerce-v111.css']
++SCRIPTS=['age-gate.js','catalog.js','cart.js','shipping.js','api.js','checkout.js','app.js','commerce-v111.js','premium-v104.js']
++def main():
++ ap=argparse.ArgumentParser();ap.add_argument('--root',type=Path,default=Path.cwd());ap.add_argument('--out',type=Path,required=True);ap.add_argument('--widths',default='');args=ap.parse_args()
++ root=args.root.resolve();out=args.out.resolve();out.mkdir(parents=True,exist_ok=True);cache={}
++ def asset(url):
++  if url not in cache:
++   file=root/'public'/url.split('?')[0].lstrip('/');mime=mimetypes.guess_type(file.name)[0] or 'application/octet-stream'
++   cache[url]='data:'+mime+';base64,'+base64.b64encode(file.read_bytes()).decode()
++  return cache[url]
++ def embed(s):return re.sub(r'/assets/[\w./-]+(?:\?[\w.=+-]+)?',lambda m:asset(m.group()),s)
++ html=(root/'public/index.html').read_text()
++ html=re.sub(r'<meta\b[^>]*http-equiv=["\']Content-Security-Policy["\'][^>]*>','',html,flags=re.I)
++ html=re.sub(r'<link\b[^>]*>','',html,flags=re.I)
++ html=re.sub(r'<script\b[^>]*\bsrc=["\'][^"\']+["\'][^>]*>\s*</script>','',html,flags=re.I)
++ html=embed(html);styles=[embed((root/'public/css'/x).read_text()) for x in STYLES];scripts=[(root/'public/js/store'/x).read_text() for x in SCRIPTS]
++ widths=[int(w) for w in args.widths.split(',')] if args.widths else WIDTHS
++ results=[];failures=[]
++ with sync_playwright() as p:
++  browser=p.chromium.launch(executable_path='/usr/bin/chromium',headless=True,args=['--no-sandbox','--disable-dev-shm-usage'])
++  for width in widths:
++   print('actual-media',width,flush=True)
++   context=browser.new_context(viewport={'width':width,'height':900},reduced_motion='reduce',bypass_csp=True)
++   page=context.new_page();page.set_default_timeout(10000);errors=[];page.on('pageerror',lambda e,b=errors:b.append(str(e)))
++   page.set_content(html,wait_until='domcontentloaded')
++   for css in styles:page.add_style_tag(content=css)
++   for js in scripts:page.add_script_tag(content=js)
++   if page.locator('#ageGateYes').count():page.locator('#ageGateYes').click()
++   page.wait_for_timeout(200)
++   header=page.evaluate("""() => ['.premium-wordmark','#menuBtn','#openAccount','#openCart'].map(s=>{const e=document.querySelector(s),r=e.getBoundingClientRect(),c=getComputedStyle(e);return {selector:s,x:r.x,y:r.y,w:r.width,h:r.height,visible:r.width>0&&c.display!=='none'&&c.visibility!=='hidden'};})""")
++   overlaps=[]
++   for i,a in enumerate(header):
++    for b in header[i+1:]:
++     if a['visible'] and b['visible'] and min(a['x']+a['w'],b['x']+b['w'])>max(a['x'],b['x'])+.5 and min(a['y']+a['h'],b['y']+b['h'])>max(a['y'],b['y'])+.5:overlaps.append([a['selector'],b['selector']])
++   page.evaluate("() => {const app=__integrallApp;app.openProduct(app.getState().products[0].id,{updateHash:false,focus:true});}")
++   page.wait_for_timeout(200)
++   metrics=page.evaluate("""() => {
++    const region=document.querySelector('#productDetails'),gal=document.querySelector('.product-gallery'),info=document.querySelector('.product-info');
++    const rr=region.getBoundingClientRect(),gr=gal.getBoundingClientRect(),ir=info.getBoundingClientRect(),s=getComputedStyle(region);
++    const bad=[...region.querySelectorAll('input,textarea,select,button')].filter(e=>{const r=e.getBoundingClientRect();return r.width>0&&r.height>0&&(r.left<-.5||r.right>innerWidth+.5);}).map(e=>e.id||e.className);
++    return {width:innerWidth,documentWidth:document.documentElement.scrollWidth,position:s.position,overflowY:s.overflowY,columns:getComputedStyle(document.querySelector('.product-details-grid')).gridTemplateColumns.split(' ').length,regionCount:document.querySelectorAll('#productDetails').length,below:ir.top>=gr.bottom-1,mainContains:document.querySelector('main').contains(region),footerBelow:document.querySelector('#footer').getBoundingClientRect().top>=rr.bottom-1,bodyLocked:document.body.classList.contains('lock'),overlay:document.querySelector('#overlay').classList.contains('open'),outsideControls:bad,imageLoaded:document.querySelector('#modalImage').naturalWidth>0,imageFit:getComputedStyle(document.querySelector('#modalImage')).objectFit,name:document.querySelector('#modalName').textContent,price:document.querySelector('#modalPrice').textContent};
++   }""")
++   if width in {280,320,375,430,768,1024,1280,1440,1920,2560}:
++    page.locator('#productDetails').screenshot(path=str(out/f'detalhes-reais-{width}.png'))
++    if width in {320,1440}:page.screenshot(path=str(out/f'viewport-produto-{width}.png'))
++   # Edge states are isolated in memory; no production catalog files are changed.
++   edge=page.evaluate("""() => {
++    const app=__integrallApp,original=structuredClone(app.getState().products),first=original[0];
++    document.querySelector('#modalGift').checked=true;document.querySelector('#modalGiftMessage').value='draft';document.querySelector('#modalQty').value='9';
++    app.openProduct(original[1].id,{updateHash:false,focus:false});
++    const clean=document.querySelector('#modalGiftMessage').value===''&&!document.querySelector('#modalGift').checked&&document.querySelector('#modalQty').value==='1';
++    const changed=structuredClone(original);changed[0].name='Nome-muito-longo'.repeat(25);changed[0].description='Descrição extensa com acentos e informação. '.repeat(100);changed[0].images=[];changed[0].image='';changed[0].variants=[];
++    app.setProducts(changed);app.openProduct(first.id,{updateHash:false,focus:false});
++    return {clean,missingImage:document.querySelector('#modalImage').src.startsWith('data:image/svg+xml'),changedName:document.querySelector('#modalName').textContent===changed[0].name,original};
++   }""")
++   page.wait_for_timeout(100)
++   edge_overflow=page.evaluate('document.documentElement.scrollWidth>innerWidth+1')
++   page.evaluate("products=>{__integrallApp.closeProductDetails({updateHistory:false,returnFocus:false});__integrallApp.setProducts(products);}",edge.pop('original'))
++   checks={'singleNormalFlow':metrics['regionCount']==1 and metrics['position'] in ['static','relative'],'galleryAboveDetails':metrics['below'] and metrics['columns']==1,'semanticMain':metrics['mainContains'] and metrics['footerBelow'],'noGlobalOverflow':metrics['documentWidth']<=width+1,'unlockedPage':not metrics['bodyLocked'] and not metrics['overlay'],'controlsWithinWidth':not metrics['outsideControls'],'originalImageLoaded':metrics['imageLoaded'] and metrics['imageFit']=='contain','headerNoOverlaps':not overlaps,'productSwitchClean':edge['clean'],'longTextReflow':not edge_overflow and edge['changedName'],'missingImageFallback':edge['missingImage'],'noPageExceptions':not errors}
++   failed=[k for k,v in checks.items() if not v]
++   if failed:failures.append({'width':width,'failed':failed,'overlaps':overlaps})
++   results.append({'width':width,'status':'APROVADO' if not failed else 'REPROVADO','checks':checks,'metrics':metrics,'pageErrors':errors})
++   context.close()
++  browser.close()
++ report={'status':'APROVADO' if not failures else 'REPROVADO','scope':'about:blank, actual media bytes and application assets, reduced motion, production CSP excluded, no HTTP network','results':results,'failures':failures}
++ (out/'results.json').write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n');print(json.dumps({'status':report['status'],'cases':len(results),'failures':failures},ensure_ascii=False))
++ return bool(failures)
++if __name__=='__main__':raise SystemExit(main())
+--- a/scripts/audit.mjs
++++ b/scripts/audit.mjs
+@@ -96,21 +96,23 @@
+ const gridPosition = indexHtml.indexOf('id="productGrid"');
+ const detailsPosition = indexHtml.indexOf('id="productDetails"');
+ const footerPosition = indexHtml.indexOf('<footer');
+-if (!(gridPosition >= 0 && footerPosition > gridPosition && detailsPosition > gridPosition)) failures.push('public/index.html: grade, rodapé e diálogo de produto devem existir após o catálogo');
+ const mainEnd = indexHtml.indexOf('</main>');
+-if (!(mainEnd > gridPosition && detailsPosition > mainEnd)) failures.push('public/index.html: diálogo deve estar fora do conteúdo principal inativado ao abrir');
++if (!(gridPosition >= 0 && gridPosition < detailsPosition && detailsPosition < mainEnd && mainEnd < footerPosition)) failures.push('public/index.html: detalhes devem seguir o catálogo dentro de main, antes do rodapé');
+ const detailTag = indexHtml.match(/<section\b[^>]*\bid=["']productDetails["'][^>]*>/i)?.[0] || '';
+-if (!/aria-modal=["']true["']/i.test(detailTag) || !/role=["']dialog["']/i.test(detailTag)) failures.push('public/index.html: #productDetails deve ser um popup modal acessível');
++if (!/role=["']region["']/i.test(detailTag) || !/aria-labelledby=["']modalName["']/i.test(detailTag) || /aria-modal/i.test(detailTag)) failures.push('public/index.html: #productDetails deve ser uma região nomeada, não um diálogo modal');
+ if (!/\bid=["']loadMoreProducts["']/.test(indexHtml)) failures.push('public/index.html: controle explícito de carregar mais produtos não encontrado');
+ 
+ const css = await readFile(path.join(publicDir, 'css', 'store.css'), 'utf8');
+-if (!/\.product-details-inline\{[^}]*position\s*:\s*fixed[^}]*z-index\s*:\s*120/s.test(css)) failures.push('store.css: popup fixo de produto não detectado');
+-if (!/\.product-details-inline\{[^}]*overflow-y\s*:\s*auto/s.test(css) || !/\.product-details-body\{[^}]*overflow\s*:\s*visible/s.test(css)) failures.push('store.css: popup de produto deve rolar no container principal, sem rolagem interna aninhada');
+-if (!/\.product-details-grid\{[^}]*grid-template-columns\s*:\s*minmax\(280px,\.88fr\)\s+minmax\(0,1\.12fr\)/s.test(css)) failures.push('store.css: layout desktop do popup de produto não detectado');
++const detailRules = [...css.matchAll(/\.product-details-inline\s*\{([^}]*)\}/g)].map(match => match[1]);
++if (!detailRules.some(rule => /position\s*:\s*(?:relative|static)/.test(rule) && /overflow\s*:\s*visible/.test(rule))) failures.push('store.css: detalhes devem permanecer no fluxo normal, com altura livre');
++if (detailRules.some(rule => /position\s*:\s*(?:fixed|absolute|sticky)|(?:max-)?height\s*:\s*[^;}]*(?:vh|dvh)|transform\s*:\s*(?!none)/.test(rule))) failures.push('store.css: posicionamento modal ou limite de altura reapareceu nos detalhes');
++const gridRules = [...css.matchAll(/\.product-details-grid\s*\{([^}]*)\}/g)].map(match => match[1]);
++if (!gridRules.length || gridRules.some(rule => !/grid-template-columns\s*:\s*minmax\(0,\s*1fr\)/.test(rule))) failures.push('store.css: todas as regras de detalhes devem manter uma única coluna');
+ if (/(?:^|\})\s*body\s*\{[^}]*min-width\s*:\s*(?:3[2-9][0-9]|[4-9][0-9]{2,}|[1-9][0-9]{3,})px/s.test(css)) failures.push('store.css: body possui largura mínima incompatível com telas pequenas');
+ if (/(?:^|\})\s*body\s*\{[^}]*overflow-x\s*:\s*hidden/s.test(css)) failures.push('store.css: overflow-x:hidden global mascara problemas de layout');
+ const catalogSource = await readFile(path.join(publicDir, 'js', 'store', 'catalog.js'), 'utf8');
+-if (/details\.scrollIntoView/.test(catalogSource)) failures.push('catalog.js: abrir produto não pode deslocar a página com scrollIntoView');
++if (/layers\.open\(details|forwardProductPopupWheel/.test(catalogSource)) failures.push('catalog.js: detalhes não devem bloquear o fundo como um modal');
++if (!/prefers-reduced-motion/.test(catalogSource) || !/clearProductDetailsState/.test(catalogSource)) failures.push('catalog.js: preferência de movimento e limpeza entre produtos devem ser preservadas');
+ if (!/const CATALOG_PAGE_SIZE = 12/.test(catalogSource) || !/allItems\.slice\(0, visible\)/.test(catalogSource)) failures.push('catalog.js: catálogo progressivo de 12 itens não detectado');
+ 
+ const serverSource = await readFile(path.join(root, 'server.js'), 'utf8');
+--- a/scripts/browser-regression.py
++++ b/scripts/browser-regression.py
+@@ -1,7 +1,7 @@
+ #!/usr/bin/env python3
+ """Regressão visual/funcional da loja INTEGRALL v11.1.7 sem backend.
+ 
+-Valida popup de produto sem deslocamento de página, galeria/foto por variação,
++Valida detalhes em fluxo normal abaixo da galeria, galeria/foto por variação,
+ fechamento e foco, fallback de imagem, catálogo progressivo (12 por vez),
+ responsividade e ausência de erros de console em Chromium.
+ """
+@@ -86,6 +86,7 @@
+     parser.add_argument("--root", type=Path, default=Path.cwd())
+     parser.add_argument("--out", type=Path, required=True)
+     parser.add_argument("--chromium", default="/usr/bin/chromium")
++    parser.add_argument("--experimental-css-zoom", action="store_true", help="Experimento de CSS zoom; não equivale ao zoom nativo do navegador.")
+     args = parser.parse_args()
+ 
+     root = args.root.resolve(); out = args.out.resolve(); out.mkdir(parents=True, exist_ok=True)
+@@ -101,7 +102,7 @@
+ 
+     with sync_playwright() as p:
+         browser = p.chromium.launch(executable_path=args.chromium, headless=True, args=["--no-sandbox", "--disable-dev-shm-usage", "--disable-gpu"])
+-        context = browser.new_context(viewport={"width": WIDTHS[0], "height": 900}, device_scale_factor=1, bypass_csp=True)
++        context = browser.new_context(viewport={"width": WIDTHS[0], "height": 900}, device_scale_factor=1, bypass_csp=True, reduced_motion="reduce")
+         transparent_png = bytes.fromhex('89504e470d0a1a0a0000000d49484452000000010000000108060000001f15c4890000000d49444154789c6360000000020001e221bc330000000049454e44ae426082')
+ 
+         for width in WIDTHS:
+@@ -159,11 +160,8 @@
+             page.keyboard.press('ArrowLeft'); page.wait_for_timeout(20)
+             modal_keyboard_src = page.locator('#modalImage').get_attribute('src')
+             page.locator('#modalGalleryStage').hover(); page.mouse.wheel(0, 650); page.wait_for_timeout(35)
+-            popup_scroll_top = page.locator('#productDetails').evaluate('node => node.scrollTop')
+-            page.locator('#productDetails').evaluate('node => node.scrollTop=0')
+-            page.mouse.move(2, 180); page.mouse.wheel(0, 650); page.wait_for_timeout(35)
+-            overlay_forward_scroll_top = page.locator('#productDetails').evaluate('node => node.scrollTop')
+-            page.locator('#productDetails').evaluate('node => node.scrollTop=0')
++            document_scroll_top = page.evaluate('window.scrollY')
++            page.locator('#productDetails').scroll_into_view_if_needed()
+             page.select_option("#modalVariant", "audit-a-v2"); page.locator("#modalVariant").dispatch_event("change"); page.wait_for_timeout(40)
+             variant_src = page.locator("#modalImage").get_attribute("src")
+             variant_modal_state = page.evaluate("() => ({open:!document.querySelector('#productDetails').hidden && document.querySelector('#productDetails').classList.contains('open'), overlay:document.querySelector('#overlay').classList.contains('open'), activeId:globalThis.__integrallApp.getState().activeId})")
+@@ -176,11 +174,11 @@
+             metrics = page.evaluate("""() => {
+               const details=document.querySelector('#productDetails'); const rect=details?.getBoundingClientRect(); const style=details?getComputedStyle(details):null;
+               const gridStyle=getComputedStyle(document.querySelector('.product-details-grid'));
+-              return {detailsExists:!!details,detailsCount:document.querySelectorAll('#productDetails').length,hidden:details?.hidden,ariaHidden:details?.getAttribute('aria-hidden'),ariaModal:details?.getAttribute('aria-modal'),role:details?.getAttribute('role'),position:style?.position,display:style?.display,gridColumns:gridStyle.gridTemplateColumns,top:rect?.top,bottom:rect?.bottom,left:rect?.left,right:rect?.right,centerX:rect?(rect.left+rect.right)/2:null,centerY:rect?(rect.top+rect.bottom)/2:null,viewportW:innerWidth,viewportH:innerHeight,parentId:details?.parentElement?.id||'',bodyLocked:document.body.classList.contains('lock'),overlayOpen:document.querySelector('#overlay')?.classList.contains('open'),horizontalOverflow:document.documentElement.scrollWidth>document.documentElement.clientWidth+1,activeName:document.querySelector('#modalName')?.textContent,activeId:globalThis.__integrallApp.getState().activeId,imgObjectFit:getComputedStyle(document.querySelector('#modalImage')).objectFit,overlayBackdrop:getComputedStyle(document.querySelector('#overlay')).backdropFilter||getComputedStyle(document.querySelector('#overlay')).webkitBackdropFilter||'none',popupOverflowY:style?.overflowY};
++              return {belowGallery:document.querySelector('.product-info').getBoundingClientRect().top>=document.querySelector('.product-gallery').getBoundingClientRect().bottom-1,detailsExists:!!details,detailsCount:document.querySelectorAll('#productDetails').length,hidden:details?.hidden,ariaHidden:details?.getAttribute('aria-hidden'),ariaModal:details?.getAttribute('aria-modal'),role:details?.getAttribute('role'),position:style?.position,display:style?.display,gridColumns:gridStyle.gridTemplateColumns,top:rect?.top,bottom:rect?.bottom,left:rect?.left,right:rect?.right,centerX:rect?(rect.left+rect.right)/2:null,centerY:rect?(rect.top+rect.bottom)/2:null,viewportW:innerWidth,viewportH:innerHeight,parentId:details?.parentElement?.id||'',bodyLocked:document.body.classList.contains('lock'),overlayOpen:document.querySelector('#overlay')?.classList.contains('open'),horizontalOverflow:document.documentElement.scrollWidth>document.documentElement.clientWidth+1,activeName:document.querySelector('#modalName')?.textContent,activeId:globalThis.__integrallApp.getState().activeId,imgObjectFit:getComputedStyle(document.querySelector('#modalImage')).objectFit,overlayBackdrop:getComputedStyle(document.querySelector('#overlay')).backdropFilter||getComputedStyle(document.querySelector('#overlay')).webkitBackdropFilter||'none',popupOverflowY:style?.overflowY};
+             }""")
+ 
+             if width in SCREENSHOT_WIDTHS:
+-                page.screenshot(path=str(out / f"produto-popup-{width}.png"), full_page=False)
++                page.locator("#productDetails").screenshot(path=str(out / f"produto-detalhes-{width}.png"))
+ 
+             page.locator("#closeProductDetails").click(); page.wait_for_timeout(50)
+             closed = page.evaluate("""() => ({hidden:document.querySelector('#productDetails')?.hidden,ariaHidden:document.querySelector('#productDetails')?.getAttribute('aria-hidden'),activeId:globalThis.__integrallApp.getState().activeId,focusedDetails:document.activeElement?.dataset?.details||'',bodyLocked:document.body.classList.contains('lock'),overlayOpen:document.querySelector('#overlay')?.classList.contains('open')})""")
+@@ -194,21 +192,21 @@
+ 
+             columns = len([x for x in metrics["gridColumns"].split() if x])
+             checks = {
+-                "popup_sem_scroll": before_scroll == after_scroll,
+-                "single_dialog": metrics["detailsExists"] and metrics["detailsCount"] == 1 and metrics["ariaModal"] == "true" and metrics["role"] == "dialog",
+-                "fixed_overlay": metrics["position"] == "fixed" and metrics["bodyLocked"] and metrics["overlayOpen"],
+-                "inside_viewport": metrics["top"] >= -1 and metrics["left"] >= -1 and metrics["right"] <= metrics["viewportW"] + 1 and metrics["bottom"] <= metrics["viewportH"] + 1,
+-                "centered_in_viewport": abs(metrics["centerX"] - metrics["viewportW"] / 2) <= 2 and abs(metrics["centerY"] - metrics["viewportH"] / 2) <= 2 and metrics["parentId"] == "catalogSurface",
+-                "responsive_columns": columns == (1 if width <= 900 else 2),
++                "opening_scrolls_to_details": after_scroll > before_scroll,
++                "single_region": metrics["detailsExists"] and metrics["detailsCount"] == 1 and metrics["ariaModal"] is None and metrics["role"] == "region",
++                "normal_flow": metrics["position"] in ("static","relative") and not metrics["bodyLocked"] and not metrics["overlayOpen"],
++                "inside_viewport_width": metrics["left"] >= -1 and metrics["right"] <= metrics["viewportW"] + 1,
++                "semantic_main_below_gallery": metrics["parentId"] == "siteMain" and metrics["belowGallery"],
++                "one_column_all_widths": columns == 1,
+                 "no_global_overflow": not metrics["horizontalOverflow"],
+                 "card_gallery_without_open": card_initial_src == first and card_next_src == second and card_swipe_src == first and card_still_closed is True,
+                 "card_square_smart_fill": abs(card_media_metrics["w"] - card_media_metrics["h"]) <= 2 and card_media_metrics["borderTop"] == "0px" and card_media_metrics["borderLeft"] == "0px" and card_media_metrics["mainFit"] == "contain" and card_media_metrics["fillFit"] == "cover",
+                 "modal_gallery_controls": initial_src == first and modal_next_src == second and modal_keyboard_src == first,
+-                "modal_scroll_anywhere": popup_scroll_top > 0 and overlay_forward_scroll_top > 0 and before_scroll == after_scroll,
++                "document_scroll": document_scroll_top > after_scroll,
+                 "no_backdrop_blur": metrics["overlayBackdrop"] in ("none", ""),
+-                "popup_is_scroll_container": metrics["popupOverflowY"] in ("auto", "scroll"),
++                "no_nested_scroll": metrics["popupOverflowY"] == "visible",
+                 "variant_image_switch": initial_src == first and variant_src == second,
+-                "variant_keeps_modal_open": variant_modal_state["open"] and variant_modal_state["overlay"] and variant_modal_state["activeId"] == "audit-product-a",
++                "variant_keeps_modal_open": variant_modal_state["open"] and not variant_modal_state["overlay"] and variant_modal_state["activeId"] == "audit-product-a",
+                 "switch_clears_state": switched["name"] == "Segundo produto" and switched["qty"] == "1" and switched["variantHidden"] is True and switched["activeId"] == "audit-product-b",
+                 "close_clears_and_restores_focus": closed["hidden"] is True and closed["ariaHidden"] == "true" and closed["activeId"] == "" and closed["focusedDetails"] == "audit-product-a" and not closed["bodyLocked"] and not closed["overlayOpen"],
+                 "escape_closes": escape_closed is True,
+@@ -305,6 +303,55 @@
+         if not legal_ok: failures.append("legal-layering: termos/privacidade empilharam camada, perderam parágrafos ou deixaram scroll incoerente")
+         results.append({"scenario":"legal-layering-and-multiline","status":"APROVADO" if legal_ok else "REPROVADO","open":legal_open,"closed":legal_closed})
+ 
++        context.close()
++        context=browser.new_context(viewport={"width":1440,"height":900},bypass_csp=True,reduced_motion="reduce")
++        page=context.new_page(); page.route('https://integrall.test/**', lambda route: route.fulfill(status=200,content_type='image/png',body=transparent_png))
++        page.set_content(html,wait_until="domcontentloaded")
++        for css in styles:page.add_style_tag(content=css)
++        page.add_script_tag(content=catalog_js);page.evaluate("products=>__integrallApp.setProducts(products)",products)
++        page.evaluate("""() => {window.__postCount=0;window.__failCustomerLogout=true;window.IntegrallApi={request:async(path,options={})=>{
++          if(path==='/api/account/session')return{authenticated:true,account:{email:'test@example.invalid',favorites:[],addresses:[]},csrfToken:'test-only-csrf'};
++          if(path==='/api/account/orders')return{orders:[]};
++          if(path==='/api/account/logout'){if(window.__failCustomerLogout)throw new Error('fixture network failure');return{ok:true};}
++          if(path.includes('/reviews')&&options.method==='POST'){window.__postCount++;await new Promise(r=>setTimeout(r,120));return{message:'Avaliação recebida.'};}
++          if(path.includes('/reviews'))return{summary:{count:0},reviews:[]};
++          return{};
++        }};}""")
++        page.add_script_tag(content=commerce_js);page.wait_for_timeout(60)
++        page.evaluate("() => __integrallApp.openProduct('audit-product-a',{updateHash:false,focus:false,variantId:'audit-a-v2'})")
++        page.wait_for_timeout(40)
++        direct_variant=page.locator('#modalVariant').input_value()=='audit-a-v2' and page.locator('#modalImage').get_attribute('src')==second
++        page.locator('#modalGift').check();page.fill('#modalGiftMessage','Mensagem de presente');page.locator('#modalGiftMessage').press('ArrowLeft')
++        text_arrows=page.locator('#modalImage').get_attribute('src')==second
++        page.fill('#reviewTitle','Título do teste');page.fill('#reviewBody','Texto da avaliação')
++        page.locator('#reviewForm').dispatch_event('submit');page.wait_for_timeout(180)
++        review_success=page.locator('#reviewFeedback').inner_text()=='Avaliação recebida.' and page.locator('#reviewTitle').input_value()==''
++        page.fill('#reviewTitle','Resposta de produto anterior');page.locator('#reviewForm').dispatch_event('submit')
++        page.evaluate("() => {__integrallApp.openProduct('audit-product-b',{updateHash:false,focus:false});__integrallApp.openProduct('audit-product-a',{updateHash:false,focus:false});}")
++        page.wait_for_timeout(180)
++        stale_post=page.locator('#reviewFeedback').inner_text()=='' and not page.locator('#reviewForm button[type=submit]').is_disabled()
++        for name,ok in [('direct-variant-image',direct_variant),('arrows-in-text-do-not-change-gallery',text_arrows),('review-async-form-reset',review_success),('review-stale-post-reopen',stale_post)]:
++          results.append({'scenario':name,'status':'APROVADO' if ok else 'REPROVADO'})
++          if not ok:failures.append(name)
++        # Landscape, text-size and CSS zoom are simulations, not browser-native zoom.
++        simulations = [(812,375,1),(1024,400,1)]
++        if args.experimental_css_zoom:
++          simulations += [(1440,900,1.25),(1440,900,1.5),(1440,900,2)]
++        for width,height,zoom in simulations:
++          page.set_viewport_size({'width':width,'height':height});page.evaluate('zoom=>document.body.style.zoom=String(zoom)',zoom);page.wait_for_timeout(40)
++          reflow=page.evaluate("""() => ({overflow:document.documentElement.scrollWidth>innerWidth+1,below:document.querySelector('.product-info').getBoundingClientRect().top>=document.querySelector('.product-gallery').getBoundingClientRect().bottom-1})""")
++          ok=not reflow['overflow'] and reflow['below'];name=f'layout-simulation-{width}x{height}-csszoom-{zoom}'
++          results.append({'scenario':name,'status':'APROVADO' if ok else 'REPROVADO','metrics':reflow})
++          if not ok:failures.append(name)
++        page.evaluate('document.body.style.zoom=""');page.set_viewport_size({'width':1440,'height':900})
++        page.locator('#openAccount').dispatch_event('click');page.wait_for_timeout(80)
++        logout=page.get_by_role('button',name='Sair desta conta');logout.click();page.wait_for_timeout(30)
++        customer_failure=page.locator('#accountLoginForm').count()==0 and logout.is_visible()
++        page.evaluate('window.__failCustomerLogout=false');logout.click();page.wait_for_selector('#accountLoginForm')
++        customer_success=page.locator('#accountLoginForm').is_visible()
++        ok=customer_failure and customer_success
++        results.append({'scenario':'customer-logout-failure-and-retry','status':'APROVADO' if ok else 'REPROVADO'})
++        if not ok:failures.append('customer-logout-failure-and-retry')
+         context.close(); browser.close()
+ 
+     (out / "browser-regression.json").write_text(json.dumps(results, ensure_ascii=False, indent=2), encoding="utf-8")
+--- a/scripts/build-production.mjs
++++ b/scripts/build-production.mjs
+@@ -98,6 +98,9 @@
+   'docker-compose.yml',
+   'README.md',
+   'CORRECOES-V11.1.8.md',
++  'CORRECOES-V11.0.4.md',
++  'TESTES-V11.0.4.md',
++  'MANIFESTO-V11.0.4.txt',
+   'LEIA-ME-PRIMEIRO.txt',
+   'DEPLOYMENT_RUNBOOK.md',
+   'SECURITY.md'
+--- a/scripts/hash-admin-password.mjs
++++ b/scripts/hash-admin-password.mjs
+@@ -1,5 +1,4 @@
+ import process from 'node:process';
+-import readline from 'node:readline';
+ import {hashPassword} from '../src/auth.js';
+ 
+ function readHidden(prompt) {
+@@ -8,7 +7,7 @@
+       let input = '';
+       process.stdin.setEncoding('utf8');
+       process.stdin.on('data', chunk => { input += chunk; });
+-      process.stdin.on('end', () => resolve(input.trimEnd()));
++      process.stdin.on('end', () => resolve(input.replace(/\r?\n$/, '')));
+     });
+   }
+   return new Promise((resolve, reject) => {
+@@ -24,26 +23,15 @@
+       stdin.setRawMode(wasRaw);
+       stdin.pause();
+     };
+-    const onData = char => {
+-      if (char === '\u0003') {
+-        cleanup();
+-        process.stdout.write('\n');
+-        reject(new Error('Operação cancelada.'));
+-        return;
+-      }
+-      if (char === '\r' || char === '\n') {
+-        cleanup();
+-        process.stdout.write('\n');
+-        resolve(value);
+-        return;
+-      }
+-      if (char === '\u007f' || char === '\b') {
+-        if (value) { value = value.slice(0, -1); process.stdout.write('\b \b'); }
+-        return;
+-      }
+-      if (/^[\u0020-\u007e]$/.test(char)) {
+-        value += char;
+-        process.stdout.write('•');
++    const onData = chunk => {
++      for (const char of chunk) {
++        if (char === '\u0003') {cleanup();process.stdout.write('\n');reject(new Error('Operação cancelada.'));return;}
++        if (char === '\r' || char === '\n') {cleanup();process.stdout.write('\n');resolve(value);return;}
++        if (char === '\u007f' || char === '\b') {
++          if (value) {value=Array.from(value).slice(0,-1).join('');process.stdout.write('\b \b');}
++        } else if (!/[\u0000-\u001f\u007f]/.test(char) && value.length < 256) {
++          value+=char;process.stdout.write('•');
++        }
+       }
+     };
+     stdin.on('data', onData);
+--- a/scripts/production-browser-smoke.py
++++ b/scripts/production-browser-smoke.py
+@@ -2,8 +2,8 @@
+ """Serve e valida o build estático de produção da INTEGRALL v11.1.6.
+ 
+ O teste usa ``dist/public`` com fallback para ``/produto/<slug>`` e confirma
+-o comportamento atual de popup: rota direta abre um único produto em camada
+-fixa, sem deslocamento/overflow, com carrinho, busca e assets funcionais. A API
++detalhes em fluxo: rota direta abre uma região única abaixo da galeria
++com rolagem do documento, sem overflow horizontal, com carrinho, busca e assets funcionais. A API
+ é respondida com 503 de propósito para exercitar o catálogo embutido.
+ """
+ from __future__ import annotations
+@@ -50,9 +50,12 @@
+             self.send_error(403)
+             return
+ 
+-        if parsed.path == "/" or parsed.path.startswith("/produto/") or not candidate.is_file():
++        if parsed.path == "/" or parsed.path.startswith("/produto/"):
+             candidate = root / "index.html"
+ 
++        if not candidate.is_file():
++            self.send_error(404)
++            return
+         content = candidate.read_bytes()
+         content_type = mimetypes.guess_type(candidate.name)[0] or "application/octet-stream"
+         self.send_response(200)
+@@ -127,6 +130,8 @@
+                         detailsOpen:details.classList.contains('open'),
+                         detailsPosition:getComputedStyle(details).position,
+                         popupWithinViewport:rect.left >= -1 && rect.right <= innerWidth + 1 && rect.top >= -1 && rect.bottom <= innerHeight + 1,
++                        belowGallery: document.querySelector('.product-info').getBoundingClientRect().top >= document.querySelector('.product-gallery').getBoundingClientRect().bottom - 1,
++                        columns: getComputedStyle(document.querySelector('.product-details-grid')).gridTemplateColumns.split(' ').length,
+                         bodyLocked:document.body.classList.contains('lock'),
+                         overlayOpen:document.querySelector('#overlay')?.classList.contains('open') || false,
+                         horizontalOverflow:document.documentElement.scrollWidth > document.documentElement.clientWidth + 1,
+@@ -137,6 +142,7 @@
+                     }"""
+                 )
+ 
++                page.locator("#productDetails").screenshot(path=str(out / f"build-detalhes-{width}.png"))
+                 variant_options = page.locator("#modalVariant option").count()
+                 if variant_options > 1:
+                     page.select_option("#modalVariant", index=1)
+@@ -175,10 +181,10 @@
+                 checks = {
+                     "fiveEmbeddedProducts": initial["products"] == 5,
+                     "directProductRoute": initial["productName"] == "Suco Integral de Uva bordô" and bool(initial["activeId"]),
+-                    "singlePopupDetails": initial["detailsCount"] == 1 and initial["legacyModalCount"] == 0,
+-                    "popupOpenAndFixed": initial["detailsOpen"] and not initial["detailsHidden"] and initial["detailsPosition"] == "fixed",
+-                    "popupWithinViewport": initial["popupWithinViewport"],
+-                    "modalLocksBackground": initial["bodyLocked"] and initial["overlayOpen"],
++                    "singleDetails": initial["detailsCount"] == 1 and initial["legacyModalCount"] == 0,
++                    "normalFlow": initial["detailsOpen"] and not initial["detailsHidden"] and initial["detailsPosition"] in ("relative", "static"),
++                    "oneColumn": initial["columns"] == 1 and initial["belowGallery"],
++                    "documentScrollUnlocked": not initial["bodyLocked"] and not initial["overlayOpen"],
+                     "noHorizontalOverflow": not initial["horizontalOverflow"],
+                     "noAgeGateAfterRemember": not initial["ageGate"],
+                     "canonicalRoute": initial["canonical"].endswith("/produto/suco-integral-de-uva-bordo"),
+--- a/scripts/production-http-smoke.mjs
++++ b/scripts/production-http-smoke.mjs
+@@ -35,7 +35,9 @@
+     if (!file) { res.writeHead(403); res.end('forbidden'); return; }
+     let isFile = false;
+     try { isFile = (await stat(file)).isFile(); } catch {}
+-    if (url.pathname === '/' || url.pathname.startsWith('/produto/') || !isFile) file = path.join(root, 'index.html');
++    if (url.pathname === '/' || url.pathname.startsWith('/produto/')) file = path.join(root, 'index.html');
++    else if (url.pathname === '/admin') file = path.join(root, 'admin.html');
++    else if (!isFile) {res.writeHead(404);res.end('not found');return;}
+     const info = await stat(file);
+     res.writeHead(200, {'Content-Type': types.get(path.extname(file).toLowerCase()) || 'application/octet-stream', 'Content-Length': info.size});
+     createReadStream(file).pipe(res);
+@@ -60,7 +62,7 @@
+     ['/', text => text.includes(expectedBuildMarker) && text.includes('id="productDetails"')],
+     ['/produto/suco-integral-de-uva-bordo', text => text.includes('id="buildData"') && text.includes('suco-integral-de-uva-bordo')],
+     ['/admin.html', text => text.includes('id="loginForm"') && text.includes('Administração INTEGRALL')],
+-    ['/css/store.css', text => text.includes('.product-details-inline') && text.includes('position:fixed') && text.includes('.catalog-pagination')],
++    ['/css/store.css', text => text.includes('.product-details-inline') && text.includes('.product-details-grid{display:grid;grid-template-columns:minmax(0,1fr)') && text.includes('.catalog-pagination')],
+     ['/js/store/catalog.js', text => text.includes('function openProduct') && text.includes('integrall:product-closed') && text.includes('CATALOG_PAGE_SIZE = 12')],
+   ];
+   for (const [route, validate] of checks) {
+@@ -79,6 +81,10 @@
+   ensure(api.status === 503, `API isolada deveria responder 503, recebeu ${api.status}`);
+   ensure((api.headers.get('cache-control') || '') === 'no-store', 'API isolada sem Cache-Control no-store');
+ 
++  for (const route of ['/assets/missing-audit-file.webp','/missing-audit-route']) {
++    ensure((await fetch(`${base}${route}`)).status===404, `${route}: recurso ausente não pode retornar HTML200`);
++  }
++
+   const manifest = (await readFile(path.join(dist, 'BUILD-MANIFEST.sha256'), 'utf8')).trim().split(/\r?\n/);
+   ensure(manifest.length > 200, 'manifesto de build incompleto');
+   for (const line of manifest) {
+@@ -88,7 +94,7 @@
+     ensure(actual === expected, `hash divergente: ${relative}`);
+   }
+ 
+-  console.log(`PRODUCTION HTTP SMOKE OK - ${checks.length + 3} cenários; ${manifest.length} hashes verificados`);
++  console.log(`PRODUCTION HTTP SMOKE OK - ${checks.length + 5} cenários; ${manifest.length} hashes verificados`);
+ } finally {
+   await new Promise(resolve => server.close(resolve));
+ }
+--- a/scripts/security-scan.mjs
++++ b/scripts/security-scan.mjs
+@@ -74,7 +74,7 @@
+ if (!/await\s+mercadoPago\.validateWebhook/.test(serverSource)) failures.push('server.js: validação assíncrona do webhook do Mercado Pago não é aguardada');
+ 
+ const configSource = await readFile(path.join(root, 'src', 'config.js'), 'utf8');
+-if (!/configuredAdminPasswordHash\s*\|\|\s*\(useBuiltInAdminPassword/.test(configSource)) failures.push('src/config.js: senha configurada não substitui inequivocamente a credencial inicial');
++if (!/const useBuiltInAdminPassword\s*=\s*defaultAdminLoginRequested/.test(configSource) || !/adminPasswordHash:\s*useBuiltInAdminPassword\s*\?\s*DEFAULT_ADMIN_PASSWORD_HASH\s*:\s*configuredAdminPasswordHash/.test(configSource)) failures.push('src/config.js: seleção exclusiva entre modo padrão e personalizado não detectada');
+ if (!/adminUsesBuiltInPasswordHash/.test(configSource) || !/adminUsesBuiltInSessionSecret/.test(configSource)) failures.push('src/config.js: marcadores de configuração inicial não detectados');
+ if (!/config\.adminUsesBuiltInPasswordHash\)[^\n]*ADMIN_PASSWORD_HASH/.test(configSource)) failures.push('src/config.js: produção não rejeita a credencial inicial');
+ if (!/config\.adminUsesBuiltInSessionSecret[^\n]*ADMIN_SESSION_SECRET/.test(configSource)) failures.push('src/config.js: produção não exige segredo administrativo persistente');
+--- a/server.js
++++ b/server.js
+@@ -16,6 +16,7 @@
+ import {JadlogService} from './src/jadlog.js';
+ import {Mailer, orderEmail} from './src/mailer.js';
+ import {AdminAuth} from './src/auth.js';
++import {createAdminSessionHandlers} from './src/admin-session.js';
+ import {decodeLegacyDataUrl, ImageUploadError, mediaIdFromUrl, parseMultipartBody, validateAndSanitizeImage} from './src/image-upload.js';
+ import {assertOrderTransition} from './src/order-state.js';
+ import {CustomerAuth} from './src/customer-auth.js';
+@@ -374,48 +375,10 @@
+   return number;
+ }
+ 
+-app.get('/api/admin/session', adminLimiter, asyncRoute(async (req, res) => {
+-  res.setHeader('Vary', 'Cookie');
+-  const session = await adminAuth.readSession(req);
+-  if (!session) return res.json({configured: adminAuth.configured, authenticated: false});
+-  res.json({
+-    configured: true,
+-    authenticated: true,
+-    user: {email: session.sub, role: session.role},
+-    csrfToken: session.csrf,
+-    expiresAt: new Date(session.exp * 1000).toISOString()
+-  });
+-}));
+-
+-app.post('/api/admin/session/login', adminLoginLimiter, publicJson, asyncRoute(async (req, res) => {
+-  if (!adminAuth.configured) {
+-    return res.status(503).json({code: 'ADMIN_NOT_CONFIGURED', error: 'A administração segura ainda não foi configurada.'});
+-  }
+-  const email = cleanText(req.body?.email, 254).toLowerCase();
+-  const password = String(req.body?.password || '');
+-  const user = await adminAuth.authenticate(email, password);
+-  if (!user) {
+-    await auditAdmin(req, 'login_failed', 'admin_session', '', {emailProvided: Boolean(email)});
+-    return res.status(401).json({code: 'ADMIN_LOGIN_INVALID', error: 'E-mail ou senha inválidos.'});
+-  }
+-  const session = await adminAuth.createSession(user);
+-  res.setHeader('Set-Cookie', session.cookie);
+-  res.setHeader('Vary', 'Cookie');
+-  await auditAdmin({...req, admin: user}, 'login_succeeded', 'admin_session', user.email);
+-  res.json({
+-    authenticated: true,
+-    user,
+-    csrfToken: session.payload.csrf,
+-    expiresAt: session.expiresAt
+-  });
+-}));
+-
+-app.post('/api/admin/session/logout', adminLimiter, adminSession, asyncRoute(async (req, res) => {
+-  await adminAuth.revokeSession(req.admin);
+-  res.setHeader('Set-Cookie', adminAuth.clearCookie());
+-  await auditAdmin(req, 'logout', 'admin_session', req.admin.email);
+-  res.json({ok: true});
+-}));
++const adminSessionHandlers = createAdminSessionHandlers({adminAuth, auditAdmin});
++app.get('/api/admin/session', adminLimiter, asyncRoute(adminSessionHandlers.read));
++app.post('/api/admin/session/login', adminLoginLimiter, publicJson, asyncRoute(adminSessionHandlers.login));
++app.post('/api/admin/session/logout', adminLimiter, adminSession, asyncRoute(adminSessionHandlers.logout));
+ 
+ app.get('/api/health', readLimiter, asyncRoute(async (_req, res) => {
+   res.setHeader('Cache-Control', 'no-store');
+--- /dev/null
++++ b/src/admin-session.js
+@@ -0,0 +1,39 @@
++import {cleanText} from './catalog.js';
++
++/** Shared production controllers. Express retains its existing body parsers,
++ * rate limits, session middleware and error handling in server.js. */
++export function createAdminSessionHandlers({adminAuth, auditAdmin}) {
++  if (!adminAuth || typeof auditAdmin !== 'function') throw new TypeError('Dependências de sessão administrativa inválidas.');
++  const noCache = res => {res.setHeader('Cache-Control', 'no-store');res.setHeader('Vary', 'Cookie');};
++  return {
++    async read(req, res) {
++      noCache(res);
++      const session = await adminAuth.readSession(req);
++      if (!session) return res.json({configured: adminAuth.configured, authenticated: false});
++      return res.json({configured:true,authenticated:true,user:{email:session.sub,role:session.role},csrfToken:session.csrf,expiresAt:new Date(session.exp*1000).toISOString()});
++    },
++    async login(req, res) {
++      noCache(res);
++      if (!adminAuth.configured) return res.status(503).json({code:'ADMIN_NOT_CONFIGURED',error:'A administração segura ainda não foi configurada.'});
++      if (!adminAuth.sameOrigin(req)) return res.status(403).json({code:'ADMIN_ORIGIN_INVALID',error:'Origem de acesso não permitida.'});
++      const email = cleanText(req.body?.email,254).toLowerCase();
++      const password = String(req.body?.password || '');
++      const user = await adminAuth.authenticate(email,password);
++      if (!user) {
++        await auditAdmin(req,'login_failed','admin_session','',{emailProvided:Boolean(email)});
++        return res.status(401).json({code:'ADMIN_LOGIN_INVALID',error:'E-mail ou senha inválidos.'});
++      }
++      const session = await adminAuth.createSession(user);
++      res.setHeader('Set-Cookie',session.cookie);
++      await auditAdmin({...req,admin:user},'login_succeeded','admin_session',user.email);
++      return res.json({authenticated:true,user,csrfToken:session.payload.csrf,expiresAt:session.expiresAt});
++    },
++    async logout(req, res) {
++      noCache(res);
++      await adminAuth.revokeSession(req.admin);
++      res.setHeader('Set-Cookie',adminAuth.clearCookie());
++      await auditAdmin(req,'logout','admin_session',req.admin.email);
++      return res.json({ok:true});
++    }
++  };
++}
+--- a/src/auth.js
++++ b/src/auth.js
+@@ -50,7 +50,7 @@
+ 
+ function validRole(value) {
+   const role = String(value || '').trim().toLowerCase();
+-  return Object.hasOwn(ADMIN_ROLES, role) ? role : 'admin';
++  return Object.hasOwn(ADMIN_ROLES, role) ? role : '';
+ }
+ 
+ function validateScryptParameters(cost, blockSize, parallelization) {
+@@ -114,7 +114,7 @@
+   }
+ 
+   get configured() {
+-    return Boolean(this.email && this.passwordHash && this.sessionSecret.length >= 32);
++    return Boolean(this.email && this.passwordHash && Object.hasOwn(ADMIN_ROLES, this.role) && this.sessionSecret.length >= 32);
+   }
+ 
+   async authenticate(email, password) {
+@@ -125,6 +125,10 @@
+     const emailMatches = safeEqualText(normalized, this.email);
+     const passwordMatches = await verifyPassword(password, this.passwordHash).catch(() => false);
+     return emailMatches && passwordMatches ? {email: this.email, role: this.role} : null;
++  }
++
++  credentialVersion() {
++    return createHmac('sha256', this.sessionSecret).update(JSON.stringify([this.email, this.role, this.passwordHash])).digest('base64url');
+   }
+ 
+   signPayload(payload) {
+@@ -143,17 +147,22 @@
+     if (!safeEqualText(signature, expected)) return null;
+     let payload;
+     try { payload = JSON.parse(Buffer.from(body, 'base64url').toString('utf8')); } catch { return null; }
+-    if (!payload || payload.v !== 1 || payload.sub !== this.email || validRole(payload.role) !== payload.role) return null;
+-    if (!Number.isInteger(payload.exp) || payload.exp <= Math.floor(Date.now() / 1000)) return null;
++    if (!payload || payload.v !== 2 || payload.sub !== this.email || payload.role !== this.role || !Object.hasOwn(ADMIN_ROLES, payload.role)) return null;
++    if (!safeEqualText(payload.credentialVersion, this.credentialVersion())) return null;
++    if (!Number.isInteger(payload.iat) || payload.iat > Math.floor(Date.now() / 1000) + 30 || payload.iat < 0) return null;
++    if (!/^[A-Za-z0-9_-]{20,64}$/.test(String(payload.jti || ''))) return null;
++    if (!Number.isInteger(payload.exp) || payload.exp <= payload.iat || payload.exp - payload.iat > 24 * 60 * 60 || payload.exp <= Math.floor(Date.now() / 1000)) return null;
+     if (!/^[A-Za-z0-9_-]{20,}$/.test(String(payload.csrf || ''))) return null;
+     return payload;
+   }
+ 
+   async createSession(user) {
++    if (!this.configured || user?.email !== this.email || user?.role !== this.role) throw new Error('Usuário administrativo inválido.');
+     const issuedAt = Math.floor(Date.now() / 1000);
+     const maxAge = Math.floor(this.sessionHours * 60 * 60);
+     const payload = {
+-      v: 1,
++      v: 2,
++      credentialVersion: this.credentialVersion(),
+       sub: user.email,
+       role: validRole(user.role),
+       iat: issuedAt,
+--- a/src/config.js
++++ b/src/config.js
+@@ -43,7 +43,7 @@
+ const configuredAdminSessionSecret = text('ADMIN_SESSION_SECRET');
+ const configuredCustomerAuthSecret = text('CUSTOMER_AUTH_SECRET');
+ const defaultAdminLoginRequested = bool('ADMIN_DEFAULT_LOGIN_ENABLED', true);
+-const useBuiltInAdminPassword = !configuredAdminPasswordHash && defaultAdminLoginRequested;
++const useBuiltInAdminPassword = defaultAdminLoginRequested;
+ 
+ export const config = Object.freeze({
+   env: text('NODE_ENV', 'development'),
+@@ -64,11 +64,12 @@
+   freeShippingCents: int('FREE_SHIPPING_CENTS', null),
+   trustProxy: bool('TRUST_PROXY', false),
+ 
+-  // Administração segura. A credencial inicial só é usada quando não existe
+-  // ADMIN_PASSWORD_HASH próprio. Uma senha configurada sempre substitui a inicial,
+-  // mesmo que uma variável antiga tenha deixado ADMIN_DEFAULT_LOGIN_ENABLED=true.
++  // Um único modo de autenticação é ativo. No modo padrão, hashes legados
++  // não substituem nem coexistem com a credencial inicial. Para usar um hash
++  // próprio, desative explicitamente ADMIN_DEFAULT_LOGIN_ENABLED. Produção
++  // continua recusando o modo padrão, independentemente do hash no ambiente.
+   adminEmail: configuredAdminEmail || DEFAULT_ADMIN_EMAIL,
+-  adminPasswordHash: configuredAdminPasswordHash || (useBuiltInAdminPassword ? DEFAULT_ADMIN_PASSWORD_HASH : ''),
++  adminPasswordHash: useBuiltInAdminPassword ? DEFAULT_ADMIN_PASSWORD_HASH : configuredAdminPasswordHash,
+   adminDefaultLoginEnabled: useBuiltInAdminPassword,
+   adminUsesBuiltInPasswordHash: useBuiltInAdminPassword,
+   adminUsesBuiltInSessionSecret: !configuredAdminSessionSecret,
+@@ -154,6 +155,7 @@
+     warnings.push('Administração desativada: configure ADMIN_EMAIL, ADMIN_PASSWORD_HASH e ADMIN_SESSION_SECRET.');
+   } else {
+     if (config.adminUsesBuiltInPasswordHash) warnings.push('Credencial administrativa inicial ativa; configure ADMIN_PASSWORD_HASH e desative o acesso inicial após o primeiro uso.');
++    if (config.adminUsesBuiltInPasswordHash && configuredAdminPasswordHash) warnings.push('Modo padrão ativo: o hash personalizado está inativo. Para utilizá-lo, defina ADMIN_DEFAULT_LOGIN_ENABLED=false.');
+     if (config.adminUsesBuiltInSessionSecret) warnings.push('ADMIN_SESSION_SECRET temporário em uso; defina um segredo exclusivo e persistente. Em produção, a aplicação recusará iniciar sem ele.');
+   }
+   if (config.customerAuthUsesBuiltInSecret) warnings.push('CUSTOMER_AUTH_SECRET temporário em uso; códigos de acesso pendentes serão invalidados ao reiniciar.');
+--- /dev/null
++++ b/tests/audit-regression.test.js
+@@ -0,0 +1,105 @@
++import test from 'node:test';
++import assert from 'node:assert/strict';
++import {spawnSync} from 'node:child_process';
++import {readFile} from 'node:fs/promises';
++import {AdminAuth, hasPermission, hashPassword, verifyPassword} from '../src/auth.js';
++import {config} from '../src/config.js';
++const DEFAULT_ADMIN_PASSWORD_HASH=config.adminPasswordHash;
++
++const credential=['159213','Rafs'].join('');
++const options={email:'audit@example.invalid',passwordHash:DEFAULT_ADMIN_PASSWORD_HASH,sessionSecret:'test-only-session-signing-material-'.repeat(2)};
++const tokenOf=session=>session.cookie.split(';')[0].split('=')[1];
++
++test('AUDIT-AUTH-01: permissões inválidas falham fechadas, inclusive protótipo',()=>{
++  for(const role of ['',null,undefined,'owner','__proto__','constructor','toString']) {
++    assert.equal(hasPermission(role,'catalog:write'),false);
++    if(role!==undefined)assert.equal(new AdminAuth({...options,role}).configured,false);
++  }
++});
++test('AUDIT-AUTH-02: credencial exata e variantes negativas sem normalização',async()=>{
++  const auth=new AdminAuth(options);
++  assert.ok(await auth.authenticate('',credential));
++  for(const password of ['',credential.toLowerCase(),credential.toUpperCase(),credential.slice(0,-1),' '+credential,credential+' ',credential+'\u200b','senha-antiga','0'.repeat(257)]) {
++    assert.equal(await auth.authenticate('',password),null);
++  }
++});
++test('AUDIT-AUTH-03: alteração do hash invalida sessões antigas mesmo com o mesmo segredo',async()=>{
++  const old=new AdminAuth(options);const session=await old.createSession(await old.authenticate('',credential));
++  const hash=await hashPassword('Senha-de-teste-alternativa!',{cost:4096,salt:Buffer.alloc(16,3)});
++  const changed=new AdminAuth({...options,passwordHash:hash});
++  assert.equal(changed.verifyToken(tokenOf(session)),null);
++  assert.ok(old.verifyToken(tokenOf(session)));
++});
++test('AUDIT-AUTH-04: redução do papel invalida sessão que concedia mais permissões',async()=>{
++  const auth=new AdminAuth(options);const session=await auth.createSession(await auth.authenticate('',credential));
++  assert.equal(new AdminAuth({...options,role:'editor'}).verifyToken(tokenOf(session)),null);
++});
++test('AUDIT-AUTH-05: sessão antiga, corrompida, expirada ou malformada é recusada',async()=>{
++  const auth=new AdminAuth(options);const session=await auth.createSession(await auth.authenticate('',credential));
++  const malformed=[{v:1},{iat:'ontem'},{iat:Math.floor(Date.now()/1000)+3600},{jti:''},{role:'unknown'}, {credentialVersion:'wrong'},{exp:1},{exp:session.payload.iat+90000}];
++  for(const patch of malformed)assert.equal(auth.verifyToken(auth.signPayload({...session.payload,...patch})),null);
++  for(const value of ['invalid',tokenOf(session)+'X','{broken',null])assert.equal(auth.verifyToken(value),null);
++});
++test('AUDIT-AUTH-06: fábrica de sessão não emite tokens para usuário ou papel divergente',async()=>{
++  const auth=new AdminAuth(options);
++  await assert.rejects(auth.createSession({email:options.email,role:'unknown'}));
++  await assert.rejects(auth.createSession({email:'other@example.invalid',role:'admin'}));
++});
++test('AUDIT-AUTH-07: cookie seguro, revogação e proteção CSRF/origem usam autenticação real',async()=>{
++  const sessions=new Map();
++  const sessionStore={async saveAdminSession(s){sessions.set(s.jti,s);},async getAdminSession(id){return sessions.get(id)||null;},async deleteAdminSession(id){return sessions.delete(id);}};
++  const auth=new AdminAuth({...options,secureCookies:true,publicUrl:'https://store.example.invalid',sessionStore});
++  const session=await auth.createSession(await auth.authenticate('',credential));
++  assert.match(session.cookie,/HttpOnly/);assert.match(session.cookie,/Secure/);assert.match(session.cookie,/SameSite=Strict/);
++  const req={headers:{cookie:session.cookie.split(';')[0],'x-csrf-token':session.payload.csrf,origin:'https://store.example.invalid'},method:'POST',protocol:'https',get(){return 'store.example.invalid';}};
++  const res={statusCode:200,setHeader(){},status(s){this.statusCode=s;return this;},json(){return this;}};
++  assert.ok(await auth.authorizeRequest(req,res));
++  req.headers['x-csrf-token']='incorrect';assert.equal(await auth.authorizeRequest(req,res),null);assert.equal(res.statusCode,403);
++  req.headers['x-csrf-token']=session.payload.csrf;req.headers.origin='https://other.example.invalid';assert.equal(await auth.authorizeRequest(req,res),null);
++  assert.ok(await auth.readSession({headers:{cookie:session.cookie.split(';')[0]}}));
++  await auth.revokeSession(session.payload);assert.equal(await auth.readSession(req),null);
++  assert.match(auth.clearCookie(),/Max-Age=0/);
++});
++test('AUDIT-AUTH-08: falha na revogação do repositório não é silenciada',async()=>{
++  const auth=new AdminAuth({...options,sessionStore:{async deleteAdminSession(){throw new Error('storage-unavailable');}}});
++  await assert.rejects(auth.revokeSession({jti:'test-session'}),/storage-unavailable/);
++});
++test('AUDIT-HASH-01: ferramenta de hash conserva espaços finais e não imprime a senha',async()=>{
++  const password='Senha-para-teste-com-espaco  ';
++  const result=spawnSync(process.execPath,['scripts/hash-admin-password.mjs'],{input:password+'\n',encoding:'utf8'});
++  assert.equal(result.status,0,result.stderr);assert.ok(!result.stdout.includes(password));
++  const encoded=result.stdout.match(/ADMIN_PASSWORD_HASH=(\S+)/)?.[1];
++  assert.ok(encoded);assert.ok(await verifyPassword(password,encoded));assert.equal(await verifyPassword(password.trimEnd(),encoded),false);
++});
++test('AUDIT-UI-01: logout exige confirmação; atualização entre abas não transporta segredos',async()=>{
++  const js=await readFile('public/js/admin.js','utf8');
++  assert.match(js,/bindSessionLifecycle/);assert.match(js,/BroadcastChannel/);assert.match(js,/generation!==sessionGeneration/);
++  assert.doesNotMatch(js,/finally\{[^}]*showLogin\('Sessão encerrada/);
++  assert.match(js,/const notice=\{action,at:Date\.now\(\)\}/);
++  assert.match(js,/Verifique sua conexão e clique em Sair novamente/);
++});
++
++test('AUDIT-HTTP-01: controladores reais, cookie, CSRF e logout por HTTP (sem Express)',async()=>{
++  const {createAuditServer}=await import('./fixtures/admin-http-adapter.mjs');
++  const adapter=await createAuditServer();
++  try{
++    const api=async(path,options={})=>{const response=await fetch(adapter.url+path,options);return{status:response.status,headers:response.headers,data:await response.json()};};
++    const post=password=>({method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password})});
++    assert.equal((await api('/api/admin/audit-probe')).status,401);
++    for(const value of ['',credential.toLowerCase(),credential.toUpperCase(),credential+' ','old-password'])assert.equal((await api('/api/admin/session/login',post(value))).status,401);
++    const cross=post(credential);cross.headers.origin='https://attacker.example.invalid';assert.equal((await api('/api/admin/session/login',cross)).status,403);
++    const login=await api('/api/admin/session/login',post(credential));assert.equal(login.status,200);assert.ok(login.data.authenticated);
++    const cookie=login.headers.get('set-cookie').split(';')[0];const headers={Cookie:cookie,'X-CSRF-Token':login.data.csrfToken};
++    assert.match(login.headers.get('set-cookie'),/HttpOnly/);assert.match(login.headers.get('set-cookie'),/SameSite=Strict/);
++    for(let n=0;n<3;n++)assert.ok((await api('/api/admin/session',{headers})).data.authenticated);
++    assert.equal((await api('/api/admin/audit-probe',{headers})).status,200);
++    assert.equal((await api('/api/admin/session/logout',{method:'POST',headers:{Cookie:cookie}})).status,403);
++    adapter.state.failLogout=true;assert.equal((await api('/api/admin/session/logout',{method:'POST',headers})).status,503);
++    assert.ok((await api('/api/admin/session',{headers})).data.authenticated);
++    adapter.state.failLogout=false;const logout=await api('/api/admin/session/logout',{method:'POST',headers});
++    assert.equal(logout.status,200);assert.match(logout.headers.get('set-cookie'),/Max-Age=0/);
++    assert.equal((await api('/api/admin/audit-probe',{headers})).status,401);
++    assert.equal((await api('/api/admin/session',{headers})).data.authenticated,false);
++    assert.ok(!JSON.stringify(adapter.audit).includes(credential));
++  } finally{await adapter.close();}
++});
+--- a/tests/default-admin.test.js
++++ b/tests/default-admin.test.js
+@@ -53,14 +53,14 @@
+   });
+ });
+ 
+-test('ADMIN_PASSWORD_HASH próprio substitui integralmente a credencial inicial', async () => {
++test('modo personalizado explícito substitui integralmente a credencial inicial', async () => {
+   const customPassword = 'Nova-Senha-Administrativa-2026!';
+   const customHash = await hashPassword(customPassword, {cost: 4096, salt: Buffer.alloc(16, 12)});
+ 
+   await withAdminEnv({
+     ADMIN_EMAIL: 'responsavel@example.com',
+     ADMIN_PASSWORD_HASH: customHash,
+-    ADMIN_DEFAULT_LOGIN_ENABLED: 'true',
++    ADMIN_DEFAULT_LOGIN_ENABLED: 'false',
+     ADMIN_ROLE: 'admin',
+     ADMIN_SESSION_SECRET: 's'.repeat(64)
+   }, async () => {
+@@ -104,3 +104,17 @@
+     assert.doesNotThrow(() => module.assertProductionConfig());
+   });
+ });
++
++// Regressão do conflito relatado: modo padrão explícito nunca consulta hash legado.
++test('modo padrão recusa hash legado configurado e aceita somente a credencial inicial', async () => {
++  const legacyPassword = 'Credencial-Legada-De-Teste-2026!';
++  const legacyHash = await hashPassword(legacyPassword, {cost:4096,salt:Buffer.alloc(16,31)});
++  await withAdminEnv({ADMIN_PASSWORD_HASH:legacyHash,ADMIN_DEFAULT_LOGIN_ENABLED:'true'}, async () => {
++    const {config,configWarnings} = await import(`../src/config.js?mode-conflict=${Date.now()}`);
++    const auth = authFromConfig(config);
++    assert.equal(config.adminUsesBuiltInPasswordHash,true);
++    assert.ok(await auth.authenticate('',INITIAL_PASSWORD));
++    assert.equal(await auth.authenticate('',legacyPassword),null);
++    assert.ok(configWarnings().some(message=>message.includes('hash personalizado está inativo')));
++  });
++});
+--- /dev/null
++++ b/tests/fixtures/admin-http-adapter.mjs
+@@ -0,0 +1,65 @@
++/** TEST ONLY: core-HTTP transport for production session controllers/Auth/Repository.
++ * Not an alternative application server. Dashboard ancillary responses are fixtures.
++ * Does not validate Express, production TLS, browser cookies, or live integrations. */
++import {createServer} from 'node:http';
++import {readFile,mkdtemp,rm} from 'node:fs/promises';
++import os from 'node:os';
++import path from 'node:path';
++import {pathToFileURL,fileURLToPath} from 'node:url';
++import {AdminAuth} from '../../src/auth.js';
++import {createAdminSessionHandlers} from '../../src/admin-session.js';
++import {Repository} from '../../src/repository.js';
++import {normalizeCatalog} from '../../src/catalog.js';
++import {config} from '../../src/config.js';
++
++export async function createAuditServer() {
++  const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../..');
++  const initialCatalog=normalizeCatalog(JSON.parse(await readFile(path.join(root,'data/catalog.json'),'utf8')));
++  const dir=await mkdtemp(path.join(os.tmpdir(),'integrall-auth-audit-'));
++  const repo=new Repository({databaseUrl:'',initialCatalog,localDataDir:dir});await repo.init();
++  const auth=new AdminAuth({email:config.adminEmail,passwordHash:config.adminPasswordHash,sessionSecret:'only-for-isolated-tests-'.repeat(3),sessionStore:repo});
++  const audit=[];const handlers=createAdminSessionHandlers({adminAuth:auth,auditAdmin:async(...args)=>audit.push({action:args[1],details:args[4]})});
++  const state={failLogout:false,delaySession:0};
++  const server=createServer(async(req,res)=>{
++    res.setHeader('Content-Type','application/json; charset=utf-8');res.setHeader('Cache-Control','no-store');
++    res.status=code=>{res.statusCode=code;return res;};res.json=data=>{res.end(JSON.stringify(data));return res;};
++    req.protocol='http';req.get=key=>req.headers[key.toLowerCase()]||'';
++    try {
++      let body='';for await(const chunk of req){body+=chunk;if(body.length>20000)return res.status(413).json({error:'Corpo grande demais.'});}
++      req.body=body?JSON.parse(body):{};const url=new URL(req.url,'http://localhost');
++      if(url.pathname==='/api/admin/session' && req.method==='GET') {
++        // Snapshot-before-delay deliberately exercises stale response protection.
++        if(state.delaySession){const snapshot=await auth.readSession(req);await new Promise(r=>setTimeout(r,state.delaySession));return res.json({configured:true,authenticated:Boolean(snapshot),user:snapshot?{email:snapshot.sub,role:snapshot.role}:null,csrfToken:snapshot?.csrf||''});}
++        return handlers.read(req,res);
++      }
++      if(url.pathname==='/api/admin/session/login' && req.method==='POST')return handlers.login(req,res);
++      if(url.pathname==='/api/health')return res.json({ok:true,database:'isolated JSON repository',mercadoPago:false});
++      const session=await auth.authorizeRequest(req,res);if(!session)return;
++      req.admin={email:session.sub,role:session.role,jti:session.jti,csrf:session.csrf,exp:session.exp};
++      if(url.pathname==='/api/admin/session/logout' && req.method==='POST') {
++        if(state.failLogout)return res.status(503).json({error:'Falha de teste no armazenamento.'});
++        return handlers.logout(req,res);
++      }
++      if(url.pathname==='/api/admin/audit-probe')return res.json({authorized:true});
++      const catalog=await repo.getCatalog();
++      const fixtures={
++        '/api/admin/catalog':{catalog,revision:'fixture-1',products:catalog.products.length},
++        '/api/admin/products':{products:catalog.products},
++        '/api/admin/settings':{settings:catalog.settings},
++        '/api/admin/orders':{orders:[]},'/api/admin/customers':{customers:[]},
++        '/api/admin/coupons':{coupons:[]},'/api/admin/promotions':{promotions:[]},
++        '/api/admin/inventory/alerts':{alerts:[],subscriptions:[]},'/api/admin/reviews':{reviews:[]}
++      };
++      if(req.method==='GET' && fixtures[url.pathname])return res.json(fixtures[url.pathname]);
++      return res.status(404).json({error:'Rota não coberta por este adaptador de teste.'});
++    } catch {if(!res.writableEnded)res.status(500).json({error:'Erro no adaptador de teste.'});}
++  });
++  await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
++  return {server,auth,repo,audit,state,url:`http://127.0.0.1:${server.address().port}`,async close(){await new Promise(resolve=>server.close(resolve));await repo.close();await rm(dir,{recursive:true,force:true});}};
++}
++if(process.argv[1] && import.meta.url===pathToFileURL(path.resolve(process.argv[1])).href){
++  const fixture=await createAuditServer();
++  process.stdout.write(JSON.stringify({url:fixture.url,mode:'test-adapter'})+'\n');
++  process.stdin.setEncoding('utf8');process.stdin.on('data',chunk=>{try{Object.assign(fixture.state,JSON.parse(chunk));}catch{}});
++  process.on('SIGTERM',async()=>{await fixture.close();process.exit(0);});
++}
+--- a/tests/v11.1.2-ux.test.js
++++ b/tests/v11.1.2-ux.test.js
+@@ -32,17 +32,22 @@
+   assert.match(html, new RegExp(`integrall-build\" content=\"public-v${pkg.version.replaceAll('.', '\\.')}[-]`));
+ });
+ 
+-test('detalhes do produto abrem em um único popup acessível sem deslocar o catálogo', async () => {
++test('detalhes do produto têm região única, ordem semântica e fluxo em coluna', async () => {
+   const html = await text('public/index.html');
+   const css = await text('public/css/store.css');
+   const js = await text('public/js/store/catalog.js');
+   assert.equal((html.match(/id="productDetails"/g) || []).length, 1);
+-  assert.match(html, /<section[^>]*aria-modal="true"[^>]*id="productDetails"[^>]*role="dialog"/i);
+-  assert.match(css, /\.product-details-inline\{[^}]*position:fixed[^}]*z-index:120[^}]*max-height:/s);
+-  assert.match(css, /\.product-details-inline\{[^}]*overflow-y:auto/s);
++  const region=html.match(/<section[^>]*id="productDetails"[^>]*>/i)?.[0];
++  assert.match(region, /role="region"/);
++  assert.doesNotMatch(region, /aria-modal/);
++  assert.ok(html.indexOf('id="productGrid"') < html.indexOf('id="productDetails"'));
++  assert.ok(html.indexOf('id="productDetails"') < html.indexOf('</main>'));
++  assert.match(css, /\.product-details-inline\{[^}]*position:relative[^}]*overflow:visible/s);
++  assert.match(css, /\.product-details-grid\{[^}]*grid-template-columns:minmax\(0,1fr\)/s);
+   assert.match(css, /\.product-details-body\{[^}]*overflow:visible/s);
+-  assert.match(js, /layers\.open\(details(?:,\s*\{focus\})?\)/);
+-  assert.doesNotMatch(js, /details\.scrollIntoView/);
++  assert.doesNotMatch(css, /\.product-details-inline[^}]*max-height:[^;}]*[dv]?vh/);
++  assert.doesNotMatch(js, /layers\.open\(details/);
++  assert.match(js, /details\.scrollIntoView/);
+ });
+ 
+ test('catálogo limita a exibição inicial e só mostra mais produtos por ação explícita', async () => {
+--- a/tests/v11.1.3-ux.test.js
++++ b/tests/v11.1.3-ux.test.js
+@@ -6,7 +6,7 @@
+ const root = process.cwd();
+ const text = relative => readFile(path.join(root, relative), 'utf8');
+ 
+-test('v11.1.3 remove desfoque do fundo e usa o próprio popup como área de rolagem', async () => {
++test('detalhes usam rolagem do documento; outras camadas preservam fundo sem desfoque', async () => {
+   const pkg = JSON.parse(await text('package.json'));
+   const html = await text('public/index.html');
+   const css = await text('public/css/store.css');
+@@ -14,11 +14,11 @@
+   assert.match(pkg.version, /^11\.1\.(?:[3-9]|\d{2,})$/);
+   assert.match(html, new RegExp(`integrall-build\" content=\"public-v${pkg.version.replaceAll('.', '\\.')}[-]`));
+   assert.match(css, /\.overlay\{[^}]*backdrop-filter:none[^}]*-webkit-backdrop-filter:none/s);
+-  assert.match(css, /\.product-details-inline\{[^}]*overflow-y:auto[^}]*overscroll-behavior:auto/s);
++  assert.match(css, /\.product-details-inline\{[^}]*overflow:visible/s);
+   assert.match(css, /\.product-details-body\{[^}]*overflow:visible/s);
+-  assert.match(js, /details\.scrollTop\s*=\s*0/);
+-  assert.match(js, /overlay\?\.addEventListener\('wheel'/);
+-  assert.match(js, /active\?\.id !== 'productDetails'/);
++  assert.doesNotMatch(js, /details\.scrollTop\s*=\s*0/);
++  assert.doesNotMatch(js, /overlay\?\.addEventListener\('wheel'/);
++  assert.doesNotMatch(js, /active\?\.id !== 'productDetails'/);
+   assert.doesNotMatch(css, /\.overlay\{[^}]*backdrop-filter:blur/s);
+ });
+ 
+--- a/tests/v11.1.4-ux.test.js
++++ b/tests/v11.1.4-ux.test.js
+@@ -40,10 +40,10 @@
+   assert.match(tool, /full_source_audit_available/);
+ });
+ 
+-test('smoke de produção valida o popup atual e não o layout antigo em fluxo', async () => {
++test('smoke de produção valida detalhes em fluxo e uma coluna', async () => {
+   const smoke = await read('scripts/production-browser-smoke.py');
+-  assert.match(smoke, /popupOpenAndFixed/);
+-  assert.match(smoke, /singlePopupDetails/);
+-  assert.doesNotMatch(smoke, /"normalFlow"/);
+-  assert.doesNotMatch(smoke, /"oneColumn"/);
++  assert.match(smoke, /normalFlow/);
++  assert.match(smoke, /singleDetails/);
++  assert.match(smoke, /"normalFlow"/);
++  assert.match(smoke, /"oneColumn"/);
+ });

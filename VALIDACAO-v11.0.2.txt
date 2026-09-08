@@ -1,0 +1,11 @@
+DOCUMENTO HISTÓRICO — INTEGRALL v11.0.2
+
+Este arquivo é preservado apenas para rastreabilidade de uma revisão anterior.
+Ele NÃO descreve o comportamento ou a certificação da versão atual.
+
+Na v11.1.1:
+- a credencial inicial não é impressa em documentação operacional ou atalhos;
+- ADMIN_PASSWORD_HASH substitui integralmente a credencial inicial;
+- não existe cadeia concorrente de senha de recuperação;
+- produção exige ADMIN_DEFAULT_LOGIN_ENABLED=false e segredos persistentes;
+- detalhes e resultados atuais estão em AUDITORIA-FORENSE-V11.1.1.md e TESTES-V11.1.1.md.
