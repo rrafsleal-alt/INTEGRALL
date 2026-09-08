@@ -38,3 +38,4 @@ Não substitua dados já operados pelo catálogo inicial deste ZIP. Preserve ban
 
 O projeto mantém os 227 produtos, inclusive os previamente ocultos/sem preço. Não foram inventados preços nem estoques. Antes de vender, confira os dados públicos de identificação/atendimento, políticas, estoque e credenciais das integrações no seu ambiente.
 # INTEGRALL
+# INTEGRALL
