@@ -37,3 +37,4 @@ As ferramentas opcionais de navegador exigem Python/Playwright/Chromium; não s�
 Não substitua dados já operados pelo catálogo inicial deste ZIP. Preserve banco, `data/local-state`, uploads, configuração privada e segredos antes de atualizar. Todos os arquivos operacionais recebidos foram conservados. A omissão do vídeo antigo de backup não altera os vídeos ativos; o original permanece no ZIP de entrada.
 
 O projeto mantém os 227 produtos, inclusive os previamente ocultos/sem preço. Não foram inventados preços nem estoques. Antes de vender, confira os dados públicos de identificação/atendimento, políticas, estoque e credenciais das integrações no seu ambiente.
+# INTEGRALL
